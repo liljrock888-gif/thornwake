@@ -648,6 +648,15 @@ const LOOKS = {
   hunter:    {skin: '#e0c0a8', body: '#2b2026', hat: 'widehat', weapon: 'bow'},
   pirate:    {skin: '#d9a77c', body: '#7a2a2a', hat: 'tricorn', weapon: 'sword'},
   valkyrie:  {skin: '#f2d4bc', body: '#c9d4e0', hat: 'winghelm', weapon: 'hammer'},
+  volt:       {skin: '#f2cda8', body: '#e8b400', hat: 'boltmask', weapon: 'fists', cape: '#c43a1a', mythic: true},
+  aegis:      {skin: '#e3b38a', body: '#2f5fa8', hat: 'crest', weapon: 'shield', cape: '#d43a3a', mythic: true},
+  nightshade: {skin: '#d9c0b0', body: '#1a1626', hat: 'cowl', weapon: 'daggers', cape: '#2a1f3d', mythic: true},
+  frostbite:  {skin: '#f0e6ff', body: '#6fb8ff', hat: 'brim', weapon: 'orb'},
+  blaze:      {skin: '#e8b894', body: '#a8321e', hat: 'helm', weapon: 'sword'},
+  sakura:     {skin: '#f6d6c0', body: '#ffb7d5', hat: 'longhair', weapon: 'greatsword'},
+  comet:      {skin: '#e0c4a8', body: '#e8eef6', hat: 'visor', weapon: 'rifle', tracer: '#ff6ad5'},
+  jinx:       {skin: '#e8d0e8', body: '#5b2a86', hat: 'pointy', weapon: 'staff'},
+  torque:     {skin: '#c99a74', body: '#d98a2a', hat: 'heavyhelm', weapon: 'minigun', tracer: '#ffd08a'},
   werewolf:   {monster: 'wolf'},
   golemkin:   {monster: 'golem'},
   drakeling:  {monster: 'drake'},
@@ -685,6 +694,17 @@ const ROSTER = [
   {team: 0, name: 'Draven', color: '#b33a3a', lane: 'mid', build: 'ad', look: 'hunter', cls: 'Vampire Hunter', free: true, stat: {ad: 1.05, hp: 1.05}, sig: {q: 'drain', r: 'vortex'}},
   {team: 0, name: 'Brook', color: '#f2c14e', lane: 'mid', build: 'ad', look: 'pirate', cls: 'Sky Pirate Captain', free: true, stat: {hp: 1.08, ad: 1.05}, sig: {q: 'flame', r: 'meteor'}},
   {team: 0, name: 'Sigrun', color: '#9fd8ff', lane: 'mid', build: 'ad', look: 'valkyrie', cls: 'Valkyrie', free: true, stat: {hp: 1.15}, sig: {q: 'frost', r: 'nova'}},
+  // Mythic superheroes: only in their $9.99 bundle (bundle = the product id on the payment server)
+  {team: 0, name: 'Volt', key: 'volt', color: '#ffe14d', lane: 'mid', build: 'ad', look: 'volt', cls: 'Lightning Speedster', mythic: true, bundle: 'bundle_volt', stat: {ms: 1.12, ad: 1.12, hp: 1.05}, sig: {q: 'kiblast', r: 'chain'}},
+  {team: 0, name: 'Aegis', key: 'aegis', color: '#5fa8ff', lane: 'mid', build: 'ad', look: 'aegis', cls: 'Shield Guardian', mythic: true, bundle: 'bundle_aegis', stat: {hp: 1.25, ad: 1.1}, sig: {q: 'rocketpunch', r: 'nova'}},
+  {team: 0, name: 'Nightshade', key: 'nightshade', color: '#9b6bff', lane: 'mid', build: 'ad', look: 'nightshade', cls: 'Shadow Vigilante', mythic: true, bundle: 'bundle_nightshade', stat: {ad: 1.15, ms: 1.08}, sig: {q: 'crescent', r: 'vortex'}},
+  // weekly shop heroes: three are for sale each week
+  {team: 0, name: 'Frostbite', color: '#8fd4ff', lane: 'mid', build: 'ap', look: 'frostbite', cls: 'Ice Sorceress', weekly: true, price: 750, stat: {ap: 1.12}, sig: {q: 'frost', r: 'nova'}},
+  {team: 0, name: 'Blaze', color: '#ff6a2a', lane: 'mid', build: 'ad', look: 'blaze', cls: 'Fire Knight', weekly: true, price: 750, stat: {ad: 1.08, hp: 1.1}, sig: {q: 'flame', r: 'phoenix'}},
+  {team: 0, name: 'Sakura', color: '#ff9ccf', lane: 'mid', build: 'ad', look: 'sakura', cls: 'Blossom Blade', weekly: true, price: 800, stat: {ad: 1.12, ms: 1.05}, sig: {q: 'crescent', r: 'tempest'}},
+  {team: 0, name: 'Comet', color: '#ff6ad5', lane: 'mid', build: 'ad', look: 'comet', cls: 'Space Ranger', weekly: true, price: 800, stat: {ad: 1.1}, sig: {q: 'kiblast', r: 'meteor'}},
+  {team: 0, name: 'Jinx', color: '#c77dff', lane: 'mid', build: 'ap', look: 'jinx', cls: 'Trickster Mage', weekly: true, price: 850, stat: {ap: 1.12, ms: 1.04}, sig: {q: 'drain', r: 'vortex'}},
+  {team: 0, name: 'Torque', color: '#f2a03a', lane: 'mid', build: 'ad', look: 'torque', cls: 'Mech Engineer', weekly: true, price: 850, stat: {hp: 1.15}, sig: {q: 'bolt', r: 'meteor'}},
 ];
 const FORMS = ['Initiate', 'Adept', 'Ascendant', 'Mythic'];
 function formOf(l) { return l >= 16 ? 3 : l >= 11 ? 2 : l >= 6 ? 1 : 0; }
@@ -1041,7 +1061,8 @@ const STYLES = {
 const LOOK_STYLE = {mage: 'magic', witch: 'magic', warlock: 'magic', shaman: 'magic', drakeling: 'magic',
   knight: 'melee', paladin: 'melee', goblinking: 'melee', brute: 'heavy', golemkin: 'heavy', rogue: 'agile', werewolf: 'agile',
   ranger: 'ranged', soldier: 'ranged', sniper: 'sniper', heavy: 'gunner', kifighter: 'agile', brawler: 'melee', soulblade: 'heavy',
-  ninja: 'agile', mecha: 'ranged', magicgirl: 'magic', samurai: 'melee', hunter: 'ranged', pirate: 'melee', valkyrie: 'heavy'};
+  ninja: 'agile', mecha: 'ranged', magicgirl: 'magic', samurai: 'melee', hunter: 'ranged', pirate: 'melee', valkyrie: 'heavy',
+  volt: 'agile', aegis: 'melee', nightshade: 'agile', frostbite: 'magic', blaze: 'melee', sakura: 'agile', comet: 'ranged', jinx: 'magic', torque: 'gunner'};
 const styleOf = look => STYLES[LOOK_STYLE[look]] || STYLES.melee;
 const STYLE_MOVES = {
   slash:    {name: 'Sword Slash', desc: 'A quick sweeping slash that hits every enemy in front of you.', color: '#e8eef6'},
@@ -1219,7 +1240,21 @@ function cast(h, k, tx, ty) {
   if (k === 'q') {
     h.face = Math.atan2(ny, nx);
     const q = h.kit ? h.kit.q : 'bolt', twin = q === 'twin', base = 50 + 22 * h.level + 0.6 * h.ap;
-    if (q === 'rocketpunch') {
+    if (q === 'scatter') {
+      for (const off of [-.36, -.18, 0, .18, .36]) {
+        const c = Math.cos(off), sn = Math.sin(off), vx = nx * c - ny * sn, vy = nx * sn + ny * c;
+        G.projs.push({kind: 'bolt', spell: 'drain', hits: null, x: h.x + vx * 30, y: h.y + vy * 30, vx: vx * 1100, vy: vy * 1100, range: 450, trav: 0, dmg: base * .45, src: h, team: h.team, r: 13});
+      }
+    } else if (q === 'lance') {
+      const len = 650, pts = [[h.x, h.y - 30]];
+      for (const u of G.units) {
+        if (!isFoe(u, h)) continue;
+        const ux = u.x - h.x, uy = u.y - h.y, along = ux * nx + uy * ny;
+        if (along > 0 && along < len + u.r && Math.abs(ux * ny - uy * nx) < 35 + u.r) damage(u, base * .95, h);
+      }
+      for (let i = 1; i <= 5; i++) pts.push([h.x + nx * len * i / 5 + rand(-18, 18), h.y - 30 + ny * len * i / 5 + rand(-18, 18)]);
+      G.zaps.push({pts, t: .3});
+    } else if (q === 'rocketpunch') {
       let hit = null, best = 1e9;
       for (const u of G.units) {
         if (!u.alive || u.team === h.team || !(u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') || !targetable(u)) continue;
@@ -1241,7 +1276,7 @@ function cast(h, k, tx, ty) {
       for (let i = 0; i < 34; i++) { const a = h.face + rand(-.55, .55), sp = rand(380, 820); G.fx.push({x: h.x + Math.cos(a) * 30, y: h.y - 20 + Math.sin(a) * 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: .45, max: .45, color: i % 3 ? '#ff7a2a' : '#ffd36a', r: rand(5, 11)}); }
     } else for (const off of twin ? [-.13, .13] : [0]) {
       const c = Math.cos(off), sn = Math.sin(off), vx = nx * c - ny * sn, vy = nx * sn + ny * c;
-      const spell = q === 'frost' || q === 'drain' ? q : q === 'kiblast' ? 'ki' : q === 'crescent' ? 'void' : 'bolt';
+      const spell = q === 'frost' || q === 'drain' || q === 'venom' ? q : q === 'kiblast' ? 'ki' : q === 'crescent' ? 'void' : 'bolt';
       G.projs.push({kind: 'bolt', spell, hits: spell === 'frost' || spell === 'void' ? [] : null,
         x: h.x + vx * 30, y: h.y + vy * 30, vx: vx * 1150, vy: vy * 1150, range: spell === 'void' ? 750 : 950, trav: 0,
         dmg: base * (twin ? .7 : spell === 'void' ? 1.1 : 1), src: h, team: h.team, r: spell === 'void' ? 30 : 16});
@@ -1274,7 +1309,17 @@ function cast(h, k, tx, ty) {
       ring(px, py, '#c79bff', 400, .5); burst(px, py, '#c79bff', 40, -260, .5, 4);
       G.blasts.push({x: px, y: py, t: .5, max: .5, r: 210, dmg: rDamage(h) * .75, src: h, team: h.team, style: 'arcane'});
     } else if (kind === 'demongate') {
-      h.gate = {x: px, y: py, t: 4, tick: 0, dmg: rDamage(h) * .2};
+      h.gate = {x: px, y: py, t: 4, tick: 0, dmg: rDamage(h) * .2, pull: .08, heal: .3, cols: ['#ff5a1f', '#7a1fff']};
+    } else if (kind === 'blackhole') {
+      h.gate = {x: px, y: py, t: 3, tick: 0, dmg: rDamage(h) * .17, pull: .3, heal: 0, cols: ['#1a0f2e', '#b06bff']};
+      ring(px, py, '#b06bff', 230, .6);
+    } else if (kind === 'blizzard') {
+      h.gate = {x: px, y: py, t: 4, tick: 0, dmg: rDamage(h) * .15, pull: 0, heal: 0, slow: true, cols: ['#ffffff', '#9fe6ff']};
+      ring(px, py, '#cfefff', 230, .6);
+    } else if (kind === 'holy') {
+      for (const u of G.units) if (u.alive && u.kind === 'hero' && u.team === h.team && dist(u, h) < 420) { u.hp = Math.min(u.maxHp, u.hp + u.maxHp * .33); burst(u.x, u.y - 30, '#fff3c9', 14, 120, .6, 3); }
+      for (const u of G.units) if (isFoe(u, h) && dist(u, h) < 300 + u.r) damage(u, rDamage(h) * .5, h);
+      ring(h.x, h.y, '#ffe9a8', 420, .7); burst(h.x, h.y - 40, '#fff3c9', 50, 300, .8, 5);
       ring(px, py, '#ff5a1f', 230, .6); burst(px, py, '#7a1fff', 40, 300, .7, 6);
     } else if (kind === 'spiritcannon') {
       const len = 1150, ex = h.x + nx * len, ey = h.y + ny * len;
@@ -1438,12 +1483,13 @@ function updateHero(h, dt) {
   if (h.buffT > 0) h.buffT -= dt;
   if (h.gate) { // Demon Gate: a burning rift that drains enemies inside it
     const g = h.gate; g.t -= dt; g.tick -= dt;
-    if (Math.random() < .7) { const a = Math.random() * 6.283, r = rand(20, 220); G.fx.push({x: g.x + Math.cos(a) * r, y: g.y + Math.sin(a) * r * .5, vx: -Math.cos(a) * 80, vy: -Math.sin(a) * 40 - 30, t: .5, max: .5, color: Math.random() < .5 ? '#ff5a1f' : '#7a1fff', r: 5}); }
+    if (Math.random() < .7) { const a = Math.random() * 6.283, r = rand(20, 220); G.fx.push({x: g.x + Math.cos(a) * r, y: g.y + Math.sin(a) * r * .5, vx: -Math.cos(a) * 80, vy: -Math.sin(a) * 40 - 30, t: .5, max: .5, color: Math.random() < .5 ? g.cols[0] : g.cols[1], r: 5}); }
     if (g.tick <= 0) {
-      g.tick = .5; ring(g.x, g.y, '#ff5a1f', 230, .35);
+      g.tick = .5; ring(g.x, g.y, g.cols[1], 230, .35);
       for (const u of G.units) if (isFoe(u, h) && Math.hypot(u.x - g.x, u.y - g.y) < 230 + u.r) {
-        damage(u, g.dmg, h); if (h.alive) h.hp = Math.min(h.maxHp, h.hp + g.dmg * .3);
-        u.x += (g.x - u.x) * .08; u.y += (g.y - u.y) * .08;
+        damage(u, g.dmg, h); if (h.alive && g.heal) h.hp = Math.min(h.maxHp, h.hp + g.dmg * g.heal);
+        u.x += (g.x - u.x) * g.pull; u.y += (g.y - u.y) * g.pull;
+        if (g.slow) u.slowUntil = Math.max(u.slowUntil || 0, G.time + .8);
       }
     }
     if (g.t <= 0) h.gate = null;
@@ -1686,6 +1732,7 @@ function update(dt) {
       if (hit) {
         if (p.mixFx) { mixHit(hit, p.mixFx, p.src); G.projs.splice(i, 1); sfx('thud', p.x, p.y); continue; }
         if (p.fire) hit.burn = {dps: p.dmg * .3, until: G.time + 2, src: p.src, tick: 0};
+        if (p.spell === 'venom') { hit.burn = {dps: p.dmg * .35, until: G.time + 3, src: p.src, tick: 0}; hit.slowUntil = Math.max(hit.slowUntil || 0, G.time + 1.5); }
         damage(hit, p.dmg, p.src); burst(p.x, p.y, boltLook(p.spell)[3], 14, 200, .4, 4); sfx('impact', p.x, p.y);
         if (p.hits) { p.hits.push(hit); if (p.spell === 'frost') hit.slowUntil = G.time + 2; } // pierces on
         else {
@@ -2258,6 +2305,11 @@ function drawUnit(u, now) {
       ctx.beginPath(); ctx.ellipse(u.x, u.y - 22, 30 + Math.sin(now * 8) * 2, 46, 0, 0, 7); ctx.stroke();
     }
     for (const [k, c] of [['rapidUntil', '#f2c14e'], ['mightUntil', '#ff6a4d'], ['hasteUntil', '#7fd1ff'], ['releaseUntil', '#e0304a']]) if (u[k] > G.time && Math.random() < .35) G.fx.push({x: u.x + rand(-18, 18), y: u.y - rand(0, 50), vx: 0, vy: rand(-40, -15), t: .5, max: .5, color: c, r: 3});
+    if (u.rainbow) { // the Prismatic skin cycles through hues
+      const hue = (now * 80 + u.id * 40) % 360, f = n => { const k = (n + hue / 30) % 12, a = .55; const v = .7 - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)) * .5; return Math.round(v * 255).toString(16).padStart(2, '0'); };
+      u.color = '#' + f(0) + f(8) + f(4);
+    }
+    if (u.skinAura && Math.random() < .3) G.fx.push({x: u.x + rand(-18, 18), y: u.y - rand(5, 60), vx: rand(-10, 10), vy: rand(-45, -15), t: .6, max: .6, color: u.skinAura, r: rand(1.5, 3)});
     if (u.protectUntil > G.time && Math.random() < .5) G.fx.push({x: u.x + rand(-24, 24), y: u.y - rand(0, 60), vx: 0, vy: -30, t: .5, max: .5, color: '#fff3c9', r: 2.5});
     if (u.slowUntil > G.time && Math.random() < .5) G.fx.push({x: u.x + rand(-16, 16), y: u.y - rand(0, 40), vx: 0, vy: rand(-20, 10), t: .4, max: .4, color: '#bfefff', r: 2.5});
     if (u.buffT > 0 && Math.random() < .5) G.fx.push({x: u.x + rand(-15, 15), y: u.y + 14, vx: -u.vx * .2, vy: -u.vy * .2, t: .3, max: .3, color: '#7fd1c7', r: 3});
@@ -2305,6 +2357,15 @@ function drawCharacter(c, u, now) {
       c.restore();
     };
     wing(.3 + fl, shade(form >= 3 ? '#e8c25a' : u.color, -.1)); wing(-.05 - fl, wc);
+  }
+  if (L.mythic) { // Mythic heroes shimmer with a golden ring
+    c.strokeStyle = '#ffd75e'; c.globalAlpha = .55 + Math.sin(now * 4 + u.id) * .25; c.lineWidth = 2.5; c.shadowColor = '#ffd75e'; c.shadowBlur = 10;
+    c.beginPath(); c.ellipse(0, 0, 30, 11, 0, 0, 7); c.stroke(); c.globalAlpha = 1; c.shadowBlur = 0;
+  }
+  if (L.cape) { // a superhero cape that sways as they move
+    const sway = Math.sin(now * 3 + u.id) * 3 - A.sw * 4;
+    c.fillStyle = L.cape; c.beginPath(); c.moveTo(-9, -46 - bob); c.lineTo(8, -46 - bob);
+    c.quadraticCurveTo(-2, -20, -14 + sway, -4); c.lineTo(-24 + sway, -8); c.quadraticCurveTo(-16, -30, -9, -46 - bob); c.closePath(); c.fill();
   }
   c.fillStyle = '#2b2420';
   c.fillRect(-6 - A.sw * 5, -18, 6, 16); c.fillRect(1 + A.sw * 5, -18, 6, 16);
@@ -2489,6 +2550,20 @@ function drawHat(c, L, u, now, eye) {
     c.fillStyle = '#d7dde6'; c.beginPath(); c.arc(1, -57, 12, Math.PI, 0); c.lineTo(13, -52); c.lineTo(-11, -52); c.closePath(); c.fill();
     c.fillStyle = '#ffffff';
     for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(sd * 10 + 1, -60); c.quadraticCurveTo(sd * 24 + 1, -70, sd * 20 + 1, -80); c.quadraticCurveTo(sd * 18 + 1, -68, sd * 8 + 1, -64); c.closePath(); c.fill(); }
+  } else if (L.hat === 'boltmask') { // a speedster's mask with lightning wings
+    c.fillStyle = '#c43a1a'; c.beginPath(); c.arc(1, -57, 11.5, Math.PI * .92, Math.PI * 2.08); c.fill(); c.fillRect(-9, -55, 21, 4);
+    c.fillStyle = '#ffe14d'; c.shadowColor = '#ffe14d'; c.shadowBlur = 8;
+    for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(sd * 11 + 1, -60); c.lineTo(sd * 19 + 1, -66); c.lineTo(sd * 15 + 1, -60); c.lineTo(sd * 21 + 1, -58); c.lineTo(sd * 11 + 1, -55); c.closePath(); c.fill(); }
+    c.shadowBlur = 0;
+  } else if (L.hat === 'crest') { // a guardian's helmet with a gold crest
+    c.fillStyle = '#2f5fa8'; c.beginPath(); c.arc(1, -57, 12, Math.PI, 0); c.lineTo(13, -50); c.lineTo(-11, -50); c.closePath(); c.fill();
+    c.fillStyle = '#ffd75e'; c.beginPath(); c.moveTo(-4, -69); c.quadraticCurveTo(1, -82, 8, -70); c.lineTo(5, -66); c.lineTo(-2, -66); c.closePath(); c.fill();
+    c.fillStyle = '#e8eef6'; c.fillRect(3, -58, 10, 3);
+  } else if (L.hat === 'cowl') { // a vigilante cowl with pointed ears
+    c.fillStyle = '#1a1626'; c.beginPath(); c.arc(1, -57, 12, Math.PI * .9, Math.PI * 2.1); c.fill();
+    for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(sd * 5 + 1, -66); c.lineTo(sd * 9 + 1, -78); c.lineTo(sd * 11 + 1, -64); c.closePath(); c.fill(); }
+    c.fillRect(-10, -58, 22, 7);
+    c.fillStyle = '#f2f2ff'; c.shadowColor = col; c.shadowBlur = 8; c.fillRect(4, -56, 7, 2); c.shadowBlur = 0;
   } else if (L.hat === 'heavyhelm') {
     c.fillStyle = '#3d4630'; c.beginPath(); c.arc(1, -56, 13.5, Math.PI * .9, Math.PI * 2.1); c.fill();
     c.fillStyle = '#14170f'; c.fillRect(2, -59, 12, 5);
@@ -2499,6 +2574,13 @@ function drawWeapon(c, w, u, hx, hy, atk, now) {
   if (w === 'fists') { // bare-handed fighters: a glowing fist when striking
     c.fillStyle = u.color; c.shadowColor = u.color; c.shadowBlur = atk ? 18 : 6;
     c.beginPath(); c.arc(hx + (atk ? 4 : 0), hy, atk ? 7 : 5.5, 0, 7); c.fill(); c.shadowBlur = 0;
+    return;
+  }
+  if (w === 'shield') { // a round star shield
+    c.fillStyle = '#d43a3a'; c.beginPath(); c.arc(hx + 3, hy - 4, atk ? 13 : 11, 0, 7); c.fill();
+    c.fillStyle = '#e8eef6'; c.beginPath(); c.arc(hx + 3, hy - 4, atk ? 9 : 7.5, 0, 7); c.fill();
+    c.fillStyle = '#2f5fa8'; c.beginPath(); c.arc(hx + 3, hy - 4, atk ? 6 : 5, 0, 7); c.fill();
+    c.fillStyle = '#ffffff'; c.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 1.6 : 4; c.lineTo(hx + 3 + Math.cos(a) * rr, hy - 4 + Math.sin(a) * rr); } c.closePath(); c.fill();
     return;
   }
   if (w === 'greatsword') { // an oversized black blade with a crimson edge
@@ -3275,7 +3357,7 @@ function heroScreen(back) {
   for (const b of $('soloHeroes').children) {
     const i = +b.dataset.i, have = PROF.heroes.includes(i);
     b.classList.toggle('locked', !have);
-    b.querySelector('.lk').textContent = have ? '' : `Unlock for ${ROSTER[i].price} Crowns`;
+    b.querySelector('.lk').textContent = heroLockLabel(i);
   }
   show('scr-hero');
 }
@@ -4038,6 +4120,12 @@ const MOVES = {
   flame: {slot: 'q', name: 'Flame Wave', desc: 'A short-range blast of fire that burns every enemy in front of you.', price: 300},
   tempest: {slot: 'r', name: 'Thunderstorm', desc: 'Six lightning strikes rain down on the target area.', price: 450},
   vortex: {slot: 'r', name: 'Arcane Vortex', desc: 'Pulls nearby enemies together, then detonates.', price: 450},
+  venom: {slot: 'q', name: 'Venom Dart', desc: 'A poison dart that keeps hurting and slows the enemy.', price: 350},
+  scatter: {slot: 'q', name: 'Arcane Scatter', desc: 'Five short-range bolts in a wide spread. Great up close.', price: 400},
+  lance: {slot: 'q', name: 'Spark Lance', desc: 'Instant lightning that strikes every enemy in a line.', price: 450},
+  blackhole: {slot: 'r', name: 'Black Hole', desc: 'Opens a black hole that drags enemies in and crushes them for 3 seconds.', price: 600},
+  blizzard: {slot: 'r', name: 'Blizzard', desc: 'A freezing storm at the target that slows and damages for 4 seconds.', price: 550},
+  holy: {slot: 'r', name: 'Holy Light', desc: 'Heals you and nearby allies for a third of their health and burns enemies around you.', price: 650},
   kiblast: {slot: 'q', sig: true, name: 'Ki Blast', desc: 'A fast blast of golden energy.'},
   rocketpunch: {slot: 'q', sig: true, name: 'Rocket Punch', desc: 'A long-reach punch that knocks the first enemy back.'},
   crescent: {slot: 'q', sig: true, name: 'Crescent Slash', desc: 'A wave of dark energy that cuts through every enemy in a line.'},
@@ -4048,7 +4136,7 @@ const MOVES = {
 };
 // look of each bolt spell, also sent to online players as a number
 const BOLT_LOOK = [['bolt', '#ffb35a', '#ff8a3a', '#fff1c2'], ['frost', '#9fe6ff', '#4fb8ff', '#ffffff'], ['drain', '#b06bff', '#7a2fff', '#f0d9ff'],
-  ['ki', '#ffe66b', '#fff2a8', '#ffffff'], ['void', '#e0304a', '#5a0010', '#ffd0d8'], ['stone', '#9a8a70', '#5a4a30', '#d8c8a8'], ['arrow', '#fff3c9', '#d9b26a', '#ffffff']];
+  ['ki', '#ffe66b', '#fff2a8', '#ffffff'], ['void', '#e0304a', '#5a0010', '#ffd0d8'], ['stone', '#9a8a70', '#5a4a30', '#d8c8a8'], ['arrow', '#fff3c9', '#d9b26a', '#ffffff'], ['venom', '#9cff3a', '#3a8a1a', '#e8ffd0']];
 const boltLook = sp => BOLT_LOOK.find(b => b[0] === sp) || BOLT_LOOK[0];
 const SKINS = {
   none: {name: 'Classic', desc: 'Your hero\'s own colors.', price: 0},
@@ -4059,12 +4147,26 @@ const SKINS = {
   verdant: {name: 'Verdant', color: '#7fe08a', pass: true},
   void: {name: 'Voidborn', color: '#b06bff', pass: true},
   royal: {name: 'Royal Crimson', color: '#e0405a', pass: true},
+  ocean: {name: 'Tidecaller', color: '#3fb6ff', price: 250},
+  toxic: {name: 'Toxic', color: '#9cff3a', price: 250},
+  rose: {name: 'Rose Gold', color: '#f4a6a0', price: 300},
+  midnight: {name: 'Midnight', color: '#3a4a8a', price: 300},
+  sunset: {name: 'Sunset', color: '#ff8f5a', price: 300},
+  phantom: {name: 'Phantom', color: '#dfe8ff', aura: '#ffffff', desc: 'Pale ghostly glow with drifting wisps.', price: 450},
+  magma: {name: 'Magma Core', color: '#ff4d1a', aura: '#ffb35a', desc: 'Molten colors with rising embers.', price: 500},
+  thunder: {name: 'Thunderstruck', color: '#c8b8ff', aura: '#ffe14d', desc: 'Crackling with sparks of lightning.', price: 500},
+  galaxy: {name: 'Galaxy', color: '#6a4cff', aura: '#ff6ad5', desc: 'Deep-space colors with twinkling stars.', price: 600},
+  prism: {name: 'Prismatic', rainbow: true, aura: '#ffffff', desc: 'Shifts through every color of the rainbow.', price: 800},
 };
 const TRAILS = {
   none: {name: 'No trail', price: 0},
   embers: {name: 'Ember trail', color: '#ff9a4a', price: 150},
   frost: {name: 'Frost trail', color: '#bfefff', price: 150},
   stars: {name: 'Starlight trail', color: '#fff3c9', pass: true},
+  bubbles: {name: 'Bubble trail', color: '#8fe3ff', price: 150},
+  leaves: {name: 'Leaf trail', color: '#7fe08a', price: 150},
+  hearts: {name: 'Heart trail', color: '#ff6ad5', price: 200},
+  neon: {name: 'Neon trail', color: '#3df5ff', price: 200},
 };
 const BOOSTS = {
   tome: {name: 'Tome of Insight', desc: 'Start your next match at level 3.', price: 75},
@@ -4080,6 +4182,9 @@ const PETS = {
   nugget:    {name: 'Nugget', kind: 'goblin', color: '#7fd16a', desc: 'Baby goblin. Pokes enemies and finds 1 extra gold every second.', price: 200, dmg: 9, gold: 1, buff: {ms: 1.08}},
   sparkwing: {name: 'Sparkwing', kind: 'drake', color: '#ffd84a', belly: '#fff6c9', desc: 'Golden baby drake. Big fireballs. Earned from the Game Pass or eggs.', pass: true, dmg: 24, buff: {ad: 1.12, as: .12}},
   prismwing: {name: 'Prismwing', kind: 'drake', color: '#ff6ad5', belly: '#9ff2ff', desc: 'Unique crystal drake. Huge fireballs and a little healing.', eggOnly: true, dmg: 28, heal: .003, sparkle: true, buff: {ad: 1.12, ap: 1.12, hp: 1.08}},
+  sparky:    {name: 'Sparky', kind: 'wisp', color: '#ffe14d', desc: 'Mythic thunder sprite. Comes with the Volt bundle.', mythic: true, bundleOnly: true, dmg: 30, mana: 2, buff: {ms: 1.1, as: .12}, glow: '#fff6a8'},
+  bulwark:   {name: 'Bulwark', kind: 'golem', color: '#5fa8ff', desc: 'Mythic shield drone. Comes with the Aegis bundle.', mythic: true, bundleOnly: true, dmg: 26, heal: .004, buff: {hp: 1.2}},
+  echo:      {name: 'Echo', kind: 'drake', color: '#2a1f3d', belly: '#9b6bff', desc: 'Mythic shadow bat-drake. Comes with the Nightshade bundle.', mythic: true, bundleOnly: true, dmg: 32, buff: {ad: 1.12, cdr: .1}, glow: '#9b6bff'},
   nyx:       {name: 'Nyx', kind: 'drake', color: '#3a2c5c', belly: '#b06bff', desc: 'Secret shadow drake. The strongest pet: heals you and refills mana.', eggOnly: true, secret: true, dmg: 32, heal: .004, mana: 2, buff: {ad: 1.15, ap: 1.15, ms: 1.1, cdr: .1}, glow: '#c79bff'},
 };
 // "+12% attack, +8% speed" for the store and hatch screens
@@ -4138,7 +4243,8 @@ function applyLoadout() {
   const p = G.player;
   const sig = ROSTER[G.heroIdx] && ROSTER[G.heroIdx].sig;
   p.kit = sig ? Object.assign({}, sig) : {q: PROF.eq.q, r: PROF.eq.r};
-  p.color = (SKINS[PROF.eq.skin] && SKINS[PROF.eq.skin].color) || p.baseColor;
+  const sk = SKINS[PROF.eq.skin] || {};
+  p.color = sk.color || p.baseColor; p.skinAura = sk.aura || null; p.rainbow = !!sk.rainbow;
   p.trail = (TRAILS[PROF.eq.trail] && TRAILS[PROF.eq.trail].color) || null;
   const petId = PROF.eq.pet && PETS[PROF.eq.pet] && owns('pets', PROF.eq.pet) ? PROF.eq.pet : null;
   p.pet = petId ? {kind: petId, x: p.x - 40, y: p.y + 10, atkT: 1, face: 0, walk: 0, seed: Math.random() * 6} : null;
@@ -4222,7 +4328,7 @@ function grantMatchRewards(won) {
   return G.rewardText;
 }
 
-let storeTab = 'heroes', storeBack = 'scr-main';
+let storeTab = 'week', storeBack = 'scr-main';
 // Hooks for the optional payments add-on used by the self-hosted version (payments.js). Unused in the artifact.
 const storeExtras = [];
 window.Thornwake = {
@@ -4237,6 +4343,8 @@ window.Thornwake = {
       if (r.crowns) PROF.crowns = Math.max(0, PROF.crowns - r.crowns);
       if (r.premium) PROF.pass.premium = false;
       if (r.skin) { PROF.skins = PROF.skins.filter(k => k !== r.skin); if (PROF.eq.skin === r.skin) PROF.eq.skin = 'none'; }
+      if (r.hero) { const hi = ROSTER.findIndex(x => x.key === r.hero); PROF.heroes = PROF.heroes.filter(k => k !== hi); }
+      if (r.pet) { PROF.pets = PROF.pets.filter(k => k !== r.pet); if (PROF.eq.pet === r.pet) PROF.eq.pet = null; }
       if (g.productId) PROF.paidProducts = (PROF.paidProducts || []).filter(k => k !== g.productId);
       saveProfile(); return true;
     }
@@ -4245,6 +4353,8 @@ window.Thornwake = {
     if (r.crowns) PROF.crowns += r.crowns;
     if (r.premium) PROF.pass.premium = true;
     if (r.skin) grant({skin: r.skin});
+    if (r.hero) { const hi = ROSTER.findIndex(x => x.key === r.hero); if (hi >= 0) grant({hero: hi}); }
+    if (r.pet && PETS[r.pet]) { grant({pet: r.pet}); PROF.eq.pet = r.pet; }
     saveProfile(); return true;
   },
   banner, el, storeCard, show,
@@ -4257,7 +4367,27 @@ window.Thornwake = {
   addScreen(section) { section.classList.add('screen'); section.hidden = true; $('scr-main').parentNode.appendChild(section); },
   currentScreen: () => overlay.hidden ? null : currentScreen,
 };
-const TABS = [['heroes', 'Heroes'], ['pets', 'Pets'], ['moves', 'Moves'], ['boosts', 'Boosts'], ['cosmetics', 'Cosmetics'], ['pass', 'Game Pass']];
+// The weekly shop features three heroes at a time; the set changes every Monday (UTC).
+const WEEK_MS = 7 * 864e5, WEEK_EPOCH = Date.UTC(2026, 0, 5);
+const weekIndex = () => Math.floor((Date.now() - WEEK_EPOCH) / WEEK_MS);
+function weeklyFeatured() {
+  const pool = ROSTER.map((r, i) => r.weekly ? i : -1).filter(i => i >= 0), w = weekIndex(), out = [];
+  for (let k = 0; k < 3 && k < pool.length; k++) out.push(pool[(w * 3 + k) % pool.length]);
+  return out;
+}
+function weekLeft() {
+  const ms = WEEK_EPOCH + (weekIndex() + 1) * WEEK_MS - Date.now(), d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24;
+  return d > 0 ? `${d}d ${h}h` : `${h}h ${Math.floor(ms / 6e4) % 60}m`;
+}
+// how a hero is unlocked: '' when owned, or a short label
+function heroLockLabel(i) {
+  const r = ROSTER[i];
+  if (PROF.heroes.includes(i)) return '';
+  if (r.bundle) return 'Mythic bundle';
+  if (r.weekly) return weeklyFeatured().includes(i) ? `This week: ${r.price} Crowns` : 'Returns in the weekly shop';
+  return `Unlock for ${r.price} Crowns`;
+}
+const TABS = [['week', 'This Week'], ['heroes', 'Heroes'], ['pets', 'Pets'], ['moves', 'Moves'], ['boosts', 'Boosts'], ['cosmetics', 'Cosmetics'], ['pass', 'Game Pass']];
 function openStore(tab, back) { if (tab) storeTab = tab; storeBack = back || 'scr-main'; renderStore(); show('scr-store'); }
 function storeAction(fn) { return () => { fn(); saveProfile(); renderStore(); if (G.started && G.mode !== 'client') applyLoadout(); }; }
 function storeCard(body, o) {
@@ -4281,12 +4411,24 @@ function renderStore() {
     tabs.appendChild(b);
   }
   const body = $('storeBody'); body.innerHTML = '';
-  if (storeTab === 'heroes') {
-    for (let i = 6; i < ROSTER.length; i++) {
-      const r = ROSTER[i], have = owns('heroes', i);
-      storeCard(body, {hero: i, title: `${r.name} · ${r.cls}`, desc: heroPerk(r), label: have ? 'Unlocked' : buyLabel(r.price), primary: !have,
-        disabled: have || PROF.crowns < r.price, onClick: storeAction(() => { if (PROF.crowns >= r.price) { PROF.crowns -= r.price; grant({hero: i}); } })});
-    }
+  const heroCard = i => {
+    const r = ROSTER[i], have = owns('heroes', i), buyable = !r.bundle && !r.free && (!r.weekly || weeklyFeatured().includes(i));
+    storeCard(body, {hero: i, title: `${r.name} · ${r.cls}` + (r.mythic ? ' · Mythic' : ''), desc: heroPerk(r),
+      label: have ? 'Unlocked' : buyable ? buyLabel(r.price) : heroLockLabel(i), primary: !have && buyable,
+      disabled: have || !buyable || PROF.crowns < r.price, onClick: storeAction(() => { if (buyable && PROF.crowns >= r.price) { PROF.crowns -= r.price; grant({hero: i}); } })});
+  };
+  if (storeTab === 'week') {
+    const head = el('div', 'passhead');
+    head.append(el('b', '', 'This week\'s heroes'), el('small', '', `New heroes rotate in every week. These leave the shop in ${weekLeft()}.`));
+    body.appendChild(head);
+    for (const i of weeklyFeatured()) heroCard(i);
+    const mh = el('div', 'passhead');
+    mh.append(el('b', '', 'Mythic superhero bundles · $9.99'),
+      el('small', '', storeExtras.some(x => x.id === 'bundles') ? 'Each comes with a Mythic hero, their Mythic pet and 500 Crowns. Find them on the Bundles tab.' : 'Each comes with a Mythic hero, their Mythic pet and 500 Crowns. Bundles are sold on the Thornwake website.'));
+    body.appendChild(mh);
+    for (let i = 0; i < ROSTER.length; i++) if (ROSTER[i].mythic) heroCard(i);
+  } else if (storeTab === 'heroes') {
+    for (let i = 6; i < ROSTER.length; i++) heroCard(i);
   } else if (storeTab === 'pets') {
     const eggBox = el('div', 'passhead');
     eggBox.append(el('b', '', 'Dragon Egg'), el('small', '', `Hatches a random pet. If you already have it, you get ${EGG_REFUND} Crowns back. You have ${PROF.eggs || 0} egg${PROF.eggs === 1 ? '' : 's'}.`),
@@ -4300,8 +4442,8 @@ function renderStore() {
     for (const id in PETS) {
       const pe = PETS[id], have = owns('pets', id), on = PROF.eq.pet === id;
       if (pe.secret && !have) continue;
-      const locked = pe.pass || pe.eggOnly;
-      storeCard(body, {pet: id, title: pe.name, desc: pe.desc + ' ' + petBuffText(pe), label: on ? 'Equipped' : have ? 'Equip' : pe.eggOnly ? 'Hatch from eggs' : pe.pass ? 'Game Pass or eggs' : buyLabel(pe.price), primary: !have && !locked,
+      const locked = pe.pass || pe.eggOnly || pe.bundleOnly;
+      storeCard(body, {pet: id, title: pe.name + (pe.mythic ? ' · Mythic' : ''), desc: pe.desc + ' ' + petBuffText(pe), label: on ? 'Equipped' : have ? 'Equip' : pe.bundleOnly ? 'Mythic bundle' : pe.eggOnly ? 'Hatch from eggs' : pe.pass ? 'Game Pass or eggs' : buyLabel(pe.price), primary: !have && !locked,
         disabled: on || (!have && (locked || PROF.crowns < pe.price)),
         onClick: storeAction(() => { if (have) PROF.eq.pet = id; else if (!locked && PROF.crowns >= pe.price) { PROF.crowns -= pe.price; grant({pet: id}); PROF.eq.pet = id; } })});
     }
@@ -4323,7 +4465,7 @@ function renderStore() {
     for (const [list, cat, slot, label] of [['skins', SKINS, 'skin', 'Skin'], ['trails', TRAILS, 'trail', 'Trail']]) {
       for (const id in cat) {
         const c = cat[id], have = owns(list, id), on = PROF.eq[slot] === id;
-        storeCard(body, {color: c.color || '#3a4a42', title: c.name, desc: c.desc || (label + (c.pass ? ', earned from the Game Pass' : ' for any hero')),
+        storeCard(body, {color: c.color || (c.rainbow ? '#ff6ad5' : '#3a4a42'), title: c.name, desc: c.desc || (label + (c.pass ? ', earned from the Game Pass' : ' for any hero')),
           label: on ? 'Equipped' : have ? 'Equip' : c.pass ? 'Game Pass reward' : buyLabel(c.price), primary: !have && !c.pass,
           disabled: on || (!have && (c.pass || PROF.crowns < c.price)),
           onClick: storeAction(() => { if (have) PROF.eq[slot] = id; else if (!c.pass && PROF.crowns >= c.price) { PROF.crowns -= c.price; grant({[slot]: id}); PROF.eq[slot] = id; } })});
@@ -4360,7 +4502,8 @@ function heroPerk(r) {
   if (s.ap) parts.push(`+${Math.round((s.ap - 1) * 100)}% ability power`);
   if (s.ms) parts.push(`${s.ms > 1 ? '+' : ''}${Math.round((s.ms - 1) * 100)}% speed`);
   const sig = r.sig ? ` Signature moves: ${MOVES[r.sig.q].name} and ${MOVES[r.sig.r].name}.` : '';
-  return parts.join(', ') + '. Joins the Tidewardens.' + sig;
+  const how = r.free ? ' Free for everyone.' : r.bundle ? ' Mythic: only in its $9.99 bundle, with a Mythic pet.' : r.weekly ? ' Sold in the weekly shop when featured.' : '';
+  return parts.join(', ') + '. Joins the Tidewardens.' + sig + how;
 }
 
 // ---------- egg hatching ----------
@@ -4814,7 +4957,7 @@ const SFX = {
   pickup:  {gap: .2,  play: (t, v) => notes(t, [76, 83, 88], .05, .3, .08 * v)},
   hatch:   {gap: .5,  play: (t, v) => { noiseHit(t, .3 * v, .25, 'highpass', 3000); notes(t + .05, [76, 81, 84, 88], .06, .45, .08 * v); }},
 };
-const SPELL_SFX = {frost: 'frost', drain: 'drain', flame: 'flame', tempest: 'ult', vortex: 'vortex', phoenix: 'phoenix',
+const SPELL_SFX = {venom: 'drain', scatter: 'shot', lance: 'zap', blackhole: 'vortex', blizzard: 'frost', holy: 'shield', frost: 'frost', drain: 'drain', flame: 'flame', tempest: 'ult', vortex: 'vortex', phoenix: 'phoenix',
   kiblast: 'bolt', rocketpunch: 'swing', crescent: 'swing', spiritcannon: 'phoenix', gatling: 'swing', release: 'vortex'};
 const sfxLast = {};
 // Plays a sound; with a position it fades with distance from the camera and stays silent off screen.
