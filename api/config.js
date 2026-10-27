@@ -62,6 +62,9 @@ module.exports = (req, res) => {
   send(res, 200, {
     enabled: Boolean(key && process.env.UPSTASH_REDIS_REST_URL),
     testMode: key.startsWith('sk_test_'),
+    // Supabase powers accounts, cloud saves and online play. The anon key is meant to be public;
+    // row-level security in the database keeps each player's save private.
+    supabase: process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY ? {url: process.env.SUPABASE_URL, anonKey: process.env.SUPABASE_ANON_KEY} : null,
     products: Object.entries(PRODUCTS).map(([id, p]) => ({id, name: p.name, desc: p.desc, cents: p.cents, once: !!p.once})),
   });
 };

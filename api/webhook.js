@@ -61,6 +61,29 @@ function send(res, status, data) {
 
 const PAID_EVENTS = ['checkout.session.completed', 'checkout.session.async_payment_succeeded'];
 
+// A full refund queues a "revoke" for the game, which takes back the unspent Crowns and the
+// Starter Pack skin or Game Pass. Partial refunds are left alone.
+async function handleRefund(stripe, charge, res) {
+  if (!charge.refunded || !charge.payment_intent) return send(res, 200, {received: true});
+  const {data} = await stripe.checkout.sessions.list({payment_intent: charge.payment_intent, limit: 1});
+  const s = data[0], {playerId, productId} = (s && s.metadata) || {};
+  const p = PRODUCTS[productId];
+  if (!p || !PLAYER_ID.test(playerId || '')) return send(res, 200, {received: true, ignored: true});
+  try {
+    const fresh = await redis('SET', `refund:${s.id}`, '1', 'NX', 'EX', 60 * 60 * 24 * 365);
+    if (fresh === 'OK') {
+      const cmds = [['RPUSH', `grants:${playerId}`, JSON.stringify({id: 'refund:' + s.id, productId, revoke: p.grant, at: Date.now()})]];
+      if (p.once) cmds.push(['SREM', `owned:${playerId}`, productId]);
+      await multi(cmds);
+    }
+    send(res, 200, {received: true});
+  } catch (e) {
+    console.error('refund storage failed', e);
+    await redis('DEL', `refund:${s.id}`).catch(() => {});
+    send(res, 500, {error: 'Try again.'});
+  }
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return send(res, 405, {error: 'Use POST.'});
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -70,6 +93,7 @@ module.exports = async (req, res) => {
   } catch (e) {
     return send(res, 400, {error: 'Bad signature.'});
   }
+  if (event.type === 'charge.refunded') return handleRefund(stripe, event.data.object, res);
   if (!PAID_EVENTS.includes(event.type)) return send(res, 200, {received: true});
   const s = event.data.object;
   if (s.payment_status !== 'paid') return send(res, 200, {received: true});
