@@ -248,6 +248,12 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
 #game.touch #feed{top:calc(122px + env(safe-area-inset-top,0px));bottom:auto;left:calc(10px + env(safe-area-inset-left,0px));right:auto;align-items:flex-start;max-width:56vw}
 #game.touch #feed div{font-size:12px;padding:3px 8px}
 #game.touch #joy{left:calc(22px + env(safe-area-inset-left,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));width:124px;height:124px}
+#joyZone{position:absolute;left:0;top:150px;bottom:0;width:50%;pointer-events:auto;touch-action:none}
+#joy{pointer-events:none!important}
+#atkBtn{touch-action:none}
+#atkBtn span{pointer-events:none}
+#atkKnob{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:rgba(255,255,255,.55);display:none;pointer-events:none}
+#atkBtn.aiming #atkKnob{display:block}
 #game.touch #atkBtn{right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));width:86px;height:86px}
 #touch #abil{display:contents}
 #touch #abil .ab{position:absolute;width:56px;height:56px;border-radius:50%;pointer-events:auto;touch-action:manipulation;background:radial-gradient(circle at 40% 35%,#2e4539,#121c18);box-shadow:0 3px 10px rgba(0,0,0,.5)}
@@ -274,7 +280,7 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
   #touch #ab-f{right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(133px + env(safe-area-inset-bottom,0px))}
   #banner{top:16%}
 }
-#elems{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(132px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;align-items:center}
+#elems{position:absolute;z-index:6;left:50%;transform:translateX(-50%);bottom:calc(132px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;align-items:center}
 #elems .el{position:relative;width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,.28);background:radial-gradient(circle at 40% 35%,var(--c),#10140f 125%);cursor:pointer;padding:0;box-shadow:0 3px 10px rgba(0,0,0,.45);touch-action:manipulation}
 #elems .el:active{filter:brightness(1.3)}
 #elems .ek{position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--gold);text-shadow:0 1px 2px #000;white-space:nowrap}
@@ -283,6 +289,42 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
 #game.touch #elems{bottom:calc(230px + env(safe-area-inset-bottom,0px));gap:5px}
 #game.touch #elems .el{width:38px;height:38px} #game.touch #elems .ek{display:none} #game.touch #mixShow{min-width:52px}
 @media (max-height:420px){#game.touch #elems{bottom:calc(14px + env(safe-area-inset-bottom,0px))}}
+body.trailer #hud,body.trailer #mini,body.trailer #top,body.trailer #menuBtn,body.trailer #touch,body.trailer #elems,body.trailer #overlay,body.trailer #banner,body.trailer #feed,body.trailer #dead,body.trailer #shop,body.trailer #loading{display:none!important}
+#trailerUI{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(5,7,10,.72);z-index:50}
+#trailerUI p{margin:0;color:var(--muted);font-size:15px;text-align:center;max-width:min(90vw,520px)}
+body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story #touch,body.story #elems,body.story #banner,body.story #feed,body.story #dead,body.story #shop{display:none!important}
+#story{position:absolute;inset:0;pointer-events:none;font-size:15px}
+#story>*{pointer-events:auto}
+#stHud{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 10px;width:200px;display:flex;flex-direction:column;gap:4px}
+#stHud .bar{height:14px} #stHud small{color:var(--gold)}
+#stQuest{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 12px;max-width:min(46vw,360px);font-size:14px}
+#stQuest b{color:var(--gold);display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+#stMenuBtn{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(94px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stPrompt{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(5,7,10,.75);border:1px solid var(--gold);color:var(--gold);font-weight:600}
+#stDialog{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(94vw,720px);padding:14px 18px}
+#stDialog b{color:var(--gold);font-family:var(--display);font-size:20px;font-weight:400}
+#stDialog p{margin:6px 0 10px;line-height:1.45}
+#stBattle{position:absolute;inset:auto 0 0 0;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+#stLog{grid-column:1/-1;padding:8px 12px;min-height:44px;font-size:14px}
+#stParty,#stActions{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+#stParty .pm{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:center;font-size:13px}
+#stParty .pm .bar{height:12px}
+#stActions .row{display:flex;flex-wrap:wrap;gap:6px}
+#stActions button,#stMenu button,#stChoices button{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+#stActions button:disabled{opacity:.45;cursor:not-allowed}
+#stActions button:focus,#stMenu button:focus,#stChoices button:focus{outline:3px solid var(--gold);outline-offset:2px}
+#stMenu{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(94vw,560px);max-height:86vh;overflow:auto;padding:14px 18px}
+#stMenu h3{margin:4px 0;font-family:var(--display);font-weight:400;color:var(--gold)}
+#stMenu .row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+#stPad{position:absolute;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px}
+#game.touch #stPad{display:grid}
+#stPad button{border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(20,28,24,.7);color:#fff;font-size:18px;touch-action:none}
+#stPad [data-d=up]{grid-area:1/2} #stPad [data-d=left]{grid-area:2/1} #stPad [data-d=right]{grid-area:2/3} #stPad [data-d=down]{grid-area:3/2}
+#stA{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));width:76px;height:76px;border-radius:50%!important;background:radial-gradient(circle at 40% 35%,#f5cf63,#c8951e)!important;color:#1a1206!important;font-weight:700}
+#crCv{width:150px;height:150px}
+#crName{padding:10px 14px;border-radius:10px;font:inherit;font-size:16px;width:min(280px,80vw);text-align:center}
+#crColor .sw{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.3);cursor:pointer;padding:0}
+#crColor .sw[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 3px var(--gold)}
 @media (prefers-reduced-motion:reduce){#banner,#feed div{transition:none}}
 </style>
 
@@ -295,6 +337,16 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
     <span id="netTag" hidden></span><span id="modeScore"></span>
   </div>
   <button id="menuBtn" class="panel" hidden>Menu</button>
+  <div id="story" hidden>
+    <div id="stHud" class="panel"><b id="stHudName"></b><div class="bar hp"><i id="stHp"></i><span id="stHpT"></span></div><div class="bar mp"><i id="stMp"></i><span id="stMpT"></span></div><small id="stGold"></small></div>
+    <div id="stQuest" class="panel"></div>
+    <button id="stMenuBtn" class="panel">Menu</button>
+    <div id="stPrompt" hidden></div>
+    <div id="stDialog" class="panel" hidden><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
+    <div id="stBattle" hidden><div id="stLog" class="panel"></div><div id="stParty" class="panel"></div><div id="stActions" class="panel"></div></div>
+    <div id="stMenu" class="panel" hidden></div>
+    <div id="stPad"><button data-d="up">▲</button><button data-d="left">◀</button><button data-d="right">▶</button><button data-d="down">▼</button><button id="stA">A</button></div>
+  </div>
   <div id="feed"></div>
   <div id="banner"><b id="bTitle"></b><span id="bSub"></span></div>
   <div id="dead" hidden><div id="deadTxt"></div><div id="swap" hidden><p id="swapNote">Pick who you come back as</p><div id="swapList"></div></div></div>
@@ -333,8 +385,9 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
     <button id="mixShow" title="Your mix. Click to clear it (C)." aria-label="Current element mix, press to clear"></button>
   </div>
   <div id="touch" hidden>
+    <div id="joyZone" aria-hidden="true"></div>
     <div id="joy" aria-label="Move"><div id="joyKnob"></div></div>
-    <button id="atkBtn" aria-label="Attack the nearest enemy">Attack</button>
+    <button id="atkBtn" aria-label="Attack. Hold to keep attacking, drag to aim."><span>Attack</span><i id="atkKnob"></i></button>
   </div>
 
   <div id="shop" class="panel" hidden>
@@ -362,6 +415,7 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
         <h2>Main Menu</h2>
         <div class="menu">
           <button class="mbtn primary" id="m-new">New Game</button>
+          <button class="mbtn" id="m-story">Story</button>
           <button class="mbtn" id="m-ranked">Ranked</button>
           <button class="mbtn" id="m-continue">Continue</button>
           <button class="mbtn" id="m-load">Load Game</button>
@@ -419,6 +473,21 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
         <button class="mbtn small back" id="storeBack">Back</button>
       </section>
 
+      <section class="screen" id="scr-story" hidden>
+        <h2>The Thornwake Chronicles</h2>
+        <p class="status" id="stSummary">A story RPG. Make your own hero, explore an open world and fight turn-based battles.</p>
+        <div class="menu"><button class="mbtn primary" id="stContinue">Continue story</button><button class="mbtn" id="stNew">New story</button></div>
+        <button class="mbtn small back" id="stBack">Back</button>
+      </section>
+      <section class="screen" id="scr-create" hidden>
+        <h2>Create your hero</h2>
+        <canvas id="crCv" width="220" height="220" aria-hidden="true"></canvas>
+        <input id="crName" maxlength="14" placeholder="Your name" aria-label="Hero name" autocomplete="off" spellcheck="false">
+        <p class="status">Class</p><div class="row" id="crClass"></div>
+        <p class="status">Color</p><div class="row" id="crColor"></div>
+        <p class="status" id="crSkillNote">Pick 3 abilities</p><div class="row" id="crSkills"></div>
+        <div class="row"><button class="mbtn primary" id="crStart">Begin your story</button><button class="mbtn small back" id="crBack">Back</button></div>
+      </section>
       <section class="screen" id="scr-daily" hidden>
         <h2>Daily</h2>
         <p class="status ok" id="dailyInfo"></p>
@@ -2018,7 +2087,7 @@ function resize() {
   dpr = Math.min(2, window.devicePixelRatio || 1);
   cw = cv.clientWidth; ch = cv.clientHeight;
   cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
-  Z = clamp(Math.min(cw, ch) / 820, .5, 1);
+  Z = touchUI.on ? clamp(Math.min(cw, ch) / 940, .36, .8) : clamp(Math.min(cw, ch) / 820, .5, 1);
 }
 window.addEventListener('resize', resize);
 
@@ -3090,12 +3159,14 @@ function playerCast(k) {
       if (best) aim = {x: best.x, y: best.y};
     }
   }
+  else if (G.touch && touchUI.aim != null) { const d = k === 'r' ? 650 : k === 'e' ? 380 : 600; aim = {x: p.x + Math.cos(touchUI.aim) * d, y: p.y + Math.sin(touchUI.aim) * d}; }
   else if (G.touch || G.pad) aim = autoAim(p, k);
   else aim = toWorld(mouse.x, mouse.y);
   if (!commandCast(k, aim.x, aim.y)) { const el = abEls[k].el; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
 }
 window.addEventListener('keydown', e => {
   if (e.target && e.target.tagName === 'INPUT') return;
+  if (typeof ST !== 'undefined' && ST.on) return; // story mode has its own controls
   const k = e.key.toLowerCase();
   if (k === 'escape') {
     e.preventDefault();
@@ -4974,6 +5045,7 @@ function musicStart() {
       music.ctx = new A();
       const comp = music.ctx.createDynamicsCompressor(); comp.connect(music.ctx.destination);
       music.out = music.ctx.createGain(); music.out.gain.value = .6 * music.vol; music.out.connect(comp);
+      music.rec = music.ctx.createMediaStreamDestination(); comp.connect(music.rec); // lets the trailer recorder capture sound
       newBus();
     }
     music.ctx.resume();
@@ -5078,18 +5150,57 @@ function joyMove(e) {
   const d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d; }
   touchUI.vx = dx / R; touchUI.vy = dy / R; knob.style.transform = `translate(${dx}px,${dy}px)`;
 }
-joy.addEventListener('pointerdown', e => { e.preventDefault(); touchUI.id = e.pointerId; try { joy.setPointerCapture(e.pointerId); } catch (err) { /* capture unsupported */ } joyMove(e); });
-joy.addEventListener('pointermove', e => { if (e.pointerId === touchUI.id) joyMove(e); });
-const joyEnd = e => { if (e.pointerId !== touchUI.id) return; touchUI.id = null; touchUI.vx = touchUI.vy = 0; knob.style.transform = ''; };
-joy.addEventListener('pointerup', joyEnd); joy.addEventListener('pointercancel', joyEnd);
-$('atkBtn').addEventListener('pointerdown', e => { e.preventDefault(); G.touch = true; G.pad = false; if (inGame()) attackNearest(); });
+// Move stick: put your thumb anywhere on the left half and the stick appears under it.
+const zone = $('joyZone');
+zone.addEventListener('pointerdown', e => {
+  e.preventDefault(); touchUI.id = e.pointerId; try { zone.setPointerCapture(e.pointerId); } catch (err) { /* capture unsupported */ }
+  const R = joy.offsetWidth / 2, gr = $('game').getBoundingClientRect();
+  joy.style.left = (e.clientX - gr.left - R) + 'px'; joy.style.bottom = (gr.bottom - e.clientY - R) + 'px';
+  joyMove(e);
+});
+zone.addEventListener('pointermove', e => { if (e.pointerId === touchUI.id) joyMove(e); });
+const joyEnd = e => { if (e.pointerId !== touchUI.id) return; touchUI.id = null; touchUI.vx = touchUI.vy = 0; knob.style.transform = ''; joy.style.left = joy.style.bottom = ''; };
+zone.addEventListener('pointerup', joyEnd); zone.addEventListener('pointercancel', joyEnd);
+// Attack stick: tap to attack, hold to keep attacking, drag to aim attacks and spells.
+const atk = $('atkBtn'), atkKnob = $('atkKnob');
+atk.addEventListener('pointerdown', e => {
+  e.preventDefault(); G.touch = true; G.pad = false; touchUI.atkId = e.pointerId; touchUI.atkLast = 0; touchUI.aim = null;
+  try { atk.setPointerCapture(e.pointerId); } catch (err) { /* capture unsupported */ }
+  const r = atk.getBoundingClientRect(); touchUI.atkC = [r.left + r.width / 2, r.top + r.height / 2];
+  if (inGame()) attackToward();
+});
+atk.addEventListener('pointermove', e => {
+  if (e.pointerId !== touchUI.atkId) return;
+  const dx = e.clientX - touchUI.atkC[0], dy = e.clientY - touchUI.atkC[1], d = Math.hypot(dx, dy), R = atk.offsetWidth / 2;
+  if (d > 14) { touchUI.aim = Math.atan2(dy, dx); atk.classList.add('aiming'); const k = Math.min(d, R) / d; atkKnob.style.transform = `translate(${dx * k}px,${dy * k}px)`; }
+});
+const atkEnd = e => { if (e.pointerId !== touchUI.atkId) return; touchUI.atkId = null; touchUI.aim = null; atk.classList.remove('aiming'); atkKnob.style.transform = ''; };
+atk.addEventListener('pointerup', atkEnd); atk.addEventListener('pointercancel', atkEnd);
+// attacks whatever is closest to where you aim (or simply nearest)
+function attackToward() {
+  const p = G.player; if (!p.alive) return;
+  if (touchUI.aim == null) return attackNearest();
+  let best = null, bs = 1e9;
+  for (const u of G.units) {
+    if (!u.alive || u.team === p.team || (u.team === 2 && u.kind !== 'monster') || !targetable(u)) continue;
+    const dx = u.x - p.x, dy = u.y - p.y, d = Math.hypot(dx, dy); if (d > 750 + p.range) continue;
+    const da = Math.atan2(dy, dx) - touchUI.aim, off = Math.abs(Math.atan2(Math.sin(da), Math.cos(da)));
+    if (off < .6 && d + off * 400 < bs) { bs = d + off * 400; best = u; }
+  }
+  if (best) { commandAttack(best); G.marker = {x: best.x, y: best.y, t: .3, atk: true}; }
+  else commandMove(p.x + Math.cos(touchUI.aim) * 200, p.y + Math.sin(touchUI.aim) * 200);
+}
 function touchTick(now) {
   if (!inGame() || !touchUI.on) return;
-  if (Math.hypot(touchUI.vx, touchUI.vy) > .2) {
+  const m = Math.hypot(touchUI.vx, touchUI.vy);
+  if (m > .2) {
     G.touch = true; G.pad = false;
-    if (now - touchUI.last > 100) { touchUI.last = now; G.holdAttack = false; commandMove(G.player.x + touchUI.vx * 170, G.player.y + touchUI.vy * 170); }
+    // steer a fixed distance ahead so movement is smooth at any thumb angle
+    if (now - touchUI.last > (G.mode === 'client' ? 100 : 40)) { touchUI.last = now; G.holdAttack = false; commandMove(G.player.x + touchUI.vx / m * 260, G.player.y + touchUI.vy / m * 260); }
     touchUI.moving = true;
   } else if (touchUI.moving) { touchUI.moving = false; commandStop(); }
+  // holding the attack stick keeps attacking (spammable), toward where you aim
+  if (touchUI.atkId != null && now - (touchUI.atkLast || 0) > 180 && (!G.player.cmd || G.player.cmd.type !== 'attack' || touchUI.aim != null)) { touchUI.atkLast = now; if (!touchUI.moving) attackToward(); }
 }
 // ---------- big-screen mode for TVs and console browsers ----------
 const TV_KEY = 'thornwake.tv';
@@ -5114,8 +5225,872 @@ function drawPortrait(now) {
 
 // ---------- main loop ----------
 let last = performance.now();
+// ---------- Story mode: The Thornwake Chronicles, a grim turn-based RPG with an open world and dungeons ----------
+// Death drops your gold as Lost Embers where you fell; rest at Ashen Shrines to heal and set where you return.
+const ST_TILE = 64, ST_W = 30, ST_H = 20;
+const ST_CLASSES = {
+  warrior: {name: 'Warrior', look: 'knight', hp: 120, mp: 30, atk: 14, mag: 4, def: 8, spd: 6, skills: ['strike', 'guard', 'rally']},
+  mage:    {name: 'Mage', look: 'mage', hp: 80, mp: 70, atk: 6, mag: 16, def: 4, spd: 7, skills: ['fireball', 'frost', 'lightning']},
+  ranger:  {name: 'Ranger', look: 'ranger', hp: 95, mp: 45, atk: 12, mag: 8, def: 5, spd: 10, skills: ['rain', 'venom', 'strike']},
+  rogue:   {name: 'Rogue', look: 'rogue', hp: 90, mp: 40, atk: 13, mag: 6, def: 5, spd: 12, skills: ['venom', 'strike', 'drain']},
+  paladin: {name: 'Paladin', look: 'paladin', hp: 130, mp: 50, atk: 11, mag: 10, def: 10, spd: 5, skills: ['heal', 'guard', 'strike']},
+  gunner:  {name: 'Gunner', look: 'soldier', hp: 100, mp: 35, atk: 15, mag: 3, def: 6, spd: 8, skills: ['rain', 'strike', 'rally']},
+};
+const ST_COLORS = ['#f2c14e', '#7fd1c7', '#e0405a', '#8f7bd8', '#7fe08a', '#ff8a4a', '#8fd4ff', '#ff9ccf'];
+// kind: phys uses attack, mag uses magic; all hits every enemy
+const ST_SKILLS = {
+  strike:    {name: 'Power Strike', mp: 6, kind: 'phys', mult: 1.8, desc: 'A heavy blow.'},
+  fireball:  {name: 'Fireball', mp: 8, kind: 'mag', mult: 1.9, burn: true, desc: 'Fire damage that keeps burning.'},
+  frost:     {name: 'Frost Bolt', mp: 7, kind: 'mag', mult: 1.5, slow: true, desc: 'Ice that may freeze the enemy for a turn.'},
+  lightning: {name: 'Chain Lightning', mp: 12, kind: 'mag', mult: 1.2, all: true, desc: 'Strikes every enemy.'},
+  rain:      {name: 'Arrow Rain', mp: 10, kind: 'phys', mult: .9, all: true, desc: 'Hits every enemy.'},
+  venom:     {name: 'Venom Strike', mp: 6, kind: 'phys', mult: 1.1, poison: true, desc: 'Poisons for 3 turns.'},
+  drain:     {name: 'Life Drain', mp: 9, kind: 'mag', mult: 1.4, drain: true, desc: 'Heals you for half the damage.'},
+  heal:      {name: 'Heal', mp: 8, kind: 'heal', mult: 2.4, desc: 'Restores health to you and your ally.'},
+  guard:     {name: 'Guard Up', mp: 5, kind: 'buff', buff: 'guard', desc: 'Double defense for 2 turns.'},
+  rally:     {name: 'War Cry', mp: 6, kind: 'buff', buff: 'rally', desc: '+50% attack for 3 turns.'},
+};
+const ST_FOES = {
+  wolf:    {name: 'Thornwolf', hp: 42, atk: 9, def: 2, spd: 9, xp: 12, gold: 6, draw: 'wolf'},
+  pup:     {name: 'Wolf Pup', hp: 22, atk: 6, def: 1, spd: 10, xp: 6, gold: 3, draw: 'wolf', small: true},
+  goblin:  {name: 'Ruin Goblin', hp: 55, atk: 12, def: 4, spd: 7, xp: 18, gold: 10, draw: 'goblin'},
+  bandit:  {name: 'Bandit', hp: 70, atk: 14, def: 5, spd: 9, xp: 24, gold: 16, draw: 'hero', look: 'rogue'},
+  frostwolf: {name: 'Frost Wolf', hp: 90, atk: 18, def: 6, spd: 11, xp: 34, gold: 18, draw: 'wolf', fur: '#cfe9ff'},
+  knight:  {name: 'Hollow Knight', hp: 120, atk: 22, def: 10, spd: 8, xp: 48, gold: 26, draw: 'hero', look: 'knight', color: '#5a4a6a'},
+  golem:   {name: 'Stone Golem', hp: 300, atk: 20, def: 10, spd: 4, xp: 120, gold: 80, draw: 'golem', boss: true},
+  drake:   {name: 'Frost Drake', hp: 440, atk: 26, def: 10, spd: 9, xp: 200, gold: 120, draw: 'drake', boss: true},
+  king:    {name: 'The Hollow King', hp: 700, atk: 32, def: 14, spd: 10, xp: 400, gold: 300, draw: 'hero', look: 'warlock', color: '#7a1fff', boss: true},
+};
+const ST_ENCOUNTERS = {T: [['wolf'], ['wolf', 'pup'], ['pup', 'pup']], ':': [['goblin'], ['goblin', 'goblin'], ['bandit']], '*': [['frostwolf'], ['frostwolf', 'wolf']], C: [['knight'], ['knight', 'bandit']]};
+const ST_REGION = {T: 'The Thornwood', ':': 'Sunken Ruins', '*': 'Frost Peaks', C: 'Hollow Castle', v: 'Thornwake, the Last Lit Village', '.': 'The Ashen Vale', '=': 'The Ashen Vale', B: 'River Bridge', S: 'Ashen Shrine', D: 'Dungeon Entrance'};
+const ST_BLOCKED = new Set(['~', '^', 'H', '#', 'W']);
+function stBuildMap() {
+  const m = Array.from({length: ST_H}, () => Array(ST_W).fill('.'));
+  const fill = (x0, y0, x1, y1, ch) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) m[y][x] = ch; };
+  fill(1, 1, 12, 6, '*'); fill(2, 8, 10, 14, 'T'); fill(12, 9, 16, 13, 'v'); fill(19, 12, 27, 18, ':'); fill(20, 1, 28, 6, 'C');
+  for (let x = 20; x <= 28; x++) { m[1][x] = 'W'; m[6][x] = 'W'; } for (let y = 1; y <= 6; y++) { m[y][20] = 'W'; m[y][28] = 'W'; }
+  m[6][24] = 'G'; // the castle gate
+  for (let y = 1; y < ST_H - 1; y++) m[y][18] = '~';
+  for (const [x, y] of [[13, 9], [16, 9], [12, 13], [16, 13]]) m[y][x] = 'H';
+  for (const [x, y] of [[21, 13], [23, 15], [26, 13], [25, 17], [20, 16]]) m[y][x] = '#';
+  for (let x = 10; x <= 24; x++) m[11][x] = m[11][x] === '~' ? 'B' : (m[11][x] === 'v' ? 'v' : '=');
+  for (let y = 7; y <= 10; y++) m[y][14] = '='; for (let x = 14; x <= 24; x++) m[7][x] = m[7][x] === '~' ? 'B' : '=';
+  for (let y = 11; y <= 13; y++) m[y][22] = m[y][22] === '#' ? ':' : '='; for (let x = 8; x <= 14; x++) m[7][x] = '='; m[6][8] = '='; m[7][24] = '=';
+  for (let x = 0; x < ST_W; x++) { m[0][x] = '^'; m[ST_H - 1][x] = '^'; } for (let y = 0; y < ST_H; y++) { m[y][0] = '^'; m[y][ST_W - 1] = '^'; }
+  for (const [x, y] of [[4, 16], [5, 16], [4, 17], [5, 17], [6, 17]]) m[y][x] = '~'; // pond
+  for (const [x, y] of [[12, 11], [9, 12], [21, 14], [9, 4], [24, 8]]) m[y][x] = 'S'; // Ashen Shrines
+  m[16][24] = 'D'; m[2][4] = 'D'; // dungeon entrances: the catacombs and the ice crypt
+  return m;
+}
+const ST_DUNGEONS = {
+  catacomb: {name: 'The Sunken Catacombs', boss: 'golem', pool: [['goblin'], ['goblin', 'goblin'], ['bandit', 'goblin']], theme: {floor: '#2a3330', wall: '#111614', glow: '#ff9a4a'}, exit: [24, 16], rows: [
+    '######################',
+    '#E...#.......#......B#',
+    '#....#..X....#..X....#',
+    '#....#.......#.......#',
+    '#.......##.......##..#',
+    '###.#####..#####.....#',
+    '#.X.#c.....#...X.##..#',
+    '#...#......#.....#...#',
+    '#...####.###.#####...#',
+    '#......X.....#...X...#',
+    '#.####...#####.......#',
+    '#..c.#.......X...##..#',
+    '#....#...............#',
+    '######################']},
+  crypt: {name: 'The Ice Crypt', boss: 'drake', pool: [['frostwolf'], ['frostwolf', 'frostwolf'], ['knight']], theme: {floor: '#33404a', wall: '#141a20', glow: '#9fe3ff'}, exit: [4, 2], rows: [
+    '######################',
+    '#E.....#.....X.......#',
+    '#......#.###########.#',
+    '#..X...#.#.....c...#.#',
+    '####.###.#.#######.#.#',
+    '#........#.#.....#.X.#',
+    '#.######.#.#..B..#...#',
+    '#.#....#.#.#.....#####',
+    '#.#.X..#...##.####...#',
+    '#.#....#####........X#',
+    '#.##.###.....######..#',
+    '#..X.....#.X.....c...#',
+    '#........#...........#',
+    '######################']},
+};
+const ST_MAP = stBuildMap();
+const stGrid = () => { const d = stData(); return d && d.map !== 'world' && ST_DUNGEONS[d.map] ? ST_DUNGEONS[d.map].rows : ST_MAP; };
+const ST_NPCS = [
+  {id: 'elder', name: 'Maren the Pale', x: 14, y: 10, look: 'shaman', color: '#c9a24a'},
+  {id: 'merchant', name: 'Pell the Merchant', x: 15, y: 12, look: 'pirate', color: '#f2c14e'},
+  {id: 'inn', name: 'Innkeeper Bree', x: 13, y: 12, look: 'witch', color: '#7fe08a'},
+  {id: 'liora', name: 'Liora', x: 15, y: 10, look: 'valkyrie', color: '#9fd8ff'},
+];
+const ST_CHESTS = [{id: 'c1', x: 3, y: 9, loot: {potion: 2}}, {id: 'c2', x: 20, y: 17, loot: {gold: 60}}, {id: 'c3', x: 10, y: 2, loot: {ether: 2}}, {id: 'c4', x: 21, y: 2, loot: {blade: 1}}];
+const ST_BOSSES = [{id: 'king', x: 24, y: 3, ch: 3, map: 'world'}];
+const ST_QUESTS = [
+  'Cull the hollowed wolves of the Thornwood to the west (%p/3). Then return to Maren the Pale.',
+  'Descend into the Sunken Catacombs beneath the ruins (south-east). Take the Ember Shard from what guards it.',
+  'Climb to the Frost Peaks (north-west) and enter the Ice Crypt. The Frost Shard sleeps in the drake\'s heart.',
+  'Carry both shards to the Hollow Castle (north-east). End the Hollow King, or be ended.',
+  'The king is ash. The curse loosens its grip. Wander as you will.',
+];
+const ST = {on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
+const stData = () => PROF.story;
+const stXpNeed = lv => 30 + 25 * lv;
+function stStats() { // base class stats grown by level, plus gear
+  const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1;
+  return {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: c.atk + 2 * L + (d.items.blade ? 6 : 0), mag: c.mag + 2 * L, def: c.def + 1.2 * L, spd: c.spd + .4 * L};
+}
+function stSave() { saveProfile(); }
+
+// ---- story menu and character creator
+let crSel = {cls: 'warrior', color: ST_COLORS[0], skills: []};
+function openStoryMenu() {
+  const d = stData();
+  $('stContinue').hidden = !d;
+  $('stSummary').textContent = d ? `${d.name}, level ${d.lv} ${ST_CLASSES[d.cls].name}. Chapter ${Math.min(4, d.ch + 1)} of 4.` : 'A story RPG. Make your own hero, explore an open world and fight turn-based battles.';
+  show('scr-story');
+}
+function renderCreator() {
+  const cl = $('crClass'); cl.innerHTML = '';
+  for (const id in ST_CLASSES) { const b = el('button', 'chip' + (crSel.cls === id ? ' sel' : ''), ST_CLASSES[id].name); b.addEventListener('click', () => { crSel.cls = id; crSel.skills = []; renderCreator(); }); cl.appendChild(b); }
+  const co = $('crColor'); co.innerHTML = '';
+  for (const c of ST_COLORS) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-pressed', c === crSel.color); b.setAttribute('aria-label', 'Color ' + c); b.addEventListener('click', () => { crSel.color = c; renderCreator(); }); co.appendChild(b); }
+  const sk = $('crSkills'); sk.innerHTML = '';
+  const rec = ST_CLASSES[crSel.cls].skills;
+  for (const id in ST_SKILLS) {
+    const S = ST_SKILLS[id], on = crSel.skills.includes(id);
+    const b = el('button', 'chip' + (on ? ' sel' : ''), S.name + (rec.includes(id) ? ' ★' : '')); b.title = `${S.desc} Costs ${S.mp} MP.`;
+    b.addEventListener('click', () => { if (on) crSel.skills = crSel.skills.filter(x => x !== id); else if (crSel.skills.length < 3) crSel.skills.push(id); renderCreator(); });
+    sk.appendChild(b);
+  }
+  $('crSkillNote').textContent = `Pick 3 abilities (${crSel.skills.length}/3). ★ suits your class. You learn more as you level up.`;
+  $('crStart').disabled = crSel.skills.length !== 3;
+  const c = $('crCv'), g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+  g.setTransform(2.4, 0, 0, 2.4, c.width / 2, c.height * .85);
+  drawCharacter(g, {look: ST_CLASSES[crSel.cls].look, color: crSel.color, team: 0, level: 3, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, 0);
+}
+$('m-story').addEventListener('click', openStoryMenu);
+$('stBack').addEventListener('click', () => show('scr-main'));
+$('stContinue').addEventListener('click', () => startStory());
+$('stNew').addEventListener('click', () => {
+  if (stData() && !confirm('Start a new story? Your current story progress will be replaced.')) return;
+  crSel = {cls: 'warrior', color: ST_COLORS[0], skills: []}; $('crName').value = ''; renderCreator(); show('scr-create');
+});
+$('crBack').addEventListener('click', openStoryMenu);
+$('crStart').addEventListener('click', () => {
+  const name = ($('crName').value.trim() || 'Wanderer').slice(0, 14), c = ST_CLASSES[crSel.cls];
+  PROF.story = {name, cls: crSel.cls, color: crSel.color, skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
+    items: {potion: 3, ether: 1}, x: 11 * ST_TILE, y: 11 * ST_TILE + 32, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false,
+    map: 'world', shrine: {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64}, lost: null};
+  stSave(); startStory(true);
+});
+
+// ---- entering and leaving the story
+function stDrawDungeonCanvas(key) { // stone floors, walls, an exit stair and the boss altar
+  const D = ST_DUNGEONS[key], rows = D.rows, c = document.createElement('canvas'); c.width = rows[0].length * ST_TILE; c.height = rows.length * ST_TILE;
+  const g = c.getContext('2d'), R = mulberry(23);
+  rows.forEach((row, y) => [...row].forEach((t, x) => {
+    const px = x * ST_TILE, py = y * ST_TILE;
+    g.fillStyle = t === '#' ? D.theme.wall : D.theme.floor; g.fillRect(px, py, ST_TILE, ST_TILE);
+    if (t !== '#') { g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 2; g.strokeRect(px + 1, py + 1, 31, 31); g.strokeRect(px + 33, py + 33, 30, 30); if (R() < .15) { g.fillStyle = '#d8d0c0'; g.fillRect(px + R() * 50, py + R() * 50, 8, 3); } }
+    else { g.fillStyle = 'rgba(255,255,255,.04)'; g.fillRect(px, py, ST_TILE, 10); }
+    if (t === 'E') { g.fillStyle = '#5a5248'; for (let i = 0; i < 4; i++) g.fillRect(px + 8 + i * 4, py + 8 + i * 12, 48 - i * 8, 10); }
+    if (t === 'B') { g.fillStyle = '#3a1010'; g.beginPath(); g.arc(px + 32, py + 32, 30, 0, 7); g.fill(); g.strokeStyle = D.theme.glow; g.lineWidth = 2; g.stroke(); }
+  }));
+  ST.dunC[key] = c;
+}
+function stDrawMapCanvas() {
+  const c = document.createElement('canvas'); c.width = ST_W * ST_TILE; c.height = ST_H * ST_TILE;
+  const g = c.getContext('2d'), R = mulberry(11);
+  const col = {'.': '#34452f', T: '#1f3322', '~': '#173f52', '^': '#4a4d52', '=': '#6a6048', v: '#5e5440', H: '#5a3226', ':': '#435a55', '#': '#626e6a', '*': '#b8c4cc', C: '#2a2433', W: '#1a1622', B: '#6a5230', G: '#5a14c0', S: '#34452f', D: '#1a1a1a'};
+  for (let y = 0; y < ST_H; y++) for (let x = 0; x < ST_W; x++) {
+    const t = ST_MAP[y][x], px = x * ST_TILE, py = y * ST_TILE;
+    g.fillStyle = col[t] || '#3f6b3a'; g.fillRect(px, py, ST_TILE, ST_TILE);
+    g.fillStyle = 'rgba(0,0,0,.06)'; if ((x + y) % 2) g.fillRect(px, py, ST_TILE, ST_TILE);
+    if (t === 'T') for (let i = 0; i < 2; i++) { const tx = px + 14 + R() * 36, ty = py + 14 + R() * 36; g.fillStyle = '#1b3320'; g.beginPath(); g.arc(tx, ty, 16, 0, 7); g.fill(); g.fillStyle = '#2f5a34'; g.beginPath(); g.arc(tx - 4, ty - 5, 10, 0, 7); g.fill(); }
+    if (t === '^') { g.fillStyle = '#7a8088'; g.beginPath(); g.moveTo(px + 6, py + 58); g.lineTo(px + 32, py + 8); g.lineTo(px + 58, py + 58); g.fill(); g.fillStyle = '#e8eef4'; g.beginPath(); g.moveTo(px + 24, py + 22); g.lineTo(px + 32, py + 8); g.lineTo(px + 40, py + 22); g.fill(); }
+    if (t === '~') { g.strokeStyle = 'rgba(180,230,255,.25)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 8, py + 24 + R() * 16); g.lineTo(px + 30, py + 20 + R() * 16); g.stroke(); }
+    if (t === 'H') { g.fillStyle = '#c9b48a'; g.fillRect(px + 8, py + 24, 48, 34); g.fillStyle = '#8a2a1e'; g.beginPath(); g.moveTo(px + 2, py + 28); g.lineTo(px + 32, py + 4); g.lineTo(px + 62, py + 28); g.fill(); g.fillStyle = '#4a2a1a'; g.fillRect(px + 26, py + 40, 12, 18); }
+    if (t === '#') { g.fillStyle = '#9aaaa5'; g.fillRect(px + 18, py + 6, 26, 52); g.fillStyle = '#6a7a75'; g.fillRect(px + 14, py + 4, 34, 8); }
+    if (t === '*' && R() < .3) { g.fillStyle = '#ffffff'; g.beginPath(); g.arc(px + R() * 64, py + R() * 64, 3, 0, 7); g.fill(); }
+    if (t === 'W') { g.fillStyle = '#3a3346'; g.fillRect(px + 4, py + 4, 56, 56); g.fillStyle = '#1a1622'; for (let i = 0; i < 3; i++) g.fillRect(px + 6 + i * 20, py, 12, 10); }
+    if (t === 'G') { g.fillStyle = '#2a1f3d'; g.fillRect(px + 8, py + 4, 48, 56); g.strokeStyle = '#b06bff'; g.lineWidth = 3; g.strokeRect(px + 12, py + 8, 40, 50); }
+    if (t === 'B') { g.fillStyle = '#5a3a1a'; for (let i = 0; i < 4; i++) g.fillRect(px, py + 6 + i * 15, 64, 9); }
+    if (t === 'D') { g.fillStyle = '#4a4440'; g.beginPath(); g.moveTo(px + 6, py + 60); g.lineTo(px + 32, py + 10); g.lineTo(px + 58, py + 60); g.fill(); g.fillStyle = '#050505'; g.beginPath(); g.moveTo(px + 18, py + 60); g.lineTo(px + 32, py + 30); g.lineTo(px + 46, py + 60); g.fill(); }
+    if (t === 'S') { g.fillStyle = '#3a3330'; g.beginPath(); g.ellipse(px + 32, py + 48, 20, 8, 0, 0, 7); g.fill(); g.strokeStyle = '#c9c0b0'; g.lineWidth = 4; g.beginPath(); g.moveTo(px + 32, py + 48); g.lineTo(px + 36, py + 14); g.stroke(); }
+  }
+  ST.mapC = c;
+}
+function startStory(fresh) {
+  if (!stData()) return openStoryMenu();
+  if (!ST.mapC) stDrawMapCanvas();
+  hideMenus(); reset(0); G.started = false;
+  ST.on = true; ST.mode = 'walk'; ST.keys = {}; ST.safe = 4; ST.walkDist = 0;
+  document.body.classList.add('story'); $('story').hidden = false; $('stBattle').hidden = true; $('stMenu').hidden = true;
+  const d = stData(); d.map = d.map || 'world'; if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
+  if (d.map !== 'world') { const px = d.x, py = d.y; stEnterMap(d.map, 2, 2); d.x = px; d.y = py; }
+  ST.cam.x = d.x; ST.cam.y = d.y; musicStart();
+  if (fresh) stSay([
+    ['', `You wake face-down in cold ash. You remember dying. You remember nothing before it. Only a name, scratched into the hilt of your weapon: ${d.name}.`],
+    ['', 'The sky is the color of a bruise. To the east, one village still keeps its fires lit. Everything else has gone hollow.'],
+    ['', 'Rest at Ashen Shrines (the swords in the ash) to heal. If you die, you drop your gold where you fall. Return for it, or lose it forever.'],
+    ['', 'Move with the arrow keys, WASD, the left stick or the on-screen pad. Interact with E, A or the A button.'],
+  ]);
+  stHud();
+}
+function stLeave() {
+  stSave(); ST.on = false; document.body.classList.remove('story'); $('story').hidden = true;
+  reset(0); G.started = false; show('scr-main');
+}
+
+// ---- dialogue: lines of [speaker, text]; an optional last entry with choices
+function stSay(lines, onDone, choices) {
+  ST.mode = 'talk'; ST.dlg = {lines, i: 0, onDone, choices};
+  stShowLine();
+}
+function stShowLine() {
+  const dl = ST.dlg, [who, text] = dl.lines[dl.i], last = dl.i === dl.lines.length - 1;
+  $('stDialog').hidden = false; $('stWho').textContent = who || 'You'; $('stText').textContent = text;
+  const ch = $('stChoices'); ch.innerHTML = '';
+  const opts = last && dl.choices ? dl.choices : [[last ? 'Done' : 'Next', null]];
+  for (const [label, fn] of opts) {
+    const b = el('button', '', label);
+    b.addEventListener('click', () => {
+      if (!last) { dl.i++; stShowLine(); return; }
+      $('stDialog').hidden = true; ST.mode = 'walk'; ST.dlg = null;
+      if (fn) fn(); if (dl.onDone) dl.onDone(); stHud(); stSave();
+    });
+    ch.appendChild(b);
+  }
+  setTimeout(() => { const b = ch.querySelector('button'); if (b) b.focus({preventScroll: true}); }, 0);
+}
+
+// ---- the world: movement, interaction and random encounters
+const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
+const stBlocked = (x, y) => { const t = stTileAt(x, y), dun = stData().map !== 'world'; return dun ? t === '#' : ST_BLOCKED.has(t) || (t === 'G' && stData().ch < 3); };
+function stEnterMap(key, tx, ty) { // move between the world and a dungeon
+  const d = stData(); d.map = key; d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
+  ST.foes = [];
+  if (key !== 'world') {
+    if (!ST.dunC[key]) stDrawDungeonCanvas(key);
+    const D = ST_DUNGEONS[key];
+    D.rows.forEach((row, y) => [...row].forEach((t, x) => { if (t === 'X') ST.foes.push({x: x * ST_TILE + 32, y: y * ST_TILE + 32, group: D.pool[(x + y) % D.pool.length], alive: true, home: [x * ST_TILE + 32, y * ST_TILE + 32]}); }));
+  }
+  stHud(); stSave();
+}
+function stRest() { // an Ashen Shrine: heal fully, set your return point, and the dead in the dungeons rise again
+  const d = stData(), s = stStats(); d.hp = s.hp; d.mp = s.mp; d.shrine = {map: d.map, x: d.x, y: d.y + 40}; sfx('respawn');
+  stSay([['', 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']]);
+}
+function stNearby() {
+  const d = stData(), near = (tx, ty) => Math.hypot(d.x - (tx * ST_TILE + 32), d.y - (ty * ST_TILE + 32)) < 80, grid = stGrid();
+  if (d.map === 'world') {
+    for (const n of ST_NPCS) if ((n.id !== 'liora' || !d.flags.liora) && near(n.x, n.y)) return {kind: 'npc', n};
+    for (const c of ST_CHESTS) if (!d.chests.includes(c.id) && near(c.x, c.y)) return {kind: 'chest', c};
+    for (const b of ST_BOSSES) if (!d.flags[b.id] && near(b.x, b.y)) return {kind: 'boss', b};
+  }
+  for (let y = 0; y < grid.length; y++) for (let x = 0; x < grid[y].length; x++) {
+    const t = grid[y][x]; if (!near(x, y)) continue;
+    if (t === 'S') return {kind: 'shrine'};
+    if (t === 'D') return {kind: 'door', key: x === 24 ? 'catacomb' : 'crypt'};
+    if (d.map === 'world') continue; // the rest only exist in dungeons ('B' is a bridge up top)
+    if (t === 'E') return {kind: 'exit'};
+    if (t === 'c' && !d.chests.includes(d.map + x + '_' + y)) return {kind: 'chest', c: {id: d.map + x + '_' + y, loot: (x + y) % 2 ? {potion: 2, gold: 40} : {ether: 1, gold: 60}}};
+    if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) return {kind: 'boss', b: {id: ST_DUNGEONS[d.map].boss, ch: ST_DUNGEONS[d.map].boss === 'golem' ? 1 : 2}};
+  }
+  if (stTileAt(d.x, d.y - 40) === 'G' && d.ch < 3) return {kind: 'gate'};
+  return null;
+}
+function stInteract() {
+  const it = stNearby(), d = stData(); if (!it) return;
+  if (it.kind === 'chest') {
+    d.chests.push(it.c.id); const L = it.c.loot, got = [];
+    if (L.potion) { d.items.potion += L.potion; got.push(L.potion + ' potions'); }
+    if (L.ether) { d.items.ether += L.ether; got.push(L.ether + ' ethers'); }
+    if (L.gold) { d.gold += L.gold; got.push(L.gold + ' gold'); }
+    if (L.blade) { d.items.blade = 1; got.push('the Royal Blade (+6 attack)'); }
+    sfx('pickup'); stSay([['', 'You open the chest and find ' + got.join(' and ') + '.']]);
+  } else if (it.kind === 'gate') stSay([['', 'A seal of violet light bars the gate. It hums like a held breath. Two shards would break it. You carry ' + Math.max(0, d.ch - 1) + '.']]);
+  else if (it.kind === 'shrine') stRest();
+  else if (it.kind === 'door') {
+    const D = ST_DUNGEONS[it.key];
+    stSay([['', `Stairs fall away into the dark. A smell of old stone and older death. This is ${D.name}.`]], null,
+      [['Descend', () => stEnterMap(it.key, 2, 2)], ['Turn back', null]]);
+  } else if (it.kind === 'exit') { const D = ST_DUNGEONS[d.map]; stSay([['', 'Grey light above. The surface.']], null, [['Climb out', () => stEnterMap('world', D.exit[0], D.exit[1] + 1)], ['Stay', null]]); }
+  else if (it.kind === 'boss') {
+    const b = it.b;
+    if (d.ch < b.ch) stSay([['', b.id === 'king' ? 'A voice like dry leaves: "Not yet, little candle. Bring me what they stole."' : 'Something vast sleeps here. Your hands will not stop shaking. Not yet.']]);
+    else stSay([['', b.id === 'golem' ? 'Bones crunch beneath a shape of fused stone. It was a guardian once. Now it only remembers how to crush. The Ember Shard burns in its chest.' : b.id === 'drake' ? 'Frozen corpses line the hall like offerings. Wings of rime unfold. The drake has not tasted warm blood in a century.' : 'The Hollow King does not rise. He unfolds. "Another candle," he whispers, "come to gutter in my hall."'],
+      ['', 'There is no turning back once you draw steel.']], null, [['Draw steel', () => stStartBattle([b.id], b.id)], ['Not yet', null]]);
+  } else if (it.kind === 'npc') stTalk(it.n.id);
+}
+function stTalk(id) {
+  const d = stData();
+  if (id === 'elder') {
+    if (d.ch === 0) {
+      if (d.pelts >= 3) stSay([['Maren the Pale', 'So. You came back. Most do not, and the ones who do come back… wrong.'], ['Maren the Pale', 'The wolves were never the sickness. They were the cough. The Hollow King drinks this land dry from his castle, and two shards keep his gate shut.'],
+        ['Maren the Pale', 'Take Liora. She has buried more friends than she can count, and she is tired of digging. The first shard lies beneath the ruins, in the catacombs.']], () => { d.ch = 1; d.flags.liora = true; d.gold += 50; sfx('levelup'); });
+      else stSay([['Maren the Pale', `Another one with a name and no past. Sit, if you must. The wolves of the Thornwood have gone hollow. Their eyes are empty and they do not stop.`], ['Maren the Pale', `Cull them. ${d.pelts} of 3 packs so far. West, where the road dies.`]]);
+    } else if (d.ch < 4) stSay([['Maren the Pale', ['', 'The catacombs eat the careless. Light a shrine before you go down.', 'Cold kills slower than steel, but it kills. The crypt is past the peaks.', 'Go, then. If you fall, at least fall facing him.'][d.ch]]]);
+    else stSay([['Maren the Pale', 'The fires are steady for the first time in my life. I do not know what to do with hope. Teach me.']]);
+  } else if (id === 'merchant') stSay([['Pell the Merchant', `Coin is coin, even at the end of the world. Potions are 15, ethers 25. You have ${d.gold}. Don't die with it.`]], null,
+    [['Buy potion (15)', () => { if (d.gold >= 15) { d.gold -= 15; d.items.potion++; sfx('pickup'); } }], ['Buy ether (25)', () => { if (d.gold >= 25) { d.gold -= 25; d.items.ether++; sfx('pickup'); } }], ['Leave', null]]);
+  else if (id === 'inn') stSay([['Innkeeper Bree', 'A bed, a bowl of something hot, and a locked door. 10 gold. You will wake. Probably.']], null,
+    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
+  else if (id === 'liora') stSay([['Liora', 'I watched the last stranger walk into the Thornwood. I found his sword a week later. Prove you are worth following.']]);
+}
+function stHunters(dt) { // dungeon enemies wander home, and charge when they see you
+  const d = stData();
+  for (const f of ST.foes) {
+    if (!f.alive) continue;
+    const dist = Math.hypot(d.x - f.x, d.y - f.y), tx = dist < 300 ? d.x : f.home[0], ty = dist < 300 ? d.y : f.home[1], a = Math.atan2(ty - f.y, tx - f.x);
+    if (Math.hypot(tx - f.x, ty - f.y) > 4) { const nx = f.x + Math.cos(a) * 95 * dt, ny = f.y + Math.sin(a) * 95 * dt; if (!stBlocked(nx, f.y)) f.x = nx; if (!stBlocked(f.x, ny)) f.y = ny; f.walk = (f.walk || 0) + 3; f.face = Math.cos(a) < 0 ? Math.PI : 0; }
+    if (dist < 44 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : ':'); return; }
+  }
+}
+function stWalk(dt) {
+  const d = stData(); let dx = 0, dy = 0;
+  if (d.map !== 'world') stHunters(dt);
+  if (ST.mode !== 'walk') return;
+  if (ST.keys.left) dx--; if (ST.keys.right) dx++; if (ST.keys.up) dy--; if (ST.keys.down) dy++;
+  if (ST.padMove) { dx += ST.padMove[0]; dy += ST.padMove[1]; }
+  const m = Math.hypot(dx, dy); ST.moving = m > .1;
+  if (!ST.moving) return;
+  const sp = 230 * dt / Math.max(1, m), nx = d.x + dx * sp, ny = d.y + dy * sp;
+  if (!stBlocked(nx, d.y + 14)) d.x = nx; if (!stBlocked(d.x, ny + 14)) d.y = ny;
+  ST.face = dx < 0 ? Math.PI : dx > 0 ? 0 : ST.face || 0; ST.walk = (ST.walk || 0) + sp * m;
+  ST.walkDist += sp * m;
+  if (d.lost && d.lost.map === d.map && Math.hypot(d.x - d.lost.x, d.y - d.lost.y) < 50) { d.gold += d.lost.gold; stSay([['', `You gather up your Lost Embers: ${d.lost.gold} gold, still warm.`]]); d.lost = null; sfx('pickup'); }
+  if (d.map !== 'world') return; // dungeons have hunters instead of random encounters
+  if (ST.walkDist > ST_TILE) {
+    ST.walkDist = 0; ST.safe--;
+    const t = stTileAt(d.x, d.y), table = ST_ENCOUNTERS[t];
+    if (table && ST.safe <= 0 && Math.random() < .14) { ST.safe = 5; stStartBattle(table[Math.floor(Math.random() * table.length)], null, t); }
+    if (Math.random() < .2) stSave();
+  }
+}
+
+// ---- turn-based battles
+function stStartBattle(foes, bossId, tile) {
+  const s = stStats(), d = stData();
+  const lvl = Math.max(0, d.lv - 1) * (bossId ? 0 : .06);
+  ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
+    foes: foes.map((k, i) => { const F = ST_FOES[k]; const hp = Math.round(F.hp * (1 + lvl)); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl), id: i}); }),
+    ally: d.flags.liora ? {name: 'Liora', hp: 80 + 12 * d.lv, maxHp: 80 + 12 * d.lv, atk: 10 + 2 * d.lv} : null};
+  ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true;
+  STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = [];
+  sfx(bossId ? 'roar' : 'swing');
+  stLog(bossId ? `${ST_FOES[foes[0]].name} blocks your way!` : 'Enemies appear: ' + ST.battle.foes.map(f => f.name).join(', ') + '.');
+  stRenderBattle();
+}
+// Battle animation: who is 'p' (you), 'a' (Liora) or a foe index. Positions are refreshed every frame.
+const STFX = {anims: [], shots: [], nums: [], parts: [], pos: {}};
+const stPos = who => STFX.pos[who] || [cw / 2, ch / 2];
+function stAnim(who, kind = 'lunge', dur = .32) { STFX.anims.push({who, kind, t: 0, dur}); }
+function stNum(who, text, color = '#fff3c9', big) { const [x, y] = stPos(who); STFX.nums.push({x: x + rand(-14, 14), y: y - 90, text: String(text), color, t: 0, big}); }
+function stBurst(who, color, n = 14, spread = 160) { const [x, y] = stPos(who); for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = rand(40, spread); STFX.parts.push({x, y: y - 50, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, t: 0, life: rand(.35, .7), color, r: rand(2, 5)}); } }
+function stShot(from, to, color, size = 10, onHit) { STFX.shots.push({from, to, t: 0, dur: .32, color, size, onHit}); }
+function stFxOffset(who) { // lunges toward the other side and back, hurt shakes
+  let ox = 0, oy = 0;
+  for (const a of STFX.anims) if (a.who === who) {
+    const k = Math.sin(Math.PI * Math.min(1, a.t / a.dur));
+    if (a.kind === 'lunge') ox += (who === 'p' || who === 'a' ? 1 : -1) * 70 * k;
+    else if (a.kind === 'hurt') ox += Math.sin(a.t * 70) * 7 * (1 - a.t / a.dur);
+    else if (a.kind === 'cast') oy -= 14 * k;
+  }
+  return [ox, oy];
+}
+function stFxDraw(dt) {
+  for (const a of STFX.anims) a.t += dt; STFX.anims = STFX.anims.filter(a => a.t < a.dur);
+  for (const sh of STFX.shots) {
+    sh.t += dt; const k = Math.min(1, sh.t / sh.dur), [x0, y0] = stPos(sh.from), [x1, y1] = stPos(sh.to);
+    const x = x0 + (x1 - x0) * k, y = (y0 - 60) + (y1 - y0) * k - Math.sin(Math.PI * k) * 40;
+    ctx.fillStyle = sh.color; ctx.shadowColor = sh.color; ctx.shadowBlur = 20; ctx.beginPath(); ctx.arc(x, y, sh.size, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+    STFX.parts.push({x, y, vx: rand(-20, 20), vy: rand(-20, 20), t: 0, life: .25, color: sh.color, r: sh.size * .5});
+    if (k >= 1 && !sh.done) { sh.done = true; if (sh.onHit) sh.onHit(); }
+  }
+  STFX.shots = STFX.shots.filter(sh => !sh.done);
+  for (const pt of STFX.parts) { pt.t += dt; pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.vy += 160 * dt; ctx.globalAlpha = Math.max(0, 1 - pt.t / pt.life); ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, 7); ctx.fill(); }
+  STFX.parts = STFX.parts.filter(pt => pt.t < pt.life);
+  ctx.textAlign = 'center';
+  for (const n of STFX.nums) {
+    n.t += dt; ctx.globalAlpha = Math.max(0, 1 - Math.max(0, n.t - .5) / .4);
+    ctx.font = `700 ${n.big ? 34 : 24}px "Barlow Semi Condensed", sans-serif`; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.75)';
+    const y = n.y - n.t * 50 - (n.big ? Math.sin(Math.min(1, n.t * 6) * Math.PI) * 10 : 0);
+    ctx.strokeText(n.text, n.x, y); ctx.fillStyle = n.color; ctx.fillText(n.text, n.x, y);
+  }
+  STFX.nums = STFX.nums.filter(n => n.t < .9); ctx.globalAlpha = 1; ctx.textAlign = 'left';
+}
+const SK_COLOR = {fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
+function stLog(t) { if (ST.battle) ST.battle.log = t; $('stLog').textContent = t; }
+const stDmg = (base, def) => Math.max(1, Math.round(base * (.9 + Math.random() * .2) - def * .5));
+function stRenderBattle(picking) {
+  const b = ST.battle, d = stData(), s = stStats();
+  const party = $('stParty'); party.innerHTML = '';
+  const row = (name, hp, maxHp, mp, maxMp) => {
+    const r = el('div', 'pm'); r.append(el('b', '', name));
+    const bar = el('div', 'bar hp'), i = el('i'), t = el('span', '', `${Math.max(0, Math.round(hp))}/${Math.round(maxHp)}`); i.style.width = Math.max(0, hp / maxHp * 100) + '%'; bar.append(i, t); r.appendChild(bar);
+    if (maxMp) { r.appendChild(el('small', '', 'MP')); const mb = el('div', 'bar mp'), mi = el('i'), mt = el('span', '', `${Math.round(mp)}/${maxMp}`); mi.style.width = mp / maxMp * 100 + '%'; mb.append(mi, mt); r.appendChild(mb); }
+    party.appendChild(r);
+  };
+  row(d.name, d.hp, s.hp, d.mp, s.mp); if (b.ally) row('Liora', b.ally.hp, b.ally.maxHp);
+  const act = $('stActions'); act.innerHTML = '';
+  if (b.over) return;
+  if (b.turn !== 'player') { act.appendChild(el('small', '', 'Enemy turn…')); return; }
+  const r1 = el('div', 'row');
+  const btn = (label, fn, dis) => { const x = el('button', '', label); x.disabled = !!dis; x.addEventListener('click', fn); r1.appendChild(x); return x; };
+  if (picking) { // choose a target, then run the action on it
+    act.appendChild(el('small', '', 'Choose a target'));
+    for (const f of b.foes) if (f.hp > 0) btn(`${f.name} (${f.hp})`, () => picking(f));
+    btn('Back', () => stRenderBattle());
+  } else if (ST.sub === 'skills') {
+    act.appendChild(el('small', '', 'Skills'));
+    for (const id of d.skills) { const S = ST_SKILLS[id]; btn(`${S.name} · ${S.mp} MP`, () => stUseSkill(id), d.mp < S.mp).title = S.desc; }
+    btn('Back', () => { ST.sub = null; stRenderBattle(); });
+  } else if (ST.sub === 'items') {
+    act.appendChild(el('small', '', 'Items'));
+    btn(`Potion ×${d.items.potion} (+60 HP)`, () => stItem('potion'), !d.items.potion);
+    btn(`Ether ×${d.items.ether} (+30 MP)`, () => stItem('ether'), !d.items.ether);
+    btn('Back', () => { ST.sub = null; stRenderBattle(); });
+  } else {
+    btn('Attack', () => stPick(f => stPlayerHit(f, s.atk * (b.buffs.rally ? 1.5 : 1), 'phys')));
+    btn('Skills', () => { ST.sub = 'skills'; stRenderBattle(); });
+    btn('Items', () => { ST.sub = 'items'; stRenderBattle(); });
+    btn('Defend', () => { b.defending = true; stLog(`${d.name} braces for the next attack.`); stEndTurn(); });
+    btn('Flee', () => { if (Math.random() < .6) { stLog('You got away!'); stEndBattle('fled'); } else { stLog('You could not escape!'); stEndTurn(); } }, !!b.bossId);
+  }
+  act.appendChild(r1);
+  setTimeout(() => { const x = act.querySelector('button:not(:disabled)'); if (x) x.focus({preventScroll: true}); }, 0);
+}
+function stPick(fn) { const alive = ST.battle.foes.filter(f => f.hp > 0); if (alive.length === 1) fn(alive[0]); else stRenderBattle(fn); }
+function stPlayerHit(f, base, kind, extra, color) {
+  const dmg = stDmg(base, kind === 'mag' ? f.def * .5 : f.def), crit = Math.random() < .12, total = crit ? Math.round(dmg * 1.5) : dmg;
+  const land = () => {
+    f.hp -= total; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact');
+    stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? total + '!' : total, crit ? '#ffd75e' : '#ffffff', crit);
+    if (crit) ST.hurt = .2;
+    if (extra) extra(f, total);
+    stLog(`${f.name} takes ${total} damage.` + (crit ? ' Critical hit!' : '') + (f.hp <= 0 ? ` ${f.name} is defeated!` : ''));
+    ST.sub = null; setTimeout(stEndTurn, 250);
+  };
+  ST.battle.turn = 'anim'; stRenderBattle();
+  if (kind === 'mag') { stAnim('p', 'cast', .3); stShot('p', f.id, color || '#c79bff', 11, land); }
+  else { stAnim('p', 'lunge', .32); setTimeout(land, 160); }
+}
+function stUseSkill(id) {
+  const S = ST_SKILLS[id], d = stData(), s = stStats(), b = ST.battle;
+  if (d.mp < S.mp) return;
+  const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag : s.atk * (b.buffs.rally ? 1.5 : 1)) * (S.mult || 1);
+  if (S.kind === 'heal') {
+    d.mp -= S.mp; const h = Math.round(power + 10); d.hp = Math.min(s.hp, d.hp + h); if (b.ally) { b.ally.hp = Math.min(b.ally.maxHp, b.ally.hp + h * .7); stNum('a', '+' + Math.round(h * .7), '#6be08a'); stBurst('a', '#6be08a', 12); }
+    stAnim('p', 'cast'); stBurst('p', '#6be08a', 22); stNum('p', '+' + h, '#6be08a', true); sfx('shield'); stLog(`${S.name} restores ${h} health.`); ST.sub = null; return setTimeout(stEndTurn, 450);
+  }
+  if (S.kind === 'buff') { d.mp -= S.mp; b.buffs[S.buff] = S.buff === 'guard' ? 2 : 3; stAnim('p', 'cast'); stBurst('p', S.buff === 'guard' ? '#7fd1c7' : '#ff6a4d', 22); stNum('p', S.buff === 'guard' ? 'Defense up' : 'Attack up', '#ffd75e'); sfx('shield'); stLog(S.buff === 'guard' ? 'Your defense doubles!' : 'Your attack surges!'); ST.sub = null; return setTimeout(stEndTurn, 450); }
+  if (S.all) {
+    d.mp -= S.mp; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
+    for (const f of b.foes) if (f.hp > 0) {
+      const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def); total += dm; left++;
+      stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { f.hp -= dm; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
+    }
+    sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
+  }
+  stPick(f => { d.mp -= S.mp; stPlayerHit(f, power, S.kind, (t, dm) => {
+    if (S.burn) t.burn = 2; if (S.poison) t.poison = 3; if (S.slow && Math.random() < .5) { t.frozen = 1; stNum(t.id, 'Frozen', '#9fe6ff'); }
+    if (S.drain) { d.hp = Math.min(s.hp, d.hp + Math.round(dm / 2)); stNum('p', '+' + Math.round(dm / 2), '#6be08a'); stBurst('p', '#b06bff', 10); }
+  }, SK_COLOR[id]); });
+}
+function stItem(k) {
+  const d = stData(), s = stStats(); if (!d.items[k]) return;
+  d.items[k]--; if (k === 'potion') d.hp = Math.min(s.hp, d.hp + 60); else d.mp = Math.min(s.mp, d.mp + 30);
+  stBurst('p', k === 'potion' ? '#e0405a' : '#7aa9ff', 16); stNum('p', k === 'potion' ? '+60' : '+30 MP', k === 'potion' ? '#6be08a' : '#9fc0ff');
+  sfx('pickup'); stLog(k === 'potion' ? 'You drink a potion. +60 HP.' : 'You drink an ether. +30 MP.'); ST.sub = null; stEndTurn();
+}
+function stEndTurn() {
+  const b = ST.battle; if (b.foes.every(f => f.hp <= 0)) return stEndBattle('won');
+  b.turn = 'enemy'; stRenderBattle();
+  setTimeout(stEnemyPhase, 650);
+}
+function stEnemyPhase() {
+  const b = ST.battle, d = stData(), s = stStats(); if (!b || b.over) return;
+  if (b.ally && b.ally.hp > 0) { // Liora fights by your side
+    const t = b.foes.find(f => f.hp > 0);
+    if (d.hp < s.hp * .35) { const hh = 30 + 4 * d.lv; d.hp = Math.min(s.hp, d.hp + hh); stAnim('a', 'cast'); stBurst('p', '#6be08a', 16); stNum('p', '+' + hh, '#6be08a'); stLog('Liora shields you and heals your wounds.'); }
+    else if (t) { const dm = stDmg(b.ally.atk * 1.2, t.def); stAnim('a', 'lunge'); setTimeout(() => { t.hp -= dm; t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(t.id, 'hurt'); stBurst(t.id, '#9fd8ff', 12); stNum(t.id, dm); sfx('impact'); }, 160); stLog(`Liora strikes ${t.name} for ${dm}.`); }
+    if (b.foes.every(f => f.hp <= 0)) return setTimeout(() => stEndBattle('won'), 450);
+  }
+  const alive = b.foes.filter(f => f.hp > 0); let i = 0;
+  const next = () => {
+    if (!ST.battle || b.over) return;
+    if (i >= alive.length) {
+      for (const k of ['guard', 'rally']) if (b.buffs[k]) b.buffs[k]--;
+      b.defending = false; b.turn = 'player'; stRenderBattle(); return;
+    }
+    const f = alive[i++];
+    if (f.hp <= 0) return next();
+    if (f.burn || f.poison) { const dot = Math.round(f.maxHp * .06); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
+    if (f.frozen) { f.frozen = 0; stLog(`${f.name} is frozen solid and can't move!`); return setTimeout(next, 600); }
+    const hitAlly = b.ally && b.ally.hp > 0 && Math.random() < .35;
+    const big = f.boss && Math.random() < .3, base = f.atk * (big ? 1.6 : 1);
+    stAnim(f.id, 'lunge', big ? .45 : .32);
+    const victim = hitAlly ? 'a' : 'p';
+    if (hitAlly) { const dm = stDmg(base, 6); b.ally.hp -= dm; stNum('a', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack on' : 'hits'} Liora for ${dm}.`); }
+    else { let dm = stDmg(base, s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); d.hp -= dm; stNum('p', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack! You take' : 'hits you for'} ${dm}${big ? ' damage' : ''}.`); }
+    stAnim(victim, 'hurt', .35); stBurst(victim, big ? '#ff5a1f' : '#e0405a', big ? 24 : 12);
+    ST.hurt = big ? .45 : .25; sfx(big ? 'boom' : 'hurt');
+    if (d.hp <= 0) return setTimeout(() => stEndBattle('lost'), 500);
+    stRenderBattle(); setTimeout(next, 650);
+  };
+  setTimeout(next, b.ally ? 600 : 0);
+}
+function stEndBattle(result) {
+  const b = ST.battle, d = stData(); b.over = true;
+  const done = () => { $('stBattle').hidden = true; ST.battle = null; ST.mode = 'walk'; stHud(); stSave(); };
+  if (result === 'fled') { if (ST.fighting) { const f = ST.fighting; f.x = f.home[0]; f.y = f.home[1]; ST.fighting = null; } return setTimeout(done, 500); }
+  if (result === 'lost') {
+    const s = stStats(), lostGold = d.gold;
+    d.lost = lostGold > 0 ? {map: d.map, x: d.x, y: d.y, gold: lostGold} : null; d.gold = 0;
+    d.hp = s.hp; d.mp = s.mp; $('stBattle').hidden = true; ST.battle = null;
+    const sh = d.shrine || {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
+    stEnterMap(sh.map, Math.floor(sh.x / ST_TILE), Math.floor(sh.y / ST_TILE)); d.x = sh.x; d.y = sh.y; ST.cam.x = d.x; ST.cam.y = d.y;
+    return stSay([['', 'YOU PERISHED'], ['', 'You wake at the shrine, gasping, ash in your mouth.' + (lostGold ? ` Your ${lostGold} gold lies where you fell, as Lost Embers. Die again before you reach it and it is gone.` : '')]], () => stSave());
+  }
+  if (ST.fighting) { ST.fighting.alive = false; ST.fighting = null; }
+  const xp = b.foes.reduce((a, f) => a + f.xp, 0), gold = b.foes.reduce((a, f) => a + f.gold, 0);
+  d.xp += xp; d.gold += gold; sfx('levelup');
+  const lines = [['', `Victory! You earn ${xp} XP and ${gold} gold.`]];
+  if (!b.bossId && b.tile === 'T' && d.ch === 0 && d.pelts < 3) { d.pelts++; lines.push(['', `Wolf packs driven off: ${d.pelts} of 3.` + (d.pelts >= 3 ? ' Return to Elder Maren.' : '')]); }
+  let learn = false;
+  while (d.xp >= stXpNeed(d.lv)) { d.xp -= stXpNeed(d.lv); d.lv++; const s = stStats(); d.hp = s.hp; d.mp = s.mp; lines.push(['', `Level up! You are now level ${d.lv}. Health and mana fully restored.`]); if (d.lv % 2 === 1 && d.skills.length < Object.keys(ST_SKILLS).length) learn = true; }
+  if (b.bossId) {
+    d.flags[b.bossId] = true;
+    lines.unshift(['', b.bossId === 'king' ? 'LORD OF HOLLOWS FELLED' : 'GUARDIAN FELLED']);
+    if (b.bossId === 'golem') { d.ch = 2; lines.push(['', 'The stone splits along old seams. Inside, the Ember Shard pulses like a second heart.'], ['Liora', 'It was a man once. I can see the shape of him in the rock. Let\'s not end up like that. The crypt next.']); }
+    if (b.bossId === 'drake') { d.ch = 3; lines.push(['', 'The drake breaks apart like a frozen lake in spring. The Frost Shard is so cold it burns.'], ['Liora', 'Two shards. The gate will open. I hope you are ready, because I am not.']); }
+    if (b.bossId === 'king') {
+      d.ch = 4; lines.push(['The Hollow King', '"You think… you have saved them? I was… the last thing… holding the dark… at bay…"'], ['', 'His crown falls and does not land. It simply stops being. For a long moment, there is only silence. Then, impossibly, a bird.'],
+        ['', `Whether the dark returns is a question for another age. For now, ${d.name}, the fire is yours.`]);
+      if (!d.rewarded) { d.rewarded = true; PROF.crowns += 300; lines.push(['', 'Story complete. You earned 300 Crowns.']); }
+    }
+  }
+  setTimeout(() => { done(); stSay(lines, learn ? stLearnSkill : null); }, 600);
+}
+function stLearnSkill() {
+  const d = stData(), opts = Object.keys(ST_SKILLS).filter(k => !d.skills.includes(k)).slice(0, 3);
+  if (!opts.length) return;
+  stSay([['', 'You feel new power stir. Choose an ability to learn.']], null, opts.map(k => [`${ST_SKILLS[k].name} (${ST_SKILLS[k].mp} MP)`, () => { d.skills.push(k); }]));
+}
+
+// ---- pause menu
+function stOpenMenu() {
+  if (ST.mode !== 'walk') return;
+  const d = stData(), s = stStats(), m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  m.append(el('h3', '', `${d.name} · Level ${d.lv} ${ST_CLASSES[d.cls].name}`),
+    el('p', '', `HP ${Math.round(d.hp)}/${s.hp} · MP ${Math.round(d.mp)}/${s.mp} · Attack ${Math.round(s.atk)} · Magic ${Math.round(s.mag)} · Defense ${Math.round(s.def)} · XP ${d.xp}/${stXpNeed(d.lv)} · ${d.gold} gold`),
+    el('h3', '', 'Abilities'), el('p', '', d.skills.map(k => `${ST_SKILLS[k].name} (${ST_SKILLS[k].mp} MP): ${ST_SKILLS[k].desc}`).join(' · ')),
+    el('h3', '', 'Bag'), el('p', '', `${d.items.potion} potions · ${d.items.ether} ethers` + (d.items.blade ? ' · Royal Blade' : '')),
+    el('h3', '', 'Quest'), el('p', '', ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)));
+  const row = el('div', 'row'), btn = (l, fn) => { const b = el('button', '', l); b.addEventListener('click', fn); row.appendChild(b); return b; };
+  btn('Drink potion', () => { if (d.items.potion) { d.items.potion--; d.hp = Math.min(s.hp, d.hp + 60); sfx('pickup'); stCloseMenu(); stOpenMenu(); } });
+  btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
+  m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
+}
+function stCloseMenu() { $('stMenu').hidden = true; ST.mode = 'walk'; stHud(); }
+$('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu() : stOpenMenu());
+
+// ---- HUD and drawing
+function stHud() {
+  const d = stData(); if (!d) return; const s = stStats();
+  $('stHudName').textContent = `${d.name} · Lv ${d.lv}`;
+  $('stHp').style.width = Math.max(0, d.hp / s.hp * 100) + '%'; $('stHpT').textContent = `${Math.max(0, Math.round(d.hp))}/${s.hp}`;
+  $('stMp').style.width = d.mp / s.mp * 100 + '%'; $('stMpT').textContent = `${Math.round(d.mp)}/${s.mp}`;
+  $('stGold').textContent = `${d.gold} gold · ${d.items.potion} potions`;
+  const where = d.map !== 'world' ? ST_DUNGEONS[d.map].name : ST_REGION[stTileAt(d.x, d.y)] || 'The Ashen Vale';
+  $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', `Chapter ${Math.min(4, d.ch + 1)} · ${where}`), document.createTextNode(ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts) + (d.lost ? ` Your Lost Embers (${d.lost.gold} gold) wait where you fell.` : '')));
+}
+const stUnit = (look, color, x, y, face, walk, id, level = 3) => ({look, color, team: 0, level, face, x, y, walk, _lw: walk - 1, atkT: 0, atkCd: 1, hitFlash: 0, id});
+function stDrawWorld(now) {
+  const d = stData(), Zs = Math.max(.7, Math.min(1.2, Math.min(cw, ch) / 700));
+  ST.cam.x += (d.x - ST.cam.x) * .12; ST.cam.y += (d.y - ST.cam.y) * .12;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#0c1411'; ctx.fillRect(0, 0, cw, ch);
+  ctx.setTransform(dpr * Zs, 0, 0, dpr * Zs, dpr * (cw / 2 - ST.cam.x * Zs), dpr * (ch / 2 - ST.cam.y * Zs));
+  const dun = d.map !== 'world';
+  ctx.drawImage(dun ? ST.dunC[d.map] : ST.mapC, 0, 0);
+  if (dun) stGrid().forEach((row, y) => [...row].forEach((t, x) => {
+    if (t === 'c' && !d.chests.includes(d.map + x + '_' + y)) { const cx = x * ST_TILE + 32, cy = y * ST_TILE + 36; ctx.fillStyle = '#5a3a1e'; ctx.fillRect(cx - 16, cy - 12, 32, 22); ctx.fillStyle = '#c9a24a'; ctx.fillRect(cx - 16, cy - 4, 32, 4); }
+    if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) stDrawFoe(ST_DUNGEONS[d.map].boss, x * ST_TILE + 32, y * ST_TILE + 40, now, .75, Math.PI);
+  }));
+  if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6, f.face || 0);
+  if (d.lost && d.lost.map === d.map) { ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff7a2a'; ctx.shadowBlur = 20; ctx.globalAlpha = .7 + Math.sin(now * 4) * .3; ctx.beginPath(); ctx.arc(d.lost.x, d.lost.y, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
+  if (!dun) for (const c of ST_CHESTS) if (!d.chests.includes(c.id)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
+  if (!dun) for (const b of ST_BOSSES) if (!d.flags[b.id]) { const x = b.x * ST_TILE + 32, y = b.y * ST_TILE + 32; ctx.strokeStyle = '#ff6a4d'; ctx.globalAlpha = .5 + Math.sin(now * 3) * .3; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 34, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; stDrawFoe(b.id, x, y + 10, now, .7, Math.PI); }
+  if (!dun) for (const n of ST_NPCS) if (n.id !== 'liora' || !d.flags.liora) {
+    const x = n.x * ST_TILE + 32, y = n.y * ST_TILE + 30; drawCharacter(ctx, stUnit(n.look, n.color, x, y, Math.PI, 0, 20 + n.x), now);
+    ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n.name, x, y - 74); ctx.textAlign = 'left';
+  }
+  if (d.flags.liora) drawCharacter(ctx, stUnit('valkyrie', '#9fd8ff', d.x - 46 * (Math.cos(ST.face || 0) || 1), d.y + 6, ST.face || 0, ST.walk || 0, 31, d.lv), now);
+  drawCharacter(ctx, stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv), now);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // light: a torch circle in dungeons, a heavy vignette above ground
+  const sx = cw / 2 + (d.x - ST.cam.x) * Zs, sy = ch / 2 + (d.y - ST.cam.y) * Zs - 20, rad = (dun ? 230 : 520) * Zs;
+  const dark = ctx.createRadialGradient(sx, sy, rad * .35, sx, sy, rad);
+  dark.addColorStop(0, 'rgba(0,0,0,0)'); dark.addColorStop(1, dun ? 'rgba(0,0,0,.96)' : 'rgba(8,6,12,.55)');
+  ctx.fillStyle = dark; ctx.fillRect(0, 0, cw, ch);
+  if (!dun) { ctx.fillStyle = 'rgba(40,30,60,.12)'; ctx.fillRect(0, 0, cw, ch); }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const near = ST.mode === 'walk' && stNearby();
+  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', door: 'Enter the dungeon', exit: 'Climb out', boss: 'Approach'}[near.kind]);
+}
+function stDrawFoe(key, x, y, now, scale, face, flash) {
+  const F = ST_FOES[key] || ST_FOES.wolf, u = {x, y, face, walk: now * 30, _lw: 0, hitFlash: flash || 0, atkT: 0, atkCd: 1, id: 5, team: 1, level: 8};
+  ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.translate(-x, -y);
+  if (F.draw === 'wolf') { u.r = F.small ? 20 : 30; u.fur = F.fur; drawWolf(ctx, u, now); }
+  else if (F.draw === 'golem') { u.r = 46; drawGolem(ctx, u, now); }
+  else if (F.draw === 'drake') { u.species = 'frost'; u.fire = '#9fe3ff'; u.sc = .9; u.r = 52; drawDragon(ctx, u, now); }
+  else if (F.draw === 'goblin') { u.type = 'melee'; u.tier = 2; u.big = 1.3; drawMinion(ctx, u, now); }
+  else { u.look = F.look; u.color = F.color || '#b33a3a'; u.level = F.boss ? 18 : 6; drawCharacter(ctx, u, now); }
+  ctx.restore();
+}
+function stDrawBattle(now, dt) {
+  const b = ST.battle, d = stData(), tile = b.tile || (b.bossId === 'golem' ? 'K' : b.bossId === 'drake' ? '*' : b.bossId === 'king' ? 'C' : '.');
+  const sky = {T: ['#152a1c', '#05100a'], ':': ['#1e332e', '#070f0d'], K: ['#2a1a14', '#080403'], '*': ['#5a7486', '#1a2630'], C: ['#22182f', '#05030a'], '.': ['#2a3a26', '#0a120c']}[tile] || ['#2a3a26', '#0a120c'];
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const g = ctx.createLinearGradient(0, 0, 0, ch); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]); ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+  ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(cw / 2, ch * .62, cw * .45, ch * .12, 0, 0, 7); ctx.fill();
+  const k = Math.max(.8, Math.min(1.6, Math.min(cw, ch) / 500)), shake = ST.hurt > 0 ? rand(-6, 6) : 0; ST.hurt = Math.max(0, (ST.hurt || 0) - dt);
+  ctx.setTransform(dpr, 0, 0, dpr, dpr * shake, 0);
+  const px = cw * .28, py = ch * .55, bob = Math.sin(now * 3) * 2;
+  STFX.pos.p = [px, py]; STFX.pos.a = [px - 70 * k, py + 30 * k];
+  const [pox, poy] = stFxOffset('p'), atkP = STFX.anims.some(a => a.who === 'p' && a.kind === 'lunge');
+  const pu = stUnit(ST_CLASSES[d.cls].look, d.color, px + pox, py + poy + bob, 0, 0, 30, d.lv); if (atkP) pu.atkT = 1;
+  drawCharacterScaled(pu, now, k * 1.3);
+  if (b.ally) { const [aox, aoy] = stFxOffset('a'), au = stUnit('valkyrie', '#9fd8ff', px - 70 * k + aox, py + 30 * k + aoy - bob, 0, 0, 31, d.lv); if (STFX.anims.some(a => a.who === 'a' && a.kind === 'lunge')) au.atkT = 1; drawCharacterScaled(au, now, k * 1.2); }
+  b.foes.forEach((f, i) => {
+    const n = b.foes.length, fx0 = cw * (.66 + (n > 1 ? (i - (n - 1) / 2) * .12 : 0)), fy0 = ch * (.55 + (i % 2) * .05);
+    STFX.pos[f.id] = [fx0, fy0];
+    if (f.hp <= 0) { // fade and sink when defeated
+      if (f.deadT == null || f.deadT > .6) return; f.deadT += dt;
+      ctx.globalAlpha = Math.max(0, 1 - f.deadT / .6); stDrawFoe(f.key, fx0, fy0 + f.deadT * 40, now, k * (f.boss ? 1.5 : 1.3), Math.PI, .2); ctx.globalAlpha = 1; return;
+    }
+    f.flash = Math.max(0, f.flash - dt);
+    const [fox, foy] = stFxOffset(f.id), fx = fx0 + fox, fy = fy0 + foy + Math.sin(now * 2.5 + i) * 2;
+    stDrawFoe(f.key, fx, fy, now, k * (f.boss ? 1.5 : 1.3), Math.PI, f.flash);
+    ctx.fillStyle = '#000a'; ctx.fillRect(fx - 40, fy - 120 * k, 80, 8); ctx.fillStyle = '#e0405a'; ctx.fillRect(fx - 40, fy - 120 * k, 80 * Math.max(0, f.hp / f.maxHp), 8);
+    ctx.fillStyle = '#fff'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(f.name, fx, fy - 126 * k); ctx.textAlign = 'left';
+  });
+  stFxDraw(dt);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+function drawCharacterScaled(u, now, sc) { ctx.save(); ctx.translate(u.x, u.y); ctx.scale(sc, sc); ctx.translate(-u.x, -u.y); drawCharacter(ctx, u, now); ctx.restore(); }
+
+// ---- input: keyboard, controller and the on-screen pad
+const ST_KEYS = {arrowup: 'up', w: 'up', arrowdown: 'down', s: 'down', arrowleft: 'left', a: 'left', arrowright: 'right', d: 'right'};
+window.addEventListener('keydown', e => {
+  if (!ST.on || (e.target && e.target.tagName === 'INPUT')) return;
+  const k = e.key.toLowerCase();
+  if (ST_KEYS[k] && ST.mode === 'walk') { ST.keys[ST_KEYS[k]] = true; e.preventDefault(); }
+  if ((k === 'e' || k === 'enter' || k === ' ') && ST.mode === 'walk') { e.preventDefault(); stInteract(); }
+  if (k === 'escape' || k === 'm') { e.preventDefault(); ST.mode === 'menu' ? stCloseMenu() : stOpenMenu(); }
+}, true);
+window.addEventListener('keyup', e => { const k = ST_KEYS[e.key.toLowerCase()]; if (k) ST.keys[k] = false; });
+for (const b of document.querySelectorAll('#stPad [data-d]')) {
+  const dir = b.dataset.d;
+  b.addEventListener('pointerdown', e => { e.preventDefault(); ST.keys[dir] = true; });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => { ST.keys[dir] = false; });
+}
+$('stA').addEventListener('click', () => { if (ST.mode === 'walk') stInteract(); });
+function stPollPad() {
+  const gp = readPad(); if (!gp) { ST.padMove = null; return; }
+  const bt = i => !!(gp.buttons[i] && gp.buttons[i].pressed), hit = i => bt(i) && !ST.pad.prev[i];
+  const dz = v => Math.abs(v) < .25 ? 0 : v, lx = dz(gp.axes[0] || 0), ly = dz(gp.axes[1] || 0);
+  G.pad = true;
+  if (ST.mode === 'walk') {
+    ST.padMove = [lx + (bt(15) ? 1 : 0) - (bt(14) ? 1 : 0), ly + (bt(13) ? 1 : 0) - (bt(12) ? 1 : 0)];
+    if (hit(0)) stInteract(); if (hit(9)) stOpenMenu();
+  } else {
+    ST.padMove = null;
+    const panel = ST.mode === 'talk' ? $('stChoices') : ST.mode === 'battle' ? $('stActions') : $('stMenu');
+    const btns = [...panel.querySelectorAll('button:not(:disabled)')], cur = btns.indexOf(document.activeElement);
+    const nav = hit(15) || hit(13) || (lx > .6 && !ST.pad.lx) ? 1 : hit(14) || hit(12) || (lx < -.6 && !ST.pad.lx) ? -1 : 0;
+    if (nav && btns.length) btns[(cur + nav + btns.length) % btns.length].focus();
+    if (hit(0)) { const t = btns.includes(document.activeElement) ? document.activeElement : btns[0]; if (t) t.click(); }
+    if (hit(1) && ST.mode === 'menu') stCloseMenu();
+    if (hit(9) && ST.mode === 'menu') stCloseMenu();
+  }
+  ST.pad.lx = Math.abs(lx) > .6; ST.pad.prev = gp.buttons.map(x => x.pressed);
+}
+function storyFrame(now, dt) {
+  stPollPad();
+  if (ST.mode === 'walk') stWalk(dt);
+  if (ST.mode === 'battle' && ST.battle) stDrawBattle(now / 1000, dt); else stDrawWorld(now / 1000);
+  $('game').classList.toggle('touch', touchUI.on);
+  if (Math.random() < .05) stHud();
+}
+
+// ---------- trailer: open the game with #trailer for a 45-second scripted showcase that can be recorded ----------
+const TR = {on: false, t: 0, scene: -1, rec: null, chunks: []};
+const TRAILER_SCENES = [
+  {at: 0, len: 4, menu: true, title: 'THORNWAKE', sub: 'A free-to-play battle arena'},
+  {at: 4, len: 7, setup: 'battle', head: 'Lead legendary heroes', sub: '30+ heroes, each with their own fighting style'},
+  {at: 11, len: 5, setup: 'elements', head: 'Mix the elements', sub: 'Fire, Frost, Storm, Life, Stone and Arcane combos'},
+  {at: 16, len: 6, setup: 'maps', head: 'Seven living maps', sub: 'Jump pads, lava, blizzards, whirlpools and more'},
+  {at: 22, len: 5, setup: 'warzone', head: 'Warzone', sub: 'Guns, grenades and tanks. No magic allowed.'},
+  {at: 27, len: 8, setup: 'mythic', head: 'Mythic superhero bundles', sub: 'Hero + Mythic pet + 500 Crowns · $9.99', gold: true},
+  {at: 35, len: 4, setup: 'shop', head: 'Always something new', sub: 'Weekly heroes · Game Pass Premium $4.99 · Daily rewards', gold: true},
+  {at: 39, len: 6, menu: true, end: true, title: 'Play free now', sub: 'thornwake-puce.vercel.app · PC · Mobile · Controller'},
+];
+const TRAILER_LEN = 45;
+function trailerHeroes(list, cx, cy, gap) { // turns the match's heroes into a staged lineup
+  const hs = G.units.filter(u => u.kind === 'hero');
+  hs.forEach((h, k) => {
+    const spec = list[k];
+    if (!spec) { h.alive = false; h.respawn = 9999; return; }
+    const r = ROSTER.find(x => x.name === spec.name) || ROSTER[0];
+    Object.assign(h, {name: r.name, look: r.look, color: r.color, baseColor: r.color, statMul: r.stat || null, kit: r.sig ? Object.assign({}, r.sig) : {q: 'bolt', r: 'starfall'},
+      team: spec.team != null ? spec.team : h.team, level: spec.level || 9, alive: true, x: cx + (spec.dx || 0), y: cy + (spec.dy || 0), think: 999, cmd: null, protectUntil: 0});
+    recalc(h); h.maxHp *= 6; h.hp = h.maxHp; h.mana = 9999;
+    if (spec.pet) h.pet = {kind: spec.pet, x: h.x - 40, y: h.y + 10, atkT: 1, face: 0, walk: 0, seed: k};
+  });
+  return hs;
+}
+const trFoe = h => nearestEnemy(h, 1200, u => u.kind === 'hero') || nearestEnemy(h, 1200);
+function trailerSetup(sc) {
+  const kind = sc.setup;
+  if (sc.menu) { G.started = false; return; }
+  const cfg = {map: kind === 'warzone' ? 'bridge' : 'vale', diff: 1, stage: -1, mode: kind === 'warzone' ? 'warzone' : 'tdm'};
+  if (kind === 'maps') cfg.map = 'sky';
+  reset(0, cfg); G.mode = 'solo'; G.started = true; G.nextWave = 1e9; G.time = 50;
+  for (const u of G.units) if (u.kind === 'minion' || u.kind === 'monster') { u.alive = false; u.respawnT = 9999; }
+  if (kind === 'battle' || kind === 'elements') {
+    trailerHeroes([{name: 'Vessa', dx: -150, dy: 40, team: 0}, {name: 'Kaito', dx: -190, dy: -60, team: 0}, {name: 'Aya', dx: -100, dy: 120, team: 0},
+      {name: 'Ronin', dx: 170, dy: -40, team: 1}, {name: 'Tarn', dx: 220, dy: 70, team: 1, level: 12}, {name: 'Zero', dx: 130, dy: 140, team: 1}], 1600, 1600);
+    G.player = G.units.find(u => u.kind === 'hero' && u.name === (kind === 'elements' ? 'Vessa' : 'Kaito'));
+  } else if (kind === 'maps') {
+    trailerHeroes([{name: 'Hana', dx: 0, dy: 0, team: 0}, {name: 'Stella', dx: -60, dy: 50, team: 0}, {name: 'Brook', dx: 260, dy: 0, team: 1}], 1150, 2050);
+    G.player = G.units.find(u => u.kind === 'hero' && u.name === 'Hana');
+  } else if (kind === 'warzone') {
+    trailerHeroes([{name: 'Zero', dx: -200, dy: 0, team: 0}, {name: 'Torque', dx: -260, dy: 80, team: 0}, {name: 'Draven', dx: 220, dy: -40, team: 1}, {name: 'Comet', dx: 260, dy: 60, team: 1}], 1600, 1600);
+    for (const h of G.units) if (h.kind === 'hero' && h.alive) { h.look = GUN_LOOKS[h.id % GUN_LOOKS.length]; recalc(h); h.maxHp *= 6; h.hp = h.maxHp; }
+    for (const [t, dx] of [[0, -420], [1, 420]]) { spawnMinion(t, 'mid', 'tank', 1); const tk = G.units[G.units.length - 1]; tk.x = 1600 + dx; tk.y = 1600 + dx * -.2; tk.maxHp = tk.hp = 99999; }
+    G.player = G.units.find(u => u.kind === 'hero' && u.alive);
+  } else if (kind === 'mythic' || kind === 'shop') {
+    const line = kind === 'mythic'
+      ? [{name: 'Volt', dx: -170, pet: 'sparky', level: 16}, {name: 'Aegis', dx: 0, dy: 20, pet: 'bulwark', level: 16}, {name: 'Nightshade', dx: 170, pet: 'echo', level: 16}]
+      : [{name: 'Frostbite', dx: -170, level: 11}, {name: 'Blaze', dx: 0, dy: 20, level: 11}, {name: 'Sakura', dx: 170, level: 11}];
+    trailerHeroes(line.map(x => Object.assign({team: 0}, x)), 1600, 1600);
+    G.player = G.units.find(u => u.kind === 'hero' && u.alive);
+    G.cam.x = 1600; G.cam.y = 1580;
+  }
+  if (G.player) { G.cam.x = G.player.x + (kind === 'battle' || kind === 'elements' ? 150 : 0); G.cam.y = G.player.y; }
+}
+function trailerAct(sc, lt, dt) {
+  const kind = sc.setup, heroes = G.units.filter(u => u.kind === 'hero' && u.alive);
+  if (kind === 'battle') {
+    TR.tick = (TR.tick || 0) - dt;
+    if (TR.tick <= 0) {
+      TR.tick = .45;
+      const h = heroes[Math.floor(Math.random() * heroes.length)], f = trFoe(h);
+      if (h && f) { h.cds.q = 0; cast(h, 'q', f.x, f.y); }
+    }
+    const plan = [[.4, 'Kaito', 'r'], [1.8, 'Tarn', 'r'], [3, 'Aya', 'r'], [4.4, 'Vessa', 'r'], [5.6, 'Ronin', 'r']];
+    for (const [at, name, k] of plan) if (lt >= at && !TR['done' + at]) {
+      TR['done' + at] = true; const h = heroes.find(x => x.name === name), f = h && trFoe(h);
+      if (h && f) { h.cds[k] = 0; h.level = Math.max(h.level, 10); cast(h, k, f.x, f.y); }
+    }
+    for (const h of heroes) if (!h.cmd) { const f = trFoe(h); if (f) h.cmd = {type: 'attack', target: f}; }
+  } else if (kind === 'elements') {
+    const p = G.player, f = trFoe(p), mixes = [['fire', 'storm'], ['stone', 'fire'], ['arcane', 'frost'], ['storm', 'storm', 'storm'], ['fire', 'fire', 'life']];
+    TR.tick = (TR.tick || 0) - dt;
+    if (f && TR.tick <= 0) { TR.tick = .55; p.mix = mixes[Math.floor(lt / 1.1) % mixes.length].slice(); p.mixT = 0; castMix(p, f.x, f.y); }
+  } else if (kind === 'maps') {
+    const maps = ['sky', 'neon', 'ember', 'ruins'], want = maps[Math.min(maps.length - 1, Math.floor(lt / 1.5))];
+    if (MAP_ID !== want) {
+      applyMap(want); const z = (MAP.zones || [])[0] || {x: 1600, y: 1600};
+      heroes.forEach((h, k) => { h.x = z.x - 120 + k * 90; h.y = z.y + 60; h.cmd = {type: 'move', x: z.x + 400, y: z.y - 200}; });
+      G.cam.x = z.x; G.cam.y = z.y; G.pickT = {}; G.pickups = []; G.time = 41;
+      sc.mapName = MAP.name;
+    }
+  } else if (kind === 'warzone') {
+    for (const h of heroes) { if (!h.cmd) { const f = trFoe(h); if (f) h.cmd = {type: 'attack', target: f}; } }
+    TR.tick = (TR.tick || 0) - dt;
+    if (TR.tick <= 0) { TR.tick = 1.1; const h = heroes[Math.floor(Math.random() * heroes.length)], f = h && trFoe(h); if (h && f) { h.cds.f = 0; cast(h, 'f', f.x, f.y); } }
+  } else if (kind === 'mythic' || kind === 'shop') {
+    TR.tick = (TR.tick || 0) - dt;
+    if (TR.tick <= 0) { TR.tick = .8; const h = heroes[Math.floor(Math.random() * heroes.length)]; if (h) { h.cds.f = 0; cast(h, 'f', h.x + 200, h.y - 60); } }
+    for (const h of heroes) h.face = Math.sin(lt * 1.3 + h.id) > 0 ? 0 : Math.PI;
+  }
+}
+function trailerCaption(sc, lt, now) {
+  const W2 = cw, H2 = ch, inA = Math.min(1, lt / .5), outA = Math.min(1, (sc.len - lt) / .4), a = Math.max(0, Math.min(inA, outA));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (sc.gold) { // golden light rays behind the bundle scenes
+    ctx.save(); ctx.globalAlpha = .18 * a; ctx.translate(W2 / 2, H2 * .45); ctx.rotate(now * .15); ctx.fillStyle = '#ffd75e';
+    for (let i = 0; i < 14; i++) { ctx.rotate(Math.PI / 7); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.max(W2, H2), -60); ctx.lineTo(Math.max(W2, H2), 60); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+  }
+  const fade = Math.max(0, 1 - Math.min(lt, sc.len - lt) / .3); // dip to black between scenes
+  if (fade > 0) { ctx.fillStyle = `rgba(0,0,0,${fade})`; ctx.fillRect(0, 0, W2, H2); }
+  ctx.globalAlpha = a; ctx.textBaseline = 'alphabetic';
+  if (sc.title) {
+    ctx.fillStyle = 'rgba(5,7,10,.45)'; ctx.fillRect(0, H2 * .28, W2, H2 * .34);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#f2c14e'; ctx.shadowColor = '#000'; ctx.shadowBlur = 18;
+    ctx.font = `${Math.round(Math.min(W2 / 8, 110))}px "Marcellus SC", Georgia, serif`; ctx.fillText(sc.title, W2 / 2, H2 * .47);
+    ctx.fillStyle = '#ece6d3'; ctx.font = `600 ${Math.round(Math.min(W2 / 34, 30))}px "Barlow Semi Condensed", system-ui, sans-serif`; ctx.fillText(sc.sub, W2 / 2, H2 * .56);
+    ctx.shadowBlur = 0;
+  } else {
+    const x = W2 * .06, y = H2 * .8, head = sc.head + (sc.setup === 'maps' && sc.mapName ? ' · ' + sc.mapName : '');
+    ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(5,7,10,.6)'; ctx.fillRect(x - 18, y - Math.min(W2 / 18, 62) - 14, Math.min(W2 * .8, 900), Math.min(W2 / 18, 62) + 64);
+    ctx.fillStyle = sc.gold ? '#ffd75e' : '#f2c14e'; ctx.fillRect(x - 18, y - Math.min(W2 / 18, 62) - 14, 6, Math.min(W2 / 18, 62) + 64);
+    ctx.shadowColor = '#000'; ctx.shadowBlur = 10;
+    ctx.fillStyle = sc.gold ? '#ffd75e' : '#ffffff'; ctx.font = `${Math.round(Math.min(W2 / 20, 56))}px "Marcellus SC", Georgia, serif`; ctx.fillText(head, x, y);
+    ctx.fillStyle = '#ece6d3'; ctx.font = `600 ${Math.round(Math.min(W2 / 40, 26))}px "Barlow Semi Condensed", system-ui, sans-serif`; ctx.fillText(sc.sub, x, y + 36);
+    ctx.shadowBlur = 0;
+  }
+  ctx.globalAlpha = 1; ctx.textAlign = 'left';
+}
+function trailerFrame(now, dt) {
+  TR.t += dt;
+  if (TR.t >= TRAILER_LEN) { stopTrailer(); return; }
+  let idx = 0; TRAILER_SCENES.forEach((sc, i) => { if (TR.t >= sc.at) idx = i; });
+  const sc = TRAILER_SCENES[idx], lt = TR.t - sc.at;
+  if (idx !== TR.scene) { TR.scene = idx; TR.tick = 0; for (const k in TR) if (k.startsWith('done')) delete TR[k]; trailerSetup(sc); }
+  if (G.started) { trailerAct(sc, lt, dt); update(dt); } else fxUpdate(dt);
+  render();
+  if (sc.menu) { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = 'rgba(5,7,10,.25)'; ctx.fillRect(0, 0, cw, ch); }
+  trailerCaption(sc, lt, now / 1000);
+}
+function startTrailer(record) {
+  musicStart(); $('trailerUI').hidden = true; document.body.classList.add('trailer');
+  Object.assign(TR, {on: true, t: 0, scene: -1, chunks: []});
+  if (record && window.MediaRecorder && cv.captureStream) {
+    const stream = cv.captureStream(60);
+    if (music.rec) for (const tr of music.rec.stream.getAudioTracks()) stream.addTrack(tr);
+    const type = ['video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+    TR.rec = new MediaRecorder(stream, {mimeType: type, videoBitsPerSecond: 8e6});
+    TR.rec.ondataavailable = e => { if (e.data.size) TR.chunks.push(e.data); };
+    TR.rec.onstop = () => {
+      const blob = new Blob(TR.chunks, {type: TR.rec.mimeType}), a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'thornwake-trailer.' + (TR.rec.mimeType.includes('mp4') ? 'mp4' : 'webm'); a.click();
+      $('trailerNote').textContent = 'Saved ' + a.download + ' to your downloads.';
+    };
+    TR.rec.start(500);
+  }
+}
+function stopTrailer() {
+  TR.on = false; document.body.classList.remove('trailer');
+  if (TR.rec && TR.rec.state !== 'inactive') TR.rec.stop();
+  TR.rec = null; reset(0); G.started = false; $('trailerUI').hidden = false;
+}
+if (location.hash === '#trailer') {
+  const box = document.createElement('div'); box.id = 'trailerUI';
+  box.innerHTML = '<h1 class="bigtitle" style="font-family:var(--display);color:var(--gold);margin:0">Thornwake trailer</h1>' +
+    '<div class="row"><button class="mbtn primary" id="trPlay">Play trailer</button><button class="mbtn" id="trRec">Record video</button></div>' +
+    '<p id="trailerNote">45 seconds with sound. Record video saves a video file when it finishes. Keep this tab open and visible while it records. For the sharpest video, make the window full screen first.</p>';
+  document.body.appendChild(box);
+  $('trPlay').addEventListener('click', () => startTrailer(false));
+  $('trRec').addEventListener('click', () => startTrailer(true));
+}
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (TR.on) { trailerFrame(now, dt); requestAnimationFrame(frame); return; }
+  if (ST.on) { storyFrame(now, dt); requestAnimationFrame(frame); return; }
   pollPad(); touchTick(now);
   if (G.started && !G.over) {
     if (G.mode === 'client') clientUpdate(dt);
