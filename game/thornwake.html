@@ -38,7 +38,13 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
 #banner span{font-size:16px;color:var(--muted);text-shadow:0 1px 6px #000}
 
 #dead{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 30%,rgba(0,0,0,.55))}
-#dead div{font-family:var(--display);font-size:30px;text-shadow:0 2px 10px #000;margin-top:-18vh}
+#dead{flex-direction:column;gap:14px}
+#dead #deadTxt{font-family:var(--display);font-size:30px;text-shadow:0 2px 10px #000;margin-top:-18vh}
+#swap{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:8px;max-width:min(92vw,640px)}
+#swap p{margin:0;font-size:14px;color:var(--muted);text-shadow:0 1px 4px #000}
+#swapList{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+#swapList button{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;touch-action:manipulation}
+#swapList button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 2px rgba(242,193,78,.3)}
 
 #hud{position:absolute;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 12px}
 #portrait{position:relative;width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#3a5a4a,#14211b 70%);border:3px solid var(--tide);flex:none}
@@ -240,20 +246,24 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
 #touch #abil .ab svg{width:26px;height:26px}
 #touch #abil .k{display:none}
 #touch #abil .mc{right:50%;bottom:5px;transform:translateX(50%);font-size:10px}
-#touch #ab-q{right:calc(127px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px))}
-#touch #ab-w{right:calc(115px + env(safe-area-inset-right,0px));bottom:calc(108px + env(safe-area-inset-bottom,0px))}
-#touch #ab-e{right:calc(68px + env(safe-area-inset-right,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px))}
-#touch #ab-r{right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(138px + env(safe-area-inset-bottom,0px))}
+#touch #abil .ab{width:52px;height:52px}
+#touch #ab-q{right:calc(153px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+#touch #ab-w{right:calc(153px + env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+#touch #ab-e{right:calc(122px + env(safe-area-inset-right,0px));bottom:calc(130px + env(safe-area-inset-bottom,0px))}
+#touch #ab-r{right:calc(68px + env(safe-area-inset-right,0px));bottom:calc(161px + env(safe-area-inset-bottom,0px))}
+#touch #ab-f{right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(161px + env(safe-area-inset-bottom,0px))}
 @media (max-height:420px){ /* phones held sideways */
   #game.touch #mini{width:92px;height:92px;top:calc(48px + env(safe-area-inset-top,0px))}
   #game.touch #hud{top:calc(48px + env(safe-area-inset-top,0px))}
   #game.touch #feed{display:none}
   #game.touch #joy{width:110px;height:110px;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
   #game.touch #atkBtn{width:76px;height:76px;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-  #touch #ab-q{right:calc(112px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px))}
-  #touch #ab-w{right:calc(104px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px))}
-  #touch #ab-e{right:calc(58px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))}
-  #touch #ab-r{right:calc(4px + env(safe-area-inset-right,0px));bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+  #touch #abil .ab{width:48px;height:48px}
+  #touch #ab-q{right:calc(131px + env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  #touch #ab-w{right:calc(131px + env(safe-area-inset-right,0px));bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+  #touch #ab-e{right:calc(105px + env(safe-area-inset-right,0px));bottom:calc(107px + env(safe-area-inset-bottom,0px))}
+  #touch #ab-r{right:calc(60px + env(safe-area-inset-right,0px));bottom:calc(133px + env(safe-area-inset-bottom,0px))}
+  #touch #ab-f{right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(133px + env(safe-area-inset-bottom,0px))}
   #banner{top:16%}
 }
 #elems{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(132px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;align-items:center}
@@ -262,7 +272,7 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
 #elems .ek{position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--gold);text-shadow:0 1px 2px #000;white-space:nowrap}
 #mixShow{display:flex;gap:4px;align-items:center;justify-content:center;min-width:64px;height:30px;padding:0 9px;margin-right:4px;border-radius:999px;background:var(--panel);border:1px solid var(--line);cursor:pointer;color:var(--muted);font-size:11px;touch-action:manipulation}
 #mixShow i{display:block;width:15px;height:15px;border-radius:50%;box-shadow:0 0 6px currentColor}
-#game.touch #elems{bottom:calc(214px + env(safe-area-inset-bottom,0px));gap:5px}
+#game.touch #elems{bottom:calc(230px + env(safe-area-inset-bottom,0px));gap:5px}
 #game.touch #elems .el{width:38px;height:38px} #game.touch #elems .ek{display:none} #game.touch #mixShow{min-width:52px}
 @media (max-height:420px){#game.touch #elems{bottom:calc(14px + env(safe-area-inset-bottom,0px))}}
 @media (prefers-reduced-motion:reduce){#banner,#feed div{transition:none}}
@@ -279,7 +289,7 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
   <button id="menuBtn" class="panel" hidden>Menu</button>
   <div id="feed"></div>
   <div id="banner"><b id="bTitle"></b><span id="bSub"></span></div>
-  <div id="dead" hidden><div id="deadTxt"></div></div>
+  <div id="dead" hidden><div id="deadTxt"></div><div id="swap" hidden><p id="swapNote">Pick who you come back as</p><div id="swapList"></div></div></div>
 
   <div id="hud" class="panel" hidden>
     <div id="portrait"><canvas id="pcv"></canvas><span id="form">Initiate</span><span id="lvl">1</span><div id="xpbar"><i id="xpFill"></i></div></div>
@@ -300,6 +310,9 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
       <button class="ab" id="ab-r" title="Starfall (unlocks at level 4): call down a star on the target area."><span class="k">R</span>
         <svg viewBox="0 0 32 32"><path d="M16 3 L19.5 12 L29 12.5 L21.5 18.5 L24 28 L16 22.5 L8 28 L10.5 18.5 L3 12.5 L12.5 12 Z" fill="#f2c14e" stroke="#fff3c9" stroke-width="1.5"/></svg>
         <span class="cd"></span><span class="cdt"></span><span class="mc">100</span></button>
+      <button class="ab" id="ab-f" title="Style move"><span class="k">F</span>
+        <svg viewBox="0 0 32 32"><path d="M6 24 C10 12 18 8 27 6 C22 11 20 15 21 20 C17 17 12 19 6 24 Z" fill="#9fc4ff" stroke="#eef5ff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="24" cy="23" r="3.5" fill="#eef5ff"/></svg>
+        <span class="cd"></span><span class="cdt"></span><span class="mc">50</span></button>
     </div>
     <div id="side">
       <div id="items"></div>
@@ -635,6 +648,7 @@ const AB = {
   w: {name: 'Cinder Ward', mana: 60, cd: 4.5},
   e: {name: 'Flicker', mana: 50, cd: 4},
   r: {name: 'Starfall', mana: 130, cd: 4.8, lvl: 4},
+  f: {name: 'Style move', mana: 0, cd: .5}, // the extra move: it depends on how the hero fights, and it's spammable
 };
 const ITEMS = {
   boots:  {name: 'Swiftsoles', cost: 300, ms: 55, desc: '+55 move speed', ab: 'SW', col: '#c8d6a0', unique: true},
@@ -860,7 +874,7 @@ function reset(heroIdx = 0, cfg = null) {
   if (!MODES[cfg.mode]) cfg.mode = 'conquest';
   applyMap(cfg.map);
   nid = 1;
-  G = {time: 0, units: [], projs: [], fx: [], lasers: [], blood: [], splats: [], pickups: [], pickT: {}, rings: [], texts: [], blasts: [], beams: [], spawnQ: [], events: [], evSeq: 0,
+  G = {time: 0, units: [], projs: [], fx: [], lasers: [], slashes: [], blood: [], splats: [], pickups: [], pickT: {}, rings: [], texts: [], blasts: [], beams: [], spawnQ: [], events: [], evSeq: 0,
        nextWave: 12, waveN: 0, kills: [0, 0], dragons: [0, 0], minionTier: 0, winner: -1, heroIdx, cfg, diff: DIFFS[cfg.diff] || DIFFS[1], zaps: [],
        mode: 'solo', started: false, paused: false, over: false, shake: 0, marker: null, touch: false, pad: false, cam: {x: 0, y: 0}};
   const towers = [];
@@ -884,7 +898,7 @@ function reset(heroIdx = 0, cfg = null) {
       kit: r.sig ? Object.assign({}, r.sig) : {q: 'bolt', r: 'starfall'}, statMul: r.stat || null, baseColor: r.color, flag: null,
       x: f.x + rand(-60, 60), y: f.y + rand(-60, 60), r: 24,
       level: 1, xp: 0, gold: 500, earned: 500, items: [], maxHp: 620, mana: 300, maxMana: 300, ad: 55, ap: 0, range: 470, atkCd: .95, speed: 330,
-      ranged: false, cds: {q: 0, w: 0, e: 0, r: 0}, kills: 0, deaths: 0, respawn: 0, cmd: null, think: rand(0, .3), state: 'shop', haste: 0, lifesteal: 0,
+      ranged: false, cds: {q: 0, w: 0, e: 0, r: 0, f: 0}, kills: 0, deaths: 0, respawn: 0, cmd: null, think: rand(0, .3), state: 'shop', haste: 0, lifesteal: 0,
       aggroT: 0, jx: 0, jy: 0, jT: 0, remote: null, human: i === pi});
     recalc(h); h.hp = h.maxHp; h.mana = h.maxMana;
     if (i === pi) G.player = h;
@@ -894,6 +908,25 @@ function reset(heroIdx = 0, cfg = null) {
   buildItemSlots();
 }
 const heroList = () => G.units.filter(u => u.kind === 'hero');
+// Dying lets you come back as a different hero you own; level, items and gold carry over.
+function swapHero(h, idx) {
+  const r = ROSTER[idx]; if (!r) return;
+  Object.assign(h, {name: r.name, look: r.look, baseColor: r.color, color: r.color, statMul: r.stat || null});
+  G.heroIdx = idx; h.nextHero = null;
+  applyLoadout(); h.hp = h.maxHp; h.mana = h.maxMana;
+}
+function renderSwap() {
+  const p = G.player, list = $('swapList'); list.innerHTML = '';
+  if (p.nextHero == null) p.nextHero = G.heroIdx;
+  for (const i of PROF.heroes) {
+    const r = ROSTER[i]; if (!r) continue;
+    const b = document.createElement('button'); b.textContent = r.name; b.title = `${r.cls}: ${styleOf(r.look).label}`;
+    b.setAttribute('aria-pressed', i === p.nextHero ? 'true' : 'false');
+    b.addEventListener('click', () => { p.nextHero = i; renderSwap(); });
+    list.appendChild(b);
+  }
+  $('swapNote').textContent = 'Come back as ' + (ROSTER[p.nextHero] || ROSTER[G.heroIdx]).name + '. Pick another hero to switch.';
+}
 function spawnBeast(sp, x, y, camp) {
   const b = BEASTS[sp];
   return mkUnit({kind: 'monster', team: 2, species: sp, camp, home: {x, y}, x, y, name: b.name, maxHp: b.maxHp, atk: b.atk, range: b.range,
@@ -918,19 +951,31 @@ function recalc(h) {
 const HERO_REACH = 45; // gap between hero and target edges that still counts as contact
 // How each class fights. range is the gap between hero and target edges; cd and dmg scale attack speed and damage.
 const STYLES = {
-  magic: {label: 'Magic, short range', range: 230, cd: 1, dmg: .9, speed: 900, size: 9},
+  magic: {label: 'Magic, short range', range: 230, cd: 1, dmg: .9, speed: 900, size: 9, move: 'firebolt'},
   // close-combat styles take less damage, since they have to walk into fights
-  melee: {label: 'Close combat, sturdy', range: HERO_REACH, cd: 1, dmg: 1.1, armor: .12},
-  heavy: {label: 'Close combat, hits nearby enemies too', range: HERO_REACH, cd: 1.15, dmg: 1.2, cleave: .4, armor: .1},
-  agile: {label: 'Close combat, fast strikes', range: HERO_REACH, cd: .75, dmg: .9, armor: .06},
-  ranged: {label: 'Ranged', range: 420, cd: 1, dmg: .85, speed: 1300, size: 6},
-  sniper: {label: 'Long range, slow and heavy shots', range: 560, cd: 1.4, dmg: 1.3, speed: 1700, size: 6},
-  gunner: {label: 'Ranged, rapid fire', range: 340, cd: .6, dmg: .55, speed: 1400, size: 5},
+  melee: {label: 'Close combat, sturdy', range: HERO_REACH, cd: 1, dmg: 1.1, armor: .12, move: 'slash'},
+  heavy: {label: 'Close combat, hits nearby enemies too', range: HERO_REACH, cd: 1.15, dmg: 1.2, cleave: .4, armor: .1, move: 'slash'},
+  agile: {label: 'Close combat, fast strikes', range: HERO_REACH, cd: .75, dmg: .9, armor: .06, move: 'slash'},
+  ranged: {label: 'Ranged', range: 420, cd: 1, dmg: .85, speed: 1300, size: 6, move: 'volley'},
+  sniper: {label: 'Long range, slow and heavy shots', range: 560, cd: 1.4, dmg: 1.3, speed: 1700, size: 6, move: 'pierce'},
+  gunner: {label: 'Ranged, rapid fire', range: 340, cd: .6, dmg: .55, speed: 1400, size: 5, move: 'grenade'},
 };
 const LOOK_STYLE = {mage: 'magic', witch: 'magic', warlock: 'magic', shaman: 'magic', drakeling: 'magic',
   knight: 'melee', paladin: 'melee', goblinking: 'melee', brute: 'heavy', golemkin: 'heavy', rogue: 'agile', werewolf: 'agile',
   ranger: 'ranged', soldier: 'ranged', sniper: 'sniper', heavy: 'gunner', kifighter: 'agile', brawler: 'melee', soulblade: 'heavy'};
 const styleOf = look => STYLES[LOOK_STYLE[look]] || STYLES.melee;
+const STYLE_MOVES = {
+  slash:    {name: 'Sword Slash', desc: 'A quick sweeping slash that hits every enemy in front of you.', color: '#e8eef6'},
+  firebolt: {name: 'Fire Bolt', desc: 'A quick bolt of fire that sets the enemy burning.', color: '#ff7a2a'},
+  burst:   {name: 'Arcane Burst', desc: 'An explosion of magic at the target spot that slows enemies.', color: '#c79bff'},
+  charge:  {name: 'Shield Charge', desc: 'Dash forward, hitting and slowing every enemy you run through.', color: '#9fc4ff'},
+  slam:    {name: 'Ground Slam', desc: 'Smash the ground, hurting and slowing enemies around you.', color: '#d9a066'},
+  shadow:  {name: 'Shadow Strike', desc: 'Blink to the nearest enemy and hit hard.', color: '#8f7bd8'},
+  volley:  {name: 'Volley', desc: 'Fire five arrows in a spread.', color: '#fff3c9'},
+  pierce:  {name: 'Piercing Shot', desc: 'A long shot that goes through every enemy in a line.', color: '#fff3c9'},
+  grenade: {name: 'Grenade', desc: 'Throw an explosive that bursts a moment later.', color: '#ffb35a'},
+};
+const styleMove = h => STYLE_MOVES[styleOf(h.look).move] || STYLE_MOVES.slash;
 const xpNeed = l => 90 + 45 * l;
 const rDamage = h => 150 + 38 * h.level + 0.9 * h.ap;
 function gainXp(h, x) {
@@ -945,7 +990,10 @@ function gainXp(h, x) {
       ring(h.x, h.y - 30, h.color, 140, 1); burst(h.x, h.y - 30, h.color, 40, 260, .8, 5); sfx('evolve', h.x, h.y);
       pushEvent([[h.name, h.team], [' evolved into ' + FORMS[f] + ' form']]);
       if (h.isPlayer) banner(FORMS[f] + ' form', `${h.name} evolved. All stats +12%.`);
-    } else if (h.isPlayer) { banner('Level ' + h.level, h.level === 4 ? 'Starfall unlocked. Press R.' : ''); sfx('levelup'); }
+    } else if (h.isPlayer) {
+      banner('Level ' + h.level, h.level === 10 && h.look === 'warlock' ? 'Ultimate unlocked: Demon Gate. Your R opens a burning rift.' : h.level === 4 ? 'Your ultimate (R) is unlocked.' : '');
+      sfx(h.level === 10 && h.look === 'warlock' ? 'evolve' : 'levelup');
+    }
   }
 }
 function giveGold(h, g) { if (G.mode === 'solo' && h.team !== G.player.team) g *= G.diff.gold; h.gold += g; h.earned += g; }
@@ -1115,8 +1163,11 @@ function cast(h, k, tx, ty) {
     h.x = clamp(h.x + nx * bd, 30, W - 30); h.y = clamp(h.y + ny * bd, 30, H - 30);
     burst(h.x, h.y, '#efe2ff', 16, 140, .45, 3);
     if (h.cmd && h.cmd.type === 'move') h.cmd = null;
+  } else if (k === 'f') {
+    castStyleMove(h, styleOf(h.look).move, tx, ty, nx, ny, d);
   } else if (k === 'r') {
-    const kind = h.kit ? h.kit.r : 'starfall', rd = Math.min(1000, d), px = h.x + nx * rd, py = h.y + ny * rd;
+    // warlocks unlock their own ultimate at level 10
+    const kind = h.look === 'warlock' && h.level >= 10 ? 'demongate' : h.kit ? h.kit.r : 'starfall', rd = Math.min(1000, d), px = h.x + nx * rd, py = h.y + ny * rd;
     if (kind === 'meteor') {
       for (let i = 0; i < 3; i++) { const t = .6 + i * .25; G.blasts.push({x: px + rand(-140, 140), y: py + rand(-140, 140), t, max: t, r: 150, dmg: rDamage(h) * .5, src: h, team: h.team}); }
     } else if (kind === 'nova') {
@@ -1130,6 +1181,9 @@ function cast(h, k, tx, ty) {
       }
       ring(px, py, '#c79bff', 400, .5); burst(px, py, '#c79bff', 40, -260, .5, 4);
       G.blasts.push({x: px, y: py, t: .5, max: .5, r: 210, dmg: rDamage(h) * .75, src: h, team: h.team, style: 'arcane'});
+    } else if (kind === 'demongate') {
+      h.gate = {x: px, y: py, t: 4, tick: 0, dmg: rDamage(h) * .2};
+      ring(px, py, '#ff5a1f', 230, .6); burst(px, py, '#7a1fff', 40, 300, .7, 6);
     } else if (kind === 'spiritcannon') {
       const len = 1150, ex = h.x + nx * len, ey = h.y + ny * len;
       for (const u of G.units) {
@@ -1159,6 +1213,66 @@ function cast(h, k, tx, ty) {
   return true;
 }
 
+// The F move. fb is its base damage; it grows with level and both damage stats.
+function castStyleMove(h, mv, tx, ty, nx, ny, d) {
+  // spammable, so each use is light
+  const fb = (45 + 20 * h.level + .5 * h.ad + .4 * h.ap) * .4, col = (STYLE_MOVES[mv] || {}).color || '#fff';
+  const foesNear = (x, y, r) => G.units.filter(u => isFoe(u, h) && Math.hypot(u.x - x, u.y - y) < r + u.r);
+  if (mv === 'slash') {
+    h.face = Math.atan2(ny, nx); h.atkT = Math.max(h.atkT, .12);
+    for (const u of foesNear(h.x, h.y, 160)) {
+      const da = Math.atan2(u.y - h.y, u.x - h.x) - h.face;
+      if (Math.abs(Math.atan2(Math.sin(da), Math.cos(da))) < 1) damage(u, fb * 1.1, h);
+    }
+    G.slashes.push({x: h.x, y: h.y - 26, ang: h.face, t: .2, max: .2, col: h.color});
+    sfx('swing', h.x, h.y);
+  } else if (mv === 'firebolt') {
+    G.projs.push({kind: 'bolt', spell: 'bolt', fire: true, hits: null, x: h.x + nx * 30, y: h.y + ny * 30, vx: nx * 1250, vy: ny * 1250, range: 700, trav: 0, dmg: fb * 1.2, src: h, team: h.team, r: 16});
+    sfx('flame', h.x, h.y);
+  } else if (mv === 'burst') {
+    const rd = Math.min(600, d), px = h.x + nx * rd, py = h.y + ny * rd;
+    for (const u of foesNear(px, py, 160)) { damage(u, fb, h); u.slowUntil = Math.max(u.slowUntil || 0, G.time + 1.2); }
+    ring(px, py, col, 160, .5); burst(px, py, col, 34, 300, .6, 5); sfx('boom', px, py);
+  } else if (mv === 'charge' || mv === 'shadow') {
+    let ex, ey;
+    if (mv === 'shadow') {
+      const t = nearestEnemy(h, 480, u => u.kind === 'hero') || nearestEnemy(h, 480);
+      if (!t) { const bd = Math.min(380, d); ex = h.x + nx * bd; ey = h.y + ny * bd; }
+      else { const a = Math.atan2(h.y - t.y, h.x - t.x); ex = t.x + Math.cos(a) * (t.r + h.r + 6); ey = t.y + Math.sin(a) * (t.r + h.r + 6); }
+      burst(h.x, h.y - 20, col, 18, 160, .4, 3);
+      h.x = clamp(ex, 30, W - 30); h.y = clamp(ey, 30, H - 30);
+      if (t) { damage(t, fb * 1.5, h); burst(t.x, t.y - 20, col, 18, 220, .45, 4); h.cmd = {type: 'attack', target: t}; }
+      sfx('blink', h.x, h.y);
+    } else {
+      const bd = Math.min(400, d), sx = h.x, sy = h.y;
+      ex = clamp(h.x + nx * bd, 30, W - 30); ey = clamp(h.y + ny * bd, 30, H - 30);
+      for (const u of G.units) {
+        if (!isFoe(u, h)) continue;
+        const ux = u.x - sx, uy = u.y - sy, along = ux * nx + uy * ny;
+        if (along > -20 && along < bd + 30 && Math.abs(ux * ny - uy * nx) < 50 + u.r) { damage(u, fb, h); u.slowUntil = Math.max(u.slowUntil || 0, G.time + 1.5); }
+      }
+      for (let i = 0; i < 12; i++) { const k2 = i / 11; G.fx.push({x: sx + (ex - sx) * k2, y: sy - 20 + (ey - sy) * k2, vx: 0, vy: 0, t: .3, max: .3, color: col, r: 6}); }
+      h.x = ex; h.y = ey; sfx('swing', h.x, h.y);
+    }
+    if (h.cmd && h.cmd.type === 'move') h.cmd = null;
+  } else if (mv === 'slam') {
+    for (const u of foesNear(h.x, h.y, 230)) { damage(u, fb * 1.15, h); u.slowUntil = Math.max(u.slowUntil || 0, G.time + 1.5); }
+    ring(h.x, h.y, col, 230, .5); burst(h.x, h.y, col, 40, 320, .6, 6); sfx('thud', h.x, h.y);
+    if (dist(h, G.player) < 900) G.shake = Math.max(G.shake, .25);
+  } else if (mv === 'volley' || mv === 'pierce') {
+    const offs = mv === 'volley' ? [-.24, -.12, 0, .12, .24] : [0];
+    for (const off of offs) {
+      const c = Math.cos(off), sn = Math.sin(off), vx = nx * c - ny * sn, vy = nx * sn + ny * c;
+      G.projs.push({kind: 'bolt', spell: 'arrow', hits: mv === 'pierce' ? [] : null, x: h.x + vx * 30, y: h.y + vy * 30, vx: vx * 1500, vy: vy * 1500,
+        range: mv === 'pierce' ? 1300 : 700, trav: 0, dmg: fb * (mv === 'pierce' ? 1.7 : .55), src: h, team: h.team, r: 14});
+    }
+    sfx('shot', h.x, h.y);
+  } else if (mv === 'grenade') {
+    const rd = Math.min(650, d);
+    G.blasts.push({x: h.x + nx * rd, y: h.y + ny * rd, t: .6, max: .6, r: 170, dmg: fb * 1.3, src: h, team: h.team, style: 'grenade'});
+    sfx('swing', h.x, h.y);
+  }
+}
 function chainTargets(h, tx, ty) {
   const out = [], pool = G.units.filter(u => u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && targetable(u));
   let from = {x: tx, y: ty}, reach = 320;
@@ -1211,7 +1325,8 @@ function updateHero(h, dt) {
       Object.assign(h, {protectUntil: G.time + 3, slowUntil: 0, shield: 0, shieldT: 0, atkT: 0, vx: 0, vy: 0});
       if (h.pet) { h.pet.x = h.x - 40; h.pet.y = h.y + 10; }
       if (h.isPlayer) { G.cam.x = h.x; G.cam.y = h.y; }
-      if (h.isPlayer) { banner('You have respawned', 'Open the shop before leaving the fountain.'); sfx('respawn'); }
+      if (h.isPlayer && h.nextHero != null && h.nextHero !== G.heroIdx) swapHero(h, h.nextHero);
+      if (h.isPlayer) { banner('You have respawned', 'You are ' + h.name + '. Open the shop before leaving the fountain.'); sfx('respawn'); }
     }
     return;
   }
@@ -1220,6 +1335,18 @@ function updateHero(h, dt) {
   h.atkT -= dt; h.mixT = (h.mixT || 0) - dt; h.aggroT = Math.max(0, h.aggroT - dt);
   if (h.shieldT > 0) { h.shieldT -= dt; if (h.shieldT <= 0) h.shield = 0; }
   if (h.buffT > 0) h.buffT -= dt;
+  if (h.gate) { // Demon Gate: a burning rift that drains enemies inside it
+    const g = h.gate; g.t -= dt; g.tick -= dt;
+    if (Math.random() < .7) { const a = Math.random() * 6.283, r = rand(20, 220); G.fx.push({x: g.x + Math.cos(a) * r, y: g.y + Math.sin(a) * r * .5, vx: -Math.cos(a) * 80, vy: -Math.sin(a) * 40 - 30, t: .5, max: .5, color: Math.random() < .5 ? '#ff5a1f' : '#7a1fff', r: 5}); }
+    if (g.tick <= 0) {
+      g.tick = .5; ring(g.x, g.y, '#ff5a1f', 230, .35);
+      for (const u of G.units) if (isFoe(u, h) && Math.hypot(u.x - g.x, u.y - g.y) < 230 + u.r) {
+        damage(u, g.dmg, h); if (h.alive) h.hp = Math.min(h.maxHp, h.hp + g.dmg * .3);
+        u.x += (g.x - u.x) * .08; u.y += (g.y - u.y) * .08;
+      }
+    }
+    if (g.t <= 0) h.gate = null;
+  }
   if (h.barrage) { // Storm Barrage: rapid punches in a cone
     const b = h.barrage; b.t -= dt; b.tick -= dt;
     if (b.tick <= 0) {
@@ -1388,6 +1515,7 @@ function botThink(h) {
     if (d < 820 && Math.random() < (G.mode === 'solo' && h.team !== G.player.team ? G.diff.aim : .3)) { const lead = d / 1150 * rand(.4, 1.1); cast(h, 'q', foe.x + foe.vx * lead + rand(-45, 45), foe.y + foe.vy * lead + rand(-45, 45)); }
     if (d < 1000 && foe.hp < rDamage(h) * 1.1) cast(h, 'r', foe.x + foe.vx * .7, foe.y + foe.vy * .7);
     if (hr < .55 && d < 500) cast(h, 'w', h.x, h.y);
+    if (d < (h.range > 200 ? 600 : 420) && Math.random() < .5) cast(h, 'f', foe.x, foe.y);
     const foeSafe = G.units.some(t => t.alive && t.kind === 'tower' && t.team === foe.team && dist(t, foe) < TOWER_RANGE + 40);
     if ((!foeSafe || fr < .15) && (hr > fr - .05 || fr < .3) && d < 700) { h.cmd = {type: 'attack', target: foe}; return; }
     if (hr < fr - .25 && d < 550) { retreat(h); return; }
@@ -1454,6 +1582,7 @@ function update(dt) {
       for (const u of G.units) if (u.alive && u.team !== p.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && Math.hypot(u.x - p.x, u.y - p.y) < u.r + p.r && !(p.hits && p.hits.includes(u))) { hit = u; break; }
       if (hit) {
         if (p.mixFx) { mixHit(hit, p.mixFx, p.src); G.projs.splice(i, 1); sfx('thud', p.x, p.y); continue; }
+        if (p.fire) hit.burn = {dps: p.dmg * .3, until: G.time + 2, src: p.src, tick: 0};
         damage(hit, p.dmg, p.src); burst(p.x, p.y, boltLook(p.spell)[3], 14, 200, .4, 4); sfx('impact', p.x, p.y);
         if (p.hits) { p.hits.push(hit); if (p.spell === 'frost') hit.slowUntil = G.time + 2; } // pierces on
         else {
@@ -1643,6 +1772,7 @@ function starfallFx(b) {
     burst(b.x, b.y, '#bfe0ff', 24, 260, .5, 4); ring(b.x, b.y, '#dff0ff', b.r, .4); sfx('zap', b.x, b.y);
     return;
   }
+  if (b.style === 'grenade') { burst(b.x, b.y, '#ffb35a', 40, 320, .7, 5); burst(b.x, b.y, '#5a4a3a', 20, 180, .8, 6); ring(b.x, b.y, '#ffd08a', b.r, .4); sfx('boom', b.x, b.y); return; }
   if (b.style === 'arcane') { burst(b.x, b.y, '#c79bff', 50, 380, .8, 6); burst(b.x, b.y, '#f0e0ff', 24, 200, .6, 4); ring(b.x, b.y, '#e6d4ff', b.r, .5); sfx('boom', b.x, b.y); return; }
   burst(b.x, b.y, '#f2c14e', 60, 420, .9, 6); burst(b.x, b.y, '#fff3c9', 30, 200, .6, 4); ring(b.x, b.y, '#fff3c9', b.r, .5);
   if (dist(b, G.player) < 900) G.shake = Math.max(G.shake, .3);
@@ -1650,6 +1780,7 @@ function starfallFx(b) {
 }
 function fxUpdate(dt) {
   for (let i = G.lasers.length - 1; i >= 0; i--) if ((G.lasers[i].t -= dt) <= 0) G.lasers.splice(i, 1);
+  for (let i = G.slashes.length - 1; i >= 0; i--) if ((G.slashes[i].t -= dt) <= 0) G.slashes.splice(i, 1);
   for (let i = G.blood.length - 1; i >= 0; i--) {
     const b = G.blood[i]; b.x += b.vx * dt; b.y += b.vy * dt; b.h += b.vh * dt; b.vh -= 900 * dt;
     if (b.h <= 0) { if (G.splats.length < 300) G.splats.push({x: b.x, y: b.y, r: b.r * rand(2, 3.6), rot: Math.random() * 3, t: 14}); G.blood.splice(i, 1); }
@@ -1888,6 +2019,13 @@ function render() {
   ctx.fillStyle = '#d0182a';
   for (const b of G.blood) { if (!inView(b, 20)) continue; ctx.beginPath(); ctx.arc(b.x, b.y - b.h, b.r, 0, 7); ctx.fill(); }
   ctx.globalCompositeOperation = 'lighter';
+  for (const sl of G.slashes) { // a sweeping arc that follows through the swing
+    const k = 1 - sl.t / sl.max, a0 = sl.ang - 1 + k * .6, a1 = sl.ang - .4 + k * 1.4;
+    ctx.globalAlpha = sl.t / sl.max; ctx.lineCap = 'round';
+    ctx.strokeStyle = sl.col; ctx.lineWidth = 16; ctx.beginPath(); ctx.arc(sl.x, sl.y, 120, a0, a1); ctx.stroke();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(sl.x, sl.y, 120, a0, a1); ctx.stroke();
+    ctx.lineCap = 'butt'; ctx.globalAlpha = 1;
+  }
   for (const l of G.lasers) {
     const k = l.t / l.max, w = l.w * (0.4 + 0.6 * k);
     ctx.lineCap = 'round'; ctx.globalAlpha = k;
@@ -2602,7 +2740,7 @@ window.addEventListener('pointerdown', () => document.body.classList.remove('pad
 window.addEventListener('blur', () => holding = false);
 
 const abEls = {};
-for (const k of 'qwer') {
+for (const k of 'qwerf') {
   const el = $('ab-' + k);
   abEls[k] = {el, cd: el.querySelector('.cd'), cdt: el.querySelector('.cdt')};
   el.querySelector('.mc').textContent = AB[k].mana;
@@ -2610,12 +2748,12 @@ for (const k of 'qwer') {
 }
 // Each device gets its own easy control style: 'pc' (mouse and keyboard), 'pad' (controller) or 'touch' (phone).
 const device = () => G.pad ? 'pad' : (G.touch || touchUI.on) ? 'touch' : 'pc';
-const KEY_LABELS = {pc: {q: 'Q', w: 'W', e: 'E', r: 'R'}, pad: {q: 'X', w: 'Y', e: 'B', r: 'RB'}, touch: {q: '', w: '', e: '', r: ''}};
+const KEY_LABELS = {pc: {q: 'Q', w: 'W', e: 'E', r: 'R', f: 'F'}, pad: {q: 'X', w: 'Y', e: 'B', r: 'RB', f: 'LB'}, touch: {q: '', w: '', e: '', r: '', f: ''}};
 const EL_LABELS = {pc: ['1', '2', '3', '4', '5', '6'], pad: ['↑', '↓', '→', '←', 'LT', 'RT'], touch: ['', '', '', '', '', '']};
 const EL_PAD = [12, 13, 15, 14, 6, 7]; // controller buttons for fire, frost, storm, life, stone, arcane
 const DEVICE_TIPS = {
-  pc: 'Click to move and attack. Keys 1-6 mix elements into your attack (C clears). Q W E R cast spells. B opens the shop.',
-  pad: 'Left stick moves, A attacks. D-pad, LT and RT mix elements into your attack. X Y B RB cast spells. LB opens the shop.',
+  pc: 'Click to move and attack. Keys 1-6 mix elements into your attack (C clears). Q W E R F cast moves. B opens the shop.',
+  pad: 'Left stick moves, A attacks. D-pad, LT and RT mix elements into your attack. X Y B RB LB cast moves. Back opens the shop.',
   touch: 'Joystick moves. Tap the colored elements to mix your attack, then fight. Tap a spell to fire it.',
 };
 // the enemy a phone or controller player's next spell or attack goes to
@@ -2630,7 +2768,7 @@ for (const [i, el] of EL_KEYS.entries()) {
 $('mixShow').addEventListener('click', () => { if (inGame()) G.player.mix = []; });
 function pickElement(el) { if (inGame() && G.mode !== 'client') addElement(G.player, el); }
 function autoAim(p, k) {
-  if (k === 'w') return {x: p.x, y: p.y};
+  if (k === 'w' || (k === 'f' && styleOf(p.look).move === 'slam')) return {x: p.x, y: p.y};
   const t = autoTarget(p);
   if (k === 'e') { const f = t || FOUNTAIN[1 - p.team]; return {x: f.x, y: f.y}; }
   if (t) return {x: t.x, y: t.y};
@@ -2667,8 +2805,8 @@ window.addEventListener('keydown', e => {
     return;
   }
   if (!inGame()) return;
-  if (e.repeat && 'qwer'.includes(k)) return;
-  if (k.length === 1 && 'qwer'.includes(k)) { e.preventDefault(); G.pad = false; playerCast(k); }
+  if (e.repeat && 'qwerf'.includes(k)) return;
+  if (k.length === 1 && 'qwerf'.includes(k)) { e.preventDefault(); G.pad = false; playerCast(k); }
   else if (k === 'b') toggleShop();
   else if (k === ' ') { e.preventDefault(); G.pad = false; attackNearest(); }
   else if (k >= '1' && k <= '6') { G.pad = false; pickElement(EL_KEYS[+k - 1]); }
@@ -2727,9 +2865,13 @@ function pollPad() {
     if (hit(3)) playerCast('w');
     if (hit(1)) playerCast('e');
     if (hit(5)) playerCast('r');
-    EL_PAD.forEach((bi, i) => { if (hit(bi)) pickElement(EL_KEYS[i]); });
+    if (!p.alive && G.mode !== 'client' && (hit(14) || hit(15))) {
+      const own = PROF.heroes.filter(i => ROSTER[i]), cur = own.indexOf(p.nextHero != null ? p.nextHero : G.heroIdx);
+      p.nextHero = own[(cur + (hit(15) ? 1 : -1) + own.length) % own.length]; renderSwap();
+    } else EL_PAD.forEach((bi, i) => { if (hit(bi)) pickElement(EL_KEYS[i]); });
     if (hit(10) || hit(11)) p.mix = [];
-    if (hit(4) || hit(8)) toggleShop();
+    if (hit(4)) playerCast('f');
+    if (hit(8)) toggleShop();
     if (hit(9)) openPause();
   }
   pad.prev = gp.buttons.map(x => x.pressed);
@@ -2814,7 +2956,7 @@ function updateHud() {
   $('modeScore').textContent = modeScoreText();
   const dev = device();
   if (dev !== hud.dev) {
-    hud.dev = dev; for (const k of 'qwer') abEls[k].el.querySelector('.k').textContent = KEY_LABELS[dev][k];
+    hud.dev = dev; for (const k of 'qwerf') abEls[k].el.querySelector('.k').textContent = KEY_LABELS[dev][k];
     $('elems').querySelectorAll('.ek').forEach((e, i) => { e.textContent = EL_LABELS[dev][i]; });
   }
   $('elems').hidden = G.mode === 'client' || !overlay.hidden || G.over;
@@ -2825,14 +2967,17 @@ function updateHud() {
     for (const e of mix) { const d = document.createElement('i'); d.style.background = d.style.color = ELEMENTS[e].color; ms.appendChild(d); }
     ms.style.opacity = mix.length && !mixUsable(p) && !lifeOnly(mix) ? .5 : 1;
   }
-  for (const k of 'qwer') {
-    const a = AB[k], e = abEls[k], c = p.cds[k], mx = a.cd * (1 - p.haste);
+  for (const k of 'qwerf') {
+    const a = AB[k], e = abEls[k], c = p.cds[k] || 0, mx = a.cd * (1 - p.haste);
     e.cd.style.setProperty('--p', (c > 0 ? clamp(c / mx, 0, 1) * 360 : 0) + 'deg');
     e.cdt.textContent = c > 0 ? Math.ceil(c) : '';
     e.el.classList.toggle('locked', p.level < (a.lvl || 1));
     e.el.classList.toggle('nomana', p.mana < a.mana);
   }
   hud.dead.hidden = p.alive || !playing;
+  const canSwap = !p.alive && playing && G.mode !== 'client' && PROF.heroes.length > 1;
+  if (canSwap && $('swap').hidden) renderSwap();
+  $('swap').hidden = !canSwap;
   if (!p.alive) hud.deadTxt.textContent = 'Respawning in ' + Math.max(1, Math.ceil(p.respawn));
   const tag = $('netTag');
   tag.hidden = false;
@@ -3616,6 +3761,7 @@ function modeThink(h, foe, hr) {
     if (d < 820 && Math.random() < aim) cast(h, 'q', foe.x + foe.vx * d / 1150, foe.y + foe.vy * d / 1150);
     if (d < 1000 && foe.hp < rDamage(h) * 1.1) cast(h, 'r', foe.x, foe.y);
     if (hr < .55 && d < 500) cast(h, 'w', h.x, h.y);
+    if (d < (h.range > 200 ? 600 : 420) && Math.random() < .5) cast(h, 'f', foe.x, foe.y);
   }
   const jit = (x, y) => { if ((h.jT -= .2) <= 0) { h.jT = 3; h.jx = rand(-90, 90); h.jy = rand(-90, 90); } return {type: 'move', x: x + h.jx, y: y + h.jy}; };
   if (mode === 'ctf') {
@@ -3694,7 +3840,7 @@ const MOVES = {
 };
 // look of each bolt spell, also sent to online players as a number
 const BOLT_LOOK = [['bolt', '#ffb35a', '#ff8a3a', '#fff1c2'], ['frost', '#9fe6ff', '#4fb8ff', '#ffffff'], ['drain', '#b06bff', '#7a2fff', '#f0d9ff'],
-  ['ki', '#ffe66b', '#fff2a8', '#ffffff'], ['void', '#e0304a', '#5a0010', '#ffd0d8'], ['stone', '#9a8a70', '#5a4a30', '#d8c8a8']];
+  ['ki', '#ffe66b', '#fff2a8', '#ffffff'], ['void', '#e0304a', '#5a0010', '#ffd0d8'], ['stone', '#9a8a70', '#5a4a30', '#d8c8a8'], ['arrow', '#fff3c9', '#d9b26a', '#ffffff']];
 const boltLook = sp => BOLT_LOOK.find(b => b[0] === sp) || BOLT_LOOK[0];
 const SKINS = {
   none: {name: 'Classic', desc: 'Your hero\'s own colors.', price: 0},
@@ -3788,7 +3934,10 @@ function applyLoadout() {
   p.pet = petId ? {kind: petId, x: p.x - 40, y: p.y + 10, atkT: 1, face: 0, walk: 0, seed: Math.random() * 6} : null;
   recalc(p);
   abEls.q.el.title = MOVES[p.kit.q].name + ': ' + MOVES[p.kit.q].desc;
-  abEls.r.el.title = MOVES[p.kit.r].name + ' (unlocks at level 4): ' + MOVES[p.kit.r].desc;
+  abEls.r.el.title = MOVES[p.kit.r].name + ' (unlocks at level 4): ' + MOVES[p.kit.r].desc +
+    (p.look === 'warlock' ? ' At level 10 it becomes Demon Gate: a burning rift that drains enemies for 4 seconds and heals you.' : '');
+  const fm = styleMove(p); abEls.f.el.title = fm.name + ': ' + fm.desc;
+  abEls.f.el.querySelector('path').setAttribute('fill', fm.color);
 }
 function applyBoosts() {
   const used = [], p = G.player;
