@@ -892,10 +892,25 @@ function recalc(h) {
   h.maxMana = 300 + 35 * L + s.mana; h.mana += Math.max(0, h.maxMana - oldMana);
   h.ad = (55 + 4 * L + s.ad) * fm * (sm.ad || 1) * (pb.ad || 1); h.ap = (s.ap + 4 * L) * fm * (sm.ap || 1) * (pb.ap || 1);
   h.speed = (330 + s.ms + 8 * f) * (sm.ms || 1) * (pb.ms || 1);
-  h.range = HERO_REACH; // heroes only basic-attack what they're touching
-  h.atkCd = 0.95 / (1 + 0.025 * L + s.as + (pb.as || 0)); h.haste = Math.min(0.45, s.cdr + (pb.cdr || 0)); h.lifesteal = s.ls;
+  const st = styleOf(h.look); // fighters touch, casters reach a little, rangers shoot from afar
+  h.range = st.range; h.ranged = st.range > HERO_REACH;
+  h.atkCd = 0.95 * st.cd / (1 + 0.025 * L + s.as + (pb.as || 0)); h.haste = Math.min(0.45, s.cdr + (pb.cdr || 0)); h.lifesteal = s.ls;
 }
 const HERO_REACH = 45; // gap between hero and target edges that still counts as contact
+// How each class fights. range is the gap between hero and target edges; cd and dmg scale attack speed and damage.
+const STYLES = {
+  magic: {label: 'Magic, short range', range: 230, cd: 1, dmg: .9, speed: 900, size: 9},
+  melee: {label: 'Close combat', range: HERO_REACH, cd: 1, dmg: 1.1},
+  heavy: {label: 'Close combat, hits nearby enemies too', range: HERO_REACH, cd: 1.15, dmg: 1.2, cleave: .45},
+  agile: {label: 'Close combat, fast strikes', range: HERO_REACH, cd: .75, dmg: .9},
+  ranged: {label: 'Ranged', range: 420, cd: 1, dmg: .85, speed: 1300, size: 6},
+  sniper: {label: 'Long range, slow and heavy shots', range: 560, cd: 1.4, dmg: 1.3, speed: 1700, size: 6},
+  gunner: {label: 'Ranged, rapid fire', range: 340, cd: .6, dmg: .55, speed: 1400, size: 5},
+};
+const LOOK_STYLE = {mage: 'magic', witch: 'magic', warlock: 'magic', shaman: 'magic', drakeling: 'magic',
+  knight: 'melee', paladin: 'melee', goblinking: 'melee', brute: 'heavy', golemkin: 'heavy', rogue: 'agile', werewolf: 'agile',
+  ranger: 'ranged', soldier: 'ranged', sniper: 'sniper', heavy: 'gunner'};
+const styleOf = look => STYLES[LOOK_STYLE[look]] || STYLES.melee;
 const xpNeed = l => 90 + 45 * l;
 const rDamage = h => 150 + 38 * h.level + 0.9 * h.ap;
 function gainXp(h, x) {
@@ -941,7 +956,7 @@ function tryAttack(u, t) {
   u.atkT = u.atkCd * (u.rapidUntil > G.time ? .5 : 1); u.face = Math.atan2(t.y - u.y, t.x - u.x);
   sfx(u.kind === 'hero' ? (u.ranged ? 'shot' : 'swing') : u.kind === 'tower' ? 'tower' : u.kind === 'monster' ? 'claw' : 'minion', u.x, u.y);
   let dmg;
-  if (u.kind === 'hero') dmg = u.ad;
+  if (u.kind === 'hero') dmg = u.ad * styleOf(u.look).dmg;
   else if (u.kind === 'tower') dmg = t.kind === 'hero' ? 170 + G.time / 60 * 6 : t.maxHp * 0.45;
   else dmg = u.atk;
   if (u.ranged) {
@@ -950,11 +965,13 @@ function tryAttack(u, t) {
   } else {
     damage(t, dmg, u);
     if (u.lifesteal && u.alive) u.hp = Math.min(u.maxHp, u.hp + dmg * u.lifesteal);
+    const cleave = u.kind === 'hero' && styleOf(u.look).cleave;
+    if (cleave) for (const o of G.units) if (o !== t && o.alive && o.team !== u.team && o.team !== 2 && targetable(o) && dist(o, t) < 110 + o.r) damage(o, dmg * cleave, u);
     burst(t.x, t.y, u.kind === 'hero' ? u.color : '#e8dcc0', u.kind === 'hero' ? 7 : 3, 120, .25, 2.5);
   }
 }
-const projSpeed = u => u.kind === 'tower' ? 850 : u.kind === 'hero' ? 1300 : 900;
-const projSize = u => u.kind === 'tower' ? 10 : u.kind === 'hero' ? 7 : u.kind === 'monster' ? 13 : 5;
+const projSpeed = u => u.kind === 'tower' ? 850 : u.kind === 'hero' ? styleOf(u.look).speed || 1300 : 900;
+const projSize = u => u.kind === 'tower' ? 10 : u.kind === 'hero' ? styleOf(u.look).size || 7 : u.kind === 'monster' ? 13 : 5;
 const projColor = u => u.kind === 'hero' ? (LOOKS[u.look] && LOOKS[u.look].tracer) || u.color : u.fire || TEAM_COLOR[u.team];
 function damage(t, amt, src) {
   if (!t.alive || t.protectUntil > G.time) return; // just respawned
@@ -2489,7 +2506,7 @@ window.addEventListener('gamepadconnected', () => { $('padHint').textContent = '
 function attackNearest() {
   const p = G.player;
   // pick a target within a short walk; the hero walks up and hits it on contact
-  let t = nearestEnemy(p, 650, u => u.kind === 'hero') || nearestEnemy(p, 650);
+  let t = nearestEnemy(p, 650 + p.range, u => u.kind === 'hero') || nearestEnemy(p, 650 + p.range);
   if (!t) { let bd = 600; for (const u of G.units) if (u.alive && u.kind === 'monster' && dist(u, p) < bd) { bd = dist(u, p); t = u; } }
   if (t) { commandAttack(t); G.marker = {x: t.x, y: t.y, t: .4, atk: true}; }
 }
@@ -2735,7 +2752,7 @@ function buildHeroGrid(el, onPick, count = ROSTER.length) {
     const b = document.createElement('button'); b.className = 'hcard'; b.dataset.i = i;
     const c = document.createElement('canvas'); c.width = c.height = 128;
     const nm = document.createElement('b'); nm.textContent = r.name;
-    const cl = document.createElement('small'); cl.textContent = r.cls;
+    const cl = document.createElement('small'); cl.textContent = r.cls + ' · ' + styleOf(r.look).label;
     const tm = document.createElement('span'); tm.className = 'tm ' + TEAM_CLS[r.team]; tm.textContent = TEAM_NAME[r.team];
     const lk = document.createElement('small'); lk.className = 'lk';
     b.append(c, nm, cl, tm, lk);
