@@ -154,6 +154,14 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
 .storebody{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;width:min(580px,100%);margin-bottom:14px;text-align:left}
 .sitem{display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);min-width:0}
 .sitem .top{display:flex;gap:10px;align-items:center;min-width:0}
+.sitem .top.view{cursor:pointer;border-radius:6px}
+.sitem .top.view:hover b,.sitem .top.view:focus-visible b{color:var(--gold)}
+.sitem .top .tap{display:block;font-size:11px;color:var(--gold);margin-top:2px}
+#pvCv{width:min(240px,62vw);height:min(240px,62vw);cursor:grab;touch-action:none}
+.pvcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;width:min(580px,100%);margin:8px 0}
+.pvcard{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);text-align:left}
+.pvcard b{display:block;font-size:13px;color:var(--gold);margin-bottom:2px}
+.pvcard span{font-size:13px;color:var(--muted);line-height:1.35}
 .sitem canvas{width:48px;height:48px;flex:none}
 .sitem .sw{width:30px;height:30px;border-radius:50%;flex:none;border:2px solid rgba(0,0,0,.5)}
 .sitem b{display:block;font-size:15px}
@@ -394,6 +402,15 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
         <div class="row"><button class="mbtn primary" id="quickGo">Choose hero</button><button class="mbtn small back" id="quickBack">Back</button></div>
       </section>
 
+      <section class="screen" id="scr-preview" hidden>
+        <h2 id="pvName"></h2>
+        <p class="status ok" id="pvCls"></p>
+        <canvas id="pvCv" width="320" height="320" aria-label="Hero preview. Drag to turn."></canvas>
+        <div class="row" id="pvForms"></div>
+        <div class="row"><button class="mbtn small" id="pvTurn">Turn</button><button class="mbtn small" id="pvAttack">Attack</button><button class="mbtn small" id="pvWalk">Walk</button></div>
+        <div class="pvcards" id="pvCards"></div>
+        <div class="row"><button class="mbtn primary" id="pvBuy" hidden></button><button class="mbtn small back" id="pvBack">Back</button></div>
+      </section>
       <section class="screen" id="scr-store" hidden>
         <h2>Store</h2>
         <p class="status ok"><span class="crowns" id="crowns">0</span><span id="crownsNote"> Crowns. You earn Crowns by playing matches; no real money is used.</span></p>
@@ -4392,14 +4409,92 @@ function openStore(tab, back) { if (tab) storeTab = tab; storeBack = back || 'sc
 function storeAction(fn) { return () => { fn(); saveProfile(); renderStore(); if (G.started && G.mode !== 'client') applyLoadout(); }; }
 function storeCard(body, o) {
   const d = el('div', 'sitem'), top = el('div', 'top');
-  if (o.hero != null) { const c = document.createElement('canvas'); c.width = c.height = 96; top.appendChild(c); paintHero(c, o.hero, .9); }
+  if (o.hero != null) {
+    const c = document.createElement('canvas'); c.width = c.height = 96; top.appendChild(c); paintHero(c, o.hero, .9);
+    top.classList.add('view'); top.tabIndex = 0; top.setAttribute('role', 'button'); top.setAttribute('aria-label', 'View ' + ROSTER[o.hero].name);
+    top.addEventListener('click', () => openPreview(o.hero));
+    top.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPreview(o.hero); } });
+  }
   else if (o.pet) { const c = document.createElement('canvas'); c.width = c.height = 96; top.appendChild(c); const g = c.getContext('2d'); g.setTransform(2, 0, 0, 2, 52, 86); drawPet(g, {kind: o.pet, x: 0, y: 0, face: 0, walk: 0, seed: 1, still: true}, 0); }
   else if (o.color) { const s = el('span', 'sw'); s.style.background = o.color; top.appendChild(s); }
-  const t = el('div'); t.append(el('b', '', o.title), el('small', '', o.desc)); top.appendChild(t); d.appendChild(top);
+  const t = el('div'); t.append(el('b', '', o.title), el('small', '', o.desc)); if (o.hero != null) t.appendChild(el('span', 'tap', 'Tap to view')); top.appendChild(t); d.appendChild(top);
   const b = el('button', 'mbtn' + (o.primary ? ' primary' : ''), o.label); b.disabled = !!o.disabled;
   if (o.onClick) b.addEventListener('click', o.onClick);
   d.appendChild(b); body.appendChild(d);
 }
+// ---------- hero preview: a turntable view with the hero's moves and buffs as cards ----------
+const BUNDLE_PET = {bundle_volt: 'sparky', bundle_aegis: 'bulwark', bundle_nightshade: 'echo'};
+const PV = {i: 0, ang: 0, spin: true, level: 1, atk: 0, walk: false, drag: null, run: 0};
+function openPreview(i) {
+  Object.assign(PV, {i, ang: 0, spin: true, level: 1, atk: 0, walk: false});
+  renderPreview(); show('scr-preview');
+  const run = ++PV.run; let last = performance.now();
+  const loop = now => {
+    if (run !== PV.run || currentScreen !== 'scr-preview' || overlay.hidden) return;
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    if (PV.spin && !PV.drag) PV.ang += dt * 1.2;
+    PV.atk = Math.max(0, PV.atk - dt);
+    drawPreview(now / 1000, dt); requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+const pvUnit = {x: 0, y: 0, face: 0, walk: 0, _lw: 0, atkCd: 1, atkT: 0, hitFlash: 0, id: 7};
+function drawPreview(now, dt) {
+  const c = $('pvCv'), g = c.getContext('2d'), S = c.width, r = ROSTER[PV.i];
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, S, S);
+  const glow = g.createRadialGradient(S / 2, S * .62, 10, S / 2, S * .62, S * .45);
+  glow.addColorStop(0, r.color + '55'); glow.addColorStop(1, r.color + '00'); g.fillStyle = glow; g.fillRect(0, 0, S, S);
+  g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(S / 2, S * .8, S * .22, S * .06, 0, 0, 7); g.fill();
+  if (PV.walk) pvUnit.walk += dt * 60;
+  Object.assign(pvUnit, {look: r.look, color: r.color, team: r.team, level: PV.level, atkT: PV.atk > 0 ? 1 : 0});
+  // turning: squash the drawing horizontally by the cosine of the angle, so the hero seems to spin in place
+  const k = S / 130, sx = Math.cos(PV.ang);
+  g.setTransform(k * (Math.abs(sx) < .08 ? .08 * Math.sign(sx || 1) : sx), 0, 0, k, S / 2, S * .78);
+  drawCharacter(g, pvUnit, now);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+}
+function renderPreview() {
+  const i = PV.i, r = ROSTER[i], st = styleOf(r.look), have = owns('heroes', i);
+  $('pvName').textContent = r.name + (r.mythic ? ' · Mythic' : '');
+  $('pvCls').textContent = `${r.cls} · ${st.label}`;
+  const forms = $('pvForms'); forms.innerHTML = '';
+  for (const lv of [1, 6, 11, 16]) {
+    const b = el('button', 'chip' + (PV.level === lv ? ' sel' : ''), `${FORMS[formOf(lv)]} (Lv ${lv})`);
+    b.addEventListener('click', () => { PV.level = lv; renderPreview(); }); forms.appendChild(b);
+  }
+  const s = r.stat || {}, pct = v => (v > 1 ? '+' : '') + Math.round((v - 1) * 100) + '%', buffs = [];
+  if (s.hp) buffs.push(pct(s.hp) + ' health'); if (s.ad) buffs.push(pct(s.ad) + ' attack'); if (s.ap) buffs.push(pct(s.ap) + ' ability power'); if (s.ms) buffs.push(pct(s.ms) + ' speed');
+  if (st.armor) buffs.push(`takes ${Math.round(st.armor * 100)}% less damage`);
+  const kitQ = r.sig ? r.sig.q : PROF.eq.q, kitR = r.sig ? r.sig.r : PROF.eq.r, fm = STYLE_MOVES[st.move] || STYLE_MOVES.slash;
+  const cards = [
+    ['Fighting style', `${st.label}. ${st.range > HERO_REACH ? `Basic attacks reach about ${Math.round(st.range)} away.` : 'Basic attacks hit on contact.'}` + (st.cleave ? ' Hits also splash nearby enemies.' : '')],
+    ['Buffs', buffs.length ? buffs.join(', ') + '.' : 'Balanced stats, no bonuses.'],
+    [`Q · ${MOVES[kitQ].name}` + (r.sig ? ' (signature)' : ''), MOVES[kitQ].desc + (r.sig ? '' : ' Your equipped Q; change it in Store › Moves.')],
+    ['W · Cinder Ward', 'A damage shield and a burst of speed.'],
+    ['E · Flicker', 'Blink a short distance.'],
+    [`R · ${MOVES[kitR].name}` + (r.sig ? ' (signature)' : ''), MOVES[kitR].desc + ' Unlocks at level 4.' + (r.look === 'warlock' ? ' At level 10 it becomes Demon Gate.' : '')],
+    [`F · ${fm.name}`, fm.desc + ' Spammable.'],
+  ];
+  const pet = BUNDLE_PET[r.bundle]; if (pet && PETS[pet]) cards.push([`Pet · ${PETS[pet].name} (Mythic)`, PETS[pet].desc + ' ' + petBuffText(PETS[pet])]);
+  const box = $('pvCards'); box.innerHTML = '';
+  for (const [h, t] of cards) { const d = el('div', 'pvcard'); d.append(el('b', '', h), el('span', '', t)); box.appendChild(d); }
+  const buyable = !have && !r.bundle && !r.free && (!r.weekly || weeklyFeatured().includes(i));
+  const pb = $('pvBuy'); pb.hidden = have || (!buyable && !r.bundle);
+  pb.textContent = r.bundle ? 'See its bundle' : buyLabel(r.price); pb.disabled = buyable && PROF.crowns < r.price;
+  $('pvCls').textContent += have ? ' · Unlocked' : ' · ' + heroLockLabel(i);
+}
+$('pvBuy').addEventListener('click', () => {
+  const r = ROSTER[PV.i];
+  if (r.bundle) { openStore(storeExtras.some(x => x.id === 'bundles') ? 'bundles' : 'week', storeBack); return; }
+  if (PROF.crowns >= r.price) { PROF.crowns -= r.price; grant({hero: PV.i}); saveProfile(); renderPreview(); }
+});
+$('pvBack').addEventListener('click', () => { renderStore(); show('scr-store'); });
+$('pvTurn').addEventListener('click', () => { PV.spin = !PV.spin; $('pvTurn').textContent = PV.spin ? 'Turn' : 'Stop turning'; if (!PV.spin) PV.ang += Math.PI; });
+$('pvAttack').addEventListener('click', () => { PV.atk = .35; });
+$('pvWalk').addEventListener('click', () => { PV.walk = !PV.walk; $('pvWalk').textContent = PV.walk ? 'Stand' : 'Walk'; });
+$('pvCv').addEventListener('pointerdown', e => { PV.drag = {x: e.clientX, a: PV.ang}; try { $('pvCv').setPointerCapture(e.pointerId); } catch (err) { /* capture unsupported */ } });
+$('pvCv').addEventListener('pointermove', e => { if (PV.drag) PV.ang = PV.drag.a + (e.clientX - PV.drag.x) / 60; });
+$('pvCv').addEventListener('pointerup', () => { PV.drag = null; });
 function buyLabel(price) { return price ? `Buy · ${price} Crowns` : 'Free'; }
 function renderStore() {
   $('crowns').textContent = PROF.crowns;
