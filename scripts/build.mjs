@@ -1,5 +1,6 @@
 // Wraps game/thornwake.html (the same file published as the Claude artifact) into a
-// standalone page with the payments add-on, written to public/index.html.
+// standalone page with the payments and online (accounts, cloud saves, online play) add-ons,
+// written to public/index.html.
 import {readFileSync, writeFileSync} from 'node:fs';
 
 const game = readFileSync(new URL('../game/thornwake.html', import.meta.url), 'utf8');
@@ -13,6 +14,7 @@ const page = `<!doctype html>
 <body>
 ${game}
 <script src="/payments.js"></script>
+<script src="/online.js"></script>
 </body>
 </html>
 `;
