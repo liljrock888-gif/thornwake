@@ -800,7 +800,7 @@ function reset(heroIdx = 0, cfg = null) {
   if (!MODES[cfg.mode]) cfg.mode = 'conquest';
   applyMap(cfg.map);
   nid = 1;
-  G = {time: 0, units: [], projs: [], fx: [], rings: [], texts: [], blasts: [], beams: [], spawnQ: [], events: [], evSeq: 0,
+  G = {time: 0, units: [], projs: [], fx: [], blood: [], splats: [], rings: [], texts: [], blasts: [], beams: [], spawnQ: [], events: [], evSeq: 0,
        nextWave: 12, waveN: 0, kills: [0, 0], dragons: [0, 0], minionTier: 0, winner: -1, heroIdx, cfg, diff: DIFFS[cfg.diff] || DIFFS[1], zaps: [],
        mode: 'solo', started: false, paused: false, over: false, shake: 0, marker: null, touch: false, pad: false, cam: {x: 0, y: 0}};
   const towers = [];
@@ -864,10 +864,10 @@ function gainXp(h, x) {
     ring(h.x, h.y, '#c79bff', 70, .6);
     const f = formOf(h.level);
     if (f > before) {
-      ring(h.x, h.y - 30, h.color, 140, 1); burst(h.x, h.y - 30, h.color, 40, 260, .8, 5);
+      ring(h.x, h.y - 30, h.color, 140, 1); burst(h.x, h.y - 30, h.color, 40, 260, .8, 5); sfx('evolve', h.x, h.y);
       pushEvent([[h.name, h.team], [' evolved into ' + FORMS[f] + ' form']]);
       if (h.isPlayer) banner(FORMS[f] + ' form', `${h.name} evolved. All stats +12%.`);
-    } else if (h.isPlayer) banner('Level ' + h.level, h.level === 4 ? 'Starfall unlocked. Press R.' : '');
+    } else if (h.isPlayer) { banner('Level ' + h.level, h.level === 4 ? 'Starfall unlocked. Press R.' : ''); sfx('levelup'); }
   }
 }
 function giveGold(h, g) { if (G.mode === 'solo' && h.team !== G.player.team) g *= G.diff.gold; h.gold += g; h.earned += g; }
@@ -896,6 +896,7 @@ function nearestEnemy(u, range, pred, heroWeight = 1) {
 function tryAttack(u, t) {
   if (u.atkT > 0) return;
   u.atkT = u.atkCd; u.face = Math.atan2(t.y - u.y, t.x - u.x);
+  sfx(u.kind === 'hero' ? (u.ranged ? 'shot' : 'swing') : u.kind === 'tower' ? 'tower' : u.kind === 'monster' ? 'claw' : 'minion', u.x, u.y);
   let dmg;
   if (u.kind === 'hero') dmg = u.ad;
   else if (u.kind === 'tower') dmg = t.kind === 'hero' ? 170 + G.time / 60 * 6 : t.maxHp * 0.45;
@@ -921,6 +922,8 @@ function damage(t, amt, src) {
   }
   if (t.shield > 0) { const s = Math.min(t.shield, amt); t.shield -= s; amt -= s; }
   t.hp -= amt; t.hitFlash = .1;
+  if (amt > 1 && t.kind === 'hero') sfx(t.isPlayer ? 'hurt' : 'hit', t.x, t.y);
+  if (amt > 1) bleed(t, t.kind === 'minion' ? 5 : 9);
   if (src && src.kind === 'hero') {
     if (t.kind === 'hero') { t.lastHero = src; t.lastHeroT = G.time; src.aggroT = 2.5; }
     if (src.isPlayer && amt > 0) text(t.x, t.y - t.r - 8, Math.round(amt), '#fff3c9');
@@ -930,16 +933,18 @@ function damage(t, amt, src) {
 }
 function kill(t, src) {
   t.alive = false; t.hp = 0;
+  bleed(t, t.kind === 'minion' ? 14 : t.fire ? 50 : 28, true);
   const killer = src && src.kind === 'hero' ? src : (t.lastHero && G.time - t.lastHeroT < 6 && t.lastHero.alive ? t.lastHero : null);
   const me = G.player;
   if (t.kind === 'minion') {
-    burst(t.x, t.y, TEAM_COLOR[t.team], 10, 160, .45, 3);
+    burst(t.x, t.y, TEAM_COLOR[t.team], 10, 160, .45, 3); sfx('pop', t.x, t.y);
     if (src && src.kind === 'hero') {
       const g = t.type === 'melee' ? 21 : 15; giveGold(src, g);
       if (src.isPlayer) text(t.x, t.y - 26, '+' + g + 'g', '#f2c14e');
     }
     for (const h of heroesOf(1 - t.team)) if (h.alive && dist(h, t) < 1100) gainXp(h, t.type === 'melee' ? 30 : 24);
   } else if (t.kind === 'monster') {
+    sfx(t.fire ? 'roar' : 'thud', t.x, t.y);
     burst(t.x, t.y - 10, t.fire || '#9fbf7a', t.fire ? 60 : 16, t.fire ? 320 : 180, t.fire ? 1 : .5, t.fire ? 6 : 4);
     t.respawnT = t.respawnDelay; t.target = null; t.resetting = false;
     if (killer) {
@@ -955,7 +960,7 @@ function kill(t, src) {
       }
     }
   } else if (t.kind === 'hero') {
-    burst(t.x, t.y, t.color, 30, 260, .8, 5); ring(t.x, t.y, TEAM_COLOR[t.team], 90, .7);
+    burst(t.x, t.y, t.color, 30, 260, .8, 5); ring(t.x, t.y, TEAM_COLOR[t.team], 90, .7); sfx('death', t.x, t.y);
     t.deaths++; t.respawn = G.cfg.mode === 'tdm' || G.cfg.mode === 'ctf' ? 4 + t.level : 6 + 2 * t.level; t.cmd = null; t.shield = 0;
     if (killer) {
       killer.kills++; giveGold(killer, 300); G.kills[killer.team]++;
@@ -968,13 +973,13 @@ function kill(t, src) {
     if (t.isPlayer) banner('You have been slain', '');
     for (const h of heroesOf(1 - t.team)) if (h.alive && (h === killer || dist(h, t) < 1200)) gainXp(h, 70 + 25 * t.level);
   } else if (t.kind === 'tower') {
-    burst(t.x, t.y - 40, TEAM_COLOR[t.team], 50, 300, 1, 6); ring(t.x, t.y, '#fff', 160, .8);
+    burst(t.x, t.y - 40, TEAM_COLOR[t.team], 50, 300, 1, 6); ring(t.x, t.y, '#fff', 160, .8); sfx('crumble', t.x, t.y);
     if (dist(me, t) < 1200) G.shake = .5;
     for (const h of heroesOf(1 - t.team)) giveGold(h, 150);
     pushEvent([[TEAM_NAME[1 - t.team], 1 - t.team], [' destroyed a ' + t.lane + ' tower']]);
     banner(t.team === me.team ? 'Your tower has fallen' : 'Enemy tower destroyed', t.team === me.team ? 'Defend your lanes.' : '+150 gold to your team');
   } else if (t.kind === 'core') {
-    burst(t.x, t.y, TEAM_COLOR[t.team], 120, 500, 1.6, 8); ring(t.x, t.y, '#fff', 400, 1.4);
+    burst(t.x, t.y, TEAM_COLOR[t.team], 120, 500, 1.6, 8); ring(t.x, t.y, '#fff', 400, 1.4); sfx('crumble'); sfx('boom');
     G.shake = 1; G.over = true; G.winner = 1 - t.team;
     setTimeout(() => endGame(1 - t.team), 1600);
   }
@@ -988,6 +993,7 @@ function cast(h, k, tx, ty) {
   if (chain && !chain.length) return false;
   const dx = tx - h.x, dy = ty - h.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
   h.mana -= a.mana; h.cds[k] = a.cd * (1 - h.haste);
+  sfx({q: 'bolt', w: 'shield', e: 'blink', r: 'ult'}[k], h.x, h.y);
   if (k === 'q') {
     h.face = Math.atan2(ny, nx);
     const twin = h.kit && h.kit.q === 'twin', base = 60 + 28 * h.level + 0.7 * h.ap;
@@ -1010,11 +1016,11 @@ function cast(h, k, tx, ty) {
       for (let i = 0; i < 3; i++) { const t = .6 + i * .25; G.blasts.push({x: px + rand(-140, 140), y: py + rand(-140, 140), t, max: t, r: 150, dmg: rDamage(h) * .5, src: h, team: h.team}); }
     } else if (kind === 'nova') {
       for (const u of G.units) if (u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && dist(u, h) < 330 + u.r) damage(u, rDamage(h) * .8, h);
-      ring(h.x, h.y, '#bfefff', 330, .6); burst(h.x, h.y, '#dff7ff', 50, 380, .7, 5);
+      ring(h.x, h.y, '#bfefff', 330, .6); burst(h.x, h.y, '#dff7ff', 50, 380, .7, 5); sfx('boom', h.x, h.y);
     } else if (kind === 'chain') {
       const pts = [[h.x, h.y - 30]];
       for (const t of chain) { damage(t, rDamage(h) * .6, h); pts.push([t.x, t.y - 10]); burst(t.x, t.y, '#bfe0ff', 10, 160, .35, 3); }
-      G.zaps.push({pts, t: .35});
+      G.zaps.push({pts, t: .35}); sfx('zap', h.x, h.y);
     } else G.blasts.push({x: px, y: py, t: .8, max: .8, r: 240, dmg: rDamage(h), src: h, team: h.team});
   }
   return true;
@@ -1069,7 +1075,7 @@ function updateHero(h, dt) {
     if (h.respawn <= 0) {
       const f = FOUNTAIN[h.team];
       h.alive = true; h.x = f.x + rand(-40, 40); h.y = f.y + rand(-40, 40); h.hp = h.maxHp; h.mana = h.maxMana; h.cmd = null; h.state = 'shop';
-      if (h.isPlayer) banner('You have respawned', 'Open the shop before leaving the fountain.');
+      if (h.isPlayer) { banner('You have respawned', 'Open the shop before leaving the fountain.'); sfx('respawn'); }
     }
     return;
   }
@@ -1110,7 +1116,7 @@ function updatePet(h, dt) {
   if ((pt.atkT -= dt) <= 0) {
     const t = nearestEnemy(h, 380);
     if (t) {
-      pt.atkT = 1.2; pt.face = t.x > pt.x ? 0 : Math.PI;
+      pt.atkT = 1.2; pt.face = t.x > pt.x ? 0 : Math.PI; sfx('pet', pt.x, pt.y);
       G.projs.push({kind: 'auto', x: pt.x, y: pt.y - 22, target: t, dmg: P.dmg + 1.5 * h.level, src: h, team: h.team, speed: 900, size: 5, color: P.color});
     } else pt.atkT = .25;
   }
@@ -1292,7 +1298,7 @@ function update(dt) {
       if (Math.random() < .8) G.fx.push({x: p.x, y: p.y, vx: rand(-30, 30), vy: rand(-30, 30), t: .3, max: .3, color: '#ffb35a', r: 5});
       let hit = null;
       for (const u of G.units) if (u.alive && u.team !== p.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && Math.hypot(u.x - p.x, u.y - p.y) < u.r + p.r) { hit = u; break; }
-      if (hit) { damage(hit, p.dmg, p.src); burst(p.x, p.y, '#ffcf7a', 14, 200, .4, 4); G.projs.splice(i, 1); }
+      if (hit) { damage(hit, p.dmg, p.src); burst(p.x, p.y, '#ffcf7a', 14, 200, .4, 4); sfx('impact', p.x, p.y); G.projs.splice(i, 1); }
       else if (p.trav > p.range) G.projs.splice(i, 1);
     } else {
       const t = p.target;
@@ -1317,11 +1323,26 @@ function update(dt) {
   fxUpdate(dt);
   G.units = G.units.filter(u => u.alive || u.kind !== 'minion');
 }
+// ---------- blood: droplets fly from living things when hit, then land as splats that fade ----------
+function bleed(u, n, gush) {
+  if (u.kind === 'tower' || u.kind === 'core' || (!gush && G.time - (u.bledAt || -1) < .15)) return;
+  u.bledAt = G.time;
+  for (let i = 0; i < n && G.blood.length < 500; i++) {
+    const a = Math.random() * 6.283, sp = rand(50, gush ? 300 : 180);
+    G.blood.push({x: u.x + rand(-5, 5), y: u.y + rand(-3, 6), h: u.r * rand(.6, 1.4), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45, vh: rand(60, gush ? 320 : 200), r: rand(2, gush ? 5 : 3.5)});
+  }
+}
 function starfallFx(b) {
   burst(b.x, b.y, '#f2c14e', 60, 420, .9, 6); burst(b.x, b.y, '#fff3c9', 30, 200, .6, 4); ring(b.x, b.y, '#fff3c9', b.r, .5);
   if (dist(b, G.player) < 900) G.shake = Math.max(G.shake, .3);
+  sfx('boom', b.x, b.y);
 }
 function fxUpdate(dt) {
+  for (let i = G.blood.length - 1; i >= 0; i--) {
+    const b = G.blood[i]; b.x += b.vx * dt; b.y += b.vy * dt; b.h += b.vh * dt; b.vh -= 900 * dt;
+    if (b.h <= 0) { if (G.splats.length < 300) G.splats.push({x: b.x, y: b.y, r: b.r * rand(2, 3.6), rot: Math.random() * 3, t: 14}); G.blood.splice(i, 1); }
+  }
+  for (let i = G.splats.length - 1; i >= 0; i--) if ((G.splats[i].t -= dt) <= 0) G.splats.splice(i, 1);
   for (let i = G.fx.length - 1; i >= 0; i--) { const f = G.fx[i]; f.t -= dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vx *= .92; f.vy *= .92; if (f.t <= 0) G.fx.splice(i, 1); }
   for (let i = G.rings.length - 1; i >= 0; i--) { if ((G.rings[i].t -= dt) <= 0) G.rings.splice(i, 1); }
   for (let i = G.texts.length - 1; i >= 0; i--) { const t = G.texts[i]; t.t -= dt; t.y -= 40 * dt; if (t.t <= 0) G.texts.splice(i, 1); }
@@ -1445,6 +1466,9 @@ function render() {
   if (ex > sx && ey > sy) ctx.drawImage(mapC, sx * MS, sy * MS, (ex - sx) * MS, (ey - sy) * MS, sx, sy, ex - sx, ey - sy);
   const inView = (u, m = 120) => u.x > vx0 - m && u.x < vx0 + hw * 2 + m && u.y > vy0 - m && u.y < vy0 + hh * 2 + m;
   const now = performance.now() / 1000;
+  ctx.fillStyle = '#9a1118';
+  for (const b of G.splats) { if (!inView(b, 20)) continue; ctx.globalAlpha = Math.min(1, b.t / 3) * .9; ctx.beginPath(); ctx.ellipse(b.x, b.y, b.r, b.r * .55, b.rot, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1;
 
   for (let t = 0; t < 2; t++) {
     const f = FOUNTAIN[t];
@@ -1510,6 +1534,8 @@ function render() {
     ctx.strokeStyle = TEAM_COLOR[t]; ctx.lineWidth = 6 + Math.random() * 4; ctx.globalAlpha = .8;
     ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(u.x, u.y); ctx.stroke(); ctx.globalAlpha = 1;
   }
+  ctx.fillStyle = '#d0182a';
+  for (const b of G.blood) { if (!inView(b, 20)) continue; ctx.beginPath(); ctx.arc(b.x, b.y - b.h, b.r, 0, 7); ctx.fill(); }
   ctx.globalCompositeOperation = 'lighter';
   for (const f of G.fx) { if (!inView(f, 40)) continue; ctx.globalAlpha = Math.max(0, f.t / f.max); ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill(); }
   ctx.globalCompositeOperation = 'source-over';
@@ -2127,7 +2153,7 @@ function commandCast(k, x, y) {
   const p = G.player, a = AB[k];
   if (G.mode === 'client') {
     if (!p.alive || p.cds[k] > 0 || p.mana < a.mana || p.level < (a.lvl || 1)) return false;
-    NET.castQ.push({q: ++NET.inSeq, k, x: Math.round(x), y: Math.round(y)});
+    NET.castQ.push({q: ++NET.inSeq, k, x: Math.round(x), y: Math.round(y)}); sfx({q: 'bolt', w: 'shield', e: 'blink', r: 'ult'}[k]);
     if (NET.castQ.length > 4) NET.castQ.shift();
     netSendInput(); return true;
   }
@@ -2423,11 +2449,11 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 function show(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  overlay.hidden = false; currentScreen = id;
+  overlay.hidden = false; currentScreen = id; musicScene();
   if (id === 'scr-main') refreshMain();
   setTimeout(() => { const b = $(id).querySelector('button:not(:disabled)'); if (b) b.focus({preventScroll: true}); }, 0);
 }
-function hideMenus() { overlay.hidden = true; }
+function hideMenus() { overlay.hidden = true; musicScene(); }
 function refreshMain() { $('m-continue').disabled = !store.get(AUTO_KEY); }
 function begin(loaded) {
   hideMenus(); closeShop();
@@ -2980,18 +3006,18 @@ function applySnap(s) {
     if (u === me && !NET.firstSnap) {
       if (lv > u.level) {
         const nf = formOf(lv);
-        if (nf > formOf(u.level)) banner(FORMS[nf] + ' form', `${u.name} evolved. All stats +12%.`);
-        else banner('Level ' + lv, lv === 4 ? 'Starfall unlocked. Press R.' : '');
+        if (nf > formOf(u.level)) { banner(FORMS[nf] + ' form', `${u.name} evolved. All stats +12%.`); sfx('evolve'); }
+        else { banner('Level ' + lv, lv === 4 ? 'Starfall unlocked. Press R.' : ''); sfx('levelup'); }
         ring(x, y, '#c79bff', 70, .6);
       }
       if (u.alive && !alive) banner('You have been slain', '');
-      if (!u.alive && alive) banner('You have respawned', 'Open the shop before leaving the fountain.');
+      if (!u.alive && alive) { banner('You have respawned', 'Open the shop before leaving the fountain.'); sfx('respawn'); }
       if (alive && u.alive && hp < u.hp - 1) text(x + rand(-10, 10), y - 40, '-' + Math.round(u.hp - hp), '#ff7a66');
       if (gold - u.gold >= 10 && !NET.firstSnap) text(x, y - 60, '+' + Math.round(gold - u.gold) + 'g', '#f2c14e');
     }
-    if (u.alive && !alive) { burst(u.x, u.y, u.color, 30, 260, .8, 5); ring(u.x, u.y, TEAM_COLOR[u.team], 90, .7); }
+    if (u.alive && !alive) { burst(u.x, u.y, u.color, 30, 260, .8, 5); ring(u.x, u.y, TEAM_COLOR[u.team], 90, .7); sfx('death', u.x, u.y); bleed(u, 28, true); }
     if (!u.alive && alive) { u.x = x; u.y = y; }
-    if (alive && u.alive && hp < u.hp - 1) u.hitFlash = .1;
+    if (alive && u.alive && hp < u.hp - 1) { u.hitFlash = .1; sfx(u === me ? 'hurt' : 'hit', u.x, u.y); bleed(u, 6); }
     u.alive = alive; u.respawn = alive ? 0 : Math.max(0, (p36(f[8]) - 1) / 10);
     if (alive) netPos(u, x, y);
     Object.assign(u, {hp, maxHp: Math.max(1, p36(f[4])), mana: p36(f[5]), maxMana: Math.max(1, p36(f[6])), level: lv, shield: p36(f[9]), buffT: f[10] === '1' ? 1 : 0,
@@ -3094,7 +3120,7 @@ function modeUpdate(dt) {
       if (flagAtHome(own) && Math.hypot(c.x - own.home.x, c.y - own.home.y) < 110) {
         G.score[c.team]++; c.flag = null; f.carrier = null; f.x = f.home.x; f.y = f.home.y;
         ring(c.x, c.y, TEAM_COLOR[c.team], 160, .8); burst(c.x, c.y - 40, TEAM_COLOR[c.team], 40, 260, .8, 5);
-        pushEvent([[c.name, c.team], [' captured the ' + TEAM_NAME[f.team] + ' flag']]);
+        pushEvent([[c.name, c.team], [' captured the ' + TEAM_NAME[f.team] + ' flag']]); sfx('capture');
         globalBanner(TEAM_NAME[c.team] + ' captured a flag', `Flags ${G.score[0]}–${G.score[1]}, first to ${CTF_CAPS}`);
         if (G.score[c.team] >= CTF_CAPS) return winMatch(c.team);
       }
@@ -3104,7 +3130,7 @@ function modeUpdate(dt) {
     if (!home && (f.dropT -= dt) <= 0) { f.x = f.home.x; f.y = f.home.y; pushEvent([['The ' + TEAM_NAME[f.team] + ' flag returned home', f.team]]); continue; }
     for (const h of G.units) {
       if (h.kind !== 'hero' || !h.alive || Math.hypot(h.x - f.x, h.y - f.y) > 70) continue;
-      if (h.team !== f.team && !h.flag) { f.carrier = h; h.flag = f; pushEvent([[h.name, h.team], [' took the ' + TEAM_NAME[f.team] + ' flag']]); break; }
+      if (h.team !== f.team && !h.flag) { f.carrier = h; h.flag = f; pushEvent([[h.name, h.team], [' took the ' + TEAM_NAME[f.team] + ' flag']]); sfx('flag', h.x, h.y); break; }
       if (h.team === f.team && !home) { f.x = f.home.x; f.y = f.home.y; pushEvent([[h.name, h.team], [' returned their flag']]); break; }
     }
   }
@@ -3446,6 +3472,7 @@ function hatchEgg() {
 }
 function revealHatch() {
   const P = PETS[hatch.pet];
+  sfx(hatch.rarity === 'Secret' || hatch.rarity === 'Unique' || hatch.rarity === 'Legendary' ? 'evolve' : 'hatch');
   $('hatchTitle').textContent = hatch.rarity === 'Secret' ? `Secret pull! ${P.name} hatched!` : hatch.rarity === 'Unique' ? `Unique pull! ${P.name} hatched!` : `${P.name} hatched!`;
   if (hatch.rarity === 'Secret' || hatch.rarity === 'Unique' || hatch.rarity === 'Legendary') $('hatchTitle').style.color = RARITY_COLOR[hatch.rarity]; else $('hatchTitle').style.color = '';
   $('hatchSub').textContent = `${hatch.rarity} · ${P.desc}` + (hatch.dup ? ` You already had ${P.name}, so you got ${EGG_REFUND} Crowns back.` : '');
@@ -3488,7 +3515,7 @@ function drawHatch(now) {
     if (t - 2.6 < .6) { g.fillStyle = `rgba(255,250,230,${1 - (t - 2.6) / .6})`; g.fillRect(0, 0, S, S); }
   }
 }
-$('hatchCv').addEventListener('pointerdown', () => { hatch.taps++; });
+$('hatchCv').addEventListener('pointerdown', () => { hatch.taps++; sfx('crack'); });
 $('hatchEquip').addEventListener('click', () => { PROF.eq.pet = hatch.pet; saveProfile(); if (G.started && G.mode !== 'client') applyLoadout(); $('hatchEquip').hidden = true; });
 $('hatchAgain').addEventListener('click', hatchEgg);
 $('hatchBack').addEventListener('click', () => { storeTab = 'pets'; renderStore(); show('scr-store'); });
@@ -3612,10 +3639,10 @@ function drawLoadArt(info) {
   g.fillStyle = fade; g.fillRect(0, 0, w, h);
 }
 
-// ---------- music: one original orchestral hip-hop theme, synthesized in the browser ----------
+// ---------- music: original themes synthesized in the browser. The title screen always plays the Thornwake theme; menus and matches rotate through the rest ----------
 const VOL_KEY = 'thornwake.volume';
 const storedVol = store.get(VOL_KEY);
-const music = {ctx: null, out: null, vol: typeof storedVol === 'number' ? clamp(storedVol, 0, 1) : .7, next: 0, timer: 0, noise: null};
+const music = {ctx: null, out: null, bus: null, song: -1, reps: 0, title: false, vol: typeof storedVol === 'number' ? clamp(storedVol, 0, 1) : .7, next: 0, timer: 0, noise: null};
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 function tone(t, midi, dur, type, vol, cutoff, vib) {
   const a = music.ctx, o = a.createOscillator(), g = a.createGain(), f = a.createBiquadFilter();
@@ -3624,7 +3651,7 @@ function tone(t, midi, dur, type, vol, cutoff, vib) {
   f.type = 'lowpass'; f.frequency.value = cutoff;
   g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + Math.min(.15, dur * .3));
   g.gain.setValueAtTime(vol, t + dur * .75); g.gain.linearRampToValueAtTime(0, t + dur + .3);
-  o.connect(f); f.connect(g); g.connect(music.out); o.start(t); o.stop(t + dur + .4);
+  o.connect(f); f.connect(g); g.connect(music.bus); o.start(t); o.stop(t + dur + .4);
 }
 // Original hip-hop beat: boom-bap drums, 808 bass and a dark string riff in D minor, 88 bpm.
 function noiseHit(t, vol, dur, type, freq) {
@@ -3633,20 +3660,20 @@ function noiseHit(t, vol, dur, type, freq) {
   const n = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
   n.buffer = music.noise; f.type = type; f.frequency.value = freq;
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
-  n.connect(f); f.connect(g); g.connect(music.out); n.start(t, Math.random() * .5); n.stop(t + dur + .05);
+  n.connect(f); f.connect(g); g.connect(music.bus); n.start(t, Math.random() * .5); n.stop(t + dur + .05);
 }
 function kick(t, vol) {
   const a = music.ctx, o = a.createOscillator(), g = a.createGain();
   o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + .12);
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + .4);
-  o.connect(g); g.connect(music.out); o.start(t); o.stop(t + .45);
+  o.connect(g); g.connect(music.bus); o.start(t); o.stop(t + .45);
 }
 function bass808(t, midi, dur) {
   const a = music.ctx, o = a.createOscillator(), g = a.createGain(), sh = a.createWaveShaper();
   const curve = new Float32Array(256); for (let i = 0; i < 256; i++) { const x = i / 128 - 1; curve[i] = Math.tanh(x * 2.2); } sh.curve = curve;
   o.type = 'sine'; o.frequency.setValueAtTime(mtof(midi) * 1.5, t); o.frequency.exponentialRampToValueAtTime(mtof(midi), t + .06);
   g.gain.setValueAtTime(.32, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
-  o.connect(sh); sh.connect(g); g.connect(music.out); o.start(t); o.stop(t + dur + .05);
+  o.connect(sh); sh.connect(g); g.connect(music.bus); o.start(t); o.stop(t + dur + .05);
 }
 function scheduleHiphop(start) {
   const step = 60 / 88 / 4, bar = step * 16;
@@ -3666,10 +3693,71 @@ function scheduleHiphop(start) {
   });
   return start + ROOTS.length * bar;
 }
+// Ironclad March: war drums, rolling hats, brass stabs and a horn call in E minor, 96 bpm.
+function scheduleMarch(start) {
+  const step = 60 / 96 / 4, bar = step * 16;
+  const ROOTS = [40, 40, 36, 38, 40, 40, 43, 35];
+  const HORN = [[0, 76, 3], [4, 79, 2], [6, 78, 2], [8, 76, 6], [0, 74, 3], [4, 76, 2], [6, 71, 2], [8, 71, 6]];
+  ROOTS.forEach((root, b) => {
+    const bt = start + b * bar;
+    for (const st of [0, 3, 8, 11]) kick(bt + st * step, st % 8 ? .4 : .6);
+    for (const st of [4, 12]) { noiseHit(bt + st * step, .34, .2, 'bandpass', 1500); kick(bt + st * step, .25); }
+    for (let st = 0; st < 16; st++) noiseHit(bt + st * step, st % 2 ? .03 : .06, .04, 'highpass', 8000);
+    if (b % 2) for (let i = 0; i < 6; i++) noiseHit(bt + (14 + i / 3) * step, .04 + i * .01, .04, 'highpass', 7500);
+    bass808(bt, root, bar * .3); bass808(bt + 8 * step, root, bar * .3);
+    for (const st of [0, 6, 10]) for (const iv of [12, 19, 24]) tone(bt + st * step, root + iv, step * 1.2, 'sawtooth', .025, 1400);
+    const [st, m, len] = HORN[b];
+    tone(bt + st * step, m, step * len, 'sawtooth', .045, 1800, true); tone(bt + st * step, m - 12, step * len, 'triangle', .035, 900);
+  });
+  return start + ROOTS.length * bar;
+}
+// Ember Skies: a mellow lo-fi groove with soft keys and a plucked melody in A minor, 80 bpm.
+function scheduleEmber(start) {
+  const step = 60 / 80 / 4, bar = step * 16;
+  const CHORDS = [[57, 60, 64, 67], [53, 57, 60, 64], [55, 59, 62, 65], [52, 56, 59, 64]];
+  const MEL = [[0, 76], [2, 79], [4, 76], [7, 74], [10, 72], [12, 74]];
+  for (let b = 0; b < 8; b++) {
+    const bt = start + b * bar, ch = CHORDS[b % 4];
+    for (const st of [0, 7, 10]) kick(bt + st * step, .35);
+    for (const st of [4, 12]) noiseHit(bt + st * step, .14, .14, 'bandpass', 2400);
+    for (let st = 0; st < 16; st += 2) noiseHit(bt + st * step + (st % 4 ? step * .2 : 0), .035, .05, 'highpass', 6500);
+    bass808(bt, ch[0] - 24, bar * .4); bass808(bt + 8 * step, ch[0] - 24, bar * .25);
+    for (const st of [0, 6]) for (const m of ch) tone(bt + st * step, m, step * 5, 'triangle', .03, 1200);
+    if (b % 4 !== 3) for (const [st, m] of MEL) tone(bt + st * step, m - (b >= 4 ? 5 : 0), step * 1.5, 'square', .018, 1600);
+  }
+  return start + 8 * bar;
+}
+// Dragonfire: a driving battle theme with a pulsing bass, choir pad and a heroic lead in F minor, 108 bpm.
+function scheduleDragonfire(start) {
+  const step = 60 / 108 / 4, bar = step * 16;
+  const ROOTS = [41, 37, 39, 36, 41, 37, 44, 43];
+  const LEAD = [[0, 77, 4], [4, 80, 2], [6, 79, 2], [8, 77, 4], [12, 75, 4]];
+  ROOTS.forEach((root, b) => {
+    const bt = start + b * bar, minor = root === 41 || root === 36;
+    for (let st = 0; st < 16; st += 4) kick(bt + st * step, .5);
+    for (const st of [4, 12]) noiseHit(bt + st * step, .3, .16, 'bandpass', 2000);
+    for (let st = 2; st < 16; st += 4) noiseHit(bt + st * step, .07, .06, 'highpass', 7000);
+    for (let st = 0; st < 16; st += 2) tone(bt + st * step, root, step * 1.4, 'sawtooth', .05, 500);
+    for (const iv of [12, minor ? 15 : 16, 19, 24]) tone(bt, root + iv, bar * .95, 'sine', .022, 2000, true);
+    if (b >= 2) for (const [st, m, len] of LEAD) tone(bt + st * step, m + (b >= 6 ? 3 : 0) - (b % 2 ? 2 : 0), step * len, 'sawtooth', .04, 2400, true);
+  });
+  return start + ROOTS.length * bar;
+}
+const SONGS = [scheduleHiphop, scheduleMarch, scheduleEmber, scheduleDragonfire];
+// Sound can only start after the first click, which is usually Play, so the main menu keeps the title song too.
+const onTitle = () => !overlay.hidden && (currentScreen === 'scr-title' || currentScreen === 'scr-main');
+// The title screen and main menu loop the main theme; elsewhere each other song plays three times through, then the next one starts.
+function nextSong() {
+  if (music.title) return 0;
+  if (music.song > 0 && music.reps < 3) return music.song;
+  return music.song > 0 && music.song < SONGS.length - 1 ? music.song + 1 : 1;
+}
+function newBus() { music.bus = music.ctx.createGain(); music.bus.connect(music.out); }
 function scheduleLoop() {
   if (!music.ctx || music.vol <= 0) return;
-  const a = music.ctx, start = Math.max(music.next, a.currentTime + .1);
-  music.next = scheduleHiphop(start);
+  const a = music.ctx, start = Math.max(music.next, a.currentTime + .1), s = nextSong();
+  music.reps = s === music.song ? music.reps + 1 : 1; music.song = s;
+  music.next = SONGS[s](start);
   clearTimeout(music.timer);
   music.timer = setTimeout(scheduleLoop, Math.max(0, (music.next - a.currentTime - 1.5) * 1000));
 }
@@ -3681,10 +3769,21 @@ function musicStart() {
       music.ctx = new A();
       const comp = music.ctx.createDynamicsCompressor(); comp.connect(music.ctx.destination);
       music.out = music.ctx.createGain(); music.out.gain.value = .6 * music.vol; music.out.connect(comp);
+      newBus();
     }
     music.ctx.resume();
     if (music.next < music.ctx.currentTime) { music.next = 0; scheduleLoop(); }
   } catch (e) { /* audio unavailable */ }
+}
+// Fades out the current song and starts the right one when moving onto or off the title screen.
+function musicScene() {
+  const title = onTitle();
+  if (title === music.title) return;
+  music.title = title;
+  if (!music.ctx || !music.next) return;
+  const old = music.bus;
+  old.gain.setTargetAtTime(0, music.ctx.currentTime, .3); setTimeout(() => old.disconnect(), 4000);
+  newBus(); music.next = 0; scheduleLoop();
 }
 function setVolume(v) {
   music.vol = clamp(v, 0, 1); store.set(VOL_KEY, music.vol);
@@ -3697,6 +3796,58 @@ for (const id of ['m-vol', 'p-vol']) $(id).addEventListener('input', e => setVol
 document.addEventListener('pointerdown', musicStart);
 document.addEventListener('keydown', musicStart);
 volLabels();
+
+// ---------- sound effects for character actions, synthesized like the music and set by the same volume slider ----------
+function sweep(t, type, f0, f1, dur, vol) {
+  const a = music.ctx, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  o.connect(g); g.connect(music.out); o.start(t); o.stop(t + dur + .02);
+}
+const notes = (t, list, gap, dur, vol, type = 'triangle') => list.forEach((m, i) => sweep(t + i * gap, type, mtof(m), mtof(m) * .998, dur, vol));
+// gap: shortest time between two plays of the same sound, so big fights don't turn into noise
+const SFX = {
+  swing:   {gap: .07, play: (t, v) => { noiseHit(t, .26 * v, .13, 'bandpass', 2600); sweep(t, 'triangle', 340, 110, .11, .12 * v); }},
+  shot:    {gap: .07, play: (t, v) => { sweep(t, 'square', 1500, 420, .09, .05 * v); noiseHit(t, .1 * v, .05, 'highpass', 5000); }},
+  tower:   {gap: .25, play: (t, v) => { sweep(t, 'sawtooth', 900, 180, .32, .07 * v); noiseHit(t, .16 * v, .3, 'lowpass', 1200); }},
+  claw:    {gap: .3,  play: (t, v) => { sweep(t, 'sawtooth', 150, 60, .35, .1 * v); noiseHit(t, .14 * v, .25, 'lowpass', 700); }},
+  minion:  {gap: .18, play: (t, v) => noiseHit(t, .06 * v, .05, 'bandpass', 1600)},
+  hit:     {gap: .09, play: (t, v) => { sweep(t, 'sine', 230, 80, .12, .22 * v); noiseHit(t, .12 * v, .07, 'bandpass', 900); }},
+  hurt:    {gap: .14, play: (t, v) => { sweep(t, 'sine', 180, 55, .16, .32 * v); noiseHit(t, .18 * v, .09, 'lowpass', 1400); }},
+  pop:     {gap: .1,  play: (t, v) => sweep(t, 'triangle', 620, 150, .11, .1 * v)},
+  thud:    {gap: .2,  play: (t, v) => { sweep(t, 'sine', 130, 40, .4, .35 * v); noiseHit(t, .15 * v, .3, 'lowpass', 600); }},
+  roar:    {gap: .5,  play: (t, v) => { sweep(t, 'sawtooth', 220, 45, 1.2, .14 * v); sweep(t + .05, 'sawtooth', 160, 38, 1.1, .1 * v); noiseHit(t, .25 * v, 1, 'lowpass', 900); }},
+  death:   {gap: .3,  play: (t, v) => { sweep(t, 'square', 620, 90, .7, .06 * v); sweep(t, 'sine', 160, 40, .6, .3 * v); }},
+  crumble: {gap: .5,  play: (t, v) => { noiseHit(t, .4 * v, 1.2, 'lowpass', 700); sweep(t, 'sine', 90, 28, 1, .4 * v); }},
+  bolt:    {gap: .08, play: (t, v) => { sweep(t, 'sawtooth', 260, 1300, .22, .06 * v); noiseHit(t, .12 * v, .2, 'bandpass', 3000); }},
+  impact:  {gap: .08, play: (t, v) => { sweep(t, 'sine', 240, 50, .25, .3 * v); noiseHit(t, .2 * v, .2, 'lowpass', 1600); }},
+  shield:  {gap: .2,  play: (t, v) => { sweep(t, 'triangle', 600, 900, .45, .1 * v); sweep(t + .04, 'triangle', 900, 1350, .45, .07 * v); }},
+  blink:   {gap: .2,  play: (t, v) => { sweep(t, 'sine', 1800, 300, .16, .12 * v); sweep(t + .12, 'sine', 400, 1600, .16, .1 * v); }},
+  ult:     {gap: .3,  play: (t, v) => { sweep(t, 'sawtooth', 180, 900, .55, .07 * v); notes(t, [62, 69, 74], .08, .5, .06 * v); }},
+  zap:     {gap: .2,  play: (t, v) => { for (let i = 0; i < 4; i++) sweep(t + i * .05, 'square', 2200 - i * 300, 500, .07, .05 * v); noiseHit(t, .15 * v, .25, 'highpass', 4000); }},
+  boom:    {gap: .15, play: (t, v) => { sweep(t, 'sine', 120, 32, .8, .5 * v); noiseHit(t, .35 * v, .9, 'lowpass', 900); }},
+  levelup: {gap: .3,  play: (t, v) => notes(t, [74, 78, 81, 86], .07, .35, .09 * v)},
+  evolve:  {gap: .5,  play: (t, v) => { notes(t, [62, 66, 69, 74, 78, 81, 86], .07, .6, .08 * v); sweep(t + .5, 'sine', 110, 40, .9, .35 * v); }},
+  respawn: {gap: .5,  play: (t, v) => notes(t, [69, 74, 78], .1, .45, .08 * v)},
+  pet:     {gap: .2,  play: (t, v) => { sweep(t, 'sine', 900, 1600, .07, .07 * v); sweep(t + .07, 'sine', 1200, 1900, .06, .05 * v); }},
+  flag:    {gap: .4,  play: (t, v) => notes(t, [67, 72], .12, .3, .09 * v, 'square')},
+  capture: {gap: .5,  play: (t, v) => notes(t, [67, 72, 76, 79], .1, .5, .08 * v, 'square')},
+  crack:   {gap: .06, play: (t, v) => { noiseHit(t, .3 * v, .06, 'bandpass', 3200); sweep(t, 'triangle', 700, 300, .05, .06 * v); }},
+  hatch:   {gap: .5,  play: (t, v) => { noiseHit(t, .3 * v, .25, 'highpass', 3000); notes(t + .05, [76, 81, 84, 88], .06, .45, .08 * v); }},
+};
+const sfxLast = {};
+// Plays a sound; with a position it fades with distance from the camera and stays silent off screen.
+function sfx(name, x, y) {
+  const S = SFX[name];
+  if (!S || !music.ctx || music.vol <= 0 || document.hidden) return;
+  let v = 1;
+  if (x !== undefined && G && G.cam) { const d = Math.hypot(x - G.cam.x, y - G.cam.y); if (d > 1300) return; v = 1 - d / 1700; }
+  const t = music.ctx.currentTime;
+  if (t - (sfxLast[name] || -1) < S.gap) return;
+  sfxLast[name] = t;
+  const bus = music.bus; music.bus = music.out;
+  try { S.play(t + .01, v); } catch (e) { /* audio unavailable */ } finally { music.bus = bus; }
+}
 
 // ---------- touch controls (phones and tablets) ----------
 const touchUI = {on: matchMedia('(pointer: coarse)').matches, vx: 0, vy: 0, id: null, last: 0, moving: false};
