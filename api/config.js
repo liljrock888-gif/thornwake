@@ -10,6 +10,10 @@ const PRODUCTS = {
   crowns_6500: {name: 'Dragon Hoard', desc: '6,500 Crowns (about 30% bonus)', cents: 999, grant: {crowns: 6500}},
   starter:     {name: 'Starter Pack', desc: '1,000 Crowns and the Gilded skin. One per player.', cents: 199, grant: {crowns: 1000, skin: 'gilded'}, once: true},
   game_pass:   {name: 'Game Pass Premium', desc: 'Unlocks the premium reward track for Season 1. One per player.', cents: 299, grant: {premium: true}, once: true},
+  // Mythic superhero bundles: a hero, their pet and 500 Crowns. One per player.
+  bundle_volt:       {name: 'Volt Mythic Bundle', desc: 'Volt, the Mythic lightning speedster, with the Mythic pet Sparky, and 500 Crowns.', cents: 999, grant: {hero: 'volt', pet: 'sparky', crowns: 500}, once: true, bundle: true},
+  bundle_aegis:      {name: 'Aegis Mythic Bundle', desc: 'Aegis, the Mythic shield guardian, with the Mythic pet Bulwark, and 500 Crowns.', cents: 999, grant: {hero: 'aegis', pet: 'bulwark', crowns: 500}, once: true, bundle: true},
+  bundle_nightshade: {name: 'Nightshade Mythic Bundle', desc: 'Nightshade, the Mythic shadow vigilante, with the Mythic pet Echo, and 500 Crowns.', cents: 999, grant: {hero: 'nightshade', pet: 'echo', crowns: 500}, once: true, bundle: true},
 };
 const PLAYER_ID = /^[a-zA-Z0-9-]{8,64}$/;
 
@@ -65,6 +69,6 @@ module.exports = (req, res) => {
     // Supabase powers accounts, cloud saves and online play. The anon key is meant to be public;
     // row-level security in the database keeps each player's save private.
     supabase: process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY ? {url: process.env.SUPABASE_URL, anonKey: process.env.SUPABASE_ANON_KEY} : null,
-    products: Object.entries(PRODUCTS).map(([id, p]) => ({id, name: p.name, desc: p.desc, cents: p.cents, once: !!p.once})),
+    products: Object.entries(PRODUCTS).map(([id, p]) => ({id, name: p.name, desc: p.desc, cents: p.cents, once: !!p.once, bundle: !!p.bundle})),
   });
 };
