@@ -18,6 +18,7 @@ html,body{height:100%;margin:0;background:var(--night);color:var(--ink);overflow
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.45)}
 button{font-family:var(--ui);color:var(--ink)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);outline-offset:3px;box-shadow:0 0 0 6px rgba(242,193,78,.25)}
 .tide{color:var(--tide)} .ash{color:var(--ash)}
 
 #top{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;padding:6px 16px;font-variant-numeric:tabular-nums}
@@ -590,10 +591,10 @@ const ROSTER = [
   {team: 0, name: 'Oru', color: '#7fe0a8', lane: 'mid', build: 'ap', look: 'shaman', cls: 'Storm Shaman', price: 600, stat: {ap: 1.18, hp: 1.05}},
   // army men
   {team: 0, name: 'Sarge', color: '#c9d36a', lane: 'mid', build: 'ad', look: 'soldier', cls: 'Rifleman', price: 350, stat: {ad: 1.08, ms: 1.03}},
-  {team: 0, name: 'Viper', color: '#9fd18a', lane: 'mid', build: 'ad', look: 'sniper', cls: 'Sniper', price: 400, stat: {ad: 1.1, range: 1.3, hp: .88}},
+  {team: 0, name: 'Viper', color: '#9fd18a', lane: 'mid', build: 'ad', look: 'sniper', cls: 'Sniper', price: 400, stat: {ad: 1.18, hp: .9}},
   {team: 0, name: 'Tank', color: '#e0a060', lane: 'mid', build: 'ad', look: 'heavy', cls: 'Heavy Gunner', price: 450, stat: {hp: 1.25, ad: 1.05, ms: .94}},
   // monsters
-  {team: 0, name: 'Grimfang', color: '#8a8f9c', lane: 'mid', build: 'ad', look: 'werewolf', cls: 'Werewolf', price: 450, stat: {ad: 1.18, ms: 1.08, range: .5}},
+  {team: 0, name: 'Grimfang', color: '#8a8f9c', lane: 'mid', build: 'ad', look: 'werewolf', cls: 'Werewolf', price: 450, stat: {ad: 1.18, ms: 1.08}},
   {team: 0, name: 'Bouldar', color: '#8a9a7a', lane: 'mid', build: 'ad', look: 'golemkin', cls: 'Stone Golem', price: 500, stat: {hp: 1.35, ms: .92}},
   {team: 0, name: 'Emberwing', color: '#ff7a2a', lane: 'mid', build: 'ap', look: 'drakeling', cls: 'Young Drake', price: 600, stat: {ap: 1.15, hp: 1.05}},
   {team: 0, name: 'Gobbo', color: '#7fd16a', lane: 'mid', build: 'ad', look: 'goblinking', cls: 'Goblin King', price: 400, stat: {hp: 1.1, ad: 1.1}},
@@ -864,7 +865,7 @@ function reset(heroIdx = 0, cfg = null) {
       kit: {q: 'bolt', r: 'starfall'}, statMul: r.stat || null, baseColor: r.color, flag: null,
       x: f.x + rand(-60, 60), y: f.y + rand(-60, 60), r: 24,
       level: 1, xp: 0, gold: 500, earned: 500, items: [], maxHp: 620, mana: 300, maxMana: 300, ad: 55, ap: 0, range: 470, atkCd: .95, speed: 330,
-      ranged: true, cds: {q: 0, w: 0, e: 0, r: 0}, kills: 0, deaths: 0, respawn: 0, cmd: null, think: rand(0, .3), state: 'shop', haste: 0, lifesteal: 0,
+      ranged: false, cds: {q: 0, w: 0, e: 0, r: 0}, kills: 0, deaths: 0, respawn: 0, cmd: null, think: rand(0, .3), state: 'shop', haste: 0, lifesteal: 0,
       aggroT: 0, jx: 0, jy: 0, jT: 0, remote: null, human: i === pi});
     recalc(h); h.hp = h.maxHp; h.mana = h.maxMana;
     if (i === pi) G.player = h;
@@ -886,13 +887,15 @@ function recalc(h) {
   const s = {hp: 0, mana: 0, ad: 0, ap: 0, ms: 0, as: 0, cdr: 0, ls: 0};
   for (const id of h.items) { const it = ITEMS[id]; for (const k in s) s[k] += it[k] || 0; }
   const oldHp = h.maxHp, oldMana = h.maxMana, L = h.level - 1, f = formOf(h.level), fm = 1 + .12 * f;
-  const sm = h.statMul || {}, petHp = h.pet && PETS[h.pet.kind] && PETS[h.pet.kind].hp || 1;
-  h.maxHp = (620 + 88 * L + s.hp) * fm * (sm.hp || 1) * petHp; h.hp += Math.max(0, h.maxHp - oldHp);
+  const sm = h.statMul || {}, pb = (h.pet && PETS[h.pet.kind] && PETS[h.pet.kind].buff) || {};
+  h.maxHp = (620 + 88 * L + s.hp) * fm * (sm.hp || 1) * (pb.hp || 1); h.hp += Math.max(0, h.maxHp - oldHp);
   h.maxMana = 300 + 35 * L + s.mana; h.mana += Math.max(0, h.maxMana - oldMana);
-  h.ad = (55 + 4 * L + s.ad) * fm * (sm.ad || 1); h.ap = (s.ap + 4 * L) * fm * (sm.ap || 1); h.speed = (330 + s.ms + 8 * f) * (sm.ms || 1);
-  h.range = 470 * (sm.range || 1);
-  h.atkCd = 0.95 / (1 + 0.025 * L + s.as); h.haste = Math.min(0.4, s.cdr); h.lifesteal = s.ls;
+  h.ad = (55 + 4 * L + s.ad) * fm * (sm.ad || 1) * (pb.ad || 1); h.ap = (s.ap + 4 * L) * fm * (sm.ap || 1) * (pb.ap || 1);
+  h.speed = (330 + s.ms + 8 * f) * (sm.ms || 1) * (pb.ms || 1);
+  h.range = HERO_REACH; // heroes only basic-attack what they're touching
+  h.atkCd = 0.95 / (1 + 0.025 * L + s.as + (pb.as || 0)); h.haste = Math.min(0.45, s.cdr + (pb.cdr || 0)); h.lifesteal = s.ls;
 }
+const HERO_REACH = 45; // gap between hero and target edges that still counts as contact
 const xpNeed = l => 90 + 45 * l;
 const rDamage = h => 150 + 38 * h.level + 0.9 * h.ap;
 function gainXp(h, x) {
@@ -946,14 +949,15 @@ function tryAttack(u, t) {
       speed: projSpeed(u), size: projSize(u), color: projColor(u)});
   } else {
     damage(t, dmg, u);
-    burst(t.x, t.y, '#e8dcc0', 3, 90, .25, 2);
+    if (u.lifesteal && u.alive) u.hp = Math.min(u.maxHp, u.hp + dmg * u.lifesteal);
+    burst(t.x, t.y, u.kind === 'hero' ? u.color : '#e8dcc0', u.kind === 'hero' ? 7 : 3, 120, .25, 2.5);
   }
 }
 const projSpeed = u => u.kind === 'tower' ? 850 : u.kind === 'hero' ? 1300 : 900;
 const projSize = u => u.kind === 'tower' ? 10 : u.kind === 'hero' ? 7 : u.kind === 'monster' ? 13 : 5;
 const projColor = u => u.kind === 'hero' ? (LOOKS[u.look] && LOOKS[u.look].tracer) || u.color : u.fire || TEAM_COLOR[u.team];
 function damage(t, amt, src) {
-  if (!t.alive) return;
+  if (!t.alive || t.protectUntil > G.time) return; // just respawned
   if (src && src.kind === 'hero') amt *= (1 + DRAKE_BONUS * G.dragons[src.team]) * (src.mightUntil > G.time ? 1.3 : 1);
   if (G.mode === 'solo' && src && src.team === 1 - G.player.team) amt *= G.diff.dmg;
   if (t.kind === 'monster' && src && src.kind === 'hero' && !t.resetting) {
@@ -1001,7 +1005,7 @@ function kill(t, src) {
     }
   } else if (t.kind === 'hero') {
     burst(t.x, t.y, t.color, 30, 260, .8, 5); ring(t.x, t.y, TEAM_COLOR[t.team], 90, .7); sfx('death', t.x, t.y);
-    t.deaths++; t.respawn = G.cfg.mode === 'tdm' || G.cfg.mode === 'ctf' ? 4 + t.level : 6 + 2 * t.level; t.cmd = null; t.shield = 0;
+    t.deaths++; t.respawn = G.cfg.mode === 'tdm' || G.cfg.mode === 'ctf' ? 3 + .6 * t.level : 5 + 1.1 * t.level; t.cmd = null; t.shield = 0;
     if (killer) {
       killer.kills++; giveGold(killer, 300); G.kills[killer.team]++;
       pushEvent([[killer.name, killer.team], [' slew '], [t.name, t.team]]);
@@ -1135,6 +1139,9 @@ function updateHero(h, dt) {
     if (h.respawn <= 0) {
       const f = FOUNTAIN[h.team];
       h.alive = true; h.x = f.x + rand(-40, 40); h.y = f.y + rand(-40, 40); h.hp = h.maxHp; h.mana = h.maxMana; h.cmd = null; h.state = 'shop';
+      Object.assign(h, {protectUntil: G.time + 3, slowUntil: 0, shield: 0, shieldT: 0, atkT: 0, vx: 0, vy: 0});
+      if (h.pet) { h.pet.x = h.x - 40; h.pet.y = h.y + 10; }
+      if (h.isPlayer) { G.cam.x = h.x; G.cam.y = h.y; }
       if (h.isPlayer) { banner('You have respawned', 'Open the shop before leaving the fountain.'); sfx('respawn'); }
     }
     return;
@@ -1153,12 +1160,12 @@ function updateHero(h, dt) {
   if (c && c.type === 'attack') {
     const t = c.target;
     if (!valid(t, h)) h.cmd = null;
-    else if (dist(h, t) <= h.range + t.r) { h.face = Math.atan2(t.y - h.y, t.x - h.x); tryAttack(h, t); }
+    else if (dist(h, t) <= h.range + t.r + h.r) { h.face = Math.atan2(t.y - h.y, t.x - h.x); tryAttack(h, t); }
     else moveToward(h, t.x, t.y, dt);
   } else if (c && c.type === 'move') {
     if (moveToward(h, c.x, c.y, dt)) h.cmd = null;
   } else if (h.atkT <= 0) {
-    const t = nearestEnemy(h, h.range, null, 0.8);
+    const t = nearestEnemy(h, h.range + h.r, null, 0.8);
     if (t) tryAttack(h, t);
   }
   h.vx = (h.x - px) / dt; h.vy = (h.y - py) / dt;
@@ -1565,9 +1572,17 @@ function drawMenuArt(now) {
 
 function render() {
   if (!G.started) { drawMenuArt(performance.now() / 1000); return; }
-  const p = G.player, cam = G.cam;
-  const tgt = p.alive ? p : FOUNTAIN[p.team];
-  cam.x += (tgt.x - cam.x) * .25; cam.y += (tgt.y - cam.y) * .25;
+  const p = G.player, cam = G.cam, tnow = performance.now(), cdt = Math.min(.05, (tnow - (cam.t || tnow)) / 1000); cam.t = tnow;
+  // look ahead of the hero, and stay where you fell while waiting to respawn
+  let lx = 0, ly = 0;
+  if (p.alive) {
+    const sp = Math.hypot(p.vx || 0, p.vy || 0), lead = Math.min(1, sp / 330) * 150;
+    if (sp > 20) { lx = p.vx / sp * lead; ly = p.vy / sp * lead; }
+    if (G.pad && pad.aim !== null) { lx += Math.cos(pad.aim) * 140; ly += Math.sin(pad.aim) * 140; }
+  }
+  cam.lx = (cam.lx || 0) + (lx - (cam.lx || 0)) * (1 - Math.exp(-cdt * 2.5)); cam.ly = (cam.ly || 0) + (ly - (cam.ly || 0)) * (1 - Math.exp(-cdt * 2.5));
+  const k = 1 - Math.exp(-cdt * 7);
+  cam.x += (p.x + cam.lx - cam.x) * k; cam.y += (p.y + cam.ly - cam.y) * k;
   const hw = cw / 2 / Z, hh = ch / 2 / Z;
   // on touch screens the camera may look a little past the map edge, so a hero near a corner isn't hidden under the thumb controls
   const edge = touchUI.on ? 170 / Z : 0;
@@ -1734,6 +1749,7 @@ function drawUnit(u, now) {
       ctx.beginPath(); ctx.ellipse(u.x, u.y - 22, 30 + Math.sin(now * 8) * 2, 46, 0, 0, 7); ctx.stroke();
     }
     for (const [k, c] of [['rapidUntil', '#f2c14e'], ['mightUntil', '#ff6a4d'], ['hasteUntil', '#7fd1ff']]) if (u[k] > G.time && Math.random() < .35) G.fx.push({x: u.x + rand(-18, 18), y: u.y - rand(0, 50), vx: 0, vy: rand(-40, -15), t: .5, max: .5, color: c, r: 3});
+    if (u.protectUntil > G.time && Math.random() < .5) G.fx.push({x: u.x + rand(-24, 24), y: u.y - rand(0, 60), vx: 0, vy: -30, t: .5, max: .5, color: '#fff3c9', r: 2.5});
     if (u.slowUntil > G.time && Math.random() < .5) G.fx.push({x: u.x + rand(-16, 16), y: u.y - rand(0, 40), vx: 0, vy: rand(-20, 10), t: .4, max: .4, color: '#bfefff', r: 2.5});
     if (u.buffT > 0 && Math.random() < .5) G.fx.push({x: u.x + rand(-15, 15), y: u.y + 14, vx: -u.vx * .2, vy: -u.vy * .2, t: .3, max: .3, color: '#7fd1c7', r: 3});
     if (u.trail && (Math.abs(u.vx) + Math.abs(u.vy) > 20) && Math.random() < .7) G.fx.push({x: u.x + rand(-8, 8), y: u.y + 12, vx: rand(-15, 15), vy: rand(-30, -5), t: .5, max: .5, color: u.trail, r: 3.5});
@@ -2260,7 +2276,7 @@ function drawMini(vx, vy, vw, vh) {
 }
 mini.addEventListener('pointerdown', e => {
   e.stopPropagation();
-  if (!inGame() || !G.player.alive) return;
+  if (!inGame() || !G.player.alive || e.pointerType === 'touch') return;
   const r = mini.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
   commandMove(x, y); G.marker = {x, y, t: .4};
@@ -2324,6 +2340,8 @@ function issueAt(sx, sy, click) {
 cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('pointerdown', e => {
   if (!inGame()) return;
+  // on touch screens only the joystick moves you; tapping the map does nothing
+  if (e.pointerType === 'touch') { G.touch = true; G.pad = false; return; }
   const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
   G.touch = e.pointerType === 'touch'; G.pad = false;
   if (!shopEl.hidden && !G.touch) closeShop();
@@ -2338,6 +2356,7 @@ cv.addEventListener('pointermove', e => {
   if (G.started) { const w = toWorld(mouse.x, mouse.y); cv.style.cursor = pickEnemy(w.x, w.y, G.player.team) ? 'crosshair' : 'default'; }
 });
 window.addEventListener('pointerup', () => holding = false);
+window.addEventListener('pointerdown', () => document.body.classList.remove('padnav'));
 window.addEventListener('blur', () => holding = false);
 
 const abEls = {};
@@ -2390,6 +2409,7 @@ function readPad() {
 function pollPad() {
   const gp = readPad();
   if (!gp) { pad.aim = null; return; }
+  document.body.classList.add('padnav'); // show which button the controller has selected
   if (!pad.seen) {
     pad.seen = true; $('padHint').textContent = 'Controller connected. Use the D-pad and A to choose, B to go back.';
     if (store.get(TV_KEY) == null && innerWidth >= 1280) setTv(true, false);
@@ -2417,11 +2437,14 @@ function pollPad() {
     const p = G.player;
     if (lx || ly || rx || ry || gp.buttons.some(x => x.pressed)) { G.pad = true; G.touch = false; }
     if (lx || ly) {
-      if (now - pad.lastMove > 100) { pad.lastMove = now; G.holdAttack = false; commandMove(p.x + lx * 170, p.y + ly * 170); }
+      // steer toward a point a fixed distance away so movement is smooth at any stick angle
+      const m = Math.hypot(lx, ly), gap = G.mode === 'client' ? 100 : 40;
+      if (now - pad.lastMove > gap) { pad.lastMove = now; G.holdAttack = false; commandMove(p.x + lx / m * 260, p.y + ly / m * 260); }
       pad.moving = true;
     } else if (pad.moving) { pad.moving = false; commandStop(); }
     pad.aim = rx || ry ? Math.atan2(ry, rx) : null;
-    if (hit(0)) attackNearest();
+    // A attacks; holding it keeps picking the next target
+    if (hit(0) || (b(0) && !pad.moving && !(p.cmd && p.cmd.type === 'attack') && now - (pad.lastAtk || 0) > 300)) { pad.lastAtk = now; attackNearest(); }
     if (hit(2)) playerCast('q');
     if (hit(3)) playerCast('w');
     if (hit(1)) playerCast('e');
@@ -2434,8 +2457,9 @@ function pollPad() {
 window.addEventListener('gamepadconnected', () => { $('padHint').textContent = 'Controller connected. Use the D-pad and A to choose, B to go back.'; });
 function attackNearest() {
   const p = G.player;
-  let t = nearestEnemy(p, p.range + 250, u => u.kind === 'hero') || nearestEnemy(p, p.range + 250);
-  if (!t) { let bd = p.range + 150; for (const u of G.units) if (u.alive && u.kind === 'monster' && dist(u, p) < bd) { bd = dist(u, p); t = u; } }
+  // pick a target within a short walk; the hero walks up and hits it on contact
+  let t = nearestEnemy(p, 650, u => u.kind === 'hero') || nearestEnemy(p, 650);
+  if (!t) { let bd = 600; for (const u of G.units) if (u.alive && u.kind === 'monster' && dist(u, p) < bd) { bd = dist(u, p); t = u; } }
   if (t) { commandAttack(t); G.marker = {x: t.x, y: t.y, t: .4, atk: true}; }
 }
 function menuRoot() {
@@ -2514,7 +2538,7 @@ function updateHud() {
     e.el.classList.toggle('nomana', p.mana < a.mana);
   }
   hud.dead.hidden = p.alive || !playing;
-  if (!p.alive) hud.deadTxt.textContent = 'Respawning in ' + Math.ceil(p.respawn);
+  if (!p.alive) hud.deadTxt.textContent = 'Respawning in ' + Math.max(1, Math.ceil(p.respawn));
   const tag = $('netTag');
   tag.hidden = false;
   tag.textContent = G.mode === 'solo' ? (G.cfg.ranked ? 'Ranked' : G.cfg.stage >= 0 ? 'Stage ' + (G.cfg.stage + 1) : G.diff.name) : (G.mode === 'host' ? 'Hosting ' : 'Online ') + (NET.code || '').toUpperCase();
@@ -3392,15 +3416,25 @@ const BOOSTS = {
   xp2: {name: 'Pass XP Booster', desc: 'Doubles the Game Pass XP from your next match.', price: 125},
 };
 const PETS = {
-  pip:       {name: 'Pip', kind: 'drake', color: '#ff8a4a', belly: '#ffd29a', desc: 'Baby fire drake. Spits fireballs at enemies near you.', price: 250, dmg: 16},
-  frostling: {name: 'Frostling', kind: 'drake', color: '#8fd8ff', belly: '#e6f8ff', desc: 'Baby frost drake. Spits ice and slowly heals you.', price: 350, dmg: 10, heal: .006},
-  mossy:     {name: 'Mossy', kind: 'golem', color: '#8a9a7a', desc: 'Pocket golem. Bonks enemies and gives you 8% more health.', price: 250, dmg: 12, hp: 1.08},
-  glimmer:   {name: 'Glimmer', kind: 'wisp', color: '#c79bff', desc: 'Sparkly wisp. Zaps enemies and keeps your mana topped up.', price: 200, dmg: 9, mana: 3},
-  nugget:    {name: 'Nugget', kind: 'goblin', color: '#7fd16a', desc: 'Baby goblin. Pokes enemies and finds 1 extra gold every second.', price: 200, dmg: 9, gold: 1},
-  sparkwing: {name: 'Sparkwing', kind: 'drake', color: '#ffd84a', belly: '#fff6c9', desc: 'Golden baby drake. Big fireballs. Earned from the Game Pass or eggs.', pass: true, dmg: 24},
-  prismwing: {name: 'Prismwing', kind: 'drake', color: '#ff6ad5', belly: '#9ff2ff', desc: 'Unique crystal drake. Huge fireballs and a little healing.', eggOnly: true, dmg: 28, heal: .003, sparkle: true},
-  nyx:       {name: 'Nyx', kind: 'drake', color: '#3a2c5c', belly: '#b06bff', desc: 'Secret shadow drake. The strongest pet: heals you and refills mana.', eggOnly: true, secret: true, dmg: 32, heal: .004, mana: 2, glow: '#c79bff'},
+  // buff: stat bonuses the pet gives its hero (ad attack, ap ability power, hp health, ms speed, as attack speed, cdr cooldowns)
+  pip:       {name: 'Pip', kind: 'drake', color: '#ff8a4a', belly: '#ffd29a', desc: 'Baby fire drake. Spits fireballs at enemies near you.', price: 250, dmg: 16, buff: {ad: 1.12}},
+  frostling: {name: 'Frostling', kind: 'drake', color: '#8fd8ff', belly: '#e6f8ff', desc: 'Baby frost drake. Spits ice and slowly heals you.', price: 350, dmg: 10, heal: .006, buff: {ap: 1.12}},
+  mossy:     {name: 'Mossy', kind: 'golem', color: '#8a9a7a', desc: 'Pocket golem. Bonks enemies and makes you tougher.', price: 250, dmg: 12, buff: {hp: 1.15}},
+  glimmer:   {name: 'Glimmer', kind: 'wisp', color: '#c79bff', desc: 'Sparkly wisp. Zaps enemies and keeps your mana topped up.', price: 200, dmg: 9, mana: 3, buff: {cdr: .1}},
+  nugget:    {name: 'Nugget', kind: 'goblin', color: '#7fd16a', desc: 'Baby goblin. Pokes enemies and finds 1 extra gold every second.', price: 200, dmg: 9, gold: 1, buff: {ms: 1.08}},
+  sparkwing: {name: 'Sparkwing', kind: 'drake', color: '#ffd84a', belly: '#fff6c9', desc: 'Golden baby drake. Big fireballs. Earned from the Game Pass or eggs.', pass: true, dmg: 24, buff: {ad: 1.12, as: .12}},
+  prismwing: {name: 'Prismwing', kind: 'drake', color: '#ff6ad5', belly: '#9ff2ff', desc: 'Unique crystal drake. Huge fireballs and a little healing.', eggOnly: true, dmg: 28, heal: .003, sparkle: true, buff: {ad: 1.12, ap: 1.12, hp: 1.08}},
+  nyx:       {name: 'Nyx', kind: 'drake', color: '#3a2c5c', belly: '#b06bff', desc: 'Secret shadow drake. The strongest pet: heals you and refills mana.', eggOnly: true, secret: true, dmg: 32, heal: .004, mana: 2, buff: {ad: 1.15, ap: 1.15, ms: 1.1, cdr: .1}, glow: '#c79bff'},
 };
+// "+12% attack, +8% speed" for the store and hatch screens
+function petBuffText(P) {
+  const b = P.buff || {}, out = [];
+  const pct = v => '+' + Math.round(v * 100) + '%';
+  if (b.ad) out.push(pct(b.ad - 1) + ' attack'); if (b.ap) out.push(pct(b.ap - 1) + ' ability power');
+  if (b.hp) out.push(pct(b.hp - 1) + ' health'); if (b.ms) out.push(pct(b.ms - 1) + ' speed');
+  if (b.as) out.push(pct(b.as) + ' attack speed'); if (b.cdr) out.push(pct(b.cdr) + ' faster cooldowns');
+  return out.length ? 'Buff: ' + out.join(', ') + '.' : '';
+}
 const EGG_PRICE = 150, EGG_REFUND = 75;
 // hatch odds, shown to players in the store
 const EGG_TABLE = [['pip', 29, 'Common'], ['nugget', 24, 'Common'], ['glimmer', 20, 'Uncommon'], ['mossy', 15, 'Uncommon'], ['frostling', 8, 'Rare'],
@@ -3556,7 +3590,7 @@ function renderStore() {
       const pe = PETS[id], have = owns('pets', id), on = PROF.eq.pet === id;
       if (pe.secret && !have) continue;
       const locked = pe.pass || pe.eggOnly;
-      storeCard(body, {pet: id, title: pe.name, desc: pe.desc, label: on ? 'Equipped' : have ? 'Equip' : pe.eggOnly ? 'Hatch from eggs' : pe.pass ? 'Game Pass or eggs' : buyLabel(pe.price), primary: !have && !locked,
+      storeCard(body, {pet: id, title: pe.name, desc: pe.desc + ' ' + petBuffText(pe), label: on ? 'Equipped' : have ? 'Equip' : pe.eggOnly ? 'Hatch from eggs' : pe.pass ? 'Game Pass or eggs' : buyLabel(pe.price), primary: !have && !locked,
         disabled: on || (!have && (locked || PROF.crowns < pe.price)),
         onClick: storeAction(() => { if (have) PROF.eq.pet = id; else if (!locked && PROF.crowns >= pe.price) { PROF.crowns -= pe.price; grant({pet: id}); PROF.eq.pet = id; } })});
     }
@@ -3613,7 +3647,6 @@ function heroPerk(r) {
   if (s.ad) parts.push(`+${Math.round((s.ad - 1) * 100)}% attack`);
   if (s.ap) parts.push(`+${Math.round((s.ap - 1) * 100)}% ability power`);
   if (s.ms) parts.push(`${s.ms > 1 ? '+' : ''}${Math.round((s.ms - 1) * 100)}% speed`);
-  if (s.range) parts.push(`${s.range > 1 ? '+' : ''}${Math.round((s.range - 1) * 100)}% range`);
   return parts.join(', ') + '. Joins the Tidewardens.';
 }
 
@@ -3649,7 +3682,7 @@ function revealHatch() {
   sfx(hatch.rarity === 'Secret' || hatch.rarity === 'Unique' || hatch.rarity === 'Legendary' ? 'evolve' : 'hatch');
   $('hatchTitle').textContent = hatch.rarity === 'Secret' ? `Secret pull! ${P.name} hatched!` : hatch.rarity === 'Unique' ? `Unique pull! ${P.name} hatched!` : `${P.name} hatched!`;
   if (hatch.rarity === 'Secret' || hatch.rarity === 'Unique' || hatch.rarity === 'Legendary') $('hatchTitle').style.color = RARITY_COLOR[hatch.rarity]; else $('hatchTitle').style.color = '';
-  $('hatchSub').textContent = `${hatch.rarity} · ${P.desc}` + (hatch.dup ? ` You already had ${P.name}, so you got ${EGG_REFUND} Crowns back.` : '');
+  $('hatchSub').textContent = `${hatch.rarity} · ${P.desc} ${petBuffText(P)}` + (hatch.dup ? ` You already had ${P.name}, so you got ${EGG_REFUND} Crowns back.` : '');
   $('hatchEquip').hidden = PROF.eq.pet === hatch.pet;
   $('hatchAgain').hidden = false;
   $('hatchAgain').textContent = PROF.eggs > 0 ? 'Hatch another' : `Hatch another · ${EGG_PRICE} Crowns`;
