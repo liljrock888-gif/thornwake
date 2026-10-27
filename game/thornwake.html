@@ -358,6 +358,7 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
           <button class="mbtn" id="m-continue">Continue</button>
           <button class="mbtn" id="m-load">Load Game</button>
           <button class="mbtn" id="m-multi">Multiplayer</button>
+          <button class="mbtn" id="m-daily">Daily</button>
           <button class="mbtn" id="m-store">Store</button>
           <button class="mbtn" id="m-help">How to Play</button>
           <label class="vol" for="m-vol">Music volume <input type="range" id="m-vol" min="0" max="100" step="5"></label>
@@ -401,6 +402,13 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
         <button class="mbtn small back" id="storeBack">Back</button>
       </section>
 
+      <section class="screen" id="scr-daily" hidden>
+        <h2>Daily</h2>
+        <p class="status ok" id="dailyInfo"></p>
+        <div class="list" id="dailyList"></div>
+        <p class="status">Quests reset at midnight. Progress counts in every mode except online matches you joined.</p>
+        <button class="mbtn small back" id="dailyBack">Back</button>
+      </section>
       <section class="screen" id="scr-ranked" hidden>
         <h2>Ranked</h2>
         <canvas id="rankCv" width="240" height="240" aria-hidden="true"></canvas>
@@ -523,12 +531,16 @@ const VALE_LANES = {
   bot: [[600, 2600], [950, 2810], [2810, 2810], [2810, 950], [2600, 600]],
 };
 const PITS = [{x: 2250, y: 2250, species: 'ember'}, {x: 950, y: 950, species: 'frost'}];
+// Zones are spots on the ground with an effect; events happen every so often. Both make each map play differently.
 const MAPS = {
-  vale: {name: 'Thornwake Vale', blurb: 'Forest valley. Three lanes and a winding river.', lanes: VALE_LANES, pits: PITS,
+  vale: {name: 'Thornwake Vale', blurb: 'Forest valley. Healing springs in the river.', lanes: VALE_LANES, pits: PITS,
+    zones: [{x: 1250, y: 1950, r: 130, kind: 'heal'}, {x: 1950, y: 1250, r: 130, kind: 'heal'}],
     camps: [{x: 820, y: 1550, species: 'wolf'}, {x: 1700, y: 2420, species: 'golem'}, {x: 2380, y: 1650, species: 'wolf'}, {x: 1500, y: 780, species: 'golem'}],
     theme: {bg: '#0c1411', ground: '#17281f', blotch: ['#1d3326', '#142219', '#21392a', '#1a2e21', '#263f2b'], river: ['#13303b', '#1b4655', 'rgba(140,210,230,.10)'],
       lane: ['#2e2a1f', '#4a3f2c', '#5a4c34'], speck: ['rgba(30,24,15,.35)', 'rgba(120,100,70,.18)'], plaza: ['#3a3c36', '#2a2c27'], camp: 'rgba(58,50,34,.6)', deco: 'forest'}},
-  frost: {name: 'Frostmere Pass', blurb: 'Snowbound pass. Three twisting lanes over a frozen river.',
+  frost: {name: 'Frostmere Pass', blurb: 'Snowbound pass. Ice patches speed you up; blizzards slow everyone.',
+    zones: [{x: 1100, y: 1200, r: 170, kind: 'ice'}, {x: 2100, y: 2000, r: 170, kind: 'ice'}, {x: 1600, y: 1600, r: 150, kind: 'ice'}],
+    event: {kind: 'blizzard', every: 70, len: 12},
     lanes: {
       top: [[600, 2600], [420, 2100], [700, 1300], [420, 600], [1300, 700], [2100, 420], [2600, 600]],
       mid: [[600, 2600], [1300, 2100], [1600, 1600], [1900, 1100], [2600, 600]],
@@ -537,17 +549,45 @@ const MAPS = {
     camps: [{x: 1000, y: 1700, species: 'wolf'}, {x: 1700, y: 2250, species: 'golem'}, {x: 2200, y: 1500, species: 'wolf'}, {x: 1500, y: 950, species: 'golem'}],
     theme: {bg: '#0f161b', ground: '#5f707b', blotch: ['#6c7f8a', '#55656f', '#7b8e98', '#647680', '#8a9da6'], river: ['#3b6075', '#9cc9dc', 'rgba(255,255,255,.45)'],
       lane: ['#3f4447', '#5d6264', '#70777a'], speck: ['rgba(255,255,255,.35)', 'rgba(40,50,56,.25)'], plaza: ['#7a8285', '#596063'], camp: 'rgba(220,232,240,.35)', deco: 'pines'}},
-  ember: {name: 'Emberfall Wastes', blurb: 'Volcanic badlands. Only two lanes, more beasts, and a river of lava.',
+  ember: {name: 'Emberfall Wastes', blurb: 'Volcanic badlands. Two lanes, lava pools that burn, and meteor showers.',
+    zones: [{x: 1350, y: 1350, r: 140, kind: 'lava'}, {x: 1850, y: 1850, r: 140, kind: 'lava'}, {x: 1000, y: 2200, r: 110, kind: 'lava'}, {x: 2200, y: 1000, r: 110, kind: 'lava'}],
+    event: {kind: 'meteors', every: 55},
     lanes: {top: VALE_LANES.top, bot: VALE_LANES.bot}, pits: PITS,
     camps: [{x: 820, y: 1550, species: 'wolf'}, {x: 1700, y: 2420, species: 'golem'}, {x: 1250, y: 2050, species: 'golem'},
             {x: 2380, y: 1650, species: 'wolf'}, {x: 1500, y: 780, species: 'golem'}, {x: 1950, y: 1150, species: 'golem'}],
     theme: {bg: '#120b09', ground: '#231915', blotch: ['#2e211c', '#1a1210', '#38261f', '#2a1c17', '#43291f'], river: ['#4a1206', '#e2501a', 'rgba(255,214,120,.5)'],
       lane: ['#17120f', '#2f2722', '#3e342d'], speck: ['rgba(0,0,0,.35)', 'rgba(255,120,40,.12)'], plaza: ['#3b3330', '#272120'], camp: 'rgba(70,40,25,.6)', deco: 'charred'}},
-  bridge: {name: 'Howling Bridge', blurb: 'One long bridge over the abyss. Every fight happens in a single lane.',
+  bridge: {name: 'Howling Bridge', blurb: 'One long bridge over the abyss. Wind gusts shove everyone sideways.',
+    event: {kind: 'gust', every: 30},
     lanes: {mid: VALE_LANES.mid}, pits: PITS, camps: [],
     theme: {bg: '#07090f', ground: '#0b0e16', blotch: ['#0e1220', '#090b13', '#13172a', '#0c0f1b', '#171332'], river: null,
       lane: ['#1b1d22', '#3e4249', '#555a62'], speck: ['rgba(0,0,0,.3)', 'rgba(200,210,230,.12)'], plaza: ['#2e3138', '#1d1f25'], camp: 'rgba(40,42,50,.8)', deco: 'void'}},
+  ruins: {name: 'Sunken Ruins', blurb: 'Flooded temple. Tide pools heal you; whirlpools drag you in.',
+    lanes: {
+      top: [[600, 2600], [500, 1700], [700, 900], [1500, 500], [2300, 700], [2600, 600]],
+      mid: [[600, 2600], [1300, 2200], [1600, 1600], [1900, 1000], [2600, 600]],
+      bot: [[600, 2600], [1500, 2700], [2300, 2500], [2700, 1700], [2500, 900], [2600, 600]],
+    }, pits: PITS,
+    camps: [{x: 1000, y: 1800, species: 'golem'}, {x: 1500, y: 2350, species: 'wolf'}, {x: 2200, y: 1400, species: 'golem'}, {x: 1700, y: 850, species: 'wolf'}],
+    zones: [{x: 1150, y: 1150, r: 120, kind: 'heal'}, {x: 2050, y: 2050, r: 120, kind: 'heal'}, {x: 1300, y: 1900, r: 150, kind: 'whirl'}, {x: 1900, y: 1300, r: 150, kind: 'whirl'}],
+    theme: {bg: '#071416', ground: '#1d3b3f', blotch: ['#22474b', '#183236', '#2a5458', '#1f3f43', '#305c5a'], river: ['#0f3a4a', '#1f6e82', 'rgba(170,240,255,.18)'],
+      lane: ['#2c3a36', '#4a5a52', '#61726a'], speck: ['rgba(0,0,0,.3)', 'rgba(170,240,230,.12)'], plaza: ['#4a5a56', '#33403d'], camp: 'rgba(40,70,70,.6)', deco: 'ruins'}},
+  sky: {name: 'Sky Citadel', blurb: 'Floating island above the clouds. Jump pads launch you across the map.',
+    lanes: {top: VALE_LANES.top, bot: VALE_LANES.bot}, pits: PITS,
+    camps: [{x: 820, y: 1550, species: 'wolf'}, {x: 2380, y: 1650, species: 'wolf'}],
+    zones: [{x: 1150, y: 2050, r: 80, kind: 'pad', to: [1950, 1250]}, {x: 2050, y: 1150, r: 80, kind: 'pad', to: [1250, 1950]},
+            {x: 1350, y: 1350, r: 80, kind: 'pad', to: [1850, 1850]}, {x: 1850, y: 1850, r: 80, kind: 'pad', to: [1350, 1350]}],
+    theme: {bg: '#9cc6ec', ground: '#7fa86a', blotch: ['#8bb676', '#739a5e', '#97c283', '#6f9459', '#a2cc8e'], river: null,
+      lane: ['#b8a988', '#d8cba8', '#e8dcbc'], speck: ['rgba(255,255,255,.3)', 'rgba(60,80,40,.15)'], plaza: ['#e8e2d0', '#c8c0aa'], camp: 'rgba(90,120,70,.5)', deco: 'clouds'}},
+  neon: {name: 'Neon Grid', blurb: 'A glowing arena. Speed pads on the lanes, and power-ups come back fast.',
+    lanes: VALE_LANES, pits: PITS, fastPickups: true,
+    camps: [{x: 820, y: 1550, species: 'golem'}, {x: 1700, y: 2420, species: 'wolf'}, {x: 2380, y: 1650, species: 'golem'}, {x: 1500, y: 780, species: 'wolf'}],
+    zones: [{x: 390, y: 1300, r: 90, kind: 'boost'}, {x: 1300, y: 390, r: 90, kind: 'boost'}, {x: 2810, y: 1900, r: 90, kind: 'boost'}, {x: 1900, y: 2810, r: 90, kind: 'boost'},
+            {x: 1600, y: 1600, r: 100, kind: 'boost'}],
+    theme: {bg: '#06040f', ground: '#0d0a1f', blotch: ['#140f2e', '#0b0819', '#1b1440', '#120d29', '#221a52'], river: null,
+      lane: ['#120a2a', '#2a1d5c', '#3b2a80'], speck: ['rgba(0,255,240,.12)', 'rgba(255,60,200,.12)'], plaza: ['#24204a', '#171433'], camp: 'rgba(60,30,120,.5)', deco: 'neon'}},
 };
+const ZONE_LOOK = {heal: ['#6be08a', 'Healing'], ice: ['#cfefff', 'Ice'], lava: ['#ff5a1f', 'Lava'], whirl: ['#4fb8d8', 'Whirlpool'], pad: ['#ffe66b', 'Jump pad'], boost: ['#3df5ff', 'Speed pad']};
 const DIFFS = [
   {name: 'Easy', dmg: .65, gold: .8, aim: .1},
   {name: 'Normal', dmg: .82, gold: .92, aim: .2},
@@ -601,6 +641,13 @@ const LOOKS = {
   kifighter: {skin: '#f2cda8', body: '#e8742a', hat: 'spiky', weapon: 'fists', glow: '#ffe66b'},
   brawler:   {skin: '#e3b38a', body: '#2f6db5', hat: 'scruffy', weapon: 'fists'},
   soulblade: {skin: '#f0d2bc', body: '#1b1b22', hat: 'longhair', weapon: 'greatsword'},
+  ninja:     {skin: '#e8c0a0', body: '#24202e', hat: 'ninja', weapon: 'daggers'},
+  mecha:     {skin: '#d9b896', body: '#5a6a7a', hat: 'visor', weapon: 'rifle', tracer: '#7ff0e6'},
+  magicgirl: {skin: '#f6d6c0', body: '#ff8fd0', hat: 'twintails', weapon: 'staff', glow: '#ffd6f0'},
+  samurai:   {skin: '#e6c09a', body: '#3a4a6a', hat: 'topknot', weapon: 'sword'},
+  hunter:    {skin: '#e0c0a8', body: '#2b2026', hat: 'widehat', weapon: 'bow'},
+  pirate:    {skin: '#d9a77c', body: '#7a2a2a', hat: 'tricorn', weapon: 'sword'},
+  valkyrie:  {skin: '#f2d4bc', body: '#c9d4e0', hat: 'winghelm', weapon: 'hammer'},
   werewolf:   {monster: 'wolf'},
   golemkin:   {monster: 'golem'},
   drakeling:  {monster: 'drake'},
@@ -630,6 +677,14 @@ const ROSTER = [
   {team: 0, name: 'Kaito', color: '#ffd23f', lane: 'mid', build: 'ap', look: 'kifighter', cls: 'Ki Fighter', price: 550, stat: {ap: 1.1, ms: 1.05}, sig: {q: 'kiblast', r: 'spiritcannon'}},
   {team: 0, name: 'Rook', color: '#4fc3ff', lane: 'mid', build: 'ad', look: 'brawler', cls: 'Brawler', price: 550, stat: {hp: 1.12, ad: 1.08}, sig: {q: 'rocketpunch', r: 'gatling'}},
   {team: 0, name: 'Aya', color: '#e0304a', lane: 'mid', build: 'ad', look: 'soulblade', cls: 'Soul Blade', price: 600, stat: {ad: 1.15}, sig: {q: 'crescent', r: 'release'}},
+  // free heroes in classic anime and game archetypes; everyone owns them
+  {team: 0, name: 'Hana', color: '#b06bff', lane: 'mid', build: 'ad', look: 'ninja', cls: 'Shadow Ninja', free: true, stat: {ms: 1.08, ad: 1.05}, sig: {q: 'twin', r: 'tempest'}},
+  {team: 0, name: 'Zero', color: '#4fd1c5', lane: 'mid', build: 'ad', look: 'mecha', cls: 'Mecha Pilot', free: true, stat: {hp: 1.1}, sig: {q: 'bolt', r: 'meteor'}},
+  {team: 0, name: 'Stella', color: '#ff8fd0', lane: 'mid', build: 'ap', look: 'magicgirl', cls: 'Star Magical Girl', free: true, stat: {ap: 1.1}, sig: {q: 'frost', r: 'starfall'}},
+  {team: 0, name: 'Ronin', color: '#e8eef6', lane: 'mid', build: 'ad', look: 'samurai', cls: 'Wandering Samurai', free: true, stat: {ad: 1.1}, sig: {q: 'crescent', r: 'tempest'}},
+  {team: 0, name: 'Draven', color: '#b33a3a', lane: 'mid', build: 'ad', look: 'hunter', cls: 'Vampire Hunter', free: true, stat: {ad: 1.05, hp: 1.05}, sig: {q: 'drain', r: 'vortex'}},
+  {team: 0, name: 'Brook', color: '#f2c14e', lane: 'mid', build: 'ad', look: 'pirate', cls: 'Sky Pirate Captain', free: true, stat: {hp: 1.08, ad: 1.05}, sig: {q: 'flame', r: 'meteor'}},
+  {team: 0, name: 'Sigrun', color: '#9fd8ff', lane: 'mid', build: 'ad', look: 'valkyrie', cls: 'Valkyrie', free: true, stat: {hp: 1.15}, sig: {q: 'frost', r: 'nova'}},
 ];
 const FORMS = ['Initiate', 'Adept', 'Ascendant', 'Mythic'];
 function formOf(l) { return l >= 16 ? 3 : l >= 11 ? 2 : l >= 6 ? 1 : 0; }
@@ -785,6 +840,28 @@ function drawMap() {
 }
 function decorate(m, R, x, y, deco, nl) {
   const rock = R() < 0.18;
+  if (deco === 'ruins') { // broken temple pillars
+    if (R() < .45) return;
+    const h = 30 + R() * 50, w = 16 + R() * 10;
+    m.fillStyle = 'rgba(0,0,0,.35)'; m.beginPath(); m.ellipse(x + 8, y + 6, w * 1.2, w * .5, 0, 0, 7); m.fill();
+    m.fillStyle = '#6f8580'; m.fillRect(x - w / 2, y - h, w, h); m.fillStyle = '#8fa6a0'; m.fillRect(x - w / 2, y - h, w * .35, h);
+    m.fillStyle = '#5a6e6a'; m.fillRect(x - w * .7, y - h - 6, w * 1.4, 6);
+    m.fillStyle = 'rgba(60,140,110,.5)'; m.fillRect(x - w / 2, y - h * .45, w, 6);
+    return;
+  }
+  if (deco === 'clouds') { // puffs of cloud drifting over the island
+    if (R() < .5) return;
+    m.fillStyle = 'rgba(255,255,255,.55)';
+    for (let i = 0; i < 4; i++) { m.beginPath(); m.arc(x + (i - 1.5) * 22, y + (i % 2) * -10, 24 + R() * 12, 0, 7); m.fill(); }
+    return;
+  }
+  if (deco === 'neon') { // glowing pylons
+    if (R() < .55) return;
+    const c = R() < .5 ? '#3df5ff' : '#ff3dc8';
+    m.fillStyle = '#1b1636'; m.fillRect(x - 8, y - 46, 16, 46);
+    m.fillStyle = c; m.shadowColor = c; m.shadowBlur = 18; m.fillRect(x - 3, y - 44, 6, 40); m.shadowBlur = 0;
+    return;
+  }
   if (deco === 'void') {
     if (nl > 520 && R() < .7) return;
     const r = 14 + R() * 26, n = 5 + (R() * 3 | 0);
@@ -900,6 +977,7 @@ function reset(heroIdx = 0, cfg = null) {
       level: 1, xp: 0, gold: 500, earned: 500, items: [], maxHp: 620, mana: 300, maxMana: 300, ad: 55, ap: 0, range: 470, atkCd: .95, speed: 330,
       ranged: false, cds: {q: 0, w: 0, e: 0, r: 0, f: 0}, kills: 0, deaths: 0, respawn: 0, cmd: null, think: rand(0, .3), state: 'shop', haste: 0, lifesteal: 0,
       aggroT: 0, jx: 0, jy: 0, jT: 0, remote: null, human: i === pi});
+    if (cfg.mode === 'warzone' && !GUN_LOOKS.includes(h.look)) h.look = GUN_LOOKS[i % GUN_LOOKS.length];
     recalc(h); h.hp = h.maxHp; h.mana = h.maxMana;
     if (i === pi) G.player = h;
   });
@@ -962,7 +1040,8 @@ const STYLES = {
 };
 const LOOK_STYLE = {mage: 'magic', witch: 'magic', warlock: 'magic', shaman: 'magic', drakeling: 'magic',
   knight: 'melee', paladin: 'melee', goblinking: 'melee', brute: 'heavy', golemkin: 'heavy', rogue: 'agile', werewolf: 'agile',
-  ranger: 'ranged', soldier: 'ranged', sniper: 'sniper', heavy: 'gunner', kifighter: 'agile', brawler: 'melee', soulblade: 'heavy'};
+  ranger: 'ranged', soldier: 'ranged', sniper: 'sniper', heavy: 'gunner', kifighter: 'agile', brawler: 'melee', soulblade: 'heavy',
+  ninja: 'agile', mecha: 'ranged', magicgirl: 'magic', samurai: 'melee', hunter: 'ranged', pirate: 'melee', valkyrie: 'heavy'};
 const styleOf = look => STYLES[LOOK_STYLE[look]] || STYLES.melee;
 const STYLE_MOVES = {
   slash:    {name: 'Sword Slash', desc: 'A quick sweeping slash that hits every enemy in front of you.', color: '#e8eef6'},
@@ -1022,13 +1101,15 @@ function nearestEnemy(u, range, pred, heroWeight = 1) {
 function tryAttack(u, t) {
   if (u.atkT > 0) return;
   u.atkT = u.atkCd * (u.rapidUntil > G.time ? .5 : 1); u.face = Math.atan2(t.y - u.y, t.x - u.x);
-  sfx(u.kind === 'hero' ? (u.ranged ? 'shot' : 'swing') : u.kind === 'tower' ? 'tower' : u.kind === 'monster' ? 'claw' : 'minion', u.x, u.y);
+  sfx(attackSound(u), u.x, u.y);
   let dmg;
   if (u.kind === 'hero') dmg = u.ad * styleOf(u.look).dmg;
   else if (u.kind === 'tower') dmg = t.kind === 'hero' ? 170 + G.time / 60 * 6 : t.maxHp * 0.45;
   else dmg = u.atk;
   if (u.ranged) {
-    G.projs.push({kind: 'auto', x: u.x, y: u.y - (u.kind === 'tower' ? 56 : u.kind === 'hero' ? 34 : u.kind === 'monster' ? 14 : 18), target: t, dmg, src: u, team: u.team,
+    const splash = u.splash || (u.tankUntil > G.time ? 120 : 0);
+    if (u.tankUntil > G.time) dmg *= 1.6;
+    G.projs.push({kind: 'auto', splash, x: u.x, y: u.y - (u.kind === 'tower' ? 56 : u.kind === 'hero' ? 34 : u.kind === 'monster' ? 14 : 18), target: t, dmg, src: u, team: u.team,
       speed: projSpeed(u), size: projSize(u), color: projColor(u)});
   } else {
     damage(t, dmg, u);
@@ -1038,8 +1119,16 @@ function tryAttack(u, t) {
     burst(t.x, t.y, u.kind === 'hero' ? u.color : '#e8dcc0', u.kind === 'hero' ? 7 : 3, 120, .25, 2.5);
   }
 }
+// guns and tanks sound like guns and tanks
+const GUN_SFX = {soldier: 'gun', mecha: 'gun', sniper: 'sniper', heavy: 'minigun'};
+function attackSound(u) {
+  if (u.type === 'tank' || u.tankUntil > G.time) return 'cannon';
+  if (u.kind === 'hero') return GUN_SFX[u.look] || (u.ranged ? 'shot' : 'swing');
+  if (u.kind === 'minion' && G.cfg.mode === 'warzone') return 'gunfar';
+  return u.kind === 'tower' ? 'tower' : u.kind === 'monster' ? 'claw' : 'minion';
+}
 const projSpeed = u => u.kind === 'tower' ? 850 : u.kind === 'hero' ? styleOf(u.look).speed || 1300 : 900;
-const projSize = u => u.kind === 'tower' ? 10 : u.kind === 'hero' ? styleOf(u.look).size || 7 : u.kind === 'monster' ? 13 : 5;
+const projSize = u => u.splash || u.tankUntil > G.time ? 11 : u.kind === 'tower' ? 10 : u.kind === 'hero' ? styleOf(u.look).size || 7 : u.kind === 'monster' ? 13 : 5;
 const projColor = u => u.kind === 'hero' ? (LOOKS[u.look] && LOOKS[u.look].tracer) || u.color : u.fire || TEAM_COLOR[u.team];
 function damage(t, amt, src) {
   if (!t.alive || t.protectUntil > G.time) return; // just respawned
@@ -1069,8 +1158,8 @@ function kill(t, src) {
   if (t.kind === 'minion') {
     burst(t.x, t.y, TEAM_COLOR[t.team], 10, 160, .45, 3); sfx('pop', t.x, t.y);
     if (src && src.kind === 'hero') {
-      const g = t.type === 'melee' ? 21 : 15; giveGold(src, g);
-      if (src.isPlayer) text(t.x, t.y - 26, '+' + g + 'g', '#f2c14e');
+      const g = t.type === 'tank' ? 70 : t.type === 'melee' ? 21 : 15; giveGold(src, g);
+      if (src.isPlayer) { text(t.x, t.y - 26, '+' + g + 'g', '#f2c14e'); dailyCount('minions'); }
     }
     for (const h of heroesOf(1 - t.team)) if (h.alive && dist(h, t) < 1100) gainXp(h, t.type === 'melee' ? 30 : 24);
   } else if (t.kind === 'monster') {
@@ -1080,6 +1169,7 @@ function kill(t, src) {
     if (killer) {
       giveGold(killer, t.gold);
       if (killer.isPlayer) text(t.x, t.y - 40, '+' + t.gold + 'g', '#f2c14e');
+      if (t.fire && killer.team === G.player.team) dailyCount('drake');
       for (const h of heroesOf(killer.team)) if (h.alive && dist(h, t) < 1200) gainXp(h, t.xpGive);
       if (t.fire) {
         G.dragons[killer.team]++;
@@ -1091,11 +1181,11 @@ function kill(t, src) {
     }
   } else if (t.kind === 'hero') {
     burst(t.x, t.y, t.color, 30, 260, .8, 5); ring(t.x, t.y, TEAM_COLOR[t.team], 90, .7); sfx('death', t.x, t.y);
-    t.deaths++; t.respawn = G.cfg.mode === 'tdm' || G.cfg.mode === 'ctf' ? 3 + .6 * t.level : 5 + 1.1 * t.level; t.cmd = null; t.shield = 0;
+    t.deaths++; t.respawn = G.cfg.mode === 'tdm' || G.cfg.mode === 'ctf' || G.cfg.mode === 'warzone' ? 3 + .6 * t.level : 5 + 1.1 * t.level; t.cmd = null; t.shield = 0;
     if (killer) {
       killer.kills++; giveGold(killer, 300); G.kills[killer.team]++;
       pushEvent([[killer.name, killer.team], [' slew '], [t.name, t.team]]);
-      if (killer.isPlayer) { text(t.x, t.y - 50, '+300g', '#f2c14e'); banner('Enemy slain', t.name + ' has fallen.'); }
+      if (killer.isPlayer) { text(t.x, t.y - 50, '+300g', '#f2c14e'); banner('Enemy slain', t.name + ' has fallen.'); dailyCount('kills'); }
     } else {
       G.kills[1 - t.team]++;
       pushEvent([[t.name, t.team], [' was executed']]);
@@ -1118,11 +1208,13 @@ const heroesOf = team => G.units.filter(u => u.kind === 'hero' && u.team === tea
 
 function cast(h, k, tx, ty) {
   const a = AB[k];
+  if (isWarzone() && k !== 'f' && !h.tankUntil) return false; // Warzone: guns and grenades only
   if (!h.alive || h.cds[k] > 0 || h.mana < a.mana || h.level < (a.lvl || 1)) return false;
   const chain = k === 'r' && h.kit && h.kit.r === 'chain' ? chainTargets(h, tx, ty) : null;
   if (chain && !chain.length) return false;
   const dx = tx - h.x, dy = ty - h.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
   h.mana -= a.mana; h.cds[k] = a.cd * (1 - h.haste) * (h.human ? 1 : 2.2); // bots wait longer between spells
+  if (h.isPlayer) dailyCount('casts');
   sfx(SPELL_SFX[k === 'q' || k === 'r' ? h.kit && h.kit[k] : ''] || {q: 'bolt', w: 'shield', e: 'blink', r: 'ult'}[k], h.x, h.y);
   if (k === 'q') {
     h.face = Math.atan2(ny, nx);
@@ -1164,7 +1256,7 @@ function cast(h, k, tx, ty) {
     burst(h.x, h.y, '#efe2ff', 16, 140, .45, 3);
     if (h.cmd && h.cmd.type === 'move') h.cmd = null;
   } else if (k === 'f') {
-    castStyleMove(h, styleOf(h.look).move, tx, ty, nx, ny, d);
+    castStyleMove(h, isWarzone() ? 'grenade' : styleOf(h.look).move, tx, ty, nx, ny, d);
   } else if (k === 'r') {
     // warlocks unlock their own ultimate at level 10
     const kind = h.look === 'warlock' && h.level >= 10 ? 'demongate' : h.kit ? h.kit.r : 'starfall', rd = Math.min(1000, d), px = h.x + nx * rd, py = h.y + ny * rd;
@@ -1292,13 +1384,21 @@ function queueWave() {
   const tier = Math.min(3, Math.floor(G.time / 240));
   if (tier > G.minionTier) { G.minionTier = tier; globalBanner('Minions have evolved', TIER_NAMES[tier] + ' now march down every lane.'); }
   for (let t = 0; t < 2; t++) for (const lane of Object.keys(LANES)) {
-    for (let i = 0; i < 6; i++) G.spawnQ.push({at: G.time + i * .7, team: t, lane, type: i < 3 ? 'melee' : 'ranged', tier});
+    if (G.cfg.mode === 'warzone') { // soldier squads with a tank behind them
+      for (let i = 0; i < 4; i++) G.spawnQ.push({at: G.time + i * .7, team: t, lane, type: 'ranged', tier});
+      if (G.waveN % 2 === 1) G.spawnQ.push({at: G.time + 3.2, team: t, lane, type: 'tank', tier});
+    } else for (let i = 0; i < 6; i++) G.spawnQ.push({at: G.time + i * .7, team: t, lane, type: i < 3 ? 'melee' : 'ranged', tier});
   }
-  if (G.waveN === 1) globalBanner('Minions have spawned', 'Follow a wave down a lane.');
+  if (G.waveN === 1) globalBanner(G.cfg.mode === 'warzone' ? 'Troops and tanks deployed' : 'Minions have spawned', 'Follow a wave down a lane.');
 }
 function spawnMinion(team, lane, type, tier) {
   const path = PATHS[team][lane], s = path[0], melee = type === 'melee';
   const mult = (1 + 0.05 * Math.floor(G.time / 60)) * (1 + 0.18 * tier);
+  if (type === 'tank') {
+    mkUnit({kind: 'minion', type, team, lane, tier, path, wp: 1, x: s[0], y: s[1], r: 34, maxHp: 1500 * mult, atk: 70 * mult, range: 460, atkCd: 2.2, speed: 160,
+      ranged: true, splash: 110, think: 0, target: null});
+    return;
+  }
   mkUnit({kind: 'minion', type, team, lane, tier, path, wp: 1, x: s[0] + rand(-15, 15), y: s[1] + rand(-15, 15), r: melee ? 16 + 2 * tier : 13 + tier,
     maxHp: (melee ? 460 : 300) * mult, atk: (melee ? 14 : 22) * mult, range: melee ? 60 : 400, atkCd: melee ? 1.2 : 1.5, speed: 235, ranged: !melee, think: 0, target: null});
 }
@@ -1307,7 +1407,7 @@ function spawnMinion(team, lane, type, tier) {
 function moveToward(u, x, y, dt) {
   const dx = x - u.x, dy = y - u.y, d = Math.hypot(dx, dy);
   if (d < 4) return true;
-  const sp = u.speed * (u.buffT > 0 ? 1.35 : 1) * (u.flag ? .85 : 1) * (u.slowUntil > G.time ? .6 : 1) * (u.hasteUntil > G.time ? 1.35 : 1) * (u.releaseUntil > G.time ? 1.25 : 1) * dt;
+  const sp = u.speed * (u.buffT > 0 ? 1.35 : 1) * (u.flag ? .85 : 1) * (u.slowUntil > G.time ? .6 : 1) * (u.hasteUntil > G.time ? 1.35 : 1) * (u.releaseUntil > G.time ? 1.25 : 1) * (u.zoneSpd || 1) * (u.tankUntil > G.time ? .75 : 1) * dt;
   u.face = Math.atan2(dy, dx);
   u.walk = (u.walk || 0) + Math.min(sp, d);
   if (sp >= d) { u.x = x; u.y = y; return true; }
@@ -1332,6 +1432,7 @@ function updateHero(h, dt) {
   }
   const px = h.x, py = h.y;
   for (const k in h.cds) h.cds[k] = Math.max(0, h.cds[k] - dt);
+  if (h.tankUntil && G.time > h.tankUntil) { h.tankUntil = 0; h.shield = 0; recalc(h); if (h.isPlayer) banner('Out of the tank', 'Back on foot.'); }
   h.atkT -= dt; h.mixT = (h.mixT || 0) - dt; h.aggroT = Math.max(0, h.aggroT - dt);
   if (h.shieldT > 0) { h.shieldT -= dt; if (h.shieldT <= 0) h.shield = 0; }
   if (h.buffT > 0) h.buffT -= dt;
@@ -1380,6 +1481,7 @@ function updateHero(h, dt) {
     if (t) heroStrike(h, t);
   }
   h.vx = (h.x - px) / dt; h.vy = (h.y - py) / dt;
+  if (h.tankUntil > G.time && Math.abs(h.vx) + Math.abs(h.vy) > 30) sfx('engine', h.x, h.y);
   if (h.pet) updatePet(h, dt);
 }
 // A pet follows its hero, shoots at enemies near the hero and applies its perk.
@@ -1404,6 +1506,7 @@ function updatePet(h, dt) {
 }
 function updateMinion(m, dt) {
   m.atkT -= dt; m.think -= dt;
+  if (m.type === 'tank' && Math.random() < .1) sfx('engine', m.x, m.y);
   if (m.think <= 0) {
     m.think = .35;
     if (!valid(m.target, m) || dist(m, m.target) > 420) m.target = nearestEnemy(m, 330, null, 1.7);
@@ -1539,7 +1642,7 @@ function update(dt) {
   if (G.mode === 'host') hostReadInputs();
   G.time += dt;
   if (G.time >= G.nextWave) { queueWave(); G.nextWave += 30; }
-  updatePickups(); updateBurns(dt);
+  updatePickups(); updateBurns(dt); updateMapFeatures(dt);
   for (let i = G.spawnQ.length - 1; i >= 0; i--) { const s = G.spawnQ[i]; if (G.time >= s.at) { spawnMinion(s.team, s.lane, s.type, s.tier || 0); G.spawnQ.splice(i, 1); } }
   for (const u of G.units) {
     if (u.hitFlash > 0) u.hitFlash -= dt;
@@ -1597,6 +1700,7 @@ function update(dt) {
       const dx = t.x - p.x, dy = t.y - p.y, d = Math.hypot(dx, dy), s = p.speed * dt;
       if (d <= s + t.r * .5) {
         damage(t, p.dmg, p.src);
+        if (p.splash) { for (const o of G.units) if (o !== t && o.alive && o.team !== p.team && o.team !== 2 && targetable(o) && dist(o, t) < p.splash + o.r) damage(o, p.dmg * .5, p.src); burst(t.x, t.y, '#ffb35a', 22, 240, .5, 5); sfx('boom', t.x, t.y); }
         if (p.src.lifesteal && p.src.alive) p.src.hp = Math.min(p.src.maxHp, p.src.hp + p.dmg * p.src.lifesteal);
         burst(t.x, t.y, p.color, p.src.kind === 'tower' ? 10 : 4, 120, .3, 3);
         G.projs.splice(i, 1);
@@ -1647,7 +1751,7 @@ const mixCost = mix => mix.length <= 1 ? 0 : mix.length * 9;
 const mixWait = (h, mix) => mix.length <= 1 ? .3 : .5 + .25 * mix.length;
 const mixRange = mix => mix.includes('stone') ? 520 : mix.includes('arcane') ? 520 : 280;
 const lifeOnly = mix => mix.length > 0 && mix.every(e => e === 'life');
-const mixUsable = h => h.mix && h.mix.length && !lifeOnly(h.mix) && h.mana >= mixCost(h.mix);
+const mixUsable = h => !isWarzone() && h.mix && h.mix.length && !lifeOnly(h.mix) && h.mana >= mixCost(h.mix);
 const isFoe = (u, h) => u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && targetable(u);
 function mixColor(mix) { // average of the queued elements' colors
   let r = 0, g = 0, b = 0;
@@ -1660,6 +1764,7 @@ function castMix(h, tx, ty) {
   const mix = h.mix || [];
   if (!mix.length || h.mixT > 0 || h.mana < mixCost(mix)) return false;
   h.mana -= mixCost(mix); h.mixT = mixWait(h, mix) * (h.rapidUntil > G.time ? .6 : 1);
+  if (h.isPlayer) dailyCount('elements');
   const per = 16 + 5 * h.level + .3 * h.ap + .25 * h.ad, power = mix.length === 1 ? per * .55 : per * mix.length * 1.15;
   const col = mixColor(mix), dx = tx - h.x, dy = ty - h.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
   h.face = Math.atan2(ny, nx); h.atkT = Math.max(h.atkT, .15);
@@ -1735,15 +1840,54 @@ const POWERUPS = {
   rapid: {name: 'Rapid fire', color: '#f2c14e', note: 'Attack twice as fast for 10s'},
   haste: {name: 'Swiftness', color: '#7fd1ff', note: '+35% move speed for 8s'},
   might: {name: 'Might', color: '#ff6a4d', note: '+30% damage for 10s'},
+  tank:  {name: 'Tank', color: '#9acd5a', note: 'Drive a tank for 20s: armored cannon shells that explode'},
 };
 const PU_KEYS = Object.keys(POWERUPS);
 // jungle and river spots, mirrored for both teams
 const PU_SPOTS = [[.27, .53], [.47, .73], [.73, .47], [.53, .27], [.42, .58], [.58, .42]];
+// ---------- map zones and events ----------
+function updateMapFeatures(dt) {
+  for (const u of G.units) u.zoneSpd = 1;
+  for (const z of MAP.zones || []) {
+    for (const u of G.units) {
+      if (!u.alive || (u.kind !== 'hero' && u.kind !== 'minion') || Math.hypot(u.x - z.x, u.y - z.y) > z.r + u.r * .5) continue;
+      if (z.kind === 'heal' && u.kind === 'hero') u.hp = Math.min(u.maxHp, u.hp + u.maxHp * .04 * dt);
+      else if (z.kind === 'lava') { u.lavaT = (u.lavaT || 0) - dt; if (u.lavaT <= 0) { u.lavaT = .5; damage(u, u.maxHp * .03, null); } }
+      else if (z.kind === 'ice') u.zoneSpd = 1.3;
+      else if (z.kind === 'boost') u.zoneSpd = 1.45;
+      else if (z.kind === 'whirl') { u.zoneSpd = .8; const a = Math.atan2(z.y - u.y, z.x - u.x); u.x += Math.cos(a) * 70 * dt; u.y += Math.sin(a) * 70 * dt; }
+      else if (z.kind === 'pad' && u.kind === 'hero' && G.time - (u.padT || -9) > 2) {
+        u.padT = G.time; burst(u.x, u.y, '#ffe66b', 20, 200, .4, 4);
+        u.x = z.to[0] + rand(-30, 30); u.y = z.to[1] + rand(-30, 30); if (u.cmd && u.cmd.type === 'move') u.cmd = null;
+        ring(u.x, u.y, '#ffe66b', 90, .5); sfx('blink', u.x, u.y);
+        if (u.isPlayer) { G.cam.x = u.x; G.cam.y = u.y; }
+      }
+    }
+  }
+  const ev = MAP.event;
+  if (!ev) return;
+  if (G.evNext == null) G.evNext = ev.every;
+  if (G.time >= G.evNext) {
+    G.evNext = G.time + ev.every;
+    if (ev.kind === 'blizzard') { G.blizzardUntil = G.time + ev.len; globalBanner('A blizzard rolls in', 'Everyone moves slower for a while.'); }
+    else if (ev.kind === 'meteors') {
+      globalBanner('Meteor shower', 'Watch the sky. Get out of the glowing circles.');
+      for (let i = 0; i < 7; i++) { const t = 1 + i * .3, path = Object.values(LANES)[i % Object.keys(LANES).length], q = pointAlong(path, rand(.25, .75));
+        G.blasts.push({x: q[0] + rand(-150, 150), y: q[1] + rand(-150, 150), t, max: t, r: 150, dmg: 180 + G.time * .8, src: null, team: 3}); }
+    } else if (ev.kind === 'gust') {
+      const sgn = Math.random() < .5 ? 1 : -1;
+      globalBanner('A gust howls across the bridge', 'Everyone gets shoved ' + (sgn > 0 ? 'down' : 'up') + ' the bridge.');
+      for (const u of G.units) if (u.alive && (u.kind === 'hero' || u.kind === 'minion')) { u.x = clamp(u.x + sgn * 85, 30, W - 30); u.y = clamp(u.y + sgn * 85, 30, H - 30); }
+    }
+  }
+  if (G.blizzardUntil > G.time) for (const u of G.units) u.zoneSpd *= .82;
+}
 function updatePickups() {
   for (let i = 0; i < PU_SPOTS.length; i++) {
     const at = G.pickT[i] != null ? G.pickT[i] : 40;
     if (G.time >= at && !G.pickups.some(p => p.spot === i)) {
-      const kind = i >= 4 ? (Math.random() < .5 ? 'rapid' : 'might') : PU_KEYS[Math.floor(Math.random() * PU_KEYS.length)];
+      const pool = PU_KEYS.filter(k => k !== 'tank');
+      const kind = isWarzone() && i >= 4 ? 'tank' : i >= 4 ? (Math.random() < .5 ? 'rapid' : 'might') : pool[Math.floor(Math.random() * pool.length)];
       G.pickups.push({spot: i, kind, x: PU_SPOTS[i][0] * W, y: PU_SPOTS[i][1] * H});
       G.pickT[i] = Infinity;
     }
@@ -1752,7 +1896,7 @@ function updatePickups() {
     const p = G.pickups[i];
     const h = G.units.find(u => u.kind === 'hero' && u.alive && Math.hypot(u.x - p.x, u.y - p.y) < 50 + u.r);
     if (!h) continue;
-    G.pickups.splice(i, 1); G.pickT[p.spot] = G.time + 35;
+    G.pickups.splice(i, 1); G.pickT[p.spot] = G.time + (MAP.fastPickups ? 15 : 35);
     applyPowerup(h, p.kind);
   }
 }
@@ -1762,9 +1906,10 @@ function applyPowerup(h, kind) {
   else if (kind === 'rapid') h.rapidUntil = G.time + 10;
   else if (kind === 'haste') h.hasteUntil = G.time + 8;
   else if (kind === 'might') h.mightUntil = G.time + 10;
+  else if (kind === 'tank') { h.tankUntil = G.time + 20; h.range = 460; h.ranged = true; h.shield = h.maxHp; h.shieldT = 20; }
   ring(h.x, h.y, P.color, 90, .6); burst(h.x, h.y - 20, P.color, 24, 220, .6, 4);
   sfx('pickup', h.x, h.y);
-  if (h.isPlayer) text(h.x, h.y - 70, P.name + '! ' + P.note, P.color);
+  if (h.isPlayer) { text(h.x, h.y - 70, P.name + '! ' + P.note, P.color); dailyCount('pickups'); }
 }
 function starfallFx(b) {
   if (b.style === 'storm') {
@@ -1959,6 +2104,17 @@ function render() {
       ctx.beginPath(); ctx.ellipse(t.x, t.y + 6, t.r + 14, (t.r + 14) * .5, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
     }
   }
+  for (const z of MAP.zones || []) {
+    if (!inView(z, z.r + 40)) continue;
+    const [zc] = ZONE_LOOK[z.kind] || ['#fff'], pulse = .5 + Math.sin(now * 2 + z.x) * .15;
+    ctx.globalAlpha = z.kind === 'lava' ? .55 : .3; ctx.fillStyle = zc; ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r, z.r * .8, 0, 0, 7); ctx.fill();
+    ctx.globalAlpha = pulse; ctx.strokeStyle = zc; ctx.lineWidth = 3; ctx.setLineDash(z.kind === 'pad' || z.kind === 'boost' ? [] : [14, 10]);
+    ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r * (z.kind === 'whirl' ? .6 + (now % 1) * .4 : 1), z.r * .8 * (z.kind === 'whirl' ? .6 + (now % 1) * .4 : 1), 0, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+    if (z.kind === 'pad') { ctx.fillStyle = zc; ctx.globalAlpha = .8; ctx.beginPath(); const a = Math.atan2(z.to[1] - z.y, z.to[0] - z.x); for (const o of [0, 22]) { ctx.moveTo(z.x + Math.cos(a) * (o + 24), z.y + Math.sin(a) * (o + 24)); ctx.lineTo(z.x + Math.cos(a + 2.5) * 14 + Math.cos(a) * o, z.y + Math.sin(a + 2.5) * 14 + Math.sin(a) * o); ctx.lineTo(z.x + Math.cos(a - 2.5) * 14 + Math.cos(a) * o, z.y + Math.sin(a - 2.5) * 14 + Math.sin(a) * o); } ctx.fill(); }
+    if (z.kind === 'lava' && Math.random() < .3) G.fx.push({x: z.x + rand(-z.r, z.r) * .7, y: z.y + rand(-z.r, z.r) * .5, vx: 0, vy: -40, t: .6, max: .6, color: '#ffb35a', r: 3});
+    ctx.globalAlpha = 1;
+  }
+  if (G.blizzardUntil > G.time) for (let i = 0; i < 6; i++) G.fx.push({x: G.cam.x + rand(-900, 900), y: G.cam.y + rand(-600, 600), vx: rand(-160, -60), vy: rand(60, 140), t: 1.2, max: 1.2, color: '#ffffff', r: rand(1.5, 3.5)});
   for (const p of G.pickups) {
     if (!inView(p, 60)) continue;
     const P = POWERUPS[p.kind], bob = Math.sin(now * 3 + p.spot) * 6, y = p.y - 26 + bob;
@@ -1970,6 +2126,7 @@ function render() {
     if (p.kind === 'heal') { ctx.fillRect(p.x - 3.5, y - 11, 7, 22); ctx.fillRect(p.x - 11, y - 3.5, 22, 7); }
     else if (p.kind === 'rapid') { ctx.beginPath(); ctx.moveTo(p.x + 3, y - 12); ctx.lineTo(p.x - 6, y + 2); ctx.lineTo(p.x + 2, y + 2); ctx.lineTo(p.x - 3, y + 12); ctx.stroke(); }
     else if (p.kind === 'haste') { for (const o of [-5, 4]) { ctx.beginPath(); ctx.moveTo(p.x + o - 4, y - 8); ctx.lineTo(p.x + o + 4, y); ctx.lineTo(p.x + o - 4, y + 8); ctx.stroke(); } }
+    else if (p.kind === 'tank') { ctx.fillRect(p.x - 11, y - 2, 22, 8); ctx.fillRect(p.x - 6, y - 8, 12, 6); ctx.fillRect(p.x + 4, y - 7, 10, 3); }
     else { ctx.beginPath(); ctx.moveTo(p.x, y - 11); ctx.lineTo(p.x, y + 7); ctx.moveTo(p.x - 7, y + 3); ctx.lineTo(p.x + 7, y + 3); ctx.stroke(); }
     ctx.lineCap = 'butt';
   }
@@ -2093,6 +2250,7 @@ function drawUnit(u, now) {
     ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(u.x, u.y + 16, 22, 9, 0, 0, 7); ctx.fill();
     ctx.strokeStyle = u.isPlayer ? 'rgba(242,193,78,.75)' : u.human ? 'rgba(255,255,255,.65)' : tc + '99'; ctx.lineWidth = u.isPlayer || u.human ? 3 : 2;
     ctx.beginPath(); ctx.ellipse(u.x, u.y + 16, 30, 12, 0, 0, 7); ctx.stroke();
+    if (u.tankUntil > G.time) drawTank(ctx, u.x, u.y, u.face || 0, u.team, u.hitFlash, 1.25); else
     drawCharacter(ctx, u, now);
     if (u.pet) drawPet(ctx, u.pet, now);
     if (u.shield > 0) {
@@ -2303,6 +2461,34 @@ function drawHat(c, L, u, now, eye) {
     c.fillStyle = '#111116'; c.beginPath(); c.arc(1, -58, 11.5, Math.PI * .9, Math.PI * 2.1); c.lineTo(12, -54); c.lineTo(-11, -54); c.closePath(); c.fill();
     c.beginPath(); c.moveTo(-9, -60); c.quadraticCurveTo(-24, -52 + Math.sin(now * 3) * 2, -20, -32); c.lineTo(-15, -34); c.quadraticCurveTo(-17, -50, -6, -56); c.closePath(); c.fill();
     c.fillStyle = u.color; c.fillRect(-11, -59, 3, 4);
+  } else if (L.hat === 'ninja') { // mask and a headband with trailing tails
+    c.fillStyle = '#1b1822'; c.beginPath(); c.arc(1, -57, 11.5, Math.PI * .95, Math.PI * 2.05); c.fill(); c.fillRect(-9, -53, 21, 7);
+    c.fillStyle = col; c.fillRect(-10, -62, 22, 3);
+    c.beginPath(); c.moveTo(-9, -61); c.lineTo(-22, -64 + Math.sin(now * 9) * 3); c.lineTo(-21, -58); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(-9, -60); c.lineTo(-20, -55 + Math.sin(now * 8 + 1) * 3); c.lineTo(-18, -51); c.closePath(); c.fill();
+  } else if (L.hat === 'visor') { // pilot helmet with a glowing visor
+    c.fillStyle = '#c9d4e0'; c.beginPath(); c.arc(1, -57, 13, Math.PI * .85, Math.PI * 2.15); c.fill();
+    c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 8; c.fillRect(1, -60, 13, 5); c.shadowBlur = 0;
+    c.fillStyle = '#5a6a7a'; c.fillRect(-12, -66, 3, 10);
+  } else if (L.hat === 'twintails') { // bright twin tails with star clips
+    c.fillStyle = '#ffb6e6'; c.beginPath(); c.arc(1, -58, 11.5, Math.PI * .95, Math.PI * 2.05); c.lineTo(12, -55); c.lineTo(-11, -55); c.closePath(); c.fill();
+    for (const sd of [-1, 1]) { c.beginPath(); c.ellipse(sd * 15 + 1, -50 + Math.sin(now * 4 + sd) * 2, 5, 13, sd * .3, 0, 7); c.fill(); }
+    c.fillStyle = '#ffe66b'; for (const sd of [-1, 1]) { c.beginPath(); c.arc(sd * 11 + 1, -64, 3, 0, 7); c.fill(); }
+  } else if (L.hat === 'topknot') { // tied-up hair and a headband
+    c.fillStyle = '#1a1414'; c.beginPath(); c.arc(1, -58, 11, Math.PI * .95, Math.PI * 2.05); c.fill();
+    c.beginPath(); c.ellipse(-2, -71, 4, 5, 0, 0, 7); c.fill();
+    c.fillStyle = '#e8eef6'; c.fillRect(-10, -61, 22, 2.5);
+  } else if (L.hat === 'widehat') { // a wide-brimmed hunter's hat
+    c.fillStyle = '#2b2026'; c.beginPath(); c.ellipse(1, -61, 21, 5, 0, 0, 7); c.fill();
+    c.beginPath(); c.moveTo(-9, -61); c.lineTo(-7, -74); c.lineTo(9, -74); c.lineTo(11, -61); c.closePath(); c.fill();
+    c.fillStyle = col; c.fillRect(-8, -66, 18, 3);
+  } else if (L.hat === 'tricorn') { // a pirate captain's tricorn
+    c.fillStyle = '#2a1c14'; c.beginPath(); c.moveTo(-17, -60); c.quadraticCurveTo(1, -82, 19, -60); c.quadraticCurveTo(1, -66, -17, -60); c.fill();
+    c.fillStyle = col; c.beginPath(); c.arc(1, -68, 2.5, 0, 7); c.fill();
+  } else if (L.hat === 'winghelm') { // a silver helm with wings
+    c.fillStyle = '#d7dde6'; c.beginPath(); c.arc(1, -57, 12, Math.PI, 0); c.lineTo(13, -52); c.lineTo(-11, -52); c.closePath(); c.fill();
+    c.fillStyle = '#ffffff';
+    for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(sd * 10 + 1, -60); c.quadraticCurveTo(sd * 24 + 1, -70, sd * 20 + 1, -80); c.quadraticCurveTo(sd * 18 + 1, -68, sd * 8 + 1, -64); c.closePath(); c.fill(); }
   } else if (L.hat === 'heavyhelm') {
     c.fillStyle = '#3d4630'; c.beginPath(); c.arc(1, -56, 13.5, Math.PI * .9, Math.PI * 2.1); c.fill();
     c.fillStyle = '#14170f'; c.fillRect(2, -59, 12, 5);
@@ -2380,7 +2566,22 @@ function drawWeapon(c, w, u, hx, hy, atk, now) {
   }
 }
 // Minions gain armor and size with each tier; tier 3 melee minions become ogres.
+function drawTank(c, x, y, face, team, flash, scale = 1) {
+  const col = TEAM_COLOR[team];
+  c.save(); c.translate(x, y + 4); c.scale(scale, scale);
+  if (flash > 0) c.filter = 'brightness(2.2)';
+  c.fillStyle = 'rgba(0,0,0,.4)'; c.beginPath(); c.ellipse(0, 10, 40, 14, 0, 0, 7); c.fill();
+  c.fillStyle = '#2b2f26'; c.fillRect(-34, -4, 68, 16); // tracks
+  c.fillStyle = '#4b5a35'; c.fillRect(-30, -18, 60, 18); // hull
+  c.fillStyle = col; c.fillRect(-30, -6, 60, 4);
+  c.fillStyle = '#3d4a2b'; c.beginPath(); c.arc(0, -20, 14, Math.PI, 0); c.fill(); // turret
+  c.strokeStyle = '#2b2f26'; c.lineWidth = 6; c.lineCap = 'round';
+  const fx = Math.cos(face) >= 0 ? 1 : -1;
+  c.beginPath(); c.moveTo(0, -24); c.lineTo(fx * 40, -26); c.stroke(); c.lineCap = 'butt';
+  c.restore();
+}
 function drawMinion(c, u, now) {
+  if (u.type === 'tank') return drawTank(c, u.x, u.y, u.face || 0, u.team, u.hitFlash, 1);
   const P = FOLK[u.team], A = animState(u, 8), tier = u.tier || 0;
   c.save(); c.translate(u.x, u.y + 6);
   if (u.hitFlash > 0) c.filter = 'brightness(2.2)';
@@ -2959,7 +3160,7 @@ function updateHud() {
     hud.dev = dev; for (const k of 'qwerf') abEls[k].el.querySelector('.k').textContent = KEY_LABELS[dev][k];
     $('elems').querySelectorAll('.ek').forEach((e, i) => { e.textContent = EL_LABELS[dev][i]; });
   }
-  $('elems').hidden = G.mode === 'client' || !overlay.hidden || G.over;
+  $('elems').hidden = G.mode === 'client' || !overlay.hidden || G.over || isWarzone();
   const mix = p.mix || [], sig = mix.join('.') + (mixUsable(p) || lifeOnly(mix) ? '' : '!');
   if (sig !== hud.mixSig) {
     hud.mixSig = sig; const ms = $('mixShow'); ms.innerHTML = '';
@@ -2971,7 +3172,7 @@ function updateHud() {
     const a = AB[k], e = abEls[k], c = p.cds[k] || 0, mx = a.cd * (1 - p.haste);
     e.cd.style.setProperty('--p', (c > 0 ? clamp(c / mx, 0, 1) * 360 : 0) + 'deg');
     e.cdt.textContent = c > 0 ? Math.ceil(c) : '';
-    e.el.classList.toggle('locked', p.level < (a.lvl || 1));
+    e.el.classList.toggle('locked', p.level < (a.lvl || 1) || (isWarzone() && k !== 'f'));
     e.el.classList.toggle('nomana', p.mana < a.mana);
   }
   hud.dead.hidden = p.alive || !playing;
@@ -3058,7 +3259,7 @@ function show(id) {
   setTimeout(() => { const b = $(id).querySelector('button:not(:disabled)'); if (b) b.focus({preventScroll: true}); }, 0);
 }
 function hideMenus() { overlay.hidden = true; musicScene(); }
-function refreshMain() { $('m-continue').disabled = !store.get(AUTO_KEY); }
+function refreshMain() { $('m-continue').disabled = !store.get(AUTO_KEY); $('m-daily').textContent = dailyReady() ? 'Daily  •  rewards ready' : 'Daily'; }
 function begin(loaded) {
   hideMenus(); closeShop();
   G.started = true; G.paused = false; G.over = false; lastAuto = G.time;
@@ -3171,6 +3372,8 @@ $('stagesBack').addEventListener('click', () => show('scr-mode'));
 $('quickBack').addEventListener('click', () => show('scr-mode'));
 $('quickGo').addEventListener('click', () => { pendingCfg = {map: quickSel.map, diff: quickSel.diff, stage: -1, mode: quickSel.mode}; heroScreen('scr-quick'); });
 $('m-store').addEventListener('click', () => openStore(null, 'scr-main'));
+$('m-daily').addEventListener('click', () => { renderDaily(); show('scr-daily'); });
+$('dailyBack').addEventListener('click', () => show('scr-main'));
 $('p-store').addEventListener('click', () => openStore(null, 'scr-pause'));
 $('storeBack').addEventListener('click', () => show(storeBack));
 $('m-continue').addEventListener('click', () => loadFrom(AUTO_KEY));
@@ -3700,7 +3903,10 @@ const MODES = {
   tdm: {name: 'Team Deathmatch', desc: 'First team to 15 hero kills wins. No towers or minions.', minions: false, towers: false},
   koth: {name: 'Hold the Spot', desc: 'Hold the circle in the middle of the map for 5 minutes in total.', minions: true, towers: true},
   ctf: {name: 'Capture the Flag', desc: 'Steal the enemy flag and carry it to yours. First to 3 captures.', minions: false, towers: false},
+  warzone: {name: 'Warzone', desc: 'Soldiers only: guns and grenades, no magic. Tanks roll down the lanes and a tank pickup lets you drive one. First team to 20 kills wins.', minions: true, towers: true},
 };
+const WARZONE_KILLS = 20, GUN_LOOKS = ['soldier', 'heavy', 'sniper', 'mecha'];
+const isWarzone = () => G && G.cfg && G.cfg.mode === 'warzone';
 const ZONE = {x: 1600, y: 1600, r: 260}, KOTH_TIME = 300, TDM_KILLS = 15, CTF_CAPS = 3;
 function flagHome(t) { const c = CORE[t], s = t ? 1 : -1; return {x: c.x - s * 160, y: c.y + s * 160}; }
 function setupMode() {
@@ -3712,6 +3918,7 @@ function modeUpdate(dt) {
   const mode = G.cfg.mode;
   if (G.over || mode === 'conquest') return;
   if (mode === 'tdm') { for (let t = 0; t < 2; t++) if (G.kills[t] >= TDM_KILLS) return winMatch(t); return; }
+  if (mode === 'warzone') { for (let t = 0; t < 2; t++) if (G.kills[t] >= WARZONE_KILLS) return winMatch(t); return; }
   if (mode === 'koth') {
     const inz = [0, 0];
     for (const h of G.units) if (h.kind === 'hero' && h.alive && dist(h, ZONE) < ZONE.r) inz[h.team]++;
@@ -3812,6 +4019,7 @@ function drawFlag(x, y, team, now) {
 function modeScoreText() {
   const m = G.cfg.mode, s = G.score;
   if (m === 'tdm') return `Kills ${G.kills[0]}–${G.kills[1]} · first to ${TDM_KILLS}`;
+  if (m === 'warzone') return `Kills ${G.kills[0]}–${G.kills[1]} · first to ${WARZONE_KILLS}`;
   if (m === 'koth') return `Held ${fmtTime(s[0])}–${fmtTime(s[1])} · ${fmtTime(KOTH_TIME)} wins`;
   if (m === 'ctf') return `Flags ${s[0]}–${s[1]} · first to ${CTF_CAPS}`;
   return '';
@@ -3900,6 +4108,8 @@ function freshProfile() {
     eq: {skin: 'none', trail: 'none', q: 'bolt', r: 'starfall', pet: null}, pass: {premium: false, xp: 0, claimed: []}, stage: 0, cleared: []};
 }
 let PROF = Object.assign(freshProfile(), store.get(PROFILE_KEY) || {});
+const ensureFreeHeroes = () => { for (const [i, r] of ROSTER.entries()) if (r.free && !PROF.heroes.includes(i)) PROF.heroes.push(i); };
+ensureFreeHeroes();
 const saveHooks = [];
 const saveProfile = () => { store.set(PROFILE_KEY, PROF); for (const f of saveHooks) f(); };
 const owns = (list, id) => PROF[list].includes(id);
@@ -3945,10 +4155,59 @@ function applyBoosts() {
   if (PROF.boosts.purse > 0) { PROF.boosts.purse--; p.gold += 600; used.push('Gold Purse'); }
   if (used.length) { saveProfile(); setTimeout(() => banner('Boosts used', used.join(' and ')), 2400); }
 }
+// ---------- daily quests: three new ones every day, plus a bonus for showing up ----------
+const DAILY_POOL = {
+  win:      {text: 'Win a match', goal: 1, crowns: 120, xp: 80},
+  matches:  {text: 'Play 2 matches', goal: 2, crowns: 80, xp: 60},
+  kills:    {text: 'Get 5 hero kills', goal: 5, crowns: 100, xp: 70},
+  minions:  {text: 'Defeat 40 minions or troops', goal: 40, crowns: 90, xp: 60},
+  pickups:  {text: 'Grab 3 power-ups', goal: 3, crowns: 70, xp: 50},
+  casts:    {text: 'Use 40 abilities', goal: 40, crowns: 70, xp: 50},
+  drake:    {text: 'Help slay a river drake', goal: 1, crowns: 100, xp: 70},
+  warzone:  {text: 'Play a Warzone match', goal: 1, crowns: 90, xp: 60},
+  elements: {text: 'Cast 25 element mixes', goal: 25, crowns: 80, xp: 60},
+};
+const DAILY_BONUS = 50;
+const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+function dailyState() {
+  const day = todayKey();
+  if (!PROF.daily || PROF.daily.day !== day) { // pick three quests seeded by the date, so they're the same all day
+    let seed = 0; for (const ch of day) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+    const R = mulberry(seed), ids = Object.keys(DAILY_POOL), pick = [];
+    while (pick.length < 3) { const id = ids[(R() * ids.length) | 0]; if (!pick.includes(id)) pick.push(id); }
+    PROF.daily = {day, bonus: false, quests: pick.map(id => ({id, prog: 0, claimed: false}))};
+    saveProfile();
+  }
+  return PROF.daily;
+}
+// counts progress toward today's quests (single-player and hosted matches)
+function dailyCount(id, n = 1) {
+  if (G.mode === 'client') return;
+  const q = dailyState().quests.find(x => x.id === id);
+  if (q && !q.claimed) q.prog = Math.min(DAILY_POOL[id].goal, q.prog + n);
+}
+function renderDaily() {
+  const st = dailyState(), list = $('dailyList'); list.innerHTML = '';
+  const bonus = el('button', 'slot-btn'), bl = el('span', '', 'Daily login bonus'), br = el('small', '', st.bonus ? 'Claimed' : `Claim ${DAILY_BONUS} Crowns`);
+  bonus.append(bl, br); bonus.disabled = st.bonus;
+  bonus.addEventListener('click', () => { if (!st.bonus) { st.bonus = true; PROF.crowns += DAILY_BONUS; saveProfile(); renderDaily(); } });
+  list.appendChild(bonus);
+  for (const q of st.quests) {
+    const Q = DAILY_POOL[q.id], done = q.prog >= Q.goal, b = el('button', 'slot-btn');
+    b.append(el('span', '', `${Q.text} · ${q.prog}/${Q.goal}`), el('small', '', q.claimed ? 'Claimed' : done ? `Claim ${Q.crowns} Crowns + ${Q.xp} XP` : `${Q.crowns} Crowns + ${Q.xp} XP`));
+    b.disabled = q.claimed || !done;
+    b.addEventListener('click', () => { if (done && !q.claimed) { q.claimed = true; PROF.crowns += Q.crowns; PROF.pass.xp += Q.xp; saveProfile(); renderDaily(); } });
+    list.appendChild(b);
+  }
+  const ms = new Date().setHours(24, 0, 0, 0) - Date.now(), hrs = Math.floor(ms / 36e5), mins = Math.floor(ms / 6e4) % 60;
+  $('dailyInfo').textContent = `${PROF.crowns} Crowns · new quests in ${hrs}h ${mins}m`;
+}
+function dailyReady() { const st = dailyState(); return !st.bonus || st.quests.some(q => !q.claimed && q.prog >= DAILY_POOL[q.id].goal); }
 function grantMatchRewards(won) {
   if (G.rewarded) return G.rewardText || '';
   G.rewarded = true;
   const p = G.player;
+  dailyCount('matches'); if (won) dailyCount('win'); if (G.cfg.mode === 'warzone') dailyCount('warzone');
   let crowns = (won ? 150 : 60) + 10 * p.kills, xp = (won ? 100 : 60) + 5 * p.kills, note = '';
   if (PROF.boosts.xp2 > 0) { PROF.boosts.xp2--; xp *= 2; note = ' (boosted)'; }
   const st = G.cfg.stage;
@@ -3992,7 +4251,7 @@ window.Thornwake = {
   refresh() { if (!overlay.hidden && currentScreen === 'scr-store') renderStore(); },
   // accounts add-on (accounts.js): cloud saves and an Account screen
   getProfile: () => JSON.parse(JSON.stringify(PROF)),
-  replaceProfile(data) { PROF = Object.assign(freshProfile(), data); store.set(PROFILE_KEY, PROF); window.Thornwake.refresh(); },
+  replaceProfile(data) { PROF = Object.assign(freshProfile(), data); ensureFreeHeroes(); store.set(PROFILE_KEY, PROF); window.Thornwake.refresh(); },
   onSave(fn) { saveHooks.push(fn); },
   addMenuButton(id, label, onClick) { const b = el('button', 'mbtn', label); b.id = id; b.addEventListener('click', onClick); $('m-help').before(b); return b; },
   addScreen(section) { section.classList.add('screen'); section.hidden = true; $('scr-main').parentNode.appendChild(section); },
@@ -4546,6 +4805,12 @@ const SFX = {
   drain:   {gap: .1,  play: (t, v) => { sweep(t, 'sawtooth', 500, 160, .35, .06 * v); sweep(t, 'sine', 330, 110, .4, .12 * v); }},
   vortex:  {gap: .3,  play: (t, v) => { sweep(t, 'sawtooth', 900, 80, .6, .07 * v); sweep(t, 'sine', 600, 60, .6, .2 * v); }},
   phoenix: {gap: .5,  play: (t, v) => { noiseHit(t, .4 * v, .8, 'lowpass', 2200); notes(t + .05, [69, 76, 81, 88], .06, .5, .08 * v, 'sawtooth'); }},
+  gun:     {gap: .06, play: (t, v) => { noiseHit(t, .45 * v, .09, 'bandpass', 2200); noiseHit(t, .3 * v, .05, 'highpass', 6000); sweep(t, 'square', 180, 60, .08, .12 * v); }},
+  gunfar:  {gap: .12, play: (t, v) => { noiseHit(t, .14 * v, .07, 'bandpass', 1800); sweep(t, 'square', 150, 60, .06, .04 * v); }},
+  sniper:  {gap: .2,  play: (t, v) => { noiseHit(t, .6 * v, .25, 'bandpass', 1600); noiseHit(t, .35 * v, .5, 'lowpass', 900); sweep(t, 'sine', 160, 40, .4, .3 * v); }},
+  minigun: {gap: .04, play: (t, v) => { noiseHit(t, .22 * v, .04, 'bandpass', 2800); sweep(t, 'square', 220, 90, .03, .05 * v); }},
+  cannon:  {gap: .2,  play: (t, v) => { sweep(t, 'sine', 110, 28, .7, .55 * v); noiseHit(t, .5 * v, .6, 'lowpass', 700); noiseHit(t, .2 * v, .12, 'bandpass', 1500); }},
+  engine:  {gap: .32, play: (t, v) => { sweep(t, 'sawtooth', 62, 55, .34, .05 * v); noiseHit(t, .06 * v, .3, 'lowpass', 220); }},
   pickup:  {gap: .2,  play: (t, v) => notes(t, [76, 83, 88], .05, .3, .08 * v)},
   hatch:   {gap: .5,  play: (t, v) => { noiseHit(t, .3 * v, .25, 'highpass', 3000); notes(t + .05, [76, 81, 84, 88], .06, .45, .08 * v); }},
 };
