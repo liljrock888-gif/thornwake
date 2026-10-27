@@ -217,6 +217,44 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
   #atkBtn{bottom:calc(225px + env(safe-area-inset-bottom,0px));width:80px;height:80px}
   .maps{grid-template-columns:minmax(0,1fr)}
 }
+/* touch screens: joystick bottom-left, Attack with Q W E R around it bottom-right, a compact status card top-left */
+#game.touch #hud{top:calc(54px + env(safe-area-inset-top,0px));bottom:auto;left:calc(10px + env(safe-area-inset-left,0px));right:auto;transform:none;flex-wrap:nowrap;gap:8px;padding:6px 8px}
+#game.touch #portrait{width:40px;height:40px;border-width:2px}
+#game.touch #form{display:none}
+#game.touch #lvl{font-size:11px}
+#game.touch #bars{width:100px;gap:4px}
+#game.touch .bar{height:13px} #game.touch .bar span{font-size:10px;line-height:12px}
+#game.touch #items{display:none}
+#game.touch #side{gap:3px}
+#game.touch #shopBtn{font-size:13px;padding:3px 8px}
+#game.touch #kda{font-size:11px}
+#game.touch #menuBtn{top:calc(10px + env(safe-area-inset-top,0px))}
+#game.touch #mini{width:112px;height:112px;top:calc(54px + env(safe-area-inset-top,0px));bottom:auto}
+#game.touch #feed{top:calc(122px + env(safe-area-inset-top,0px));bottom:auto;left:calc(10px + env(safe-area-inset-left,0px));right:auto;align-items:flex-start;max-width:56vw}
+#game.touch #feed div{font-size:12px;padding:3px 8px}
+#game.touch #joy{left:calc(22px + env(safe-area-inset-left,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));width:124px;height:124px}
+#game.touch #atkBtn{right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));width:86px;height:86px}
+#touch #abil{display:contents}
+#touch #abil .ab{position:absolute;width:56px;height:56px;border-radius:50%;pointer-events:auto;touch-action:manipulation;background:radial-gradient(circle at 40% 35%,#2e4539,#121c18);box-shadow:0 3px 10px rgba(0,0,0,.5)}
+#touch #abil .ab svg{width:26px;height:26px}
+#touch #abil .k{display:none}
+#touch #abil .mc{right:50%;bottom:5px;transform:translateX(50%);font-size:10px}
+#touch #ab-q{right:calc(127px + env(safe-area-inset-right,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+#touch #ab-w{right:calc(115px + env(safe-area-inset-right,0px));bottom:calc(108px + env(safe-area-inset-bottom,0px))}
+#touch #ab-e{right:calc(68px + env(safe-area-inset-right,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+#touch #ab-r{right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(138px + env(safe-area-inset-bottom,0px))}
+@media (max-height:420px){ /* phones held sideways */
+  #game.touch #mini{width:92px;height:92px;top:calc(48px + env(safe-area-inset-top,0px))}
+  #game.touch #hud{top:calc(48px + env(safe-area-inset-top,0px))}
+  #game.touch #feed{display:none}
+  #game.touch #joy{width:110px;height:110px;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  #game.touch #atkBtn{width:76px;height:76px;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  #touch #ab-q{right:calc(112px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+  #touch #ab-w{right:calc(104px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  #touch #ab-e{right:calc(58px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))}
+  #touch #ab-r{right:calc(4px + env(safe-area-inset-right,0px));bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+  #banner{top:16%}
+}
 @media (prefers-reduced-motion:reduce){#banner,#feed div{transition:none}}
 </style>
 
@@ -485,11 +523,11 @@ const MAPS = {
       lane: ['#1b1d22', '#3e4249', '#555a62'], speck: ['rgba(0,0,0,.3)', 'rgba(200,210,230,.12)'], plaza: ['#2e3138', '#1d1f25'], camp: 'rgba(40,42,50,.8)', deco: 'void'}},
 };
 const DIFFS = [
-  {name: 'Easy', dmg: .8, gold: .85, aim: .15},
-  {name: 'Normal', dmg: 1, gold: 1, aim: .3},
-  {name: 'Hard', dmg: 1.15, gold: 1.15, aim: .45},
-  {name: 'Brutal', dmg: 1.3, gold: 1.3, aim: .6},
-  {name: 'Nightmare', dmg: 1.45, gold: 1.45, aim: .75},
+  {name: 'Easy', dmg: .65, gold: .8, aim: .1},
+  {name: 'Normal', dmg: .82, gold: .92, aim: .2},
+  {name: 'Hard', dmg: .95, gold: 1.05, aim: .32},
+  {name: 'Brutal', dmg: 1.08, gold: 1.15, aim: .45},
+  {name: 'Nightmare', dmg: 1.2, gold: 1.25, aim: .58},
 ];
 const STAGES = [{map: 'vale', diff: 0, mode: 'conquest'}, {map: 'frost', diff: 1, mode: 'tdm'}, {map: 'ember', diff: 1, mode: 'ctf'},
   {map: 'bridge', diff: 2, mode: 'koth'}, {map: 'frost', diff: 3, mode: 'conquest'}, {map: 'ember', diff: 4, mode: 'conquest'}];
@@ -572,10 +610,11 @@ function shade(hex, a) {
 }
 
 const AB = {
-  q: {name: 'Ember Bolt', mana: 50, cd: 5},
-  w: {name: 'Cinder Ward', mana: 60, cd: 14},
-  e: {name: 'Flicker', mana: 40, cd: 11},
-  r: {name: 'Starfall', mana: 100, cd: 55, lvl: 4},
+  // every cooldown is under 5 seconds; mana is what limits spamming
+  q: {name: 'Ember Bolt', mana: 40, cd: 2.5},
+  w: {name: 'Cinder Ward', mana: 60, cd: 4.5},
+  e: {name: 'Flicker', mana: 50, cd: 4},
+  r: {name: 'Starfall', mana: 130, cd: 4.8, lvl: 4},
 };
 const ITEMS = {
   boots:  {name: 'Swiftsoles', cost: 300, ms: 55, desc: '+55 move speed', ab: 'SW', col: '#c8d6a0', unique: true},
@@ -801,7 +840,7 @@ function reset(heroIdx = 0, cfg = null) {
   if (!MODES[cfg.mode]) cfg.mode = 'conquest';
   applyMap(cfg.map);
   nid = 1;
-  G = {time: 0, units: [], projs: [], fx: [], blood: [], splats: [], rings: [], texts: [], blasts: [], beams: [], spawnQ: [], events: [], evSeq: 0,
+  G = {time: 0, units: [], projs: [], fx: [], blood: [], splats: [], pickups: [], pickT: {}, rings: [], texts: [], blasts: [], beams: [], spawnQ: [], events: [], evSeq: 0,
        nextWave: 12, waveN: 0, kills: [0, 0], dragons: [0, 0], minionTier: 0, winner: -1, heroIdx, cfg, diff: DIFFS[cfg.diff] || DIFFS[1], zaps: [],
        mode: 'solo', started: false, paused: false, over: false, shake: 0, marker: null, touch: false, pad: false, cam: {x: 0, y: 0}};
   const towers = [];
@@ -855,7 +894,7 @@ function recalc(h) {
   h.atkCd = 0.95 / (1 + 0.025 * L + s.as); h.haste = Math.min(0.4, s.cdr); h.lifesteal = s.ls;
 }
 const xpNeed = l => 90 + 45 * l;
-const rDamage = h => 180 + 45 * h.level + 1.0 * h.ap;
+const rDamage = h => 150 + 38 * h.level + 0.9 * h.ap;
 function gainXp(h, x) {
   if (!h.alive) x *= 0.5;
   h.xp += x;
@@ -896,7 +935,7 @@ function nearestEnemy(u, range, pred, heroWeight = 1) {
 // ---------- combat ----------
 function tryAttack(u, t) {
   if (u.atkT > 0) return;
-  u.atkT = u.atkCd; u.face = Math.atan2(t.y - u.y, t.x - u.x);
+  u.atkT = u.atkCd * (u.rapidUntil > G.time ? .5 : 1); u.face = Math.atan2(t.y - u.y, t.x - u.x);
   sfx(u.kind === 'hero' ? (u.ranged ? 'shot' : 'swing') : u.kind === 'tower' ? 'tower' : u.kind === 'monster' ? 'claw' : 'minion', u.x, u.y);
   let dmg;
   if (u.kind === 'hero') dmg = u.ad;
@@ -915,7 +954,7 @@ const projSize = u => u.kind === 'tower' ? 10 : u.kind === 'hero' ? 7 : u.kind =
 const projColor = u => u.kind === 'hero' ? (LOOKS[u.look] && LOOKS[u.look].tracer) || u.color : u.fire || TEAM_COLOR[u.team];
 function damage(t, amt, src) {
   if (!t.alive) return;
-  if (src && src.kind === 'hero') amt *= 1 + DRAKE_BONUS * G.dragons[src.team];
+  if (src && src.kind === 'hero') amt *= (1 + DRAKE_BONUS * G.dragons[src.team]) * (src.mightUntil > G.time ? 1.3 : 1);
   if (G.mode === 'solo' && src && src.team === 1 - G.player.team) amt *= G.diff.dmg;
   if (t.kind === 'monster' && src && src.kind === 'hero' && !t.resetting) {
     t.lastHero = src; t.lastHeroT = G.time;
@@ -993,7 +1032,7 @@ function cast(h, k, tx, ty) {
   const chain = k === 'r' && h.kit && h.kit.r === 'chain' ? chainTargets(h, tx, ty) : null;
   if (chain && !chain.length) return false;
   const dx = tx - h.x, dy = ty - h.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
-  h.mana -= a.mana; h.cds[k] = a.cd * (1 - h.haste);
+  h.mana -= a.mana; h.cds[k] = a.cd * (1 - h.haste) * (h.human ? 1 : 2.2); // bots wait longer between spells
   sfx(SPELL_SFX[k === 'q' || k === 'r' ? h.kit && h.kit[k] : ''] || {q: 'bolt', w: 'shield', e: 'blink', r: 'ult'}[k], h.x, h.y);
   if (k === 'q') {
     h.face = Math.atan2(ny, nx);
@@ -1081,7 +1120,7 @@ function spawnMinion(team, lane, type, tier) {
 function moveToward(u, x, y, dt) {
   const dx = x - u.x, dy = y - u.y, d = Math.hypot(dx, dy);
   if (d < 4) return true;
-  const sp = u.speed * (u.buffT > 0 ? 1.35 : 1) * (u.flag ? .85 : 1) * (u.slowUntil > G.time ? .6 : 1) * dt;
+  const sp = u.speed * (u.buffT > 0 ? 1.35 : 1) * (u.flag ? .85 : 1) * (u.slowUntil > G.time ? .6 : 1) * (u.hasteUntil > G.time ? 1.35 : 1) * dt;
   u.face = Math.atan2(dy, dx);
   u.walk = (u.walk || 0) + Math.min(sp, d);
   if (sp >= d) { u.x = x; u.y = y; return true; }
@@ -1235,6 +1274,8 @@ function botThink(h) {
       return;
     }
   }
+  const pu = G.pickups.find(p => (p.kind === 'heal' ? hr < .5 : true) && Math.hypot(p.x - h.x, p.y - h.y) < (p.kind === 'heal' ? 700 : 260));
+  if (pu && !(foe && dist(h, foe) < 400)) { h.cmd = {type: 'move', x: pu.x, y: pu.y}; return; }
   if (hr < .3 || (h.items.length < 6 && h.gold >= 1300 && !foe && hr < .8)) { h.state = 'recall'; h.cmd = {type: 'move', x: f.x, y: f.y}; return; }
   const drake = G.units.find(u => u.kind === 'monster' && u.alive && u.fire &&
     ((u.target && u.target.team === h.team && dist(u, h) < 1600) || (h.state === 'dragon' && u.id === h.dragonId)));
@@ -1279,6 +1320,7 @@ function update(dt) {
   if (G.mode === 'host') hostReadInputs();
   G.time += dt;
   if (G.time >= G.nextWave) { queueWave(); G.nextWave += 30; }
+  updatePickups();
   for (let i = G.spawnQ.length - 1; i >= 0; i--) { const s = G.spawnQ[i]; if (G.time >= s.at) { spawnMinion(s.team, s.lane, s.type, s.tier || 0); G.spawnQ.splice(i, 1); } }
   for (const u of G.units) {
     if (u.hitFlash > 0) u.hitFlash -= dt;
@@ -1359,6 +1401,43 @@ function bleed(u, n, gush) {
     const a = Math.random() * 6.283, sp = rand(50, gush ? 300 : 180);
     G.blood.push({x: u.x + rand(-5, 5), y: u.y + rand(-3, 6), h: u.r * rand(.6, 1.4), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45, vh: rand(60, gush ? 320 : 200), r: rand(2, gush ? 5 : 3.5)});
   }
+}
+// ---------- power-ups: pickups that appear around the map for any hero to grab ----------
+const POWERUPS = {
+  heal:  {name: 'Health pack', color: '#6be08a', note: '+40% health'},
+  rapid: {name: 'Rapid fire', color: '#f2c14e', note: 'Attack twice as fast for 10s'},
+  haste: {name: 'Swiftness', color: '#7fd1ff', note: '+35% move speed for 8s'},
+  might: {name: 'Might', color: '#ff6a4d', note: '+30% damage for 10s'},
+};
+const PU_KEYS = Object.keys(POWERUPS);
+// jungle and river spots, mirrored for both teams
+const PU_SPOTS = [[.27, .53], [.47, .73], [.73, .47], [.53, .27], [.42, .58], [.58, .42]];
+function updatePickups() {
+  for (let i = 0; i < PU_SPOTS.length; i++) {
+    const at = G.pickT[i] != null ? G.pickT[i] : 40;
+    if (G.time >= at && !G.pickups.some(p => p.spot === i)) {
+      const kind = i >= 4 ? (Math.random() < .5 ? 'rapid' : 'might') : PU_KEYS[Math.floor(Math.random() * PU_KEYS.length)];
+      G.pickups.push({spot: i, kind, x: PU_SPOTS[i][0] * W, y: PU_SPOTS[i][1] * H});
+      G.pickT[i] = Infinity;
+    }
+  }
+  for (let i = G.pickups.length - 1; i >= 0; i--) {
+    const p = G.pickups[i];
+    const h = G.units.find(u => u.kind === 'hero' && u.alive && Math.hypot(u.x - p.x, u.y - p.y) < 50 + u.r);
+    if (!h) continue;
+    G.pickups.splice(i, 1); G.pickT[p.spot] = G.time + 35;
+    applyPowerup(h, p.kind);
+  }
+}
+function applyPowerup(h, kind) {
+  const P = POWERUPS[kind];
+  if (kind === 'heal') h.hp = Math.min(h.maxHp, h.hp + h.maxHp * .4);
+  else if (kind === 'rapid') h.rapidUntil = G.time + 10;
+  else if (kind === 'haste') h.hasteUntil = G.time + 8;
+  else if (kind === 'might') h.mightUntil = G.time + 10;
+  ring(h.x, h.y, P.color, 90, .6); burst(h.x, h.y - 20, P.color, 24, 220, .6, 4);
+  sfx('pickup', h.x, h.y);
+  if (h.isPlayer) text(h.x, h.y - 70, P.name + '! ' + P.note, P.color);
 }
 function starfallFx(b) {
   if (b.style === 'storm') {
@@ -1490,7 +1569,9 @@ function render() {
   const tgt = p.alive ? p : FOUNTAIN[p.team];
   cam.x += (tgt.x - cam.x) * .25; cam.y += (tgt.y - cam.y) * .25;
   const hw = cw / 2 / Z, hh = ch / 2 / Z;
-  cam.x = clamp(cam.x, Math.min(hw, W / 2), Math.max(W - hw, W / 2)); cam.y = clamp(cam.y, Math.min(hh, H / 2), Math.max(H - hh, H / 2));
+  // on touch screens the camera may look a little past the map edge, so a hero near a corner isn't hidden under the thumb controls
+  const edge = touchUI.on ? 170 / Z : 0;
+  cam.x = clamp(cam.x, Math.min(hw - edge, W / 2), Math.max(W - hw + edge, W / 2)); cam.y = clamp(cam.y, Math.min(hh - edge, H / 2), Math.max(H - hh + edge, H / 2));
   const shx = G.shake > 0 ? rand(-8, 8) * G.shake : 0, shy = G.shake > 0 ? rand(-8, 8) * G.shake : 0;
   const vx0 = cam.x - hw, vy0 = cam.y - hh;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1532,6 +1613,20 @@ function render() {
     ctx.strokeStyle = 'rgba(242,193,78,.55)'; ctx.lineWidth = 4; ctx.setLineDash([14, 10]);
     ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(ax, ay); ctx.stroke(); ctx.setLineDash([]);
     ctx.beginPath(); ctx.arc(ax, ay, 18, 0, 7); ctx.stroke();
+  }
+  for (const p of G.pickups) {
+    if (!inView(p, 60)) continue;
+    const P = POWERUPS[p.kind], bob = Math.sin(now * 3 + p.spot) * 6, y = p.y - 26 + bob;
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 22, 8, 0, 0, 7); ctx.fill();
+    ctx.shadowColor = P.color; ctx.shadowBlur = 24; ctx.fillStyle = P.color; ctx.globalAlpha = .9;
+    ctx.beginPath(); ctx.arc(p.x, y, 20, 0, 7); ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(p.x, y, 20 + Math.sin(now * 5) * 2, 0, 7); ctx.stroke();
+    ctx.fillStyle = '#10140f'; ctx.strokeStyle = '#10140f'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    if (p.kind === 'heal') { ctx.fillRect(p.x - 3.5, y - 11, 7, 22); ctx.fillRect(p.x - 11, y - 3.5, 22, 7); }
+    else if (p.kind === 'rapid') { ctx.beginPath(); ctx.moveTo(p.x + 3, y - 12); ctx.lineTo(p.x - 6, y + 2); ctx.lineTo(p.x + 2, y + 2); ctx.lineTo(p.x - 3, y + 12); ctx.stroke(); }
+    else if (p.kind === 'haste') { for (const o of [-5, 4]) { ctx.beginPath(); ctx.moveTo(p.x + o - 4, y - 8); ctx.lineTo(p.x + o + 4, y); ctx.lineTo(p.x + o - 4, y + 8); ctx.stroke(); } }
+    else { ctx.beginPath(); ctx.moveTo(p.x, y - 11); ctx.lineTo(p.x, y + 7); ctx.moveTo(p.x - 7, y + 3); ctx.lineTo(p.x + 7, y + 3); ctx.stroke(); }
+    ctx.lineCap = 'butt';
   }
   for (const b of G.blasts) {
     const k = 1 - b.t / b.max;
@@ -1638,6 +1733,7 @@ function drawUnit(u, now) {
       ctx.strokeStyle = 'rgba(200,255,245,.75)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.ellipse(u.x, u.y - 22, 30 + Math.sin(now * 8) * 2, 46, 0, 0, 7); ctx.stroke();
     }
+    for (const [k, c] of [['rapidUntil', '#f2c14e'], ['mightUntil', '#ff6a4d'], ['hasteUntil', '#7fd1ff']]) if (u[k] > G.time && Math.random() < .35) G.fx.push({x: u.x + rand(-18, 18), y: u.y - rand(0, 50), vx: 0, vy: rand(-40, -15), t: .5, max: .5, color: c, r: 3});
     if (u.slowUntil > G.time && Math.random() < .5) G.fx.push({x: u.x + rand(-16, 16), y: u.y - rand(0, 40), vx: 0, vy: rand(-20, 10), t: .4, max: .4, color: '#bfefff', r: 2.5});
     if (u.buffT > 0 && Math.random() < .5) G.fx.push({x: u.x + rand(-15, 15), y: u.y + 14, vx: -u.vx * .2, vy: -u.vy * .2, t: .3, max: .3, color: '#7fd1c7', r: 3});
     if (u.trail && (Math.abs(u.vx) + Math.abs(u.vy) > 20) && Math.random() < .7) G.fx.push({x: u.x + rand(-8, 8), y: u.y + 12, vx: rand(-15, 15), vy: rand(-30, -5), t: .5, max: .5, color: u.trail, r: 3.5});
@@ -2153,6 +2249,7 @@ function drawMini(vx, vy, vw, vh) {
       mctx.fillStyle = TEAM_COLOR[u.team]; mctx.fillRect(u.x - r, u.y - r, r * 2, r * 2);
     }
   }
+  for (const p of G.pickups) { mctx.fillStyle = POWERUPS[p.kind].color; mctx.beginPath(); mctx.arc(p.x, p.y, 45, 0, 7); mctx.fill(); }
   for (const u of G.units) if (u.kind === 'hero' && u.alive) {
     mctx.fillStyle = u.color; mctx.strokeStyle = u.isPlayer ? '#fff' : TEAM_COLOR[u.team]; mctx.lineWidth = 26;
     mctx.beginPath(); mctx.arc(u.x, u.y, 70, 0, 7); mctx.fill(); mctx.stroke();
@@ -2247,6 +2344,7 @@ const abEls = {};
 for (const k of 'qwer') {
   const el = $('ab-' + k);
   abEls[k] = {el, cd: el.querySelector('.cd'), cdt: el.querySelector('.cdt')};
+  el.querySelector('.mc').textContent = AB[k].mana;
   el.addEventListener('click', () => playerCast(k));
 }
 function autoAim(p, k) {
@@ -2384,6 +2482,12 @@ function updateHud() {
   $('top').hidden = !playing; overlay.classList.toggle('art', !playing);
   $('hud').hidden = !playing; mini.hidden = !playing; $('menuBtn').hidden = !playing || !overlay.hidden;
   $('touch').hidden = !(playing && touchUI.on && overlay.hidden && !G.over);
+  // on touch screens the ability buttons move next to the Attack button
+  const abil = $('abil'), wantTouch = touchUI.on;
+  if ($('game').classList.contains('touch') !== wantTouch) {
+    $('game').classList.toggle('touch', wantTouch);
+    if (wantTouch) $('touch').appendChild(abil); else $('side').before(abil);
+  }
   if (!playing) return;
   if (p.items.join('.') !== slotSig) renderSlots();
   hud.portrait.style.borderColor = TEAM_COLOR[p.team];
@@ -2988,6 +3092,7 @@ function encodeSnap() {
   const snap = {t: Math.round(G.time * 10), k: G.kills, d: G.dragons, mt: G.minionTier, ov: G.winner, hu: hu.join('.'),
     sc: G.score.map(v => Math.round(v)), zo: G.zoneOwner, fl: G.flags.map(f => [f36(f.x / 4), f36(f.y / 4), f.carrier ? f36(f.carrier.id) : ''].join(',')).join(';'),
     m: m.join(';'), n: n.join(';'), w: w.join(';'), h: h.join(';'), p: pr.join(';'),
+    pk: G.pickups.map(p => [f36(p.x / 4), f36(p.y / 4), PU_KEYS.indexOf(p.kind)].join(',')).join(';'),
     b: G.blasts.map(b => [f36(b.x / 4), f36(b.y / 4), f36(b.t * 10), b.team, f36(b.r)].join(',')).join(';'), e: G.events.slice(-5)};
   const LIMIT = 3650;
   if (byteLen(snap) > LIMIT) snap.p = '';
@@ -3079,6 +3184,7 @@ function applySnap(s) {
       if (t && src) G.projs.push({kind: 'auto', x, y, target: t, src, speed: projSpeed(src), size: projSize(src), color: projColor(src)});
     }
   }
+  G.pickups = split(s.pk || '').map((f, i) => ({spot: i, x: p36(f[0]) * 4, y: p36(f[1]) * 4, kind: PU_KEYS[+f[2]] || 'heal'}));
   G.blasts = split(s.b).map(f => ({x: p36(f[0]) * 4, y: p36(f[1]) * 4, t: p36(f[2]) / 10, max: .8, r: clamp(p36(f[4]) || 240, 60, 400), team: +f[3] || 0}));
   for (const e of Array.isArray(s.e) ? s.e : []) {
     if (!e || !(+e.i > NET.lastEv)) continue;
@@ -3953,6 +4059,7 @@ const SFX = {
   drain:   {gap: .1,  play: (t, v) => { sweep(t, 'sawtooth', 500, 160, .35, .06 * v); sweep(t, 'sine', 330, 110, .4, .12 * v); }},
   vortex:  {gap: .3,  play: (t, v) => { sweep(t, 'sawtooth', 900, 80, .6, .07 * v); sweep(t, 'sine', 600, 60, .6, .2 * v); }},
   phoenix: {gap: .5,  play: (t, v) => { noiseHit(t, .4 * v, .8, 'lowpass', 2200); notes(t + .05, [69, 76, 81, 88], .06, .5, .08 * v, 'sawtooth'); }},
+  pickup:  {gap: .2,  play: (t, v) => notes(t, [76, 83, 88], .05, .3, .08 * v)},
   hatch:   {gap: .5,  play: (t, v) => { noiseHit(t, .3 * v, .25, 'highpass', 3000); notes(t + .05, [76, 81, 84, 88], .06, .45, .08 * v); }},
 };
 const SPELL_SFX = {frost: 'frost', drain: 'drain', flame: 'flame', tempest: 'ult', vortex: 'vortex', phoenix: 'phoenix'};
