@@ -29,9 +29,23 @@
     head.appendChild(links);
     if (config.testMode) head.appendChild(TW.el('small', '', 'Test mode: no real money is charged. Use card 4242 4242 4242 4242.'));
     body.appendChild(head);
-    for (const p of config.products) {
+    for (const p of config.products.filter(x => !x.bundle)) {
       const owned = p.once && TW.ownsProduct(p.id);
       TW.storeCard(body, {color: '#f2c14e', title: p.name, desc: p.desc, label: owned ? 'Owned' : `Buy · ${money(p.cents)}`, primary: !owned, disabled: owned,
+        onClick: e => buy(p.id, e.currentTarget)});
+    }
+  }
+
+  // Mythic superhero bundles, each with a hero, their pet and Crowns
+  function renderBundles(body) {
+    const head = TW.el('div', 'passhead');
+    head.append(TW.el('b', '', 'Mythic superhero bundles'),
+      TW.el('small', '', 'Each bundle unlocks a Mythic hero with a cape and golden aura, their Mythic pet, and 500 Crowns. One of each per player.'));
+    if (config.testMode) head.appendChild(TW.el('small', '', 'Test mode: no real money is charged. Use card 4242 4242 4242 4242.'));
+    body.appendChild(head);
+    for (const p of config.products.filter(x => x.bundle)) {
+      const owned = TW.ownsProduct(p.id);
+      TW.storeCard(body, {color: '#ffd75e', title: p.name, desc: p.desc, label: owned ? 'Owned' : `Buy · ${money(p.cents)}`, primary: !owned, disabled: owned,
         onClick: e => buy(p.id, e.currentTarget)});
     }
   }
@@ -65,6 +79,7 @@
     if (!c || !c.enabled) return;
     config = c;
     TW.addStoreTab('buy', 'Buy Crowns', renderBuy);
+    if (config.products.some(p => p.bundle)) TW.addStoreTab('bundles', 'Bundles', renderBundles);
     const params = new URLSearchParams(location.search), result = params.get('purchase');
     if (result) history.replaceState(null, '', location.pathname);
     if (result === 'cancelled') TW.banner('Checkout cancelled', 'You were not charged.');
