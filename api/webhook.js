@@ -11,7 +11,7 @@ const PRODUCTS = {
   crowns_3000: {name: 'Chest of Crowns', desc: '3,000 Crowns (about 20% bonus)', cents: 499, grant: {crowns: 3000}},
   crowns_6500: {name: 'Dragon Hoard', desc: '6,500 Crowns (about 30% bonus)', cents: 999, grant: {crowns: 6500}},
   starter:     {name: 'Starter Pack', desc: '1,000 Crowns and the Gilded skin. One per player.', cents: 199, grant: {crowns: 1000, skin: 'gilded'}, once: true},
-  game_pass:   {name: 'Game Pass Premium', desc: 'Unlocks the premium reward track for Season 1. One per player.', cents: 299, grant: {premium: true}, once: true},
+  game_pass:   {name: 'Game Pass Premium', desc: 'Unlocks the premium reward track for this season. One per player.', cents: 499, grant: {premium: true}, once: true},
   // Mythic superhero bundles: a hero, their pet and 500 Crowns. One per player.
   bundle_volt:       {name: 'Volt Mythic Bundle', desc: 'Volt, the Mythic lightning speedster, with the Mythic pet Sparky, and 500 Crowns.', cents: 999, grant: {hero: 'volt', pet: 'sparky', crowns: 500}, once: true, bundle: true},
   bundle_aegis:      {name: 'Aegis Mythic Bundle', desc: 'Aegis, the Mythic shield guardian, with the Mythic pet Bulwark, and 500 Crowns.', cents: 999, grant: {hero: 'aegis', pet: 'bulwark', crowns: 500}, once: true, bundle: true},
