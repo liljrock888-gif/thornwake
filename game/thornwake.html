@@ -573,6 +573,9 @@ const LOOKS = {
   soldier: {skin: '#e0b48e', body: '#4b5a35', hat: 'helmet', weapon: 'rifle', tracer: '#ffe08a'},
   sniper:  {skin: '#c99a74', body: '#5d6b3e', hat: 'boonie', weapon: 'sniper', tracer: '#fff3c9'},
   heavy:   {skin: '#b88462', body: '#3d4630', hat: 'heavyhelm', weapon: 'minigun', tracer: '#ffb35a'},
+  kifighter: {skin: '#f2cda8', body: '#e8742a', hat: 'spiky', weapon: 'fists', glow: '#ffe66b'},
+  brawler:   {skin: '#e3b38a', body: '#2f6db5', hat: 'scruffy', weapon: 'fists'},
+  soulblade: {skin: '#f0d2bc', body: '#1b1b22', hat: 'longhair', weapon: 'greatsword'},
   werewolf:   {monster: 'wolf'},
   golemkin:   {monster: 'golem'},
   drakeling:  {monster: 'drake'},
@@ -598,6 +601,10 @@ const ROSTER = [
   {team: 0, name: 'Bouldar', color: '#8a9a7a', lane: 'mid', build: 'ad', look: 'golemkin', cls: 'Stone Golem', price: 500, stat: {hp: 1.35, ms: .92}},
   {team: 0, name: 'Emberwing', color: '#ff7a2a', lane: 'mid', build: 'ap', look: 'drakeling', cls: 'Young Drake', price: 600, stat: {ap: 1.15, hp: 1.05}},
   {team: 0, name: 'Gobbo', color: '#7fd16a', lane: 'mid', build: 'ad', look: 'goblinking', cls: 'Goblin King', price: 400, stat: {hp: 1.1, ad: 1.1}},
+  // anime-style heroes with their own signature moves (sig replaces the equipped Q and R)
+  {team: 0, name: 'Kaito', color: '#ffd23f', lane: 'mid', build: 'ap', look: 'kifighter', cls: 'Ki Fighter', price: 550, stat: {ap: 1.1, ms: 1.05}, sig: {q: 'kiblast', r: 'spiritcannon'}},
+  {team: 0, name: 'Rook', color: '#4fc3ff', lane: 'mid', build: 'ad', look: 'brawler', cls: 'Brawler', price: 550, stat: {hp: 1.12, ad: 1.08}, sig: {q: 'rocketpunch', r: 'gatling'}},
+  {team: 0, name: 'Aya', color: '#e0304a', lane: 'mid', build: 'ad', look: 'soulblade', cls: 'Soul Blade', price: 600, stat: {ad: 1.15}, sig: {q: 'crescent', r: 'release'}},
 ];
 const FORMS = ['Initiate', 'Adept', 'Ascendant', 'Mythic'];
 function formOf(l) { return l >= 16 ? 3 : l >= 11 ? 2 : l >= 6 ? 1 : 0; }
@@ -841,7 +848,7 @@ function reset(heroIdx = 0, cfg = null) {
   if (!MODES[cfg.mode]) cfg.mode = 'conquest';
   applyMap(cfg.map);
   nid = 1;
-  G = {time: 0, units: [], projs: [], fx: [], blood: [], splats: [], pickups: [], pickT: {}, rings: [], texts: [], blasts: [], beams: [], spawnQ: [], events: [], evSeq: 0,
+  G = {time: 0, units: [], projs: [], fx: [], lasers: [], blood: [], splats: [], pickups: [], pickT: {}, rings: [], texts: [], blasts: [], beams: [], spawnQ: [], events: [], evSeq: 0,
        nextWave: 12, waveN: 0, kills: [0, 0], dragons: [0, 0], minionTier: 0, winner: -1, heroIdx, cfg, diff: DIFFS[cfg.diff] || DIFFS[1], zaps: [],
        mode: 'solo', started: false, paused: false, over: false, shake: 0, marker: null, touch: false, pad: false, cam: {x: 0, y: 0}};
   const towers = [];
@@ -862,7 +869,7 @@ function reset(heroIdx = 0, cfg = null) {
   list.forEach((r, i) => {
     const f = FOUNTAIN[r.team];
     const h = mkUnit({kind: 'hero', team: r.team, name: r.name, color: r.color, lane: LANES[r.lane] ? r.lane : laneKeys[i % laneKeys.length], build: r.build, look: r.look, isPlayer: i === pi,
-      kit: {q: 'bolt', r: 'starfall'}, statMul: r.stat || null, baseColor: r.color, flag: null,
+      kit: r.sig ? Object.assign({}, r.sig) : {q: 'bolt', r: 'starfall'}, statMul: r.stat || null, baseColor: r.color, flag: null,
       x: f.x + rand(-60, 60), y: f.y + rand(-60, 60), r: 24,
       level: 1, xp: 0, gold: 500, earned: 500, items: [], maxHp: 620, mana: 300, maxMana: 300, ad: 55, ap: 0, range: 470, atkCd: .95, speed: 330,
       ranged: false, cds: {q: 0, w: 0, e: 0, r: 0}, kills: 0, deaths: 0, respawn: 0, cmd: null, think: rand(0, .3), state: 'shop', haste: 0, lifesteal: 0,
@@ -890,7 +897,7 @@ function recalc(h) {
   const sm = h.statMul || {}, pb = (h.pet && PETS[h.pet.kind] && PETS[h.pet.kind].buff) || {};
   h.maxHp = (620 + 88 * L + s.hp) * fm * (sm.hp || 1) * (pb.hp || 1); h.hp += Math.max(0, h.maxHp - oldHp);
   h.maxMana = 300 + 35 * L + s.mana; h.mana += Math.max(0, h.maxMana - oldMana);
-  h.ad = (55 + 4 * L + s.ad) * fm * (sm.ad || 1) * (pb.ad || 1); h.ap = (s.ap + 4 * L) * fm * (sm.ap || 1) * (pb.ap || 1);
+  h.ad = (55 + 5.5 * L + s.ad) * fm * (sm.ad || 1) * (pb.ad || 1); h.ap = (s.ap + 4 * L) * fm * (sm.ap || 1) * (pb.ap || 1);
   h.speed = (330 + s.ms + 8 * f) * (sm.ms || 1) * (pb.ms || 1);
   const st = styleOf(h.look); // fighters touch, casters reach a little, rangers shoot from afar
   h.range = st.range; h.ranged = st.range > HERO_REACH;
@@ -900,16 +907,17 @@ const HERO_REACH = 45; // gap between hero and target edges that still counts as
 // How each class fights. range is the gap between hero and target edges; cd and dmg scale attack speed and damage.
 const STYLES = {
   magic: {label: 'Magic, short range', range: 230, cd: 1, dmg: .9, speed: 900, size: 9},
-  melee: {label: 'Close combat', range: HERO_REACH, cd: 1, dmg: 1.1},
-  heavy: {label: 'Close combat, hits nearby enemies too', range: HERO_REACH, cd: 1.15, dmg: 1.2, cleave: .45},
-  agile: {label: 'Close combat, fast strikes', range: HERO_REACH, cd: .75, dmg: .9},
+  // close-combat styles take less damage, since they have to walk into fights
+  melee: {label: 'Close combat, sturdy', range: HERO_REACH, cd: 1, dmg: 1.1, armor: .12},
+  heavy: {label: 'Close combat, hits nearby enemies too', range: HERO_REACH, cd: 1.15, dmg: 1.2, cleave: .4, armor: .1},
+  agile: {label: 'Close combat, fast strikes', range: HERO_REACH, cd: .75, dmg: .9, armor: .06},
   ranged: {label: 'Ranged', range: 420, cd: 1, dmg: .85, speed: 1300, size: 6},
   sniper: {label: 'Long range, slow and heavy shots', range: 560, cd: 1.4, dmg: 1.3, speed: 1700, size: 6},
   gunner: {label: 'Ranged, rapid fire', range: 340, cd: .6, dmg: .55, speed: 1400, size: 5},
 };
 const LOOK_STYLE = {mage: 'magic', witch: 'magic', warlock: 'magic', shaman: 'magic', drakeling: 'magic',
   knight: 'melee', paladin: 'melee', goblinking: 'melee', brute: 'heavy', golemkin: 'heavy', rogue: 'agile', werewolf: 'agile',
-  ranger: 'ranged', soldier: 'ranged', sniper: 'sniper', heavy: 'gunner'};
+  ranger: 'ranged', soldier: 'ranged', sniper: 'sniper', heavy: 'gunner', kifighter: 'agile', brawler: 'melee', soulblade: 'heavy'};
 const styleOf = look => STYLES[LOOK_STYLE[look]] || STYLES.melee;
 const xpNeed = l => 90 + 45 * l;
 const rDamage = h => 150 + 38 * h.level + 0.9 * h.ap;
@@ -975,12 +983,13 @@ const projSize = u => u.kind === 'tower' ? 10 : u.kind === 'hero' ? styleOf(u.lo
 const projColor = u => u.kind === 'hero' ? (LOOKS[u.look] && LOOKS[u.look].tracer) || u.color : u.fire || TEAM_COLOR[u.team];
 function damage(t, amt, src) {
   if (!t.alive || t.protectUntil > G.time) return; // just respawned
-  if (src && src.kind === 'hero') amt *= (1 + DRAKE_BONUS * G.dragons[src.team]) * (src.mightUntil > G.time ? 1.3 : 1);
+  if (src && src.kind === 'hero') amt *= (1 + DRAKE_BONUS * G.dragons[src.team]) * (src.mightUntil > G.time ? 1.3 : 1) * (src.releaseUntil > G.time ? 1.35 : 1);
   if (G.mode === 'solo' && src && src.team === 1 - G.player.team) amt *= G.diff.dmg;
   if (t.kind === 'monster' && src && src.kind === 'hero' && !t.resetting) {
     t.lastHero = src; t.lastHeroT = G.time;
     for (const m of G.units) if (m.kind === 'monster' && m.camp === t.camp && m.alive && !m.target) m.target = src;
   }
+  if (t.kind === 'hero') amt *= 1 - (styleOf(t.look).armor || 0);
   if (t.shield > 0) { const s = Math.min(t.shield, amt); t.shield -= s; amt -= s; }
   t.hp -= amt; t.hitFlash = .1;
   if (amt > 1 && t.kind === 'hero') sfx(t.isPlayer ? 'hurt' : 'hit', t.x, t.y);
@@ -1057,18 +1066,33 @@ function cast(h, k, tx, ty) {
   sfx(SPELL_SFX[k === 'q' || k === 'r' ? h.kit && h.kit[k] : ''] || {q: 'bolt', w: 'shield', e: 'blink', r: 'ult'}[k], h.x, h.y);
   if (k === 'q') {
     h.face = Math.atan2(ny, nx);
-    const q = h.kit ? h.kit.q : 'bolt', twin = q === 'twin', base = 60 + 28 * h.level + 0.7 * h.ap;
-    if (q === 'flame') {
+    const q = h.kit ? h.kit.q : 'bolt', twin = q === 'twin', base = 50 + 22 * h.level + 0.6 * h.ap;
+    if (q === 'rocketpunch') {
+      let hit = null, best = 1e9;
+      for (const u of G.units) {
+        if (!u.alive || u.team === h.team || !(u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') || !targetable(u)) continue;
+        const ux = u.x - h.x, uy = u.y - h.y, along = ux * nx + uy * ny, side = Math.abs(ux * ny - uy * nx);
+        if (along > 0 && along < 460 + u.r && side < 45 + u.r && along < best) { best = along; hit = u; }
+      }
+      const reach = hit ? best : 460;
+      for (let i = 0; i < 14; i++) { const d2 = reach * i / 13; G.fx.push({x: h.x + nx * d2, y: h.y - 26 + ny * d2, vx: 0, vy: 0, t: .2, max: .2, color: '#ffe0c0', r: 6}); }
+      if (hit) {
+        damage(hit, base * 1.25, h); burst(hit.x, hit.y - 10, '#ffffff', 16, 240, .4, 4); sfx('impact', hit.x, hit.y);
+        if (hit.alive && hit.kind !== 'tower') { hit.x = clamp(hit.x + nx * 120, 30, W - 30); hit.y = clamp(hit.y + ny * 120, 30, H - 30); }
+      }
+    } else if (q === 'flame') {
       for (const u of G.units) {
         if (!u.alive || u.team === h.team || !(u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') || dist(u, h) > 430 + u.r) continue;
         const da = Math.atan2(u.y - h.y, u.x - h.x) - h.face, off = Math.abs(Math.atan2(Math.sin(da), Math.cos(da)));
-        if (off < .6) damage(u, base * 1.15, h);
+        if (off < .6) damage(u, base * 1.05, h);
       }
       for (let i = 0; i < 34; i++) { const a = h.face + rand(-.55, .55), sp = rand(380, 820); G.fx.push({x: h.x + Math.cos(a) * 30, y: h.y - 20 + Math.sin(a) * 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: .45, max: .45, color: i % 3 ? '#ff7a2a' : '#ffd36a', r: rand(5, 11)}); }
     } else for (const off of twin ? [-.13, .13] : [0]) {
       const c = Math.cos(off), sn = Math.sin(off), vx = nx * c - ny * sn, vy = nx * sn + ny * c;
-      G.projs.push({kind: 'bolt', spell: q === 'frost' || q === 'drain' ? q : 'bolt', hits: q === 'frost' ? [] : null,
-        x: h.x + vx * 30, y: h.y + vy * 30, vx: vx * 1150, vy: vy * 1150, range: 950, trav: 0, dmg: base * (twin ? .7 : 1), src: h, team: h.team, r: 16});
+      const spell = q === 'frost' || q === 'drain' ? q : q === 'kiblast' ? 'ki' : q === 'crescent' ? 'void' : 'bolt';
+      G.projs.push({kind: 'bolt', spell, hits: spell === 'frost' || spell === 'void' ? [] : null,
+        x: h.x + vx * 30, y: h.y + vy * 30, vx: vx * 1150, vy: vy * 1150, range: spell === 'void' ? 750 : 950, trav: 0,
+        dmg: base * (twin ? .7 : spell === 'void' ? 1.1 : 1), src: h, team: h.team, r: spell === 'void' ? 30 : 16});
     }
   } else if (k === 'w') {
     h.shield = 70 + 22 * h.level + 0.5 * h.ap; h.shieldT = 3; h.buffT = 2.5;
@@ -1094,6 +1118,22 @@ function cast(h, k, tx, ty) {
       }
       ring(px, py, '#c79bff', 400, .5); burst(px, py, '#c79bff', 40, -260, .5, 4);
       G.blasts.push({x: px, y: py, t: .5, max: .5, r: 210, dmg: rDamage(h) * .75, src: h, team: h.team, style: 'arcane'});
+    } else if (kind === 'spiritcannon') {
+      const len = 1150, ex = h.x + nx * len, ey = h.y + ny * len;
+      for (const u of G.units) {
+        if (!u.alive || u.team === h.team || !(u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') || !targetable(u)) continue;
+        const ux = u.x - h.x, uy = u.y - h.y, along = ux * nx + uy * ny;
+        if (along > -20 && along < len && Math.abs(ux * ny - uy * nx) < 75 + u.r) damage(u, rDamage(h) * .9, h);
+      }
+      G.lasers.push({x1: h.x + nx * 30, y1: h.y - 30 + ny * 30, x2: ex, y2: ey - 30, t: .7, max: .7, color: '#ffe66b', w: 70});
+      burst(h.x + nx * 40, h.y - 30, '#fff2a8', 30, 260, .5, 5);
+      if (dist(h, G.player) < 900) G.shake = Math.max(G.shake, .35);
+    } else if (kind === 'gatling') {
+      h.barrage = {t: 1.3, tick: 0, ang: Math.atan2(ny, nx), dmg: rDamage(h) * .07};
+    } else if (kind === 'release') {
+      h.releaseUntil = G.time + 6;
+      for (const u of G.units) if (u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && dist(u, h) < 240 + u.r) damage(u, rDamage(h) * .45, h);
+      ring(h.x, h.y, '#e0304a', 240, .6); burst(h.x, h.y - 30, '#5a0010', 50, 360, .8, 6); burst(h.x, h.y - 30, '#e0304a', 30, 240, .7, 4);
     } else if (kind === 'phoenix') {
       for (const u of G.units) if (u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && dist(u, h) < 290 + u.r) damage(u, rDamage(h) * .6, h);
       h.hp = Math.min(h.maxHp, h.hp + h.maxHp * .25); h.buffT = 3;
@@ -1141,7 +1181,7 @@ function spawnMinion(team, lane, type, tier) {
 function moveToward(u, x, y, dt) {
   const dx = x - u.x, dy = y - u.y, d = Math.hypot(dx, dy);
   if (d < 4) return true;
-  const sp = u.speed * (u.buffT > 0 ? 1.35 : 1) * (u.flag ? .85 : 1) * (u.slowUntil > G.time ? .6 : 1) * (u.hasteUntil > G.time ? 1.35 : 1) * dt;
+  const sp = u.speed * (u.buffT > 0 ? 1.35 : 1) * (u.flag ? .85 : 1) * (u.slowUntil > G.time ? .6 : 1) * (u.hasteUntil > G.time ? 1.35 : 1) * (u.releaseUntil > G.time ? 1.25 : 1) * dt;
   u.face = Math.atan2(dy, dx);
   u.walk = (u.walk || 0) + Math.min(sp, d);
   if (sp >= d) { u.x = x; u.y = y; return true; }
@@ -1168,6 +1208,20 @@ function updateHero(h, dt) {
   h.atkT -= dt; h.aggroT = Math.max(0, h.aggroT - dt);
   if (h.shieldT > 0) { h.shieldT -= dt; if (h.shieldT <= 0) h.shield = 0; }
   if (h.buffT > 0) h.buffT -= dt;
+  if (h.barrage) { // Storm Barrage: rapid punches in a cone
+    const b = h.barrage; b.t -= dt; b.tick -= dt;
+    if (b.tick <= 0) {
+      b.tick = .1;
+      for (const u of G.units) {
+        if (!u.alive || u.team === h.team || !(u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') || !targetable(u) || dist(u, h) > 300 + u.r) continue;
+        const da = Math.atan2(u.y - h.y, u.x - h.x) - b.ang;
+        if (Math.abs(Math.atan2(Math.sin(da), Math.cos(da))) < .6) damage(u, b.dmg, h);
+      }
+      for (let i = 0; i < 4; i++) { const a = b.ang + rand(-.55, .55), r = rand(50, 290); G.fx.push({x: h.x + Math.cos(a) * r, y: h.y - 24 + Math.sin(a) * r, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60, t: .16, max: .16, color: i % 2 ? '#ffe0c0' : h.color, r: 8}); }
+      sfx('swing', h.x, h.y);
+    }
+    if (b.t <= 0) h.barrage = null;
+  }
   h.hp = Math.min(h.maxHp, h.hp + (2 + .4 * h.level) * dt);
   h.mana = Math.min(h.maxMana, h.mana + (5 + .5 * h.level) * dt);
   if (dist(h, FOUNTAIN[h.team]) < 420) { h.hp = Math.min(h.maxHp, h.hp + h.maxHp * .2 * dt); h.mana = Math.min(h.maxMana, h.mana + h.maxMana * .2 * dt); }
@@ -1388,7 +1442,7 @@ function update(dt) {
       for (const u of G.units) if (u.alive && u.team !== p.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && Math.hypot(u.x - p.x, u.y - p.y) < u.r + p.r && !(p.hits && p.hits.includes(u))) { hit = u; break; }
       if (hit) {
         damage(hit, p.dmg, p.src); burst(p.x, p.y, boltLook(p.spell)[3], 14, 200, .4, 4); sfx('impact', p.x, p.y);
-        if (p.spell === 'frost') { hit.slowUntil = G.time + 2; p.hits.push(hit); } // pierces on
+        if (p.hits) { p.hits.push(hit); if (p.spell === 'frost') hit.slowUntil = G.time + 2; } // pierces on
         else {
           if (p.spell === 'drain' && p.src.alive) { p.src.hp = Math.min(p.src.maxHp, p.src.hp + p.dmg * .5); burst(p.src.x, p.src.y - 20, '#b06bff', 10, 90, .5, 3); }
           G.projs.splice(i, 1);
@@ -1476,6 +1530,7 @@ function starfallFx(b) {
   sfx('boom', b.x, b.y);
 }
 function fxUpdate(dt) {
+  for (let i = G.lasers.length - 1; i >= 0; i--) if ((G.lasers[i].t -= dt) <= 0) G.lasers.splice(i, 1);
   for (let i = G.blood.length - 1; i >= 0; i--) {
     const b = G.blood[i]; b.x += b.vx * dt; b.y += b.vy * dt; b.h += b.vh * dt; b.vh -= 900 * dt;
     if (b.h <= 0) { if (G.splats.length < 300) G.splats.push({x: b.x, y: b.y, r: b.r * rand(2, 3.6), rot: Math.random() * 3, t: 14}); G.blood.splice(i, 1); }
@@ -1682,6 +1737,13 @@ function render() {
     if (!inView(pr)) continue;
     if (pr.kind === 'bolt') {
       const lk = boltLook(pr.spell);
+      if (lk[0] === 'void') {
+        ctx.save(); ctx.translate(pr.x, pr.y); ctx.rotate(Math.atan2(pr.vy, pr.vx));
+        ctx.shadowColor = lk[1]; ctx.shadowBlur = 22; ctx.fillStyle = lk[2];
+        ctx.beginPath(); ctx.arc(-14, 0, 34, -1.2, 1.2); ctx.arc(-26, 0, 30, 1.1, -1.1, true); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = lk[1]; ctx.beginPath(); ctx.arc(-14, 0, 30, -1.1, 1.1); ctx.arc(-24, 0, 27, 1, -1, true); ctx.closePath(); ctx.fill();
+        ctx.restore(); ctx.shadowBlur = 0; continue;
+      }
       ctx.fillStyle = lk[1]; ctx.shadowColor = lk[2]; ctx.shadowBlur = 20;
       ctx.beginPath(); ctx.arc(pr.x, pr.y, 13, 0, 7); ctx.fill();
       ctx.fillStyle = lk[3]; ctx.beginPath(); ctx.arc(pr.x, pr.y, 6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
@@ -1707,6 +1769,13 @@ function render() {
   ctx.fillStyle = '#d0182a';
   for (const b of G.blood) { if (!inView(b, 20)) continue; ctx.beginPath(); ctx.arc(b.x, b.y - b.h, b.r, 0, 7); ctx.fill(); }
   ctx.globalCompositeOperation = 'lighter';
+  for (const l of G.lasers) {
+    const k = l.t / l.max, w = l.w * (0.4 + 0.6 * k);
+    ctx.lineCap = 'round'; ctx.globalAlpha = k;
+    ctx.strokeStyle = l.color; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2); ctx.stroke();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = w * .4; ctx.beginPath(); ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2); ctx.stroke();
+    ctx.lineCap = 'butt'; ctx.globalAlpha = 1;
+  }
   for (const f of G.fx) { if (!inView(f, 40)) continue; ctx.globalAlpha = Math.max(0, f.t / f.max); ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill(); }
   ctx.globalCompositeOperation = 'source-over';
   for (const r of G.rings) { const k = r.t / r.max; ctx.globalAlpha = k; ctx.strokeStyle = r.color; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (1.2 - k * .5), 0, 7); ctx.stroke(); }
@@ -1773,7 +1842,7 @@ function drawUnit(u, now) {
       ctx.strokeStyle = 'rgba(200,255,245,.75)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.ellipse(u.x, u.y - 22, 30 + Math.sin(now * 8) * 2, 46, 0, 0, 7); ctx.stroke();
     }
-    for (const [k, c] of [['rapidUntil', '#f2c14e'], ['mightUntil', '#ff6a4d'], ['hasteUntil', '#7fd1ff']]) if (u[k] > G.time && Math.random() < .35) G.fx.push({x: u.x + rand(-18, 18), y: u.y - rand(0, 50), vx: 0, vy: rand(-40, -15), t: .5, max: .5, color: c, r: 3});
+    for (const [k, c] of [['rapidUntil', '#f2c14e'], ['mightUntil', '#ff6a4d'], ['hasteUntil', '#7fd1ff'], ['releaseUntil', '#e0304a']]) if (u[k] > G.time && Math.random() < .35) G.fx.push({x: u.x + rand(-18, 18), y: u.y - rand(0, 50), vx: 0, vy: rand(-40, -15), t: .5, max: .5, color: c, r: 3});
     if (u.protectUntil > G.time && Math.random() < .5) G.fx.push({x: u.x + rand(-24, 24), y: u.y - rand(0, 60), vx: 0, vy: -30, t: .5, max: .5, color: '#fff3c9', r: 2.5});
     if (u.slowUntil > G.time && Math.random() < .5) G.fx.push({x: u.x + rand(-16, 16), y: u.y - rand(0, 40), vx: 0, vy: rand(-20, 10), t: .4, max: .4, color: '#bfefff', r: 2.5});
     if (u.buffT > 0 && Math.random() < .5) G.fx.push({x: u.x + rand(-15, 15), y: u.y + 14, vx: -u.vx * .2, vy: -u.vy * .2, t: .3, max: .3, color: '#7fd1c7', r: 3});
@@ -1962,6 +2031,21 @@ function drawHat(c, L, u, now, eye) {
     c.fillStyle = '#5d6b3e'; c.beginPath(); c.ellipse(1, -60, 17, 4, 0, 0, 7); c.fill();
     c.beginPath(); c.arc(1, -60, 9.5, Math.PI, 0); c.fill();
     c.fillStyle = '#3f4a29'; c.fillRect(-8, -62, 18, 2);
+  } else if (L.hat === 'spiky') { // tall golden spikes that flicker with energy
+    c.fillStyle = '#ffd23f'; c.shadowColor = '#ffe66b'; c.shadowBlur = (G && u.releaseUntil > G.time) || (u.level || 1) >= 6 ? 14 : 6;
+    c.beginPath(); c.moveTo(-11, -56);
+    for (const [x, y] of [[-16, -66], [-9, -64], [-12, -80], [-3, -68], [1, -88 + Math.sin(now * 6) * 2], [5, -69], [12, -79], [10, -64], [16, -63], [11, -56]]) c.lineTo(x, y);
+    c.closePath(); c.fill(); c.shadowBlur = 0;
+  } else if (L.hat === 'scruffy') { // messy dark hair with a red headband
+    c.fillStyle = '#2a1d16'; c.beginPath(); c.arc(1, -58, 11.5, Math.PI * .95, Math.PI * 2.05);
+    for (const [x, y] of [[12, -60], [9, -66], [5, -63], [1, -70], [-4, -64], [-9, -68], [-11, -60]]) c.lineTo(x, y);
+    c.closePath(); c.fill();
+    c.fillStyle = '#d63a3a'; c.fillRect(-10, -62, 22, 3.5);
+    c.beginPath(); c.moveTo(-10, -61); c.lineTo(-20, -58 + Math.sin(now * 7) * 2); c.lineTo(-18, -54); c.closePath(); c.fill();
+  } else if (L.hat === 'longhair') { // long black hair tied back
+    c.fillStyle = '#111116'; c.beginPath(); c.arc(1, -58, 11.5, Math.PI * .9, Math.PI * 2.1); c.lineTo(12, -54); c.lineTo(-11, -54); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(-9, -60); c.quadraticCurveTo(-24, -52 + Math.sin(now * 3) * 2, -20, -32); c.lineTo(-15, -34); c.quadraticCurveTo(-17, -50, -6, -56); c.closePath(); c.fill();
+    c.fillStyle = u.color; c.fillRect(-11, -59, 3, 4);
   } else if (L.hat === 'heavyhelm') {
     c.fillStyle = '#3d4630'; c.beginPath(); c.arc(1, -56, 13.5, Math.PI * .9, Math.PI * 2.1); c.fill();
     c.fillStyle = '#14170f'; c.fillRect(2, -59, 12, 5);
@@ -1969,6 +2053,20 @@ function drawHat(c, L, u, now, eye) {
   }
 }
 function drawWeapon(c, w, u, hx, hy, atk, now) {
+  if (w === 'fists') { // bare-handed fighters: a glowing fist when striking
+    c.fillStyle = u.color; c.shadowColor = u.color; c.shadowBlur = atk ? 18 : 6;
+    c.beginPath(); c.arc(hx + (atk ? 4 : 0), hy, atk ? 7 : 5.5, 0, 7); c.fill(); c.shadowBlur = 0;
+    return;
+  }
+  if (w === 'greatsword') { // an oversized black blade with a crimson edge
+    c.save(); c.translate(hx, hy); c.rotate(atk ? -.2 : -.9);
+    c.fillStyle = '#16161c'; c.beginPath(); c.moveTo(-3, 2); c.lineTo(5, 2); c.lineTo(7, -46); c.lineTo(1, -54); c.lineTo(-5, -46); c.closePath(); c.fill();
+    c.strokeStyle = u.color; c.lineWidth = 2; c.shadowColor = u.color; c.shadowBlur = G && u.releaseUntil > G.time ? 16 : 6;
+    c.beginPath(); c.moveTo(6, 0); c.lineTo(7, -46); c.lineTo(1, -54); c.stroke(); c.shadowBlur = 0;
+    c.fillStyle = '#c9a24a'; c.fillRect(-7, 1, 15, 3); c.fillStyle = '#2b2420'; c.fillRect(-1, 4, 3, 9);
+    c.restore();
+    return;
+  }
   if (w === 'staff') {
     c.strokeStyle = '#8a6a43'; c.lineWidth = 3.5; c.beginPath(); c.moveTo(hx - 1, hy + 24); c.lineTo(hx + 2, hy - 30); c.stroke();
     c.fillStyle = u.color; c.shadowColor = u.color; c.shadowBlur = atk ? 22 : 10;
@@ -3439,10 +3537,17 @@ const MOVES = {
   flame: {slot: 'q', name: 'Flame Wave', desc: 'A short-range blast of fire that burns every enemy in front of you.', price: 300},
   tempest: {slot: 'r', name: 'Thunderstorm', desc: 'Six lightning strikes rain down on the target area.', price: 450},
   vortex: {slot: 'r', name: 'Arcane Vortex', desc: 'Pulls nearby enemies together, then detonates.', price: 450},
+  kiblast: {slot: 'q', sig: true, name: 'Ki Blast', desc: 'A fast blast of golden energy.'},
+  rocketpunch: {slot: 'q', sig: true, name: 'Rocket Punch', desc: 'A long-reach punch that knocks the first enemy back.'},
+  crescent: {slot: 'q', sig: true, name: 'Crescent Slash', desc: 'A wave of dark energy that cuts through every enemy in a line.'},
+  spiritcannon: {slot: 'r', sig: true, name: 'Spirit Cannon', desc: 'A huge charged beam that blasts everything in a long line.'},
+  gatling: {slot: 'r', sig: true, name: 'Storm Barrage', desc: 'A storm of rapid punches in front of you.'},
+  release: {slot: 'r', sig: true, name: 'Soul Release', desc: 'Unleash your blade: a shockwave, then 6 seconds of harder hits and faster steps.'},
   phoenix: {slot: 'r', name: 'Phoenix Rising', desc: 'Burst into flame: burn enemies around you, heal a quarter of your health and run faster.', price: 500},
 };
 // look of each bolt spell, also sent to online players as a number
-const BOLT_LOOK = [['bolt', '#ffb35a', '#ff8a3a', '#fff1c2'], ['frost', '#9fe6ff', '#4fb8ff', '#ffffff'], ['drain', '#b06bff', '#7a2fff', '#f0d9ff']];
+const BOLT_LOOK = [['bolt', '#ffb35a', '#ff8a3a', '#fff1c2'], ['frost', '#9fe6ff', '#4fb8ff', '#ffffff'], ['drain', '#b06bff', '#7a2fff', '#f0d9ff'],
+  ['ki', '#ffe66b', '#fff2a8', '#ffffff'], ['void', '#e0304a', '#5a0010', '#ffd0d8']];
 const boltLook = sp => BOLT_LOOK.find(b => b[0] === sp) || BOLT_LOOK[0];
 const SKINS = {
   none: {name: 'Classic', desc: 'Your hero\'s own colors.', price: 0},
@@ -3528,7 +3633,8 @@ function paintHero(c, idx, scale, level, color) {
 }
 function applyLoadout() {
   const p = G.player;
-  p.kit = {q: PROF.eq.q, r: PROF.eq.r};
+  const sig = ROSTER[G.heroIdx] && ROSTER[G.heroIdx].sig;
+  p.kit = sig ? Object.assign({}, sig) : {q: PROF.eq.q, r: PROF.eq.r};
   p.color = (SKINS[PROF.eq.skin] && SKINS[PROF.eq.skin].color) || p.baseColor;
   p.trail = (TRAILS[PROF.eq.trail] && TRAILS[PROF.eq.trail].color) || null;
   const petId = PROF.eq.pet && PETS[PROF.eq.pet] && owns('pets', PROF.eq.pet) ? PROF.eq.pet : null;
@@ -3646,6 +3752,7 @@ function renderStore() {
     }
   } else if (storeTab === 'moves') {
     for (const id in MOVES) {
+      if (MOVES[id].sig) continue; // signature moves come with their hero
       const m = MOVES[id], have = owns('moves', id), on = PROF.eq[m.slot] === id;
       storeCard(body, {title: `${m.name} (${m.slot.toUpperCase()})`, desc: m.desc, label: on ? 'Equipped' : have ? 'Equip' : buyLabel(m.price), primary: !have,
         disabled: on || (!have && PROF.crowns < m.price),
@@ -3697,7 +3804,8 @@ function heroPerk(r) {
   if (s.ad) parts.push(`+${Math.round((s.ad - 1) * 100)}% attack`);
   if (s.ap) parts.push(`+${Math.round((s.ap - 1) * 100)}% ability power`);
   if (s.ms) parts.push(`${s.ms > 1 ? '+' : ''}${Math.round((s.ms - 1) * 100)}% speed`);
-  return parts.join(', ') + '. Joins the Tidewardens.';
+  const sig = r.sig ? ` Signature moves: ${MOVES[r.sig.q].name} and ${MOVES[r.sig.r].name}.` : '';
+  return parts.join(', ') + '. Joins the Tidewardens.' + sig;
 }
 
 // ---------- egg hatching ----------
@@ -4145,7 +4253,8 @@ const SFX = {
   pickup:  {gap: .2,  play: (t, v) => notes(t, [76, 83, 88], .05, .3, .08 * v)},
   hatch:   {gap: .5,  play: (t, v) => { noiseHit(t, .3 * v, .25, 'highpass', 3000); notes(t + .05, [76, 81, 84, 88], .06, .45, .08 * v); }},
 };
-const SPELL_SFX = {frost: 'frost', drain: 'drain', flame: 'flame', tempest: 'ult', vortex: 'vortex', phoenix: 'phoenix'};
+const SPELL_SFX = {frost: 'frost', drain: 'drain', flame: 'flame', tempest: 'ult', vortex: 'vortex', phoenix: 'phoenix',
+  kiblast: 'bolt', rocketpunch: 'swing', crescent: 'swing', spiritcannon: 'phoenix', gatling: 'swing', release: 'vortex'};
 const sfxLast = {};
 // Plays a sound; with a position it fades with distance from the camera and stays silent off screen.
 function sfx(name, x, y) {
