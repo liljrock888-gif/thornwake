@@ -50,7 +50,10 @@
       for (const g of grants) if (TW.grantPaid(g)) added.push(g);
       if (grants.length) await post('/api/claim', {playerId, ack: grants.length});
       if (added.length) {
-        TW.banner('Purchase added', added.map(g => (config.products.find(p => p.id === g.productId) || {}).name).filter(Boolean).join(', '));
+        const names = list => list.map(g => (config.products.find(p => p.id === g.productId) || {}).name).filter(Boolean).join(', ');
+        const bought = added.filter(g => !g.revoke), refunded = added.filter(g => g.revoke);
+        if (bought.length) TW.banner('Purchase added', names(bought));
+        else TW.banner('Purchase refunded', names(refunded) + ' was refunded and removed from your game.');
         TW.refresh();
       } else if (tries > 0) setTimeout(() => claim(tries - 1), 2500);
     } catch (e) {
