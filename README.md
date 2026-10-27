@@ -6,7 +6,7 @@ never handle card numbers yourself.
 
 ## What's for sale
 
-Prices are set in `lib/products.js`. The game can't change them.
+Prices are set in the `PRODUCTS` list at the top of each file in `api/`. Keep that list identical in all four files. The game can't change prices.
 
 | Product | Price | Gets |
 |---|---|---|
@@ -44,13 +44,38 @@ business and bank details.
 4. In Vercel → Project → Settings → Environment Variables, add every name from
    `.env.example` with your values. Use your test key (`sk_test_...`) first.
 5. In Stripe → Developers → Webhooks, add an endpoint at
-   `https://YOUR-SITE/api/webhook` that sends `checkout.session.completed` and
-   `checkout.session.async_payment_succeeded`. Copy its signing secret into
+   `https://YOUR-SITE/api/webhook` that sends `checkout.session.completed`,
+   `checkout.session.async_payment_succeeded` and `charge.refunded`. Copy its signing secret into
    `STRIPE_WEBHOOK_SECRET`, then redeploy.
 6. Open your site, go to Store → Buy Crowns, and pay with test card
    `4242 4242 4242 4242` (any future date, any CVC). The Crowns should arrive
    within a few seconds of returning to the game.
 7. When test purchases work, swap in your live key and a live-mode webhook secret.
+
+## Refunds
+
+Add `charge.refunded` to the webhook's events. When you fully refund a purchase in
+Stripe, the webhook queues a "revoke" for that player, and the game takes back the
+unspent Crowns, the Starter Pack skin or the Game Pass the next time it loads.
+Partial refunds are left alone.
+
+## Accounts, cloud saves and online play (Supabase)
+
+`public/online.js` adds an **Account** button to the main menu, saves each signed-in
+player's progress online, and runs Multiplayer and online Ranked over Supabase Realtime.
+It switches on only when `SUPABASE_URL` and `SUPABASE_ANON_KEY` are set.
+
+1. Create a free project at supabase.com.
+2. SQL Editor → New query: paste `supabase/setup.sql` and run it.
+3. Authentication → Sign In / Providers → Email: turn **off** "Confirm email", so players can
+   sign in right after creating an account. (Supabase's built-in email only sends a few
+   messages an hour.)
+4. Project Settings → API: copy the Project URL and the `anon` public key into Vercel as
+   `SUPABASE_URL` and `SUPABASE_ANON_KEY`, then redeploy.
+
+The free plan allows a limited number of realtime messages each month. A full six-player
+match sends about ten updates a second, so watch Supabase → Reports → Realtime once
+people start playing, and move to a paid plan if you get close to the limit.
 
 ## Updating the game
 
