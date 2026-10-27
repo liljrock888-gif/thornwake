@@ -2422,12 +2422,15 @@ function drawCharacter(c, u, now) {
   const metal = form >= 3 ? '#e8c25a' : form >= 2 ? '#d7dde6' : '#9aa3ae';
   const sc = 1 + (lv - 1) * .015;
   const bob = A.moving ? Math.abs(Math.cos(A.ph)) * 2.5 : Math.sin(now * 2 + u.id) * .8;
+  let wind = .3; try { if (ST.on && ST.wx) wind = ST.wx.wind; } catch (e) { /* story state not ready yet */ }
+  const flow = A.moving ? 1.8 : .7 + wind * .6; // how hard cloth flaps: running, or standing in the wind
   c.save(); c.translate(u.x, u.y + 16);
   if (lv >= 13) {
     c.strokeStyle = u.color; c.globalAlpha = .45 + Math.sin(now * 3 + u.id) * .2; c.lineWidth = 2;
     c.beginPath(); c.ellipse(0, 0, 36 * sc, 14 * sc, 0, 0, 7); c.stroke(); c.globalAlpha = 1;
   }
   c.scale(A.dir * sc, sc);
+  c.rotate(A.moving ? .07 : Math.sin(now * 1.1 + u.id) * .015); // lean into a run, sway a little when idle
   if (u.hitFlash > 0) c.filter = 'brightness(2.2)';
   if (lv >= 16) {
     const g = c.createRadialGradient(0, -42, 6, 0, -42, 56 + Math.sin(now * 5) * 4);
@@ -2454,18 +2457,28 @@ function drawCharacter(c, u, now) {
     c.fillStyle = L.cape; c.beginPath(); c.moveTo(-9, -46 - bob); c.lineTo(8, -46 - bob);
     c.quadraticCurveTo(-2, -20, -14 + sway, -4); c.lineTo(-24 + sway, -8); c.quadraticCurveTo(-16, -30, -9, -46 - bob); c.closePath(); c.fill();
   }
+  if (!L.cape) { // a scarf that trails behind and ripples
+    c.strokeStyle = shade(u.color, .12); c.lineCap = 'round';
+    let px = -2, py = -47 - bob;
+    for (let i = 1; i <= 5; i++) {
+      const nx = -2 - i * (5 + flow * 1.6), ny = -47 - bob + i * (A.moving ? .8 : 2.6) + Math.sin(now * (4 + flow * 3) - i * 1.1 + u.id) * (.8 + i * .7) * flow;
+      c.lineWidth = 5 - i * .6; c.beginPath(); c.moveTo(px, py); c.lineTo(nx, ny); c.stroke(); px = nx; py = ny;
+    }
+  }
   c.fillStyle = '#2b2420';
   c.fillRect(-6 - A.sw * 5, -18, 6, 16); c.fillRect(1 + A.sw * 5, -18, 6, 16);
   c.fillStyle = lv >= 9 ? u.color : '#16100d';
   if (lv >= 9) { c.shadowColor = u.color; c.shadowBlur = 6; }
   c.fillRect(-7 - A.sw * 5, -4, 8, 4); c.fillRect(A.sw * 5, -4, 9, 4); c.shadowBlur = 0;
   c.translate(0, -bob);
-  const cloakEnd = lv >= 3 ? -2 : -7;
-  c.fillStyle = shade(u.color, -.45);
-  c.beginPath(); c.moveTo(-9, -46); c.lineTo(6, -46); c.lineTo(2 - A.sw * 2, cloakEnd - 3); c.lineTo(-18 - A.sw * 3, cloakEnd); c.closePath(); c.fill();
-  if (lv >= 3) { c.strokeStyle = form >= 3 ? '#e8c25a' : u.color; c.lineWidth = 1.5; c.beginPath(); c.moveTo(2 - A.sw * 2, cloakEnd - 3); c.lineTo(-18 - A.sw * 3, cloakEnd); c.stroke(); }
+  const breath = A.moving ? 0 : Math.sin(now * 2.2 + u.id) * .03; c.translate(0, -16); c.scale(1 - breath * .4, 1 + breath); c.translate(0, 16); // breathing
+  const cloakEnd = lv >= 3 ? -2 : -7, flap = Math.sin(now * (3 + flow * 3) + u.id) * 1.6 * flow - (A.moving ? 5 : wind * 3), flap2 = Math.sin(now * (3 + flow * 3) + u.id + 1.7) * 1.2 * flow;
+  c.fillStyle = shade(u.color, -.45); // the cloak hem ripples
+  c.beginPath(); c.moveTo(-9, -46); c.lineTo(6, -46); c.lineTo(2 - A.sw * 2, cloakEnd - 3 + flap2 * .5);
+  c.quadraticCurveTo(-7 - A.sw * 2 + flap * .5, cloakEnd + 2 + flap2, -18 - A.sw * 3 + flap, cloakEnd - flap2 * .6); c.closePath(); c.fill();
+  if (lv >= 3) { c.strokeStyle = form >= 3 ? '#e8c25a' : u.color; c.lineWidth = 1.5; c.beginPath(); c.moveTo(2 - A.sw * 2, cloakEnd - 3 + flap2 * .5); c.quadraticCurveTo(-7 - A.sw * 2 + flap * .5, cloakEnd + 2 + flap2, -18 - A.sw * 3 + flap, cloakEnd - flap2 * .6); c.stroke(); }
   c.strokeStyle = shade(L.body, -.35); c.lineWidth = 5; c.lineCap = 'round';
-  c.beginPath(); c.moveTo(-7, -42); c.lineTo(-11 + A.sw * 3, -27); c.stroke();
+  c.beginPath(); c.moveTo(-7, -42); c.lineTo(-11 + A.sw * 6, -27 + (A.moving ? 0 : Math.sin(now * 2.2 + u.id) * .8)); c.stroke(); // the back arm swings with each step
   if (L.weapon === 'sword') {
     c.fillStyle = TEAM_COLOR[u.team]; c.strokeStyle = form ? metal : '#d9dee6'; c.lineWidth = 2;
     c.beginPath(); c.moveTo(-21, -42); c.lineTo(-5, -42); c.lineTo(-6, -29); c.lineTo(-13, -21); c.lineTo(-20, -29); c.closePath(); c.fill(); c.stroke();
@@ -2479,6 +2492,7 @@ function drawCharacter(c, u, now) {
   }
   c.fillStyle = TEAM_COLOR[u.team]; c.fillRect(-12, -25, 24, 4);
   c.fillStyle = '#e8d9a8'; c.fillRect(-2, -26, 4, 6);
+  c.strokeStyle = shade(TEAM_COLOR[u.team], -.2); c.lineWidth = 2; c.beginPath(); c.moveTo(-10, -22); c.lineTo(-11 + Math.sin(now * (4 + flow * 3) + u.id) * 2 * flow - (A.moving ? 3 : 0), -12); c.stroke(); // a belt tassel
   if (lv >= 5) {
     c.fillStyle = u.color; c.shadowColor = u.color; c.shadowBlur = 8;
     c.beginPath(); c.moveTo(0, -29); c.lineTo(3, -24); c.lineTo(0, -19); c.lineTo(-3, -24); c.closePath(); c.fill(); c.shadowBlur = 0;
@@ -2493,13 +2507,14 @@ function drawCharacter(c, u, now) {
   const eye = lv >= 4 ? u.color : (L.glow || '#1a1210');
   c.fillStyle = L.skin; c.beginPath(); c.arc(1, -55, 10, 0, 7); c.fill();
   if (lv >= 4) { c.shadowColor = eye; c.shadowBlur = 8; }
-  c.fillStyle = eye; c.beginPath(); c.arc(6, -56, 1.9, 0, 7); c.fill(); c.shadowBlur = 0;
+  const blink = (now + u.id * .37) % 3.7 < .12, look = !A.moving && Math.sin(now * .7 + u.id) > .85 ? -2.5 : 0; // blinks and glances around
+  c.fillStyle = eye; if (blink) c.fillRect(4 + look, -56.5, 4, 1.2); else { c.beginPath(); c.arc(6 + look, -56, 1.9, 0, 7); c.fill(); } c.shadowBlur = 0;
   drawHat(c, L, u, now, eye);
   if (lv >= 14) {
     c.strokeStyle = '#ffe9a8'; c.shadowColor = '#ffe9a8'; c.shadowBlur = lv >= 17 ? 16 : 8; c.lineWidth = 2.5;
     c.beginPath(); c.ellipse(-1, -93, lv >= 17 ? 13 : 10, 3.5, 0, 0, 7); c.stroke(); c.shadowBlur = 0;
   }
-  const hx = A.atk ? 15 : 10, hy = A.atk ? -44 : -28;
+  const hx = A.atk ? 15 : 10 - (A.moving ? A.sw * 5 : 0), hy = A.atk ? -44 : -28 + (A.moving ? 0 : Math.sin(now * 2.2 + u.id + 1) * .8); // the weapon arm swings opposite the back arm
   c.strokeStyle = shade(L.body, -.1); c.lineWidth = 5;
   c.beginPath(); c.moveTo(6, -42); c.lineTo(hx, hy); c.stroke();
   if (form >= 2) { c.shadowColor = u.color; c.shadowBlur = 10; }
@@ -5020,14 +5035,54 @@ function scheduleDragonfire(start) {
   });
   return start + ROOTS.length * bar;
 }
-const SONGS = [scheduleHiphop, scheduleMarch, scheduleEmber, scheduleDragonfire];
+// Story: Ashen Vale, a slow drone with a lonely harp in D minor, 66 bpm.
+function scheduleVale(start) {
+  const step = 60 / 66 / 4, bar = step * 16, ROOTS = [38, 38, 34, 36, 38, 41, 36, 33], HARP = [[0, 74], [3, 77], [6, 76], [8, 74], [11, 69], [14, 72]];
+  ROOTS.forEach((root, b) => {
+    const bt = start + b * bar;
+    tone(bt, root - 12, bar * .98, 'sawtooth', .02, 300); tone(bt, root, bar * .98, 'sine', .03, 800, true); tone(bt, root + 7, bar * .98, 'sine', .015, 900, true);
+    if (b % 2 === 0) kick(bt, .25);
+    noiseHit(bt + 8 * step, .03, 1.2, 'lowpass', 400);
+    for (const [st, m] of HARP) if ((st + b) % 3) tone(bt + st * step, m - (b >= 4 ? 3 : 0), step * 3, 'triangle', .03, 2400);
+  });
+  return start + ROOTS.length * bar;
+}
+// Story battles: Steel in the Ash, war drums and a churning string ostinato in C minor, 132 bpm.
+function scheduleSteel(start) {
+  const step = 60 / 132 / 4, bar = step * 16, ROOTS = [36, 36, 32, 34, 36, 39, 32, 31];
+  ROOTS.forEach((root, b) => {
+    const bt = start + b * bar;
+    for (const st of [0, 3, 6, 8, 11, 14]) kick(bt + st * step, st % 8 ? .38 : .58);
+    for (const st of [4, 12]) noiseHit(bt + st * step, .3, .18, 'bandpass', 1700);
+    for (let st = 0; st < 16; st++) tone(bt + st * step, root + 12 + [0, 3, 7, 3][st % 4], step * .9, 'sawtooth', .022, 1600);
+    tone(bt, root - 12, bar * .5, 'sawtooth', .04, 400); tone(bt + bar / 2, root - 12, bar * .5, 'sawtooth', .04, 400);
+    if (b >= 2) tone(bt, root + 24 + (b % 2 ? 5 : 7), step * 6, 'sawtooth', .03, 2200, true);
+  });
+  return start + ROOTS.length * bar;
+}
+// Story bosses: Hollow Crown, an organ and choir over pounding drums in B-flat minor, 100 bpm.
+function scheduleCrown(start) {
+  const step = 60 / 100 / 4, bar = step * 16, ROOTS = [34, 34, 30, 32, 34, 37, 29, 33];
+  ROOTS.forEach((root, b) => {
+    const bt = start + b * bar;
+    for (const st of [0, 2, 8, 10]) kick(bt + st * step, .6); for (const st of [4, 12]) { noiseHit(bt + st * step, .36, .3, 'bandpass', 1200); kick(bt + st * step, .3); }
+    for (const iv of [12, 15, 19, 24]) tone(bt, root + iv, bar * .96, 'square', .014, 1400, true); // organ
+    for (const iv of [24, 27, 31]) tone(bt, root + iv, bar * .96, 'sine', .02, 3000, true); // choir
+    bass808(bt, root, bar * .5); bass808(bt + 8 * step, root, bar * .4);
+    if (b % 2) for (const [st, m] of [[0, 70], [4, 73], [8, 72], [12, 68]]) tone(bt + st * step, m, step * 4, 'sawtooth', .035, 2000, true);
+  });
+  return start + ROOTS.length * bar;
+}
+const SONGS = [scheduleHiphop, scheduleMarch, scheduleEmber, scheduleDragonfire, scheduleVale, scheduleSteel, scheduleCrown];
+const SONG_VALE = 4, SONG_STEEL = 5, SONG_CROWN = 6;
 // Sound can only start after the first click, which is usually Play, so the main menu keeps the title song too.
 const onTitle = () => !overlay.hidden && (currentScreen === 'scr-title' || currentScreen === 'scr-main');
 // The title screen and main menu loop the main theme; elsewhere each other song plays three times through, then the next one starts.
 function nextSong() {
+  if (music.forced != null) return music.forced;
   if (music.title) return 0;
-  if (music.song > 0 && music.reps < 3) return music.song;
-  return music.song > 0 && music.song < SONGS.length - 1 ? music.song + 1 : 1;
+  if (music.song > 0 && music.song < 4 && music.reps < 3) return music.song;
+  return music.song > 0 && music.song < 3 ? music.song + 1 : 1;
 }
 function newBus() { music.bus = music.ctx.createGain(); music.bus.connect(music.out); }
 function scheduleLoop() {
@@ -5061,6 +5116,12 @@ function musicScene() {
   if (!music.ctx || !music.next) return;
   const old = music.bus;
   old.gain.setTargetAtTime(0, music.ctx.currentTime, .3); setTimeout(() => old.disconnect(), 4000);
+  newBus(); music.next = 0; scheduleLoop();
+}
+function musicForce(idx) { // story mode picks its own songs: null hands music back to the playlist
+  if (music.forced === idx) return; music.forced = idx;
+  if (!music.ctx || !music.next) return;
+  const old = music.bus; old.gain.setTargetAtTime(0, music.ctx.currentTime, .25); setTimeout(() => old.disconnect(), 3000);
   newBus(); music.next = 0; scheduleLoop();
 }
 function setVolume(v) {
@@ -5251,6 +5312,30 @@ const ST_SKILLS = {
   guard:     {name: 'Guard Up', mp: 5, kind: 'buff', buff: 'guard', desc: 'Double defense for 2 turns.'},
   rally:     {name: 'War Cry', mp: 6, kind: 'buff', buff: 'rally', desc: '+50% attack for 3 turns.'},
 };
+// Mastery: every use of a move counts. At 8, 20 and 40 uses it evolves: more damage, more criticals, worse wounds.
+const ST_RANK_AT = [0, 8, 20, 40];
+const ST_EVOLVE = {
+  attack:    ['Strike', 'Honed Strike', 'Butcher\'s Cut', 'Executioner\'s Edge'],
+  strike:    ['Power Strike', 'Crushing Blow', 'Bonebreaker', 'Worldsplitter'],
+  fireball:  ['Fireball', 'Greater Fireball', 'Inferno Beam', 'Sunfire Annihilation'],
+  frost:     ['Frost Bolt', 'Ice Spear', 'Glacial Lance', 'Absolute Zero Beam'],
+  lightning: ['Chain Lightning', 'Forked Storm', 'Thunderhead', 'Wrath of the Sky'],
+  rain:      ['Arrow Rain', 'Arrow Storm', 'Iron Tempest', 'Thousand Thorns'],
+  venom:     ['Venom Strike', 'Viper Fang', 'Black Rot', 'Plaguebringer'],
+  drain:     ['Life Drain', 'Soul Siphon', 'Soul Rend Beam', 'Oblivion Ray'],
+  heal:      ['Heal', 'Greater Heal', 'Sacred Light', 'Rebirth'],
+  guard:     ['Guard Up', 'Iron Wall', 'Bastion', 'Unbreakable'],
+  rally:     ['War Cry', 'Battle Roar', 'Warlord\'s Howl', 'Cry of the Ashborn'],
+};
+const ST_BEAMS = {fireball: 1, frost: 1, drain: 1}; // from rank 2 these fire as beams, which can obliterate
+const stUses = id => ((stData().mastery || {})[id]) || 0;
+const stRank = id => ST_RANK_AT.filter(n => stUses(id) >= n).length - 1;
+const stSkName = id => ST_EVOLVE[id] ? ST_EVOLVE[id][stRank(id)] : ST_SKILLS[id].name;
+function stMaster(id) {
+  const d = stData(), was = stRank(id), old = stSkName(id); d.mastery = d.mastery || {}; d.mastery[id] = (d.mastery[id] || 0) + 1;
+  if (stRank(id) > was) setTimeout(() => { stCallout(`${old} evolved into ${stSkName(id)}!`, '#ffd75e'); stVoice(stSkName(id) + ' awakened!', 'ann'); sfx('evolve'); stLog(`Mastery! ${old} evolved into ${stSkName(id)} (rank ${stRank(id)}).`); }, 900);
+}
+const stMasteryText = id => { const r = stRank(id), nx = ST_RANK_AT[r + 1]; return `${'★'.repeat(r)}${r ? ' ' : ''}` + (nx ? `${stUses(id)}/${nx} to evolve` : 'fully evolved'); };
 const ST_FOES = {
   wolf:    {name: 'Thornwolf', hp: 42, atk: 9, def: 2, spd: 9, xp: 12, gold: 6, draw: 'wolf'},
   pup:     {name: 'Wolf Pup', hp: 22, atk: 6, def: 1, spd: 10, xp: 6, gold: 3, draw: 'wolf', small: true},
@@ -5261,6 +5346,9 @@ const ST_FOES = {
   golem:   {name: 'Stone Golem', hp: 300, atk: 20, def: 10, spd: 4, xp: 120, gold: 80, draw: 'golem', boss: true},
   drake:   {name: 'Frost Drake', hp: 440, atk: 26, def: 10, spd: 9, xp: 200, gold: 120, draw: 'drake', boss: true},
   stalker: {name: 'The Gloam Stalker', hp: 340, atk: 24, def: 9, spd: 13, xp: 160, gold: 140, draw: 'hero', look: 'hunter', color: '#2a1f3d', boss: true},
+  reefgob: {name: 'Reef Goblin', hp: 70, atk: 15, def: 5, spd: 9, xp: 30, gold: 18, draw: 'goblin'},
+  corsair: {name: 'Corsair Cutthroat', hp: 95, atk: 19, def: 6, spd: 10, xp: 40, gold: 30, draw: 'hero', look: 'pirate', color: '#2a6a8a'},
+  mara:    {name: 'Mara, the Corsair Queen', hp: 600, atk: 30, def: 11, spd: 12, xp: 300, gold: 250, draw: 'hero', look: 'pirate', color: '#c0392b', boss: true},
   guard:   {name: 'Town Guard', hp: 110, atk: 18, def: 9, spd: 8, xp: 30, gold: 15, draw: 'hero', look: 'knight', color: '#4a6a9a'},
   cultist: {name: 'Hollow Cultist', hp: 85, atk: 19, def: 5, spd: 9, xp: 38, gold: 22, draw: 'hero', look: 'warlock', color: '#5a1fa0'},
   witch:   {name: 'Sister Vey, the Ashen Witch', hp: 520, atk: 28, def: 10, spd: 11, xp: 260, gold: 200, draw: 'hero', look: 'witch', color: '#ff5a1f', boss: true},
@@ -5269,7 +5357,7 @@ const ST_FOES = {
 };
 const ST_ENCOUNTERS = {b: [['knight'], ['bandit', 'bandit'], ['cultist', 'bandit']], a: [['goblin', 'bandit'], ['cultist'], ['frostwolf', 'cultist']], g: [['bandit'], ['bandit', 'wolf'], ['frostwolf', 'bandit']], T: [['wolf'], ['wolf', 'pup'], ['pup', 'pup']], ':': [['goblin'], ['goblin', 'goblin'], ['bandit']], '*': [['frostwolf'], ['frostwolf', 'wolf']], C: [['knight'], ['knight', 'bandit']]};
 const ST_REGION = {b: 'The Bone Marsh', a: 'The Ashfall Dunes', g: 'The Gloamwood', T: 'The Thornwood', ':': 'Sunken Ruins', '*': 'Frost Peaks', C: 'Hollow Castle', v: 'Thornwake, the Last Lit Village', '.': 'The Ashen Vale', '=': 'The Ashen Vale', B: 'River Bridge', S: 'Ashen Shrine', D: 'Dungeon Entrance'};
-const ST_BLOCKED = new Set(['~', '^', 'H', 'h', 'I', 'U', 'K', '#', 'W', 'Q']);
+const ST_BLOCKED = new Set(['~', '^', 'H', 'h', 'I', 'U', 'K', '#', 'W', 'Q', 'L', 'M']);
 // Teleport crystals: touch one to attune it, then travel between any you've attuned
 const ST_CRYSTALS = [
   {id: 'thornwake', name: 'Thornwake', x: 17, y: 11}, {id: 'ravenhollow', name: 'Ravenhollow', x: 12, y: 22}, {id: 'saltmere', name: 'Saltmere', x: 31, y: 12},
@@ -5304,6 +5392,8 @@ function stBuildMap() {
   for (const [x, y] of [[12, 11], [9, 12], [21, 14], [9, 4], [24, 8], [8, 21], [34, 11], [32, 20]]) m[y][x] = 'S'; // Ashen Shrines
   m[16][24] = 'D'; m[2][4] = 'D'; m[9][44] = 'D'; // entrances: the catacombs, the ice crypt and Duskwatch Castle
   for (const c of ST_CRYSTALS) m[c.y][c.x] = 'Q'; // teleport crystals
+  for (let y = 14; y <= 17; y++) for (let x = 38; x <= 39; x++) m[y][x] = '~'; // Saltmere harbor
+  m[16][37] = 'P'; m[13][39] = 'L'; m[19][12] = 'M'; // the pier, the lighthouse and Ravenhollow's windmill
   return m;
 }
 const ST_DUNGEONS = {
@@ -5385,8 +5475,22 @@ const ST_MOUNTS = {
   gryphon:   {name: 'Gilded Gryphon', kind: 'gryphon', color: '#d8b04a', mane: '#fff3c9', speed: 2.4, crowns: 400, fly: true},
   nightmare: {name: 'Cinder Nightmare', kind: 'horse', color: '#1a1214', mane: '#ff5a1f', speed: 2.1, drop: 'Sister Vey'},
 };
+function stBuildIsles() { // two islands joined by a sandbar; Port Halcyon on the west isle
+  const W = 30, H = 20, m = Array.from({length: H}, () => Array(W).fill('#'));
+  const blob = (cx, cy, rx, ry, c) => { for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1) m[y][x] = c; };
+  blob(8, 10, 7.5, 6.5, ','); blob(8, 10, 6, 5, '.'); blob(21, 9, 8.5, 7, ','); blob(21, 9, 7, 5.6, '.');
+  for (let x = 13; x <= 16; x++) { m[9][x] = ','; m[10][x] = ','; }
+  for (const [x, y] of [[5, 7], [9, 6], [11, 9], [5, 13], [10, 13]]) m[y][x] = 'H';
+  for (const [x, y] of [[3, 9], [12, 12], [4, 14], [17, 5], [19, 4], [24, 5], [26, 7], [18, 12], [23, 13], [25, 12], [20, 7], [27, 10], [16, 8]]) m[y][x] = 'T';
+  m[10][1] = 'E'; m[10][8] = 'S';
+  for (const [x, y] of [[18, 6], [22, 6], [19, 11], [24, 10], [22, 13]]) m[y][x] = 'X';
+  m[12][26] = 'c'; m[6][23] = 'c'; m[9][27] = 'B';
+  return m.map(r => r.join(''));
+}
+ST_DUNGEONS.isles = {name: 'The Brightwater Isles', outdoor: true, lit: true, boss: 'mara', pool: [['reefgob', 'reefgob'], ['corsair'], ['corsair', 'reefgob']], theme: {floor: '#5a8a3a', wall: '#1f6a8a', glow: '#ffe9a8'}, exit: [37, 15], rows: stBuildIsles()};
+const stMapSong = () => stData() && stData().map === 'isles' ? 2 : SONG_VALE;
 const ST_DOOR_AT = {'24,16': 'catacomb', '4,2': 'crypt', '44,9': 'duskwatch'};
-const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0};
+const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0, mara: 0};
 const ST_MAP = stBuildMap();
 const stGrid = () => { const d = stData(); return d && d.map !== 'world' && ST_DUNGEONS[d.map] ? ST_DUNGEONS[d.map].rows : ST_MAP; };
 const ST_NPCS = [
@@ -5426,6 +5530,8 @@ const ST_NPCS = [
   {id: 'tilly', name: 'Tilly', map: 'nets', x: 2, y: 4, look: 'magicgirl', color: '#9fe6ff', kid: true},
   {id: 'vesk', name: 'Vesk the Thief', map: 'jail', x: 4, y: 2, look: 'rogue', color: '#6a6a4a'},
   {id: 'holt', name: 'Warden Holt', map: 'jail', x: 7, y: 4, look: 'knight', color: '#3a3a4a'},
+  {id: 'oona', name: 'Harbormaster Oona', map: 'isles', x: 3, y: 11, look: 'valkyrie', color: '#4fb8d8'},
+  {id: 'kesh', name: 'Kesh the Trader', map: 'isles', x: 7, y: 8, look: 'pirate', color: '#e0a040'},
   // appear as stories unfold
   {id: 'hessa', name: 'Hessa', x: 44, y: 26, look: 'witch', color: '#a08070', need: 'wrenQuest', hideIf: 'hessaDone'},
   {id: 'hessaHome', name: 'Hessa', map: 'wrenhome', x: 7, y: 2, look: 'witch', color: '#a08070', need: 'hessaHome'},
@@ -5453,12 +5559,13 @@ const ST_QUESTS = [
 const stVillage = (x, y) => x > 29 * ST_TILE ? 'Saltmere, the Drowned Harbor' : y > 17 * ST_TILE ? 'Ravenhollow' : 'Thornwake, the Last Lit Village';
 const stNpcShown = (n, d) => (n.id !== 'liora' || !d.flags.liora) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]);
 const stChestShown = (c, d) => !d.chests.includes(c.id) && (!c.need || d.flags[c.need]);
-const ST = {on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
+const ST = {treesBy: {}, on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
 const stData = () => PROF.story;
 const stXpNeed = lv => 30 + 25 * lv;
 function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
-  return {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0), def: c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0), spd: c.spd + .4 * L};
+  const W = d.wounds || {};
+  return {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0)) * (W.hole ? .75 : 1), spd: c.spd + .4 * L};
 }
 function stSave() { saveProfile(); }
 // Alignment: -10 (Ashen) to +10 (Light). Light makes shops cheaper and toughens you; Ashen makes you hit harder.
@@ -5489,6 +5596,201 @@ function stJail() {
   stEnterMap('jail', 1, 2);
   stSay([['', 'Iron. Straw. The smell of everyone who sat here before you.'], ['', `Three days pass in the Thornwake cells. Your skills dull from disuse (you lose ${lostXp} XP). Then the bars swing open.`], ['Warden Holt', 'Your debt to Thornwake is paid. Walk out the door, and don\'t make me see you again.']]);
 }
+function stSail(key, tx, ty) { const d = stData(); d.riding = false; ST.mode = 'sail'; ST.sail = {t: 0, dur: 4.5, to: [key, tx, ty], home: key === 'world'}; $('stPrompt').hidden = true; sfx('blink'); }
+function stDrawSail(now, dt) { // the voyage: waves, a ship crossing the screen, gulls, and the days passing
+  const S = ST.sail; S.t += dt; const k = Math.min(1, S.t / S.dur);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const sk = ctx.createLinearGradient(0, 0, 0, ch * .6); sk.addColorStop(0, S.home ? '#3a3a5a' : '#f4b87a'); sk.addColorStop(1, S.home ? '#8a8aa0' : '#7aa8d0'); ctx.fillStyle = sk; ctx.fillRect(0, 0, cw, ch);
+  ctx.fillStyle = S.home ? '#d8d8e8' : '#fff2c0'; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(cw * .78, ch * .2, 34, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+  for (let L = 0; L < 4; L++) {
+    const y0 = ch * (.56 + L * .11); ctx.fillStyle = ['#3a7a9a', '#2a6a8a', '#1a5070', '#0e3a52'][L]; ctx.beginPath(); ctx.moveTo(0, ch);
+    for (let x = 0; x <= cw; x += 20) ctx.lineTo(x, y0 + Math.sin(x * .02 + now * (1.5 + L * .4) + L) * (6 + L * 3));
+    ctx.lineTo(cw, ch); ctx.fill();
+    if (L === 1) { // the ship rides the second wave
+      const sx = cw * (.1 + .8 * k), sy = y0 + Math.sin(sx * .02 + now * 1.9 + 1) * 9 - 6;
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(Math.sin(now * 1.6) * .05); const sc = Math.min(1.4, cw / 700); ctx.scale(sc, sc);
+      ctx.fillStyle = '#4a2a14'; ctx.beginPath(); ctx.moveTo(-70, -10); ctx.lineTo(70, -10); ctx.lineTo(52, 18); ctx.lineTo(-56, 18); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#c9a24a'; ctx.fillRect(-60, -8, 124, 3);
+      ctx.fillStyle = '#2a1a0a'; ctx.fillRect(-4, -110, 6, 102); ctx.fillRect(-44, -80, 4, 72);
+      ctx.fillStyle = '#efe6d2'; ctx.beginPath(); ctx.moveTo(2, -104); ctx.quadraticCurveTo(44, -70, 2, -20); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(-40, -76); ctx.quadraticCurveTo(-12, -54, -40, -24); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#b33a3a'; ctx.beginPath(); ctx.moveTo(2, -110); ctx.lineTo(24 + Math.sin(now * 6) * 3, -104); ctx.lineTo(2, -98); ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 2; for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(sx - 60 - i * 26, sy + 16 + i); ctx.lineTo(sx - 76 - i * 26, sy + 18 + i); ctx.stroke(); }
+    }
+  }
+  ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 2; for (let i = 0; i < 5; i++) { const gx = (cw * .2 + i * 70 + now * 40) % (cw + 80) - 40, gy = ch * .18 + Math.sin(i * 2 + now) * 20, f = Math.sin(now * 8 + i) * 6; ctx.beginPath(); ctx.moveTo(gx - 10, gy - f); ctx.lineTo(gx, gy); ctx.lineTo(gx + 10, gy - f); ctx.stroke(); }
+  ctx.textAlign = 'center'; ctx.fillStyle = '#fff3e0'; ctx.shadowColor = '#000'; ctx.shadowBlur = 12;
+  ctx.font = `${Math.round(Math.min(cw / 20, 38))}px "Marcellus SC", Georgia, serif`; ctx.fillText(S.home ? 'Sailing home to Saltmere' : 'Sailing to the Brightwater Isles', cw / 2, ch * .1 + 20);
+  ctx.font = '600 18px "Barlow Semi Condensed", sans-serif'; ctx.fillText(`Day ${Math.min(3, 1 + Math.floor(k * 3))} of 3`, cw / 2, ch * .1 + 48); ctx.shadowBlur = 0; ctx.textAlign = 'left';
+  if (S.t >= S.dur) { ST.mode = 'walk'; ST.sail = null; stEnterMap(...S.to); musicForce(stMapSong()); stCallout(S.home ? 'Saltmere, the Drowned Harbor' : 'The Brightwater Isles', '#ffe9a8'); }
+}
+// Weather drifts between clear skies, rain, storms, fog and wind. Rain falls as snow on the peaks and sand in the dunes.
+function stWeatherTick(dt) {
+  const W = ST.wx || (ST.wx = {kind: 'clear', t: 0, next: 30, k: 0, flash: 0, wind: .3, p: []});
+  W.t += dt;
+  if (W.t > W.next) { W.t = 0; W.next = rand(50, 110); const r = Math.random(); W.kind = r < .32 ? 'clear' : r < .58 ? 'rain' : r < .76 ? 'storm' : r < .9 ? 'fog' : 'wind'; }
+  W.k += ((W.kind === 'clear' ? 0 : 1) - W.k) * Math.min(1, dt * .35);
+  W.wind = .3 + (W.kind === 'storm' || W.kind === 'wind' ? 1.3 : W.kind === 'rain' ? .5 : 0) * W.k;
+  if (W.kind === 'storm' && W.k > .6 && Math.random() < dt * .18) { W.flash = 1; W.bolt = Math.random() * cw; setTimeout(() => sfx('boom'), rand(250, 1400)); }
+  W.flash = Math.max(0, W.flash - dt * 2.5);
+}
+// Day and night follow the real clock on your device.
+function stClock() { const n = new Date(), h = ST.clockOverride != null ? ST.clockOverride : n.getHours() + n.getMinutes() / 60; const sun = Math.sin((h - 6) / 12 * Math.PI); return {h, sun, dark: clamp(.12 - sun, 0, .72), warm: Math.max(0, .4 - Math.abs(sun)) * (h < 12 ? .8 : 1)}; }
+const stTimeName = h => h < 5 ? 'Night' : h < 7 ? 'Dawn' : h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 19.5 ? 'Dusk' : h < 21 ? 'Evening' : 'Night';
+const stTimeText = h => { const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 60); return `${(hh % 12) || 12}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'}`; };
+function stNightDraw(Zs, d, dun, isles) { // darkness with holes burned out by every light nearby
+  const C = stClock(); if (dun && !isles) return;
+  if (C.warm > .02) { ctx.fillStyle = C.h < 12 ? `rgba(255,150,90,${C.warm * .35})` : `rgba(255,110,70,${C.warm * .4})`; ctx.fillRect(0, 0, cw, ch); }
+  if (C.dark < .02) return;
+  const N = ST.nightC || (ST.nightC = document.createElement('canvas')); if (N.width !== cw || N.height !== ch) { N.width = cw; N.height = ch; }
+  const g = N.getContext('2d'); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, cw, ch); g.fillStyle = `rgba(6,10,32,${C.dark})`; g.fillRect(0, 0, cw, ch);
+  g.globalCompositeOperation = 'destination-out';
+  const hole = (x, y, r) => { const sx = cw / 2 + (x - ST.cam.x) * Zs, sy = ch / 2 + (y - ST.cam.y) * Zs, R = r * Zs; if (sx < -R || sy < -R || sx > cw + R || sy > ch + R) return; const gr = g.createRadialGradient(sx, sy, R * .15, sx, sy, R); gr.addColorStop(0, 'rgba(0,0,0,.95)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(sx - R, sy - R, R * 2, R * 2); };
+  hole(d.x, d.y - 30, 190 + Math.sin(performance.now() * .008) * 6); // your torch
+  for (const L of ST.lights || []) hole(L[0], L[1], L[2]);
+  ctx.drawImage(N, 0, 0, cw, ch);
+  ctx.globalCompositeOperation = 'lighter'; // warm glow where the light falls
+  for (const L of ST.lights || []) { const sx = cw / 2 + (L[0] - ST.cam.x) * Zs, sy = ch / 2 + (L[1] - ST.cam.y) * Zs, R = L[2] * Zs * .6; if (sx < -R || sy < -R || sx > cw + R || sy > ch + R) continue; const gr = ctx.createRadialGradient(sx, sy, 2, sx, sy, R); gr.addColorStop(0, `rgba(255,170,80,${.35 * C.dark})`); gr.addColorStop(1, 'rgba(255,170,80,0)'); ctx.fillStyle = gr; ctx.fillRect(sx - R, sy - R, R * 2, R * 2); }
+  ctx.globalCompositeOperation = 'source-over';
+  if (C.dark > .3) for (let i = 0; i < 40; i++) { const x = (i * 197.3 + 13) % cw, y = (i * 83.7) % (ch * .35); ctx.fillStyle = `rgba(255,255,240,${(.3 + Math.sin(performance.now() * .002 + i) * .25) * C.dark})`; ctx.fillRect(x, y, 1.5, 1.5); } // stars
+}
+const ST_WX_NAME = {clear: '', rain: 'Rain', storm: 'Thunderstorm', fog: 'Fog', wind: 'High winds'};
+function stWeatherDraw(dt, tile, isles) {
+  const W = ST.wx; if (!W) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const wet = W.kind === 'rain' || W.kind === 'storm', snow = tile === '*', sand = tile === 'a' && (W.kind === 'wind' || W.kind === 'storm'), P = W.p;
+  let n = wet ? (W.kind === 'storm' ? 9 : 4) * W.k : 0;
+  const spawn = (o) => { if (P.length < 500) P.push(o); };
+  for (let i = 0; i < n; i++) spawn(snow ? {k: 'snow', x: rand(-100, cw + 100), y: -10, vx: W.wind * 40, vy: rand(60, 120), r: rand(1.5, 3.2)} : sand ? {k: 'sand', x: -20, y: rand(0, ch), vx: rand(500, 900), vy: rand(-20, 20)} : {k: 'rain', x: rand(-100, cw + 100), y: -20, vx: -W.wind * 220, vy: rand(800, 1000)});
+  if (snow && Math.random() < .5) spawn({k: 'snow', x: rand(0, cw), y: -10, vx: W.wind * 30, vy: rand(40, 80), r: rand(1, 2.4)});
+  if (sand) for (let i = 0; i < 3; i++) spawn({k: 'sand', x: -20, y: rand(0, ch), vx: rand(500, 900), vy: rand(-20, 20)});
+  if (Math.random() < .25) { // region life: leaves, fireflies, ash, sun motes
+    const kind = isles ? 'mote' : tile === 'T' ? 'leaf' : tile === 'g' || tile === 'b' ? 'fly' : tile === '*' || tile === 'a' ? null : 'ash';
+    if (kind) spawn({k: kind, x: rand(0, cw), y: kind === 'fly' || kind === 'mote' ? rand(ch * .3, ch) : -10, vx: kind === 'leaf' ? W.wind * 90 : rand(-10, 10), vy: kind === 'leaf' ? rand(30, 60) : kind === 'ash' ? rand(15, 35) : rand(-8, 8), r: rand(1.5, 3), t: 0, life: rand(4, 8), ph: Math.random() * 6});
+  }
+  if (wet && W.k > .1) { ctx.fillStyle = `rgba(10,14,24,${(W.kind === 'storm' ? .32 : .16) * W.k})`; ctx.fillRect(0, 0, cw, ch); }
+  for (const q of P) {
+    q.t = (q.t || 0) + dt; q.x += q.vx * dt; q.y += q.vy * dt;
+    if (q.k === 'rain') { ctx.strokeStyle = 'rgba(170,200,230,.55)'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(q.x + q.vx * .025, q.y + q.vy * .025); ctx.stroke(); if (q.y > ch * rand(.5, 1.1)) { q.dead = true; ctx.strokeStyle = 'rgba(190,220,250,.4)'; ctx.beginPath(); ctx.ellipse(q.x, q.y, 5, 2, 0, 0, 7); ctx.stroke(); } }
+    else if (q.k === 'snow') { q.x += Math.sin(q.t * 2 + q.r) * .6; ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, 7); ctx.fill(); }
+    else if (q.k === 'sand') { ctx.strokeStyle = 'rgba(216,184,138,.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(q.x - 30, q.y); ctx.stroke(); }
+    else if (q.k === 'leaf') { q.x += Math.sin(q.t * 3 + q.ph) * 1.2; ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.t * 3 + q.ph); ctx.fillStyle = q.ph > 3 ? '#8a6a2a' : '#4a7a3a'; ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.5, 0, 0, 7); ctx.fill(); ctx.restore(); }
+    else { const a = q.k === 'fly' || q.k === 'mote' ? (.5 + Math.sin(q.t * 4 + q.ph) * .5) * Math.min(1, (q.life - q.t)) : .6; q.vx += Math.sin(q.t + q.ph) * .3; ctx.fillStyle = q.k === 'fly' ? `rgba(200,255,120,${a})` : q.k === 'mote' ? `rgba(255,240,180,${a})` : 'rgba(180,170,160,.6)'; if (q.k !== 'ash') { ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 10; } ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, 7); ctx.fill(); ctx.shadowBlur = 0; if (q.t > q.life) q.dead = true; }
+    if (q.y > ch + 20 || q.x > cw + 120 || q.x < -140) q.dead = true;
+  }
+  W.p = P.filter(q => !q.dead);
+  if (W.kind === 'fog' && W.k > .05) for (let i = 0; i < 5; i++) { const fx = ((i * 311 + performance.now() * .01 * (1 + i * .2)) % (cw + 600)) - 300, fy = ch * (.2 + i * .17), gr = ctx.createRadialGradient(fx, fy, 10, fx, fy, 320); gr.addColorStop(0, `rgba(200,205,215,${.32 * W.k})`); gr.addColorStop(1, 'rgba(200,205,215,0)'); ctx.fillStyle = gr; ctx.fillRect(fx - 320, fy - 320, 640, 640); }
+  if (W.flash > 0) {
+    ctx.fillStyle = `rgba(230,235,255,${W.flash * .6})`; ctx.fillRect(0, 0, cw, ch);
+    if (W.flash > .7) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.shadowColor = '#bcd'; ctx.shadowBlur = 20; ctx.beginPath(); let bx = W.bolt, by = 0; ctx.moveTo(bx, by); while (by < ch * .6) { by += rand(20, 50); bx += rand(-30, 30); ctx.lineTo(bx, by); } ctx.stroke(); ctx.shadowBlur = 0; }
+  }
+}
+
+// ---- life in the world: swaying trees, travelers and a cart, farm and wild animals, birds, fish, smoke, campfires, a windmill and a lighthouse
+const ST_ROUTES = [[[17.5, 11.5], [31, 11.5]], [[14.5, 15], [14.5, 21.5], [12.5, 21.5]], [[14.5, 7.5], [24.5, 7.5]], [[31, 11.5], [40, 11.5]]].map(r => r.map(([x, y]) => [x * ST_TILE, y * ST_TILE]));
+const ST_PEN = {x0: 7 * ST_TILE + 12, y0: 15 * ST_TILE + 12, x1: 11 * ST_TILE - 12, y1: 18 * ST_TILE - 12};
+const ST_CAMPS = [[28, 9], [39, 20], [17, 24]];
+function stDrawTree(t, now, wind) {
+  const sw = Math.sin(now * (1.2 + wind) + t.ph + t.x * .01) * (2 + wind * 7) * t.s, s = t.s;
+  ctx.save(); ctx.translate(t.x, t.y);
+  if (t.palm) { // a curved trunk and drooping fronds
+    ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 7 * s; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(6 * s + sw * .3, -40 * s, 4 * s + sw, -78 * s); ctx.stroke();
+    ctx.strokeStyle = '#3a8a3a'; ctx.lineWidth = 6 * s; for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + Math.sin(now * 1.5 + i) * .08 * (1 + wind); ctx.beginPath(); ctx.moveTo(4 * s + sw, -78 * s); ctx.quadraticCurveTo(4 * s + sw + Math.cos(a) * 26 * s, -88 * s + Math.sin(a) * 10 * s, 4 * s + sw * 1.3 + Math.cos(a) * 40 * s, -66 * s + Math.abs(Math.sin(a)) * 8 * s); ctx.stroke(); }
+  } else {
+    ctx.fillStyle = t.dark ? '#1a120c' : '#3a2a1a'; ctx.beginPath(); ctx.moveTo(-4 * s, 0); ctx.lineTo(4 * s, 0); ctx.lineTo(2 * s + sw * .3, -26 * s); ctx.lineTo(-2 * s + sw * .3, -26 * s); ctx.fill();
+    const cols = t.dark ? ['#0a120d', '#121c15', '#1a2a1e'] : ['#173020', '#24472a', '#356a3a'];
+    for (let i = 0; i < 3; i++) { ctx.fillStyle = cols[i]; ctx.beginPath(); ctx.arc(sw * (.5 + i * .25) + (i - 1) * 3 * s, -34 * s - i * 9 * s, (20 - i * 4) * s, 0, 7); ctx.fill(); }
+  }
+  ctx.restore();
+}
+function stAnimal(a, now) { // sheep, cows, chickens, deer and rabbits
+  const dir = a.vx < 0 ? -1 : 1, hop = a.kind === 'rabbit' && a.moving ? -Math.abs(Math.sin(now * 12)) * 6 : 0, peck = a.kind === 'chicken' && !a.moving ? Math.max(0, Math.sin(now * 5 + a.ph)) * 4 : 0;
+  ctx.save(); ctx.translate(a.x, a.y); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 2, a.kind === 'cow' ? 22 : 12, 4, 0, 0, 7); ctx.fill(); ctx.scale(dir, 1); ctx.translate(0, hop);
+  const leg = i => Math.sin(now * 10 + i) * (a.moving ? 3 : 0);
+  if (a.kind === 'sheep') { ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 3; for (const i of [-7, 7]) { ctx.beginPath(); ctx.moveTo(i, -6); ctx.lineTo(i + leg(i), 2); ctx.stroke(); } ctx.fillStyle = '#e8e4da'; for (const [x, y, r] of [[-6, -12, 8], [3, -14, 9], [9, -11, 7], [0, -9, 8]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); } ctx.fillStyle = '#2a2a2a'; ctx.beginPath(); ctx.ellipse(16, -14, 5, 4, 0, 0, 7); ctx.fill(); }
+  else if (a.kind === 'cow') { ctx.strokeStyle = '#3a2a20'; ctx.lineWidth = 4; for (const i of [-14, -6, 8, 15]) { ctx.beginPath(); ctx.moveTo(i, -10); ctx.lineTo(i + leg(i), 2); ctx.stroke(); } ctx.fillStyle = '#efe8e0'; ctx.beginPath(); ctx.ellipse(0, -16, 20, 10, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#2a2420'; ctx.beginPath(); ctx.arc(-6, -18, 5, 0, 7); ctx.arc(8, -14, 4, 0, 7); ctx.fill(); ctx.fillStyle = '#efe8e0'; ctx.beginPath(); ctx.ellipse(23, -20 + (a.moving ? 0 : 6), 7, 6, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#d8a0a0'; ctx.fillRect(27, -20 + (a.moving ? 0 : 6), 4, 5); }
+  else if (a.kind === 'chicken') { ctx.strokeStyle = '#d8a03a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-1, -4); ctx.lineTo(-1 + leg(1), 1); ctx.moveTo(2, -4); ctx.lineTo(2 + leg(2), 1); ctx.stroke(); ctx.fillStyle = '#f4efe4'; ctx.beginPath(); ctx.ellipse(0, -8, 6, 5, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(5, -13 + peck, 3.5, 0, 7); ctx.fill(); ctx.fillStyle = '#d83a2a'; ctx.fillRect(4, -18 + peck, 3, 3); ctx.fillStyle = '#e0a020'; ctx.fillRect(8, -13 + peck, 3, 2); }
+  else if (a.kind === 'deer') { ctx.strokeStyle = '#4a3020'; ctx.lineWidth = 2.5; for (const i of [-9, -4, 6, 10]) { ctx.beginPath(); ctx.moveTo(i, -12); ctx.lineTo(i + leg(i) * 1.6, 2); ctx.stroke(); } ctx.fillStyle = '#8a5a32'; ctx.beginPath(); ctx.ellipse(0, -16, 14, 7, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.moveTo(10, -18); ctx.lineTo(16, -32); ctx.lineTo(20, -30); ctx.lineTo(14, -14); ctx.fill(); ctx.beginPath(); ctx.ellipse(19, -32, 5, 3.5, .3, 0, 7); ctx.fill(); ctx.strokeStyle = '#d8c8a0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(17, -35); ctx.lineTo(13, -46); ctx.moveTo(15, -41); ctx.lineTo(19, -46); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-13, -18, 3, 0, 7); ctx.fill(); }
+  else { ctx.fillStyle = '#8a7a6a'; ctx.beginPath(); ctx.ellipse(0, -6, 8, 6, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(7, -10, 4, 0, 7); ctx.fill(); ctx.fillRect(5, -20, 2.5, 9); ctx.fillRect(8, -19, 2.5, 8); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-8, -6, 2.5, 0, 7); ctx.fill(); }
+  ctx.restore();
+}
+function stAmbient(dt, now, Zs, d, dun, isles) {
+  const A = ST.amb || (ST.amb = {crit: [], walkers: null, birds: [], fish: [], smoke: [], farm: null, chick: null, smokeT: 0, birdT: 4, fishT: 1, boatY: 3 * ST_TILE});
+  const vw = cw / 2 / Zs + 120, vh = ch / 2 / Zs + 160, inView = (x, y) => Math.abs(x - ST.cam.x) < vw && Math.abs(y - ST.cam.y) < vh;
+  const wind = ST.wx ? ST.wx.wind : .3, grid = stGrid(), tileAt = (x, y) => (grid[Math.floor(y / ST_TILE)] || '')[Math.floor(x / ST_TILE)] || '#';
+  ST.lights = [];
+  if (dun && !isles) return;
+  grid.forEach((row, y) => { if (Math.abs(y * ST_TILE - ST.cam.y) > vh + 300) return; [...row].forEach((t, x) => { if (Math.abs(x * ST_TILE - ST.cam.x) > vw + 300) return; if ('HIUK'.includes(t)) ST.lights.push(isles ? [x * ST_TILE + 32, y * ST_TILE + 30, 120] : [x * ST_TILE + 64, y * ST_TILE + 80, 170]); else if (t === 'Q') ST.lights.push([x * ST_TILE + 32, y * ST_TILE + 30, 110]); else if (t === 'S') ST.lights.push([x * ST_TILE + 32, y * ST_TILE + 40, 70]); }); });
+  if (!isles) { for (const [cx0, cy0] of ST_CAMPS) ST.lights.push([cx0 * ST_TILE + 32, cy0 * ST_TILE + 30, 230]); ST.lights.push([39.5 * ST_TILE, 14 * ST_TILE - 190, 260]); }
+  // fish leap from the water now and then
+  A.fishT -= dt; if (A.fishT <= 0) { A.fishT = rand(.6, 2); for (let k = 0; k < 8; k++) { const x = ST.cam.x + rand(-vw, vw), y = ST.cam.y + rand(-vh, vh), t = tileAt(x, y); if (t === '~' || (isles && t === '#')) { A.fish.push({x, y, t: 0, dir: Math.random() < .5 ? -1 : 1}); break; } } }
+  for (const f of A.fish) { f.t += dt; const k = f.t / .8; if (k < 1) { const fx = f.x + f.dir * k * 40, fy = f.y - Math.sin(k * Math.PI) * 30; ctx.save(); ctx.translate(fx, fy); ctx.rotate(f.dir * (k - .5) * 2.4); ctx.fillStyle = '#b8c8d0'; ctx.beginPath(); ctx.ellipse(0, 0, 9, 3.5, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.moveTo(-f.dir * 8, 0); ctx.lineTo(-f.dir * 14, -4); ctx.lineTo(-f.dir * 14, 4); ctx.fill(); ctx.restore(); } ctx.strokeStyle = `rgba(220,240,255,${Math.max(0, .6 - Math.abs(k - (k < .5 ? 0 : 1)) * 1.2)})`; ctx.lineWidth = 2; for (const ex of [0, 40]) { ctx.beginPath(); ctx.ellipse(f.x + f.dir * ex, f.y, 6 + f.t * 14, 2 + f.t * 4, 0, 0, 7); ctx.stroke(); } }
+  A.fish = A.fish.filter(f => f.t < 1.2);
+  // trees sway in the wind
+  for (const t of ST.treesBy[d.map] || []) if (inView(t.x, t.y)) stDrawTree(t, now, wind);
+  if (!dun) {
+    // a little rowboat drifts down the river
+    A.boatY += dt * 22; if (A.boatY > 30 * ST_TILE) A.boatY = 2 * ST_TILE;
+    const bx = 18 * ST_TILE + 32 + Math.sin(now) * 6, by = A.boatY; if (inView(bx, by)) { ctx.fillStyle = '#5a3a1a'; ctx.beginPath(); ctx.ellipse(bx, by, 9, 22, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#3a2614'; ctx.fillRect(bx - 7, by - 3, 14, 4); ctx.fillStyle = '#8a7a5a'; ctx.beginPath(); ctx.arc(bx, by + 8, 6, 0, 7); ctx.fill(); ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 2; const oar = Math.sin(now * 3) * 6; ctx.beginPath(); ctx.moveTo(bx - 18, by + 6 + oar); ctx.lineTo(bx + 18, by + 6 - oar); ctx.stroke(); }
+  }
+  { // a ship at anchor: in Saltmere harbor, or beside the Port Halcyon pier
+    const hx = isles ? .45 * ST_TILE : 38.9 * ST_TILE, hy = (isles ? 10.5 : 16) * ST_TILE + Math.sin(now * 1.4) * 3; if (inView(hx, hy)) { ctx.save(); ctx.translate(hx, hy); ctx.rotate(Math.sin(now * 1.1) * .03); ctx.fillStyle = '#4a2a14'; ctx.beginPath(); ctx.moveTo(-26, -60); ctx.lineTo(26, -60); ctx.lineTo(20, 60); ctx.lineTo(-20, 60); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#c9a24a'; ctx.fillRect(-24, -60, 48, 4); ctx.fillStyle = '#2a1a0a'; ctx.fillRect(-3, -40, 6, 80); ctx.fillStyle = '#efe6d2'; ctx.fillRect(-30 - wind * 4, -24, 60, 12); ctx.fillRect(-24 - wind * 4, 10, 48, 10); ctx.fillStyle = '#b33a3a'; ctx.beginPath(); ctx.moveTo(0, -44); ctx.lineTo(16 + Math.sin(now * 6) * 3, -40); ctx.lineTo(0, -36); ctx.fill(); ctx.restore(); }
+  }
+  if (!dun) {
+    // the lighthouse and the windmill
+    const lx = 39.5 * ST_TILE, ly = 14 * ST_TILE - 4; if (inView(lx, ly - 100)) {
+      ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(lx, ly, 30, 8, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#e8e0d0'; ctx.beginPath(); ctx.moveTo(lx - 22, ly); ctx.lineTo(lx - 13, ly - 170); ctx.lineTo(lx + 13, ly - 170); ctx.lineTo(lx + 22, ly); ctx.fill(); ctx.fillStyle = '#b33a3a'; for (const yy of [-40, -100]) ctx.fillRect(lx - 20 + (-yy / 170) * 8, ly + yy - 16, 40 - (-yy / 170) * 16, 16);
+      ctx.fillStyle = '#2a2a2a'; ctx.fillRect(lx - 16, ly - 196, 32, 26); ctx.fillStyle = '#ffe9a8'; ctx.shadowColor = '#ffe9a8'; ctx.shadowBlur = 30; ctx.fillRect(lx - 10, ly - 192, 20, 18); ctx.shadowBlur = 0;
+      const a = now * .9, gl = ctx.createRadialGradient(lx, ly - 183, 4, lx, ly - 183, 420); gl.addColorStop(0, 'rgba(255,233,168,.35)'); gl.addColorStop(1, 'rgba(255,233,168,0)'); ctx.fillStyle = gl;
+      ctx.beginPath(); ctx.moveTo(lx, ly - 183); ctx.arc(lx, ly - 183, 420, a - .18, a + .18); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(lx, ly - 183); ctx.arc(lx, ly - 183, 420, a + Math.PI - .18, a + Math.PI + .18); ctx.closePath(); ctx.fill();
+    }
+    const mx = 12.5 * ST_TILE, my = 20 * ST_TILE - 6; if (inView(mx, my - 80)) {
+      ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(mx, my, 30, 8, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#8a7a62'; ctx.beginPath(); ctx.moveTo(mx - 26, my); ctx.lineTo(mx - 16, my - 120); ctx.lineTo(mx + 16, my - 120); ctx.lineTo(mx + 26, my); ctx.fill(); ctx.fillStyle = '#4a2a1e'; ctx.beginPath(); ctx.moveTo(mx - 22, my - 118); ctx.lineTo(mx, my - 146); ctx.lineTo(mx + 22, my - 118); ctx.fill(); ctx.fillStyle = '#2a1a10'; ctx.fillRect(mx - 7, my - 26, 14, 26);
+      ctx.save(); ctx.translate(mx, my - 118); ctx.rotate(now * (.6 + wind)); ctx.fillStyle = '#d8ccb0'; ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 3; for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -78); ctx.stroke(); ctx.fillRect(2, -76, 14, 60); } ctx.restore(); ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.arc(mx, my - 118, 5, 0, 7); ctx.fill();
+    }
+    // campfires with tents
+    for (const [cx0, cy0] of ST_CAMPS) { const x = cx0 * ST_TILE + 32, y = cy0 * ST_TILE + 40; if (!inView(x, y)) continue;
+      ctx.fillStyle = '#6a5a3a'; ctx.beginPath(); ctx.moveTo(x - 70, y); ctx.lineTo(x - 44, y - 40); ctx.lineTo(x - 18, y); ctx.fill(); ctx.fillStyle = '#1a1206'; ctx.beginPath(); ctx.moveTo(x - 50, y); ctx.lineTo(x - 44, y - 16); ctx.lineTo(x - 38, y); ctx.fill();
+      ctx.fillStyle = '#3a2a1a'; ctx.fillRect(x - 12, y - 4, 24, 5); const fl = 14 + Math.sin(now * 14) * 3; ctx.fillStyle = '#ff7a2a'; ctx.shadowColor = '#ff9a3a'; ctx.shadowBlur = 40; ctx.beginPath(); ctx.moveTo(x - 9, y - 2); ctx.quadraticCurveTo(x + Math.sin(now * 9) * 3, y - fl * 2, x + 9, y - 2); ctx.fill(); ctx.fillStyle = '#ffd75e'; ctx.beginPath(); ctx.moveTo(x - 4, y - 2); ctx.quadraticCurveTo(x, y - fl, x + 4, y - 2); ctx.fill(); ctx.shadowBlur = 0;
+      if (Math.random() < .3) A.smoke.push({x: x + rand(-3, 3), y: y - fl, t: 0, r: 3, ember: Math.random() < .3}); }
+    // the farm pen: sheep and a cow; chickens in Ravenhollow
+    if (!A.farm) { A.farm = ['sheep', 'sheep', 'sheep', 'cow'].map((kind, i) => ({kind, x: ST_PEN.x0 + 30 + i * 50, y: ST_PEN.y0 + 40 + (i % 2) * 40, vx: 1, vy: 0, t: rand(0, 3), ph: i})); A.chick = [0, 1, 2, 3].map(i => ({kind: 'chicken', x: (6 + i) * ST_TILE, y: 21 * ST_TILE + 20, vx: 1, vy: 0, t: rand(0, 2), ph: i, home: [(6 + i) * ST_TILE, 21 * ST_TILE + 20]})); }
+    if (inView((ST_PEN.x0 + ST_PEN.x1) / 2, (ST_PEN.y0 + ST_PEN.y1) / 2)) { ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 4; ctx.strokeRect(ST_PEN.x0, ST_PEN.y0, ST_PEN.x1 - ST_PEN.x0, ST_PEN.y1 - ST_PEN.y0); ctx.fillStyle = '#4a3020'; for (let x = ST_PEN.x0; x <= ST_PEN.x1; x += 32) { ctx.fillRect(x - 3, ST_PEN.y0 - 10, 6, 14); ctx.fillRect(x - 3, ST_PEN.y1 - 10, 6, 14); } }
+    for (const a of A.farm.concat(A.chick)) { a.t -= dt; if (a.t <= 0) { a.t = rand(1, 4); a.moving = Math.random() < .55; const ang = Math.random() * 6.28; a.vx = Math.cos(ang) * (a.kind === 'chicken' ? 30 : 16); a.vy = Math.sin(ang) * 10; }
+      if (a.moving) { a.x += a.vx * dt; a.y += a.vy * dt; } if (a.home) { a.x = clamp(a.x, a.home[0] - 70, a.home[0] + 70); a.y = clamp(a.y, a.home[1] - 30, a.home[1] + 30); } else { a.x = clamp(a.x, ST_PEN.x0 + 20, ST_PEN.x1 - 24); a.y = clamp(a.y, ST_PEN.y0 + 24, ST_PEN.y1 - 6); }
+      if (inView(a.x, a.y)) stAnimal(a, now); }
+    // travelers and a cart on the roads
+    if (!A.walkers) A.walkers = [[0, 'hunter', '#6a6a5a'], [0, 'cart'], [1, 'witch', '#7a5a6a'], [2, 'paladin', '#8a8a8a'], [3, 'pirate', '#5a6a7a'], [1, 'heavy', '#6a5a4a']].map(([r, look, color], i) => ({r, look, color, seg: 0, k: (i * .37) % 1, fwd: i % 2 === 0, walk: 0}));
+    for (const w of A.walkers) {
+      const R = ST_ROUTES[w.r], a = R[w.seg], b = R[w.seg + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]), sp = (w.look === 'cart' ? 60 : 45) * dt / len;
+      w.k += w.fwd ? sp : -sp; if (w.k > 1) { if (w.seg < R.length - 2) { w.seg++; w.k = 0; } else { w.k = 1; w.fwd = false; } } if (w.k < 0) { if (w.seg > 0) { w.seg--; w.k = 1; } else { w.k = 0; w.fwd = true; } }
+      const p0 = R[w.seg], p1 = R[w.seg + 1], x = p0[0] + (p1[0] - p0[0]) * w.k, y = p0[1] + (p1[1] - p0[1]) * w.k + 10, face = (p1[0] - p0[0]) * (w.fwd ? 1 : -1) < 0 ? Math.PI : 0; w.walk += 3;
+      if (!inView(x, y)) continue;
+      if (w.look === 'cart') { const dir = Math.cos(face) < 0 ? -1 : 1; ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x - dir * 70 - 26, y - 34, 52, 26); ctx.fillStyle = '#c9b48a'; ctx.beginPath(); ctx.ellipse(x - dir * 70, y - 38, 26, 12, 0, Math.PI, 0); ctx.fill(); ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 3; for (const wx of [-14, 14]) { ctx.beginPath(); ctx.arc(x - dir * 70 + wx, y - 6, 9, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x - dir * 70 + wx + Math.cos(w.walk * .1) * 9, y - 6 + Math.sin(w.walk * .1) * 9); ctx.lineTo(x - dir * 70 + wx - Math.cos(w.walk * .1) * 9, y - 6 - Math.sin(w.walk * .1) * 9); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(x - dir * 44, y - 20); ctx.lineTo(x - dir * 10, y - 22); ctx.stroke(); stDrawMount(ctx, 'mare', x, y, face, w.walk * 4, now, true); }
+      else drawCharacterScaled(stUnit(w.look, w.color, x, y, face, w.walk, 40 + w.r, 2), now, .9);
+    }
+    // wild animals graze near you and bolt when you come close
+    if (A.crit.length < 6 && Math.random() < .05) { const x = ST.cam.x + rand(-vw, vw), y = ST.cam.y + rand(-vh, vh), t = tileAt(x, y); if ('.T*g:'.includes(t) && Math.hypot(x - d.x, y - d.y) > 300) A.crit.push({kind: t === 'T' || t === 'g' ? 'deer' : 'rabbit', x, y, vx: 1, vy: 0, t: 0, ph: Math.random() * 6}); }
+    for (const a of A.crit) { const dd = Math.hypot(a.x - d.x, a.y - d.y);
+      if (dd < 170) { const ang = Math.atan2(a.y - d.y, a.x - d.x), sp = a.kind === 'deer' ? 260 : 220; a.vx = Math.cos(ang) * sp; a.vy = Math.sin(ang) * sp; a.moving = true; a.t = .5; }
+      else { a.t -= dt; if (a.t <= 0) { a.t = rand(1, 3); a.moving = Math.random() < .5; const ang = Math.random() * 6.28; a.vx = Math.cos(ang) * 30; a.vy = Math.sin(ang) * 20; } }
+      if (a.moving) { const nx = a.x + a.vx * dt, ny = a.y + a.vy * dt; if (!ST_BLOCKED.has(tileAt(nx, ny))) { a.x = nx; a.y = ny; } else a.t = 0; }
+      if (inView(a.x, a.y)) stAnimal(a, now); else a.gone = true; }
+    A.crit = A.crit.filter(a => !a.gone);
+  }
+  // chimney smoke from every house, inn and hut nearby
+  A.smokeT -= dt; if (A.smokeT <= 0) { A.smokeT = .12; grid.forEach((row, y) => { if (Math.abs(y * ST_TILE - ST.cam.y) > vh + 200) return; [...row].forEach((t, x) => { if ('HIUK'.includes(t) && Math.abs(x * ST_TILE - ST.cam.x) < vw + 200 && Math.random() < .5) A.smoke.push(isles ? {x: x * ST_TILE + 32, y: y * ST_TILE - 46, t: 0, r: 3} : {x: x * ST_TILE + 100, y: y * ST_TILE - 70, t: 0, r: 4}); }); }); }
+}
+function stAmbientOver(dt, now) { // smoke, embers and birds pass over everything
+  const A = ST.amb; if (!A) return; const wind = ST.wx ? ST.wx.wind : .3;
+  for (const q of A.smoke) { q.t += dt; q.x += (12 + wind * 40) * dt; q.y -= (q.ember ? 50 : 28) * dt; q.r += dt * (q.ember ? 0 : 8); ctx.fillStyle = q.ember ? `rgba(255,170,80,${Math.max(0, 1 - q.t)})` : `rgba(150,140,135,${Math.max(0, .45 - q.t * .12)})`; ctx.beginPath(); ctx.arc(q.x, q.y, q.ember ? 1.8 : q.r, 0, 7); ctx.fill(); }
+  A.smoke = A.smoke.filter(q => q.t < (q.ember ? 1 : 3.6));
+  A.birdT -= dt; if (A.birdT <= 0) { A.birdT = rand(5, 12); const fl = ST.cam.x - 900, y = ST.cam.y + rand(-300, 200), n = 3 + Math.floor(Math.random() * 5); for (let i = 0; i < n; i++) A.birds.push({x: fl - i * 30 - Math.random() * 20, y: y + (i % 2) * 18 + i * 6, ph: Math.random() * 6, t: 0, gull: stData().map === 'isles'}); }
+  for (const b of A.birds) { b.t += dt; b.x += (140 + wind * 60) * dt; b.y += Math.sin(b.t * 2 + b.ph) * .4; const f = Math.sin(b.t * 10 + b.ph) * 6; ctx.strokeStyle = b.gull ? '#f4f4f4' : '#141414'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(b.x - 9, b.y - f); ctx.lineTo(b.x, b.y); ctx.lineTo(b.x + 9, b.y - f); ctx.stroke(); ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(b.x - 30, b.y + 160, 6, 2, 0, 0, 7); ctx.fill(); }
+  A.birds = A.birds.filter(b => b.t < 14);
+}
 function stToggleRide() {
   const d = stData(), own = d.mounts || [];
   if (ST.mode !== 'walk') return;
@@ -5501,7 +5803,7 @@ function stToggleRide() {
   } else d.riding = true;
   sfx(d.riding ? 'pet' : 'blink'); stCallout(d.riding ? `Riding the ${ST_MOUNTS[d.mount].name}` : 'Dismounted', '#ffe9a8'); stHud();
 }
-function stDrawMount(g, id, x, y, face, walk, now) { // drawn under the rider; legs gallop with distance walked
+function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // drawn under the rider; legs gallop with distance walked
   const M = ST_MOUNTS[id], dir = Math.cos(face) < 0 ? -1 : 1, ph = walk * .045, fly = M.fly;
   g.save(); g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(x, y + 4, fly ? 30 : 42, fly ? 8 : 11, 0, 0, 7); g.fill();
   g.translate(x, y - (fly ? 26 + Math.sin(now * 4) * 5 : 0)); g.scale(dir, 1);
@@ -5512,7 +5814,7 @@ function stDrawMount(g, id, x, y, face, walk, now) { // drawn under the rider; l
   }
   g.lineCap = 'round';
   if (!fly || M.kind === 'gryphon') for (const [i, o] of [[-24, 0], [-12, 2], [14, 1], [26, 3]]) { // legs
-    const sw = Math.sin(ph + o) * (ST.moving ? 9 : 1); g.lineWidth = M.kind === 'wolf' ? 7 : 6; g.strokeStyle = M.kind === 'horse' || M.kind === 'elk' ? '#2a201a' : M.mane;
+    const sw = Math.sin(ph + o) * (moving ? 9 : 1); g.lineWidth = M.kind === 'wolf' ? 7 : 6; g.strokeStyle = M.kind === 'horse' || M.kind === 'elk' ? '#2a201a' : M.mane;
     g.beginPath(); g.moveTo(i, -20); g.lineTo(i + sw, fly ? -4 : 2); g.stroke();
   }
   g.fillStyle = M.color; g.beginPath(); g.ellipse(0, -28, M.kind === 'wolf' ? 30 : 34, M.kind === 'wolf' ? 13 : 15, 0, 0, 7); g.fill();
@@ -5574,7 +5876,30 @@ $('crStart').addEventListener('click', () => {
 });
 
 // ---- entering and leaving the story
-function stDrawDungeonCanvas(key) { // stone floors, walls, an exit stair and the boss altar (castles add banners, torches and a throne)
+function stDrawOutdoorCanvas(key) { // sea, sand, grass, huts, a pier; palms are drawn live so they sway
+  const D = ST_DUNGEONS[key], rows = D.rows, c = document.createElement('canvas'); c.width = rows[0].length * ST_TILE; c.height = rows.length * ST_TILE;
+  const g = c.getContext('2d'), R = mulberry(41), trees = ST.treesBy[key] = [], at = (x, y) => (rows[y] && rows[y][x]) || '#';
+  rows.forEach((row, y) => [...row].forEach((t, x) => {
+    const px = x * ST_TILE, py = y * ST_TILE, shore = t === '#' && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => at(x + a, y + b) !== '#');
+    g.fillStyle = t === '#' || t === 'E' ? (shore ? '#3a9ab0' : '#1f6a8a') : t === ',' || t === 'S' ? '#d8c690' : '#5a8a3a'; g.fillRect(px, py, ST_TILE, ST_TILE);
+    if (t === '#') { g.strokeStyle = shore ? 'rgba(255,255,255,.5)' : 'rgba(200,240,255,.25)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 6, py + 20 + R() * 20); g.quadraticCurveTo(px + 32, py + 12 + R() * 20, px + 58, py + 24 + R() * 20); g.stroke(); }
+    else if (t === ',') { g.fillStyle = 'rgba(120,90,40,.3)'; for (let i = 0; i < 4; i++) g.fillRect(px + R() * 60, py + R() * 60, 2, 2); if (R() < .1) { g.fillStyle = '#f0e0d0'; g.beginPath(); g.arc(px + R() * 50 + 7, py + R() * 50 + 7, 4, 0, 7); g.fill(); } }
+    else if (t !== 'E') { g.strokeStyle = 'rgba(30,60,20,.5)'; g.lineWidth = 2; for (let i = 0; i < 4; i++) { const gx = px + R() * 60, gy = py + R() * 60; g.beginPath(); g.moveTo(gx, gy); g.lineTo(gx + 2, gy - 7); g.stroke(); } if (R() < .15) { g.fillStyle = ['#ff6a8a', '#ffd75e', '#fff'][Math.floor(R() * 3)]; g.beginPath(); g.arc(px + R() * 56 + 4, py + R() * 56 + 4, 3, 0, 7); g.fill(); } }
+    if (t === 'T') { trees.push({x: px + 32, y: py + 44, s: 1 + R() * .3, palm: true, ph: R() * 6}); g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(px + 32, py + 48, 18, 6, 0, 0, 7); g.fill(); }
+    if (t === 'E') { g.fillStyle = '#7a5a3a'; for (let i = 0; i < 4; i++) g.fillRect(px + 2, py + 4 + i * 15, 60, 11); }
+    if (t === 'S') { g.fillStyle = '#3a3330'; g.beginPath(); g.ellipse(px + 32, py + 48, 20, 8, 0, 0, 7); g.fill(); g.strokeStyle = '#c9c0b0'; g.lineWidth = 4; g.beginPath(); g.moveTo(px + 32, py + 48); g.lineTo(px + 36, py + 14); g.stroke(); }
+    if (t === 'H') { // a stilted hut with a tall thatched roof
+      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(px + 2, py + 54, 64, 10);
+      g.fillStyle = '#a07a4a'; g.fillRect(px + 6, py + 10, 52, 48); g.fillStyle = '#5a3a1a'; g.fillRect(px + 24, py + 30, 16, 28);
+      g.fillStyle = '#ffd08a'; g.globalAlpha = .8; g.fillRect(px + 10, py + 22, 10, 10); g.fillRect(px + 44, py + 22, 10, 10); g.globalAlpha = 1;
+      g.fillStyle = '#c9a24a'; g.beginPath(); g.moveTo(px - 8, py + 16); g.lineTo(px + 32, py - 50); g.lineTo(px + 72, py + 16); g.closePath(); g.fill();
+      g.strokeStyle = 'rgba(120,80,20,.6)'; g.lineWidth = 2; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(px + 32, py - 50); g.lineTo(px - 6 + i * 15, py + 16); g.stroke(); }
+    }
+  }));
+  ST.dunC[key] = c;
+}
+function stDrawDungeonCanvas(key) {
+  if (ST_DUNGEONS[key].outdoor) return stDrawOutdoorCanvas(key); // stone floors, walls, an exit stair and the boss altar (castles add banners, torches and a throne)
   const D = ST_DUNGEONS[key], rows = D.rows, c = document.createElement('canvas'); c.width = rows[0].length * ST_TILE; c.height = rows.length * ST_TILE;
   const g = c.getContext('2d'), R = mulberry(23);
   rows.forEach((row, y) => [...row].forEach((t, x) => {
@@ -5605,15 +5930,15 @@ function stDrawDungeonCanvas(key) { // stone floors, walls, an exit stair and th
 function stDrawMapCanvas() {
   const c = document.createElement('canvas'); c.width = ST_W * ST_TILE; c.height = ST_H * ST_TILE;
   const g = c.getContext('2d'), R = mulberry(11);
-  const col = {b: '#26281c', a: '#6a5844', Q: '#34452f', g: '#1a2620', '.': '#34452f', T: '#1f3322', '~': '#173f52', '^': '#4a4d52', '=': '#6a6048', v: '#5e5440', H: '#5a3226', ':': '#435a55', '#': '#626e6a', '*': '#b8c4cc', C: '#2a2433', W: '#1a1622', B: '#6a5230', G: '#5a14c0', S: '#34452f', D: '#1a1a1a'};
+  const col = {b: '#26281c', a: '#6a5844', Q: '#34452f', g: '#1a2620', '.': '#34452f', T: '#1f3322', '~': '#173f52', '^': '#4a4d52', '=': '#6a6048', v: '#5e5440', H: '#5a3226', ':': '#435a55', '#': '#626e6a', '*': '#b8c4cc', C: '#2a2433', W: '#1a1622', B: '#6a5230', G: '#5a14c0', S: '#34452f', D: '#1a1a1a', P: '#173f52', L: '#5e5440', M: '#5e5440'};
   for (let y = 0; y < ST_H; y++) for (let x = 0; x < ST_W; x++) {
     const t = ST_MAP[y][x], px = x * ST_TILE, py = y * ST_TILE;
     g.fillStyle = col[t] || '#3f6b3a'; g.fillRect(px, py, ST_TILE, ST_TILE);
     g.fillStyle = 'rgba(0,0,0,.06)'; if ((x + y) % 2) g.fillRect(px, py, ST_TILE, ST_TILE);
     if (t === 'b') { if (R() < .35) { g.fillStyle = '#d8d0b8'; g.fillRect(px + R() * 50, py + R() * 50, 12, 3); g.fillRect(px + R() * 50, py + R() * 50, 3, 9); } if (R() < .3) { g.fillStyle = 'rgba(80,90,40,.5)'; g.beginPath(); g.ellipse(px + 32, py + 40, 22, 9, 0, 0, 7); g.fill(); } }
     if (t === 'a') { g.strokeStyle = 'rgba(40,30,20,.35)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px, py + 20 + R() * 20); g.quadraticCurveTo(px + 32, py + 10 + R() * 30, px + 64, py + 24 + R() * 20); g.stroke(); }
-    if (t === 'g') for (let i = 0; i < 2; i++) { const tx = px + 14 + R() * 36, ty = py + 14 + R() * 36; g.fillStyle = '#0d1410'; g.beginPath(); g.arc(tx, ty, 18, 0, 7); g.fill(); g.fillStyle = '#1e2a22'; g.beginPath(); g.arc(tx - 4, ty - 5, 10, 0, 7); g.fill(); }
-    if (t === 'T') for (let i = 0; i < 2; i++) { const tx = px + 14 + R() * 36, ty = py + 14 + R() * 36; g.fillStyle = '#1b3320'; g.beginPath(); g.arc(tx, ty, 16, 0, 7); g.fill(); g.fillStyle = '#2f5a34'; g.beginPath(); g.arc(tx - 4, ty - 5, 10, 0, 7); g.fill(); }
+    if (t === 'g' || t === 'T') for (let i = 0; i < 2; i++) { const tx = px + 14 + R() * 36, ty = py + 20 + R() * 36; g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(tx, ty + 4, 16, 6, 0, 0, 7); g.fill(); (ST.treesBy.world = ST.treesBy.world || []).push({x: tx, y: ty, s: .8 + R() * .5, dark: t === 'g', ph: R() * 6}); }
+    if (t === 'P') { g.fillStyle = '#6a4a2a'; for (let i = 0; i < 4; i++) g.fillRect(px + 2, py + 4 + i * 15, 60, 11); g.fillStyle = '#3a2a1a'; g.fillRect(px + 4, py + 56, 6, 8); g.fillRect(px + 54, py + 56, 6, 8); }
     if (t === '^') { g.fillStyle = '#7a8088'; g.beginPath(); g.moveTo(px + 6, py + 58); g.lineTo(px + 32, py + 8); g.lineTo(px + 58, py + 58); g.fill(); g.fillStyle = '#e8eef4'; g.beginPath(); g.moveTo(px + 24, py + 22); g.lineTo(px + 32, py + 8); g.lineTo(px + 40, py + 22); g.fill(); }
     if (t === '~') { g.strokeStyle = 'rgba(180,230,255,.25)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 8, py + 24 + R() * 16); g.lineTo(px + 30, py + 20 + R() * 16); g.stroke(); }
     if (t === 'h' || t === 'H' || t === 'I' || t === 'U' || t === 'K') { g.fillStyle = col.v; g.fillRect(px, py, ST_TILE, ST_TILE); }
@@ -5631,10 +5956,15 @@ function stDrawMapCanvas() {
     const t = ST_MAP[y][x]; if (!'HIUK'.includes(t)) continue;
     const px = x * ST_TILE, py = y * ST_TILE, W2 = ST_TILE * 2, wall = {H: '#a8946a', I: '#8a6a4a', U: '#6a6a7a', K: '#5a4a40'}[t], roof = {H: '#6a2a1e', I: '#3a4a2a', U: '#2a2a4a', K: '#2a2420'}[t];
     g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(px + 10, py + W2 - 14, W2 - 4, 12);
-    g.fillStyle = wall; g.fillRect(px + 8, py + 44, W2 - 16, W2 - 52);
-    g.fillStyle = 'rgba(0,0,0,.15)'; for (let i = 0; i < 4; i++) g.fillRect(px + 8, py + 60 + i * 16, W2 - 16, 2);
-    g.fillStyle = roof; g.beginPath(); g.moveTo(px - 4, py + 50); g.lineTo(px + ST_TILE, py - 30); g.lineTo(px + W2 + 4, py + 50); g.closePath(); g.fill();
-    g.fillStyle = 'rgba(255,255,255,.08)'; g.beginPath(); g.moveTo(px + ST_TILE, py - 30); g.lineTo(px + W2 + 4, py + 50); g.lineTo(px + ST_TILE + 10, py + 50); g.closePath(); g.fill();
+    g.fillStyle = '#3a2a1a'; g.fillRect(px + 92, py - 64, 16, 44); g.fillStyle = '#2a1e14'; g.fillRect(px + 89, py - 68, 22, 6); // chimney
+    g.fillStyle = wall; g.fillRect(px + 8, py + 10, W2 - 16, W2 - 18); // two storeys
+    g.fillStyle = 'rgba(0,0,0,.15)'; for (let i = 0; i < 7; i++) g.fillRect(px + 8, py + 22 + i * 15, W2 - 16, 2);
+    g.fillStyle = 'rgba(40,24,12,.6)'; g.fillRect(px + 8, py + 10, 6, W2 - 18); g.fillRect(px + W2 - 14, py + 10, 6, W2 - 18); g.fillRect(px + 8, py + 54, W2 - 16, 6); // timber frame
+    g.fillStyle = '#ffd08a'; g.globalAlpha = .8; g.fillRect(px + 22, py + 26, 16, 16); g.fillRect(px + W2 - 38, py + 26, 16, 16); g.globalAlpha = 1; // upstairs windows
+    g.fillStyle = roof; g.beginPath(); g.moveTo(px - 8, py + 18); g.lineTo(px + ST_TILE, py - 78); g.lineTo(px + W2 + 8, py + 18); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.08)'; g.beginPath(); g.moveTo(px + ST_TILE, py - 78); g.lineTo(px + W2 + 8, py + 18); g.lineTo(px + ST_TILE + 10, py + 18); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(0,0,0,.2)'; for (let i = 1; i < 5; i++) g.fillRect(px - 8 + i * 6, py + 18 - i * 19, W2 + 16 - i * 12, 2); // shingles
+    g.fillStyle = '#ffd08a'; g.globalAlpha = .7; g.beginPath(); g.arc(px + ST_TILE, py - 20, 8, 0, 7); g.fill(); g.globalAlpha = 1; // attic window
     g.fillStyle = '#2a1a10'; g.fillRect(px + ST_TILE - 12, py + W2 - 42, 24, 34); // door
     g.fillStyle = '#ffd08a'; g.globalAlpha = .85; g.fillRect(px + 20, py + 66, 18, 16); g.fillRect(px + W2 - 38, py + 66, 18, 16); g.globalAlpha = 1; // lit windows
     if (t === 'I' || t === 'U' || t === 'K') { // a hanging sign
@@ -5655,7 +5985,7 @@ function startStory(fresh) {
   document.body.classList.add('story'); $('story').hidden = false; $('stBattle').hidden = true; $('stMenu').hidden = true;
   const d = stData(); d.map = d.map || 'world'; if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
   if (d.map !== 'world') { const px = d.x, py = d.y; stEnterMap(d.map, 2, 2); d.x = px; d.y = py; }
-  ST.cam.x = d.x; ST.cam.y = d.y; musicStart();
+  ST.cam.x = d.x; ST.cam.y = d.y; musicStart(); musicForce(stMapSong());
   if (fresh) stSay([
     ['', `You wake face-down in cold ash. You remember dying. You remember nothing before it. Only a name, scratched into the hilt of your weapon: ${d.name}.`],
     ['', 'The sky is the color of a bruise. To the east, one village still keeps its fires lit. Everything else has gone hollow.'],
@@ -5665,7 +5995,7 @@ function startStory(fresh) {
   stHud();
 }
 function stLeave() {
-  stSave(); ST.on = false; document.body.classList.remove('story'); $('story').hidden = true;
+  stSave(); ST.on = false; document.body.classList.remove('story'); $('story').hidden = true; musicForce(null); try { speechSynthesis.cancel(); } catch (e) { /* no speech */ }
   reset(0); G.started = false; show('scr-main');
 }
 
@@ -5693,7 +6023,7 @@ function stShowLine() {
 
 // ---- the world: movement, interaction and random encounters
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
-const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (dun) return '#fbtkj'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
+const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (dun) return '#fbtkjH'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
   const d = stData(); if (key !== 'world') d.riding = false; d.map = key; d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
@@ -5705,8 +6035,8 @@ function stEnterMap(key, tx, ty) { // move between the world and a dungeon
   stHud(); stSave();
 }
 function stRest() { // an Ashen Shrine: heal fully, set your return point, and the dead in the dungeons rise again
-  const d = stData(), s = stStats(); d.hp = s.hp; d.mp = s.mp; d.shrine = {map: d.map, x: d.x, y: d.y + 40}; sfx('respawn');
-  stSay([['', 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']]);
+  const d = stData(), hurt = !!d.wounds; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; d.shrine = {map: d.map, x: d.x, y: d.y + 40}; sfx('respawn');
+  stSay([['', (hurt ? 'The ash fills your wounds and knits them closed. Even the lost arm grows back, grey and new. ' : '') + 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']]);
 }
 function stNearby() {
   const d = stData(), near = (tx, ty) => Math.hypot(d.x - (tx * ST_TILE + 32), d.y - (ty * ST_TILE + 32)) < 80, grid = stGrid();
@@ -5722,8 +6052,9 @@ function stNearby() {
     if (t === 'S') return {kind: 'shrine'};
     if (t === 'Q') return {kind: 'crystal', c: ST_CRYSTALS.find(c => c.x === x && c.y === y)};
     if (t === 'D') return {kind: 'door', key: ST_DOOR_AT[x + ',' + y] || 'crypt'};
+    if (t === 'P') return {kind: 'ship'};
     if (d.map === 'world') continue; // the rest only exist in dungeons ('B' is a bridge up top)
-    if (t === 'E') return {kind: 'exit'};
+    if (t === 'E') return {kind: ST_DUNGEONS[d.map].outdoor ? 'ship' : 'exit'};
     if (t === 'c' && !d.chests.includes(d.map + x + '_' + y)) return {kind: 'chest', c: {id: d.map + x + '_' + y, loot: (x + y) % 2 ? {potion: 2, gold: 40} : {ether: 1, gold: 60}}};
     if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) return {kind: 'boss', b: {id: ST_DUNGEONS[d.map].boss, ch: ST_BOSS_CH[ST_DUNGEONS[d.map].boss] || 0}};
   }
@@ -5745,6 +6076,11 @@ function stInteract(pre) {
   } else if (it.kind === 'gate' && d.ch >= 3) stSay([['', 'The seal shatters as the shards draw near. The gate of the Hollow Keep groans open onto a hall of cold torches.']], null, [['Enter the keep', () => stEnterMap('keep', 2, 2)], ['Not yet', null]]);
   else if (it.kind === 'gate') stSay([['', 'A seal of violet light bars the gate. It hums like a held breath. Two shards would break it. You carry ' + Math.max(0, d.ch - 1) + '.']]);
   else if (it.kind === 'shrine') stRest();
+  else if (it.kind === 'ship') {
+    if (d.map === 'world') stSay([['Captain Isolde', 'The Gull\'s Promise. Fastest hull in the Drowned Harbor, because she\'s the only one left.'], ['Captain Isolde', `Three days east lie the Brightwater Isles, where the Hollowing never reached. ${stPrice(30)} gold for passage.`]], null,
+      [[`Sail to the Brightwater Isles (${stPrice(30)} gold)`, () => { if (d.gold < stPrice(30)) return stSay([['Captain Isolde', 'No coin, no passage. The sea doesn\'t take favors.']]); d.gold -= stPrice(30); stSail('isles', 2, 10); }], ['Not today', null]]);
+    else stSay([['Captain Isolde', 'Back to the grey, then? Climb aboard. The return trip is on me.']], null, [['Sail home to Saltmere', () => stSail('world', 37, 16)], ['Stay a while', null]]);
+  }
   else if (it.kind === 'crystal') {
     d.crystals = d.crystals || [];
     const fresh = !d.crystals.includes(it.c.id); if (fresh) { d.crystals.push(it.c.id); sfx('blink'); }
@@ -5760,7 +6096,7 @@ function stInteract(pre) {
   else if (it.kind === 'boss') {
     const b = it.b;
     if (b.side ? !d.flags[b.side] : d.ch < b.ch) stSay([['', b.side ? 'A shape watches you from between the trees, then is simply not there. Something here is waiting for a reason to show itself.' : b.id === 'king' ? 'A voice like dry leaves: "Not yet, little candle. Bring me what they stole."' : 'Something vast sleeps here. Your hands will not stop shaking. Not yet.']]);
-    else stSay([['', b.id === 'witch' ? 'A woman sits among a ring of candles that burn black. "Another pilgrim," she sighs. "I always hope it will be someone new. It is always the same ash."' : b.id === 'brother' ? 'A knight kneels in the mud, sword planted, waiting. When he lifts his head, he has Liora\'s eyes, and nothing behind them.' : b.id === 'stalker' ? 'It steps out of the gloom wearing a hunter\'s coat and no face. It has been hunting Corin\'s family for three generations.' : b.id === 'golem' ? 'Bones crunch beneath a shape of fused stone. It was a guardian once. Now it only remembers how to crush. The Ember Shard burns in its chest.' : b.id === 'drake' ? 'Frozen corpses line the hall like offerings. Wings of rime unfold. The drake has not tasted warm blood in a century.' : 'The Hollow King does not rise. He unfolds. "Another candle," he whispers, "come to gutter in my hall."'],
+    else stSay([['', b.id === 'mara' ? 'A woman in a red coat lounges on a throne of lashed driftwood, a cutlass across her knees. "Oh good," she says. "Entertainment."' : b.id === 'witch' ? 'A woman sits among a ring of candles that burn black. "Another pilgrim," she sighs. "I always hope it will be someone new. It is always the same ash."' : b.id === 'brother' ? 'A knight kneels in the mud, sword planted, waiting. When he lifts his head, he has Liora\'s eyes, and nothing behind them.' : b.id === 'stalker' ? 'It steps out of the gloom wearing a hunter\'s coat and no face. It has been hunting Corin\'s family for three generations.' : b.id === 'golem' ? 'Bones crunch beneath a shape of fused stone. It was a guardian once. Now it only remembers how to crush. The Ember Shard burns in its chest.' : b.id === 'drake' ? 'Frozen corpses line the hall like offerings. Wings of rime unfold. The drake has not tasted warm blood in a century.' : 'The Hollow King does not rise. He unfolds. "Another candle," he whispers, "come to gutter in my hall."'],
       ['', 'There is no turning back once you draw steel.']], null, [['Draw steel', () => stStartBattle([b.id], b.id)], ['Not yet', null]]);
   } else if (it.kind === 'npc') stTalk(it.n.id);
 }
@@ -5776,7 +6112,7 @@ function stTalk(id) {
   } else if (id === 'merchant') stSay([['Pell the Merchant', `Coin is coin, even at the end of the world. Potions are ${stPrice(15)}, ethers ${stPrice(25)}.${stAlign() >= 3 ? ' A friend\'s price.' : stAlign() <= -3 ? ' Price goes up for your kind.' : ''} You have ${d.gold}. Don't die with it.`]], null,
     [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Steal a potion', () => stPickpocket('Pell the Merchant')], ['Leave', null]]);
   else if (id === 'inn') stSay([['Innkeeper Bree', 'A bed, a bowl of something hot, and a locked door. 10 gold. You will wake. Probably.']], null,
-    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
+    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
   else if (id === 'guild') {
     const B = d.bounty && ST_BOUNTIES.find(x => x.id === d.bounty.id);
     if (B && d.bounty.prog >= B.need) stSay([['Guildmaster Oskar', `"${B.name}." Done, and you're still breathing. That's rarer than you'd think. ${B.gold} gold, as promised.`]], () => { d.gold += B.gold; d.xp += B.xp; d.bounties = (d.bounties || 0) + 1; d.bounty = null; sfx('levelup'); });
@@ -5799,7 +6135,7 @@ function stTalk(id) {
      ['Grant her rest', () => { d.flags.hessaDone = true; d.flags.hessaRest = true; d.items.potion += 3; stSay([['', 'She thanks you. She asks you to make it quick. You do. You take her red scarf back to Thornwake.'], ['', 'It is the right thing, you tell yourself. You will tell yourself for a long time.']]); }]]);
   else if (id === 'hessaHome') stSay([['Hessa', 'Every morning I wake up and I still know her name. Every morning, that is a gift. Thank you.']]);
   else if (id === 'hask' || id === 'mira') stSay([[id === 'hask' ? 'Innkeeper Hask' : 'Innkeeper Mira', id === 'hask' ? 'Ravenhollow\'s only bed. The ravens are the only thing that sleeps sound here. 10 gold.' : 'Salt in the air keeps the dead away. Mostly. A room is 10 gold, and the stew is free if you don\'t ask what\'s in it.']], null,
-    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
+    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
   else if (id === 'ansel') stSay([['Brother Ansel', d.blessed ? 'The blessing holds. Go, before I lose my nerve and ask you to stay.' : 'The old gods are dead or sleeping. I pray anyway. For 40 gold, I will pray for you. It helps. I think.']], null,
     d.blessed ? null : [['Receive a blessing (40 gold, +3 magic)', () => { if (d.gold >= 40) { d.gold -= 40; d.blessed = true; sfx('shield'); } }], ['Leave', null]]);
   else if (id === 'corin') {
@@ -5875,6 +6211,13 @@ function stTalk(id) {
     d.flags.maudCoin ? null : [['Leave her 20 gold for bread', () => { if (d.gold < 20) return; d.gold -= 20; d.flags.maudCoin = true; stShift(1); }], ['Leave', null]]);
   else if (id === 'vesk') stSay([['Vesk the Thief', d.jailed > 1 ? 'Back again? We should get matching cells.' : 'First time in? I\'m here for stealing bread. Fourth time. The bread is better in here.'], ['Vesk the Thief', stAlign() <= -3 ? 'You\'ve the eyes of a real one. Rob the rich, and the watch\'ll find you. Rob the poor, and only the gods will. Choose your marks.' : 'Word of advice: guards come for you in any village. Pay the fine if you can. The cells are cheaper, but they cost you in other ways.']]);
   else if (id === 'holt') stSay([['Warden Holt', d.crime > 0 ? 'Stealing from the WARDEN\'S chest? In the WARDEN\'S jail? Get out. I can\'t afford to feed you twice.' : 'Your sentence is served. The door\'s there. Use it.']]);
+  else if (id === 'oona') {
+    if (d.flags.mara && !d.flags.oonaPaid) stSay([['Harbormaster Oona', 'Mara\'s flag is on the bottom of the bay where it belongs. The nets come up full for the first time in a year.'], ['Harbormaster Oona', 'The harbor owes you. 200 gold, and every captain in Halcyon will drink to your name.']], () => { d.flags.oonaPaid = true; d.gold += 200; PROF.crowns += 100; stShift(1); sfx('levelup'); stCallout('+200 gold · +100 Crowns', '#ffd75e'); });
+    else if (d.flags.mara) stSay([['Harbormaster Oona', 'Sun on the water, fish in the nets. You did that. Rest here as long as you like.']]);
+    else stSay([['Harbormaster Oona', 'Welcome to Port Halcyon. The Hollowing never crossed the sea. Here the sun still means something.'], ['Harbormaster Oona', 'But Mara the Corsair Queen holds the east isle. She takes our catch, and sometimes our children. Bring down her flag and the harbor will pay.']]);
+  }
+  else if (id === 'kesh') stSay([['Kesh the Trader', `Island goods! Potions ${stPrice(12)}, ethers ${stPrice(20)}. Cheaper than the mainland, because nobody here is dying.`]], null,
+    [[`Buy potion (${stPrice(12)})`, () => { if (d.gold >= stPrice(12)) { d.gold -= stPrice(12); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(20)})`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.items.ether++; sfx('pickup'); } }], ['Steal a potion', () => stPickpocket('Kesh the Trader')], ['Leave', null]]);
   else if (id === 'liora') stSay([['Liora', 'I watched the last stranger walk into the Thornwood. I found his sword a week later. Prove you are worth following.']]);
 }
 function stHunters(dt) { // dungeon enemies wander home, and charge when they see you
@@ -5883,7 +6226,7 @@ function stHunters(dt) { // dungeon enemies wander home, and charge when they se
     if (!f.alive) continue;
     const dist = Math.hypot(d.x - f.x, d.y - f.y), tx = dist < 300 ? d.x : f.home[0], ty = dist < 300 ? d.y : f.home[1], a = Math.atan2(ty - f.y, tx - f.x);
     if (Math.hypot(tx - f.x, ty - f.y) > 4) { const nx = f.x + Math.cos(a) * 95 * dt, ny = f.y + Math.sin(a) * 95 * dt; if (!stBlocked(nx, f.y)) f.x = nx; if (!stBlocked(f.x, ny)) f.y = ny; f.walk = (f.walk || 0) + 3; f.face = Math.cos(a) < 0 ? Math.PI : 0; }
-    if (dist < 44 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : d.map === 'keep' ? 'C' : d.map === 'duskwatch' ? 'a' : ':'); return; }
+    if (dist < 44 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : d.map === 'keep' ? 'C' : d.map === 'duskwatch' ? 'a' : d.map === 'isles' ? ',' : ':'); return; }
   }
 }
 function stWalk(dt) {
@@ -5921,17 +6264,22 @@ function stStartBattle(foes, bossId, tile) {
   ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
     foes: foes.map((k, i) => { const F = ST_FOES[k]; const hp = Math.round(F.hp * (1 + lvl)); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl), id: i}); }),
     ally: d.flags.liora ? {name: 'Liora', hp: 80 + 12 * d.lv, maxHp: 80 + 12 * d.lv, atk: 10 + 2 * d.lv + (d.flags.lioraOath ? 6 : 0)} : null};
-  ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true;
-  STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = [];
-  sfx(bossId ? 'roar' : 'swing');
+  ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
+  STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
+  sfx(bossId ? 'roar' : 'swing'); musicForce(bossId ? SONG_CROWN : SONG_STEEL);
   stLog(bossId ? `${ST_FOES[foes[0]].name} blocks your way!` : 'Enemies appear: ' + ST.battle.foes.map(f => f.name).join(', ') + '.');
-  stRenderBattle();
+  // a cinematic opening: letterbox bars, a title card, and a spoken line; you act when it ends
+  const I = ST_INTRO[bossId], F0 = ST_FOES[foes[0]];
+  STFX.intro = {t: 0, dur: bossId ? 2.8 : 1.5, boss: !!bossId, title: bossId ? F0.name : ST.battle.foes.length > 1 ? 'AMBUSH' : F0.name, sub: I ? I[0] : ST.battle.foes.map(f => f.name).join(' · '), color: F0.color || '#ff5a3a'};
+  ST.battle.turn = 'intro'; stRenderBattle();
+  if (I) setTimeout(() => stVoice(I[1], 'boss'), 500); else if (ST.battle.ally && Math.random() < .5) setTimeout(() => stVoice(ST_LIORA_LINES[Math.floor(Math.random() * ST_LIORA_LINES.length)], 'a'), 300);
+  setTimeout(() => { if (ST.battle && ST.battle.turn === 'intro') { ST.battle.turn = 'player'; stRenderBattle(); } }, STFX.intro.dur * 1000);
 }
 // Battle animation: who is 'p' (you), 'a' (Liora) or a foe index. Positions are refreshed every frame.
-const STFX = {anims: [], shots: [], nums: [], parts: [], pos: {}};
+const STFX = {anims: [], shots: [], nums: [], parts: [], pos: {}, limbs: [], beams: [], slow: 0};
 const stPos = who => STFX.pos[who] || [cw / 2, ch / 2];
 function stAnim(who, kind = 'lunge', dur = .32) { STFX.anims.push({who, kind, t: 0, dur}); }
-function stNum(who, text, color = '#fff3c9', big) { const [x, y] = stPos(who); STFX.nums.push({x: x + rand(-14, 14), y: y - 90, text: String(text), color, t: 0, big}); }
+function stNum(who, text, color = '#fff3c9', big, dy = 0) { const [x, y] = stPos(who); STFX.nums.push({x: x + rand(-14, 14), y: y - 90 - dy, text: String(text), color, t: 0, big}); }
 function stBurst(who, color, n = 14, spread = 160) { const [x, y] = stPos(who); for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = rand(40, spread); STFX.parts.push({x, y: y - 50, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, t: 0, life: rand(.35, .7), color, r: rand(2, 5)}); } }
 function stShot(from, to, color, size = 10, onHit) { STFX.shots.push({from, to, t: 0, dur: .32, color, size, onHit}); }
 function stFxOffset(who) { // lunges toward the other side and back, hurt shakes
@@ -5944,7 +6292,35 @@ function stFxOffset(who) { // lunges toward the other side and back, hurt shakes
   }
   return [ox, oy];
 }
+function stIntroDraw(dt) {
+  const I = STFX.intro; if (!I) return; I.t += dt; if (I.t > I.dur + .4) { STFX.intro = null; return; }
+  const inK = Math.min(1, I.t / .35), outK = Math.max(0, (I.t - I.dur) / .4), k = inK * (1 - outK), bar = ch * .13 * k;
+  ctx.save(); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, cw, bar); ctx.fillRect(0, ch - bar, cw, bar);
+  const slide = (1 - Math.min(1, I.t / .5)) * cw * .6 - outK * cw, y = ch * .42;
+  ctx.globalAlpha = k; ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(0, y - 52, cw, 92);
+  ctx.fillStyle = I.color; ctx.fillRect(0, y - 52, cw, 3); ctx.fillRect(0, y + 37, cw, 3);
+  ctx.textAlign = 'center'; ctx.shadowColor = I.color; ctx.shadowBlur = 30; ctx.fillStyle = '#fff3e0';
+  ctx.font = `${Math.round(Math.min(cw / (I.boss ? 16 : 20), I.boss ? 54 : 40))}px "Marcellus SC", Georgia, serif`; ctx.fillText(I.title, cw / 2 + slide, y + 4);
+  ctx.shadowBlur = 0; ctx.font = '600 16px "Barlow Semi Condensed", sans-serif'; ctx.fillStyle = '#d8cfc0'; ctx.fillText(I.sub, cw / 2 - slide, y + 28);
+  if (I.boss && I.t > .6) { ctx.font = '700 22px "Barlow Semi Condensed", sans-serif'; ctx.fillStyle = '#ff5a3a'; ctx.globalAlpha = k * (.6 + Math.sin(I.t * 10) * .4); ctx.fillText('BOSS', cw / 2, y - 64); }
+  ctx.restore();
+}
 function stFxDraw(dt) {
+  for (const bm of STFX.beams) { // a thick beam of light from caster to target
+    bm.t += dt; const k = bm.t / bm.dur, [x0, y0] = stPos(bm.from), [x1, y1] = stPos(bm.to), w = (k < .15 ? k / .15 : Math.max(0, 1 - (k - .15) / .85)) * 30 + 2;
+    ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = bm.color; ctx.shadowBlur = 40; ctx.strokeStyle = bm.color; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(x0 + 20, y0 - 60); ctx.lineTo(x1, y1 - 50); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = w * .35; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x1, y1 - 50, w * 1.3, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(x0 + 20, y0 - 60, w * .8, 0, 7); ctx.fill(); ctx.restore();
+    for (let i = 0; i < 3; i++) { const q = Math.random(); STFX.parts.push({x: x0 + 20 + (x1 - x0 - 20) * q, y: y0 - 60 + (y1 - y0 + 10) * q, vx: rand(-60, 60), vy: rand(-90, 20), t: 0, life: .4, color: bm.color, r: rand(2, 4)}); }
+    if (k > .25 && !bm.hit) { bm.hit = true; ST.hurt = .3; if (bm.onHit) bm.onHit(); }
+  }
+  STFX.beams = STFX.beams.filter(bm => bm.t < bm.dur);
+  for (const L of STFX.limbs) { // severed limbs tumble and stay where they land
+    if (!L.down) { L.t = (L.t || 0) + dt; L.x += L.vx * dt; L.y += L.vy * dt; L.vy += 700 * dt; L.rot += L.vr * dt; if (L.y >= L.gy && L.vy > 0) { L.y = L.gy; L.down = true; STFX.pools.push({x: L.x, y: L.y + 4, r: 14, rot: 0}); } else if (Math.random() < .6) STFX.parts.push({x: L.x, y: L.y, vx: 0, vy: 0, t: 0, life: .5, color: '#a3121a', r: 2.5}); }
+    ctx.save(); ctx.translate(L.x, L.y); ctx.rotate(L.down ? 1.5 : L.rot); ctx.fillStyle = L.color; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-18, -5, 36, 10, 5) : ctx.rect(-18, -5, 36, 10); ctx.fill();
+    ctx.fillStyle = '#e0c8b0'; ctx.beginPath(); ctx.arc(-18, 0, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#7a0008'; ctx.beginPath(); ctx.arc(18, 0, 5.5, 0, 7); ctx.fill(); ctx.restore();
+  }
   for (const a of STFX.anims) a.t += dt; STFX.anims = STFX.anims.filter(a => a.t < a.dur);
   for (const sh of STFX.shots) {
     sh.t += dt; const k = Math.min(1, sh.t / sh.dur), [x0, y0] = stPos(sh.from), [x1, y1] = stPos(sh.to);
@@ -5967,6 +6343,36 @@ function stFxDraw(dt) {
 }
 // big per-move effects: slash arcs, falling lightning, arrow rain, poison clouds, light pillars, shield bubbles
 function stEffect(kind, who, color) { STFX.effects = STFX.effects || []; STFX.effects.push({kind, who, color, t: 0, dur: kind === 'pillar' || kind === 'aura' ? .7 : .45}); }
+function stWound(who, u, kind, crit, rk, beam) { // u.w: {bleed, maim, hole}; the player's wounds live in the save
+  const w = u.w || (u.w = {}), chance = beam ? .55 : kind === 'mag' ? (crit ? .3 : .05) : .14 + .1 * rk + (crit ? .4 : 0);
+  if (Math.random() > chance) return;
+  const [x, y] = stPos(who), side = who === 'p' || who === 'a' ? 1 : -1;
+  if (!beam && crit && !w.maim && Math.random() < .5) {
+    w.maim = true; if (who !== 'p') u.atk *= .7;
+    STFX.limbs.push({x: x + side * 14, y: y - 55, vx: -side * rand(120, 220), vy: -rand(220, 320), rot: 0, vr: rand(-12, 12), gy: y + rand(6, 18), color: u.color || '#9a7a6a'});
+    stGore(who, 30, true); stNum(who, 'SEVERED', '#ff3a3a', true, 40); sfx('crack');
+  } else if ((beam || crit) && !w.hole) { w.hole = true; if (who !== 'p') u.def *= .6; stGore(who, 24, true); stNum(who, 'PIERCED', '#ff5a3a', true, 40); }
+  else { w.bleed = 3; stNum(who, 'Bleeding', '#ff6a6a', false, 40); }
+}
+function stWoundDraw(w, x, y, sc, side, tall, now) { // a hole through the chest, a spurting stump, dripping blood
+  if (!w) return; const ty = y - (tall ? 31 : 26) * sc;
+  if (w.hole) {
+    const r = 9 * sc, g = ctx.createRadialGradient(x, ty, 1, x, ty, r * 1.7);
+    g.addColorStop(0, '#000'); g.addColorStop(.5, '#14000a'); g.addColorStop(.78, '#8a0a12'); g.addColorStop(1, 'rgba(138,10,18,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, ty, r * 1.6, r * 1.9, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#7a0a10'; ctx.fillRect(x - 2, ty + r, 4, (6 + (now * 18) % 16) * sc);
+  }
+  if (w.maim) {
+    const sx = x + side * 13 * sc, sy = y - (tall ? 44 : 32) * sc;
+    ctx.fillStyle = '#5a0008'; ctx.beginPath(); ctx.arc(sx, sy, 6 * sc, 0, 7); ctx.fill(); ctx.fillStyle = '#d8c8b8'; ctx.beginPath(); ctx.arc(sx, sy, 2 * sc, 0, 7); ctx.fill();
+    if (Math.random() < .4) STFX.parts.push({x: sx, y: sy, vx: side * rand(30, 120), vy: -rand(30, 150), t: 0, life: rand(.4, .7), color: '#a3121a', r: rand(1.5, 3.5)});
+  }
+  if (w.bleed) {
+    ctx.fillStyle = 'rgba(140,8,14,.75)'; ctx.fillRect(x - 6 * sc, ty - 4 * sc, 3 * sc, 20 * sc); ctx.fillRect(x + 4 * sc, ty + 2 * sc, 2 * sc, 14 * sc);
+    if (Math.random() < .3) STFX.parts.push({x: x + rand(-8, 8) * sc, y: ty + 10 * sc, vx: 0, vy: 20, t: 0, life: .6, color: '#8a0a10', r: 2});
+  }
+}
+function stBeam(from, to, color, onHit) { STFX.beams.push({from, to, color, t: 0, dur: .6, onHit}); sfx('kiblast'); }
 function stGore(who, n = 10, pool) { // blood spray, and a pool on the ground
   const [x, y] = stPos(who);
   for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + rand(-1.4, 1.4), v = rand(80, 260); STFX.parts.push({x, y: y - 45, vx: Math.cos(a) * v + (who === 'p' || who === 'a' ? -60 : 60), vy: Math.sin(a) * v, t: 0, life: rand(.5, .9), color: Math.random() < .5 ? '#a3121a' : '#6a0a0f', r: rand(2, 4.5)}); }
@@ -5987,6 +6393,27 @@ function stEffectsDraw(dt) {
   }
   ctx.globalAlpha = 1; STFX.effects = L.filter(e => e.t < e.dur);
 }
+// Voice lines, spoken by the browser. Each speaker has its own pitch and pace.
+const ST_VOICE = {p: [1, 1.05], a: [1.4, 1.08], boss: [.25, .78], foe: [.6, .95], ann: [.45, .82]};
+function stVoice(text, who = 'foe') {
+  if (PROF.voiceOff || music.vol <= 0 || !window.speechSynthesis) return;
+  try {
+    const u = new SpeechSynthesisUtterance(text), [pitch, rate] = ST_VOICE[who] || ST_VOICE.foe, vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+    u.pitch = pitch; u.rate = rate; u.volume = Math.min(1, music.vol + .2); if (vs.length) u.voice = vs[(who === 'a' ? 1 : who === 'boss' ? 2 : 0) % vs.length];
+    if (speechSynthesis.speaking && who !== 'ann') speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch (e) { /* speech unavailable */ }
+}
+const ST_INTRO = { // boss title cards and their opening words
+  king: ['Lord of Hollows', 'Kneel, little candle. Kneel, and be hollow.'],
+  golem: ['Guardian of the Ember Shard', 'Intruder. Return. To. Stone.'],
+  drake: ['Wyrm of the Frozen Heart', 'Your warmth. I will drink it.'],
+  stalker: ['The Nameless Hunter', 'I know your name. I wore it once.'],
+  brother: ['The Last of the Old Company', 'Sister. Forgive me. I cannot stop.'],
+  mara: ['Queen of the Brightwater Sea', 'Another hero come to drown? Lovely. The sharks are hungry.'],
+  witch: ['The Ashen Witch of Duskwatch', 'Burn with me, pilgrim. It is warmer than it looks.'],
+};
+const ST_LIORA_LINES = ['Stay close!', 'Watch my back.', 'Another one for the ash.', 'Together, then.'];
 // Named moves: [name, effect, damage multiplier, color, extra]. extra: all (hits you and Liora), heal, guard, slow
 const ST_FOE_MOVES = {
   king: [['Crown of Ash', 'zap', 1.9, '#b06bff'], ['Hollow Reign', 'cloud', 1.3, '#7a1fff', 'all'], ['Benediction of Rot', 'pillar', 0, '#7a1fff', 'heal']],
@@ -5996,6 +6423,8 @@ const ST_FOE_MOVES = {
   brother: [['Oathbreaker', 'slash', 1.8, '#9fc4ff'], ['Last Stand', 'aura', 0, '#9fc4ff', 'guard']],
   witch: [['Pyre of Sorrow', 'shards', 1.7, '#ff5a1f'], ['Ashen Hex', 'cloud', 1.2, '#ff7a2a', 'all'], ['Cinder Rebirth', 'pillar', 0, '#ffb35a', 'heal']],
   cultist: [['Hex Bolt', 'zap', 1.4, '#b06bff'], ['Drink the Light', 'tendril', 1.2, '#7a1fff']],
+  mara: [['Broadside', 'shards', 1.6, '#ffb35a', 'all'], ['Cutlass Flurry', 'slash', 1.9, '#ffffff'], ['Rum and Thunder', 'aura', 0, '#ffd75e', 'guard']],
+  corsair: [['Powder Shot', 'zap', 1.4, '#ffb35a']],
 };
 function stCallout(text, color) { STFX.callout = {text, color, t: 0}; }
 function stCalloutDraw(dt) {
@@ -6019,10 +6448,10 @@ function stRenderBattle(picking) {
     if (maxMp) { r.appendChild(el('small', '', 'MP')); const mb = el('div', 'bar mp'), mi = el('i'), mt = el('span', '', `${Math.round(mp)}/${maxMp}`); mi.style.width = mp / maxMp * 100 + '%'; mb.append(mi, mt); r.appendChild(mb); }
     party.appendChild(r);
   };
-  row(d.name, d.hp, s.hp, d.mp, s.mp); if (b.ally) row('Liora', b.ally.hp, b.ally.maxHp);
+  row(d.name + (d.wounds ? ' · ' + [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed', d.wounds.hole && 'Pierced'].filter(Boolean).join(' · ') : ''), d.hp, s.hp, d.mp, s.mp); if (b.ally) row('Liora', b.ally.hp, b.ally.maxHp);
   const act = $('stActions'); act.innerHTML = '';
   if (b.over) return;
-  if (b.turn !== 'player') { act.appendChild(el('small', '', 'Enemy turn…')); return; }
+  if (b.turn !== 'player') { act.appendChild(el('small', '', b.turn === 'intro' ? '…' : 'Enemy turn…')); return; }
   const r1 = el('div', 'row');
   const btn = (label, fn, dis) => { const x = el('button', '', label); x.disabled = !!dis; x.addEventListener('click', fn); r1.appendChild(x); return x; };
   if (picking) { // choose a target, then run the action on it
@@ -6031,7 +6460,7 @@ function stRenderBattle(picking) {
     btn('Back', () => stRenderBattle());
   } else if (ST.sub === 'skills') {
     act.appendChild(el('small', '', 'Skills'));
-    for (const id of d.skills) { const S = ST_SKILLS[id]; btn(`${S.name} · ${S.mp} MP`, () => stUseSkill(id), d.mp < S.mp).title = S.desc; }
+    for (const id of d.skills) { const S = ST_SKILLS[id]; btn(`${stSkName(id)} ${'★'.repeat(stRank(id))} · ${S.mp} MP`, () => stUseSkill(id), d.mp < S.mp).title = `${S.desc} Mastery: ${stMasteryText(id)}.` + (ST_BEAMS[id] ? ' Evolves into a beam that can obliterate.' : ''); }
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else if (ST.sub === 'items') {
     act.appendChild(el('small', '', 'Items'));
@@ -6039,7 +6468,7 @@ function stRenderBattle(picking) {
     btn(`Ether ×${d.items.ether} (+30 MP)`, () => stItem('ether'), !d.items.ether);
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else {
-    btn('Attack', () => stPick(f => stPlayerHit(f, s.atk * (b.buffs.rally ? 1.5 : 1), 'phys')));
+    btn(`${stSkName('attack')} ${'★'.repeat(stRank('attack'))}`, () => stPick(f => stPlayerHit(f, s.atk * (b.buffs.rally ? 1.5 : 1), 'phys'))).title = 'Basic attack. Mastery: ' + stMasteryText('attack');
     btn('Skills', () => { ST.sub = 'skills'; stRenderBattle(); });
     btn('Items', () => { ST.sub = 'items'; stRenderBattle(); });
     btn('Defend', () => { b.defending = true; stLog(`${d.name} braces for the next attack.`); stEndTurn(); });
@@ -6050,37 +6479,51 @@ function stRenderBattle(picking) {
 }
 function stPick(fn) { const alive = ST.battle.foes.filter(f => f.hp > 0); if (alive.length === 1) fn(alive[0]); else stRenderBattle(fn); }
 function stPlayerHit(f, base, kind, extra, color) {
-  const dmg0 = stDmg(base, kind === 'mag' ? f.def * .5 : f.def), dmg = f.guard ? Math.round(dmg0 / 2) : dmg0, crit = Math.random() < .12, total = crit ? Math.round(dmg * 1.5) : dmg;
+  const sk = ST.curSkill || 'attack', rk = stRank(sk), beam = kind === 'mag' && rk >= 2 && ST_BEAMS[sk];
+  base *= 1 + .2 * rk; stMaster(sk);
+  const dmg0 = stDmg(base, kind === 'mag' ? f.def * .5 : f.def), dmg = f.guard ? Math.round(dmg0 / 2) : dmg0;
+  const crit = Math.random() < .08 + .06 * rk + (f.w && f.w.hole ? .1 : 0), total = crit ? Math.round(dmg * (1.5 + .4 * rk)) : dmg; // grinding a move makes its criticals brutal
   const land = () => {
+    const before = f.hp; ST.curSkill = null;
     f.hp -= total; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact');
-    const sk = ST.curSkill; ST.curSkill = null;
     stEffect(SK_FX[sk] || 'slash', f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'));
-    if (kind !== 'mag' || sk === 'drain') stGore(f.id, crit ? 22 : 12, f.hp <= 0 ? true : undefined);
-    if (f.hp <= 0) stGore(f.id, 30, true);
+    const oblit = beam && f.hp <= 0 && (total >= before + f.maxHp * .25 || total >= f.maxHp * .55);
+    const lethal = !oblit && f.hp <= 0 && (crit || total >= before + f.maxHp * .3);
+    if (oblit) { f.oblit = true; stCallout('OBLITERATED', color || '#fff3c9'); stVoice('Obliterated!', 'ann'); STFX.pools.push({x: stPos(f.id)[0], y: stPos(f.id)[1] + 8, r: 40, rot: 0, scorch: true}); STFX.slow = .5; }
+    else {
+      if (kind !== 'mag' || sk === 'drain') stGore(f.id, crit ? 22 : 12, f.hp <= 0 ? true : undefined);
+      if (f.hp <= 0) stGore(f.id, 30, true);
+      if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stVoice('Lethal blow!', 'ann'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; if (!f.w.maim) stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
+      else if (f.hp > 0) stWound(f.id, f, kind, crit, rk, beam);
+    }
     stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? total + '!' : total, crit ? '#ffd75e' : '#ffffff', crit);
     if (crit) ST.hurt = .2;
     if (extra) extra(f, total);
-    stLog(`${f.name} takes ${total} damage.` + (crit ? ' Critical hit!' : '') + (f.hp <= 0 ? ` ${f.name} is defeated!` : ''));
+    stLog(`${f.name} takes ${total} damage.` + (crit ? ' Critical hit!' : '') + (oblit ? ` ${f.name} is obliterated!` : lethal ? ` A lethal blow! ${f.name} is cut down!` : f.hp <= 0 ? ` ${f.name} is defeated!` : ''));
     ST.sub = null; setTimeout(stEndTurn, 250);
   };
   ST.battle.turn = 'anim'; stRenderBattle();
-  if (kind === 'mag') { stAnim('p', 'cast', .3); stShot('p', f.id, color || '#c79bff', 11, land); }
+  if (beam) { stAnim('p', 'cast', .6); stBeam('p', f.id, color || '#c79bff', land); }
+  else if (kind === 'mag') { stAnim('p', 'cast', .3); stShot('p', f.id, color || '#c79bff', 11, land); }
   else { stAnim('p', 'lunge', .32); setTimeout(land, 160); }
 }
 function stUseSkill(id) {
   const S = ST_SKILLS[id], d = stData(), s = stStats(), b = ST.battle;
   if (d.mp < S.mp) return;
-  const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag : s.atk * (b.buffs.rally ? 1.5 : 1)) * (S.mult || 1);
+  const nm = stSkName(id); stCallout(`${d.name}: "${nm}!"`, SK_COLOR[id] || '#ffe9a8'); stVoice(nm + '!', 'p');
+  const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag : s.atk * (b.buffs.rally ? 1.5 : 1)) * (S.mult || 1) * (S.kind === 'heal' || S.all ? 1 + .2 * stRank(id) : 1);
+  if (S.kind === 'heal' || S.kind === 'buff' || S.all) stMaster(id);
   if (S.kind === 'heal') {
     d.mp -= S.mp; const h = Math.round(power + 10); d.hp = Math.min(s.hp, d.hp + h); if (b.ally) { b.ally.hp = Math.min(b.ally.maxHp, b.ally.hp + h * .7); stNum('a', '+' + Math.round(h * .7), '#6be08a'); stBurst('a', '#6be08a', 12); }
-    stAnim('p', 'cast'); stEffect('pillar', 'p', '#fff3c9'); stBurst('p', '#6be08a', 22); stNum('p', '+' + h, '#6be08a', true); sfx('shield'); stLog(`${S.name} restores ${h} health.`); ST.sub = null; return setTimeout(stEndTurn, 450);
+    if (d.wounds && stRank(id) >= 2) d.wounds = null; // Sacred Light and Rebirth close wounds
+    stAnim('p', 'cast'); stEffect('pillar', 'p', '#fff3c9'); stBurst('p', '#6be08a', 22); stNum('p', '+' + h, '#6be08a', true); sfx('shield'); stLog(`${nm} restores ${h} health.`); ST.sub = null; return setTimeout(stEndTurn, 450);
   }
   if (S.kind === 'buff') { d.mp -= S.mp; b.buffs[S.buff] = S.buff === 'guard' ? 2 : 3; stAnim('p', 'cast'); stEffect('aura', 'p', S.buff === 'guard' ? '#7fd1c7' : '#ff5a1f'); stBurst('p', S.buff === 'guard' ? '#7fd1c7' : '#ff6a4d', 22); stNum('p', S.buff === 'guard' ? 'Defense up' : 'Attack up', '#ffd75e'); sfx('shield'); stLog(S.buff === 'guard' ? 'Your defense doubles!' : 'Your attack surges!'); ST.sub = null; return setTimeout(stEndTurn, 450); }
   if (S.all) {
     d.mp -= S.mp; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
     for (const f of b.foes) if (f.hp > 0) {
       const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def); total += dm; left++;
-      stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { f.hp -= dm; f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff'); if (S.kind !== 'mag') stGore(f.id, 8); stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
+      stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { f.hp -= dm; f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff'); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
     }
     sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
@@ -6091,7 +6534,7 @@ function stUseSkill(id) {
 }
 function stItem(k) {
   const d = stData(), s = stStats(); if (!d.items[k]) return;
-  d.items[k]--; if (k === 'potion') d.hp = Math.min(s.hp, d.hp + 60); else d.mp = Math.min(s.mp, d.mp + 30);
+  d.items[k]--; if (k === 'potion') { d.hp = Math.min(s.hp, d.hp + 60); if (d.wounds) d.wounds.bleed = 0; } else d.mp = Math.min(s.mp, d.mp + 30);
   stBurst('p', k === 'potion' ? '#e0405a' : '#7aa9ff', 16); stNum('p', k === 'potion' ? '+60' : '+30 MP', k === 'potion' ? '#6be08a' : '#9fc0ff');
   sfx('pickup'); stLog(k === 'potion' ? 'You drink a potion. +60 HP.' : 'You drink an ether. +30 MP.'); ST.sub = null; stEndTurn();
 }
@@ -6108,6 +6551,10 @@ function stEnemyPhase() {
     else if (t) { const dm = stDmg(b.ally.atk * 1.2, t.def); stAnim('a', 'lunge'); setTimeout(() => { t.hp -= dm; t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(t.id, 'hurt'); stBurst(t.id, '#9fd8ff', 12); stNum(t.id, dm); sfx('impact'); }, 160); stLog(`Liora strikes ${t.name} for ${dm}.`); }
     if (b.foes.every(f => f.hp <= 0)) return setTimeout(() => stEndBattle('won'), 450);
   }
+  if (d.wounds && d.wounds.bleed) { // your own bleeding
+    const bd = Math.max(3, Math.round(s.hp * .04)); d.hp -= bd; d.wounds.bleed--; stNum('p', bd, '#ff4a4a'); stGore('p', 6, false); stLog(`You bleed for ${bd}.`);
+    if (d.hp <= 0) return setTimeout(() => stEndBattle('lost'), 500);
+  }
   const alive = b.foes.filter(f => f.hp > 0); let i = 0;
   const next = () => {
     if (!ST.battle || b.over) return;
@@ -6118,12 +6565,13 @@ function stEnemyPhase() {
     }
     const f = alive[i++];
     if (f.hp <= 0) return next();
+    if (f.w && f.w.bleed) { const bd = Math.max(3, Math.round(f.maxHp * .05)); f.hp -= bd; f.w.bleed--; stNum(f.id, bd, '#ff4a4a'); stGore(f.id, 6, false); if (f.hp <= 0) { f.deadT = 0; stLog(`${f.name} bleeds out.`); if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
     if (f.burn || f.poison) { const dot = Math.round(f.maxHp * .06); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
     if (f.frozen) { f.frozen = 0; stLog(`${f.name} is frozen solid and can't move!`); return setTimeout(next, 600); }
     const moves = ST_FOE_MOVES[f.key];
     if (moves && Math.random() < (f.boss ? .45 : .5)) { // a named move: called out, then it lands
       const [mname, fx, mult, col, extra] = moves[Math.floor(Math.random() * moves.length)];
-      stCallout(`${f.name.split(',')[0]}: "${mname}!"`, col); stLog(`${f.name} calls out: ${mname}!`); sfx(f.boss ? 'roar' : 'zap'); stAnim(f.id, 'cast', .5);
+      stCallout(`${f.name.split(',')[0]}: "${mname}!"`, col); stVoice(mname + '!', f.boss ? 'boss' : 'foe'); stLog(`${f.name} calls out: ${mname}!`); sfx(f.boss ? 'roar' : 'zap'); stAnim(f.id, 'cast', .5);
       setTimeout(() => {
         if (!ST.battle || b.over) return;
         if (extra === 'heal') { const h = Math.round(f.maxHp * .14); f.hp = Math.min(f.maxHp, f.hp + h); stEffect(fx, f.id, col); stNum(f.id, '+' + h, '#6be08a', true); }
@@ -6134,6 +6582,7 @@ function stEnemyPhase() {
             let dm = stDmg(f.atk * mult, v === 'p' ? s.def * (b.buffs.guard ? 2 : 1) : 6); if (v === 'p' && b.defending) dm = Math.round(dm / 2);
             if (v === 'p') d.hp -= dm; else b.ally.hp -= dm;
             stEffect(fx, v, col); stAnim(v, 'hurt', .4); stNum(v, dm, '#ff7a66', true); stGore(v, 14, true);
+            if (v === 'p' && Math.random() < .2) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
             if (extra === 'slow' && v === 'p') b.buffs.guard = 0;
           }
           ST.hurt = .4; sfx('boom');
@@ -6148,7 +6597,12 @@ function stEnemyPhase() {
     stAnim(f.id, 'lunge', big ? .45 : .32);
     const victim = hitAlly ? 'a' : 'p';
     if (hitAlly) { const dm = stDmg(base, 6); b.ally.hp -= dm; stNum('a', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack on' : 'hits'} Liora for ${dm}.`); }
-    else { let dm = stDmg(base, s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); d.hp -= dm; stNum('p', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack! You take' : 'hits you for'} ${dm}${big ? ' damage' : ''}.`); }
+    else {
+      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); d.hp -= dm; stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
+      stLog(`${f.name} ${fcrit ? 'lands a brutal critical! You take' : big ? 'unleashes a fierce attack! You take' : 'hits you for'} ${dm}${big || fcrit ? ' damage' : ''}.`);
+      if (d.hp <= 0 && fcrit) { stCallout('LETHAL BLOW', '#ff2a2a'); stVoice('Lethal blow!', 'ann'); stGore('p', 50, true); STFX.slow = .7; }
+      else if (fcrit || (big && Math.random() < .4)) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
+    }
     stAnim(victim, 'hurt', .35); stBurst(victim, big ? '#ff5a1f' : '#e0405a', big ? 10 : 4); stGore(victim, big ? 20 : 9, big ? true : undefined); if (big) stEffect('slash', victim, '#ff5a1f');
     ST.hurt = big ? .45 : .25; sfx(big ? 'boom' : 'hurt');
     if (d.hp <= 0) return setTimeout(() => stEndBattle('lost'), 500);
@@ -6158,12 +6612,12 @@ function stEnemyPhase() {
 }
 function stEndBattle(result) {
   const b = ST.battle, d = stData(); b.over = true;
-  const done = () => { $('stBattle').hidden = true; ST.battle = null; ST.mode = 'walk'; stHud(); stSave(); };
+  const done = () => { $('stBattle').hidden = true; ST.battle = null; ST.mode = 'walk'; musicForce(stMapSong()); stHud(); stSave(); };
   if (result === 'fled') { if (ST.fighting) { const f = ST.fighting; f.x = f.home[0]; f.y = f.home[1]; ST.fighting = null; } return setTimeout(done, 500); }
   if (result === 'lost') {
     const s = stStats(), lostGold = d.gold;
     d.lost = lostGold > 0 ? {map: d.map, x: d.x, y: d.y, gold: lostGold} : null; d.gold = 0;
-    d.hp = s.hp; d.mp = s.mp; $('stBattle').hidden = true; ST.battle = null;
+    d.wounds = null; d.hp = s.hp; d.mp = s.mp; $('stBattle').hidden = true; ST.battle = null; musicForce(stMapSong());
     const sh = d.shrine || {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
     stEnterMap(sh.map, Math.floor(sh.x / ST_TILE), Math.floor(sh.y / ST_TILE)); d.x = sh.x; d.y = sh.y; ST.cam.x = d.x; ST.cam.y = d.y;
     return stSay([['', 'YOU PERISHED'], ['', 'You wake at the shrine, gasping, ash in your mouth.' + (lostGold ? ` Your ${lostGold} gold lies where you fell, as Lost Embers. Die again before you reach it and it is gone.` : '')]], () => stSave());
@@ -6181,10 +6635,12 @@ function stEndBattle(result) {
   while (d.xp >= stXpNeed(d.lv)) { d.xp -= stXpNeed(d.lv); d.lv++; const s = stStats(); d.hp = s.hp; d.mp = s.mp; lines.push(['', `Level up! You are now level ${d.lv}. Health and mana fully restored.`]); if (d.lv % 2 === 1 && d.skills.length < Object.keys(ST_SKILLS).length) learn = true; }
   if (b.bossId) {
     d.flags[b.bossId] = true;
+    if (ST_INTRO[b.bossId]) setTimeout(() => stVoice({king: 'The dark... is coming.', golem: 'Stone... remembers...', drake: 'So... warm...', stalker: 'At last... a face...', brother: 'Liora... I\'m sorry.', witch: 'Thank you.'}[b.bossId], 'boss'), 300);
     lines.unshift(['', b.bossId === 'king' ? 'LORD OF HOLLOWS FELLED' : b.bossId === 'stalker' ? 'NAMELESS HUNTER FELLED' : 'GUARDIAN FELLED']);
     if (b.bossId === 'witch') { d.mounts = d.mounts || []; if (!d.mounts.includes('nightmare')) d.mounts.push('nightmare'); lines.push(['', 'Her black mare, the Cinder Nightmare, steps out of the smoke and kneels to you. Its mane is still burning. (New mount!)']); }
     if (b.bossId === 'witch') lines.push(['Sister Vey', '"Thank you… I was so tired of burning…"'], ['', 'The black candles go out one by one. Among her things you find a hundred years of letters, all addressed to a daughter, none ever sent.']);
     if (b.bossId === 'brother') { d.flags.lioraOath = true; lines.push(['Liora', 'Aldric. You waited for me. Of course you did. You always did.'], ['', 'She closes his eyes with two fingers and stands for a long time in the rain. When she turns back to you, something in her has hardened, and something has healed.'], ['Liora', 'I swore an oath to bring him rest. It is done. My sword is yours until the end.'], ['', 'Liora fights harder now (+6 attack).']); }
+    if (b.bossId === 'mara') lines.push(['Mara', '"Ha… not bad… for a landlubber…"'], ['', 'Her crew scatters into the surf. Her red flag comes down. Harbormaster Oona will want to hear of this.']);
     if (b.bossId === 'stalker') lines.push(['', 'The coat collapses, empty. Inside the lining, a tin locket with a painted face. Corin will want this.']);
     if (b.bossId === 'golem') { d.ch = 2; lines.push(['', 'The stone splits along old seams. Inside, the Ember Shard pulses like a second heart.'], ['Liora', 'It was a man once. I can see the shape of him in the rock. Let\'s not end up like that. The crypt next.']); }
     if (b.bossId === 'drake') { d.ch = 3; lines.push(['', 'The drake breaks apart like a frozen lake in spring. The Frost Shard is so cold it burns.'], ['Liora', 'Two shards. The gate will open. I hope you are ready, because I am not.']); }
@@ -6208,7 +6664,8 @@ function stOpenMenu() {
   const d = stData(), s = stStats(), m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
   m.append(el('h3', '', `${d.name} · Level ${d.lv} ${ST_CLASSES[d.cls].name}`),
     el('p', '', `HP ${Math.round(d.hp)}/${s.hp} · MP ${Math.round(d.mp)}/${s.mp} · Attack ${Math.round(s.atk)} · Magic ${Math.round(s.mag)} · Defense ${Math.round(s.def)} · XP ${d.xp}/${stXpNeed(d.lv)} · ${d.gold} gold`),
-    el('h3', '', 'Abilities'), el('p', '', d.skills.map(k => `${ST_SKILLS[k].name} (${ST_SKILLS[k].mp} MP): ${ST_SKILLS[k].desc}`).join(' · ')),
+    el('h3', '', 'Abilities'), el('p', '', ['attack'].concat(d.skills).map(k => `${stSkName(k)}${k === 'attack' ? '' : ` (${ST_SKILLS[k].mp} MP)`}: ${stMasteryText(k)}`).join(' · ') + '. Use a move to master it. Mastered moves crit harder, open worse wounds, and fire magic as beams that can obliterate.'),
+    ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed (-20% attack)', d.wounds.hole && 'Pierced (-25% defense)'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
     el('h3', '', 'Bag'), el('p', '', `${d.items.potion} potions · ${d.items.ether} ethers` + (d.items.blade ? ' · Royal Blade' : '')),
     el('h3', '', 'Quest'), el('p', '', ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)),
     el('h3', '', 'Side stories'), el('p', '', [
@@ -6224,6 +6681,7 @@ function stOpenMenu() {
   const row = el('div', 'row'), btn = (l, fn) => { const b = el('button', '', l); b.addEventListener('click', fn); row.appendChild(b); return b; };
   btn('Drink potion', () => { if (d.items.potion) { d.items.potion--; d.hp = Math.min(s.hp, d.hp + 60); sfx('pickup'); stCloseMenu(); stOpenMenu(); } });
   for (const k of d.mounts || []) if (k !== d.mount) btn(`Choose ${ST_MOUNTS[k].name}`, () => { d.mount = k; stCloseMenu(); stOpenMenu(); });
+  btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Voice lines on.', 'ann'); });
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
 }
@@ -6238,13 +6696,14 @@ function stHud() {
   $('stMp').style.width = d.mp / s.mp * 100 + '%'; $('stMpT').textContent = `${Math.round(d.mp)}/${s.mp}`;
   $('stGold').textContent = `${d.gold} gold · ${d.items.potion} potions` + (d.crime ? ` · Bounty ${d.crime}` : '');
   const tl = stTileAt(d.x, d.y), where = d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale';
-  $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', `Chapter ${Math.min(4, d.ch + 1)} · ${where}`), document.createTextNode(ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts) + (d.lost ? ` Your Lost Embers (${d.lost.gold} gold) wait where you fell.` : '')));
+  const outside = d.map === 'world' || d.map === 'isles', C = stClock(), wx = [outside ? `${stTimeName(C.h)} ${stTimeText(C.h)}` : '', ST.wx && ST.wx.k > .5 && outside ? ST_WX_NAME[ST.wx.kind] : ''].filter(Boolean).join(' · ');
+  $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', `Chapter ${Math.min(4, d.ch + 1)} · ${where}` + (wx ? ` · ${wx}` : '')), document.createTextNode(ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts) + (d.lost ? ` Your Lost Embers (${d.lost.gold} gold) wait where you fell.` : '')));
 }
 const stUnit = (look, color, x, y, face, walk, id, level = 3) => ({look, color, team: 0, level, face, x, y, walk, _lw: walk - 1, atkT: 0, atkCd: 1, hitFlash: 0, id});
-function stDrawWorld(now) {
+function stDrawWorld(now, dt = 1 / 60) {
   const d = stData(), Zs = Math.max(.7, Math.min(1.2, Math.min(cw, ch) / 700));
   ST.cam.x += (d.x - ST.cam.x) * .12; ST.cam.y += (d.y - ST.cam.y) * .12;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#0c1411'; ctx.fillRect(0, 0, cw, ch);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = d.map === 'isles' ? '#1f6a8a' : '#0c1411'; ctx.fillRect(0, 0, cw, ch);
   ctx.setTransform(dpr * Zs, 0, 0, dpr * Zs, dpr * (cw / 2 - ST.cam.x * Zs), dpr * (ch / 2 - ST.cam.y * Zs));
   const dun = d.map !== 'world';
   ctx.drawImage(dun ? ST.dunC[d.map] : ST.mapC, 0, 0);
@@ -6252,6 +6711,7 @@ function stDrawWorld(now) {
     if (t === 'c' && !d.chests.includes(d.map + x + '_' + y)) { const cx = x * ST_TILE + 32, cy = y * ST_TILE + 36; ctx.fillStyle = '#5a3a1e'; ctx.fillRect(cx - 16, cy - 12, 32, 22); ctx.fillStyle = '#c9a24a'; ctx.fillRect(cx - 16, cy - 4, 32, 4); }
     if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) stDrawFoe(ST_DUNGEONS[d.map].boss, x * ST_TILE + 32, y * ST_TILE + 40, now, .75, Math.PI);
   }));
+  const isles = dun && ST_DUNGEONS[d.map].outdoor; stAmbient(dt, now, Zs, d, dun, isles);
   if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6, f.face || 0);
   if (d.lost && d.lost.map === d.map) { ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff7a2a'; ctx.shadowBlur = 20; ctx.globalAlpha = .7 + Math.sin(now * 4) * .3; ctx.beginPath(); ctx.arc(d.lost.x, d.lost.y, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
   if (!dun) for (const c of ST_CHESTS) if (stChestShown(c, d)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
@@ -6266,17 +6726,20 @@ function stDrawWorld(now) {
   const ride = !dun && d.riding && ST_MOUNTS[d.mount];
   if (ride) { stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); drawCharacter(ctx, stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 4 * Math.cos(ST.face || 0), d.y - 26 - (ride.fly ? 26 + Math.sin(now * 4) * 5 : 0), ST.face || 0, 0, 30, d.lv), now); }
   else drawCharacter(ctx, stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv), now);
+  stAmbientOver(dt, now);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   // light: a torch circle in dungeons, a heavy vignette above ground
   const lit = dun && ST_DUNGEONS[d.map].lit, sx = cw / 2 + (d.x - ST.cam.x) * Zs, sy = ch / 2 + (d.y - ST.cam.y) * Zs - 20, rad = (dun && !lit ? 230 : 520) * Zs;
   const dark = ctx.createRadialGradient(sx, sy, rad * .35, sx, sy, rad);
-  dark.addColorStop(0, 'rgba(0,0,0,0)'); dark.addColorStop(1, dun && !lit ? 'rgba(0,0,0,.96)' : 'rgba(8,6,12,.55)');
+  dark.addColorStop(0, 'rgba(0,0,0,0)'); dark.addColorStop(1, dun && !lit ? 'rgba(0,0,0,.96)' : isles ? 'rgba(8,6,12,.22)' : 'rgba(8,6,12,.55)');
   ctx.fillStyle = dark; ctx.fillRect(0, 0, cw, ch);
   if (!dun) { ctx.fillStyle = 'rgba(40,30,60,.12)'; ctx.fillRect(0, 0, cw, ch); }
+  stNightDraw(Zs, d, dun, isles);
+  if (!dun || isles) stWeatherDraw(dt, stTileAt(d.x, d.y), isles);
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), door: near.key && ST_DUNGEONS[near.key].lit ? 'Enter the castle' : 'Enter the dungeon', exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out', boss: 'Approach'}[near.kind]);
+  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: near.key && ST_DUNGEONS[near.key].lit ? 'Enter the castle' : 'Enter the dungeon', exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out', boss: 'Approach'}[near.kind]);
   $('stRide').hidden = dun || !(d.mounts || []).length; $('stRide').textContent = d.riding ? 'Dismount' : 'Ride';
 }
 function stDrawFoe(key, x, y, now, scale, face, flash) {
@@ -6291,33 +6754,45 @@ function stDrawFoe(key, x, y, now, scale, face, flash) {
 }
 function stDrawBattle(now, dt) {
   const b = ST.battle, d = stData(), tile = b.tile || (b.bossId === 'golem' ? 'K' : b.bossId === 'drake' ? '*' : b.bossId === 'king' ? 'C' : '.');
-  const sky = {a: ['#4a3626', '#120a06'], b: ['#22261a', '#070806'], g: ['#10180f', '#030603'], T: ['#152a1c', '#05100a'], ':': ['#1e332e', '#070f0d'], K: ['#2a1a14', '#080403'], '*': ['#5a7486', '#1a2630'], C: ['#22182f', '#05030a'], '.': ['#2a3a26', '#0a120c']}[tile] || ['#2a3a26', '#0a120c'];
+  const sky = {',': ['#6ab0d8', '#1a4a5a'], v: ['#2a2a3a', '#0a0a12'], a: ['#4a3626', '#120a06'], b: ['#22261a', '#070806'], g: ['#10180f', '#030603'], T: ['#152a1c', '#05100a'], ':': ['#1e332e', '#070f0d'], K: ['#2a1a14', '#080403'], '*': ['#5a7486', '#1a2630'], C: ['#22182f', '#05030a'], '.': ['#2a3a26', '#0a120c']}[tile] || ['#2a3a26', '#0a120c'];
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const g = ctx.createLinearGradient(0, 0, 0, ch); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]); ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+  if (d.map === 'world' || d.map === 'isles') { const C = stClock(); if (C.dark > .02) { ctx.fillStyle = `rgba(6,10,32,${C.dark * .6})`; ctx.fillRect(0, 0, cw, ch); } if (C.warm > .02) { ctx.fillStyle = `rgba(255,130,80,${C.warm * .3})`; ctx.fillRect(0, 0, cw, ch); } }
   ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(cw / 2, ch * .62, cw * .45, ch * .12, 0, 0, 7); ctx.fill();
+  if (STFX.slow > 0) { STFX.slow -= dt; dt *= .3; } // slow motion after a lethal blow
   const k = Math.max(.8, Math.min(1.6, Math.min(cw, ch) / 500)), shake = ST.hurt > 0 ? rand(-6, 6) : 0; ST.hurt = Math.max(0, (ST.hurt || 0) - dt);
   ctx.setTransform(dpr, 0, 0, dpr, dpr * shake, 0);
-  for (const pl of STFX.pools || []) { ctx.fillStyle = 'rgba(90,8,12,.75)'; ctx.beginPath(); ctx.ellipse(pl.x, pl.y, pl.r, pl.r * .45, pl.rot * .2, 0, 7); ctx.fill(); }
+  for (const pl of STFX.pools || []) { ctx.fillStyle = pl.scorch ? 'rgba(10,8,6,.8)' : 'rgba(90,8,12,.75)'; ctx.beginPath(); ctx.ellipse(pl.x, pl.y, pl.r, pl.r * .45, pl.rot * .2, 0, 7); ctx.fill(); }
   const px = cw * .28, py = ch * .55, bob = Math.sin(now * 3) * 2;
   STFX.pos.p = [px, py]; STFX.pos.a = [px - 70 * k, py + 30 * k];
   const [pox, poy] = stFxOffset('p'), atkP = STFX.anims.some(a => a.who === 'p' && a.kind === 'lunge');
   const pu = stUnit(ST_CLASSES[d.cls].look, d.color, px + pox, py + poy + bob, 0, 0, 30, d.lv); if (atkP) pu.atkT = 1;
-  drawCharacterScaled(pu, now, k * 1.3);
+  drawCharacterScaled(pu, now, k * 1.3); stWoundDraw(d.wounds, px + pox, py + poy + bob, k * 1.3, 1, true, now);
   if (b.ally) { const [aox, aoy] = stFxOffset('a'), au = stUnit('valkyrie', '#9fd8ff', px - 70 * k + aox, py + 30 * k + aoy - bob, 0, 0, 31, d.lv); if (STFX.anims.some(a => a.who === 'a' && a.kind === 'lunge')) au.atkT = 1; drawCharacterScaled(au, now, k * 1.2); }
   b.foes.forEach((f, i) => {
     const n = b.foes.length, fx0 = cw * (.66 + (n > 1 ? (i - (n - 1) / 2) * .12 : 0)), fy0 = ch * (.55 + (i % 2) * .05);
     STFX.pos[f.id] = [fx0, fy0];
+    if (f.hp <= 0 && f.oblit) { // obliterated: burned away from the top down into drifting ash
+      if (f.deadT == null || f.deadT > 1.1) return; f.deadT += dt;
+      const sc = k * (f.boss ? 1.5 : 1.3), top = fy0 - 140 * sc, cut = top + Math.min(1, f.deadT / 1) * 160 * sc;
+      ctx.save(); ctx.beginPath(); ctx.rect(fx0 - 200, cut, 400, 400); ctx.clip(); stDrawFoe(f.key, fx0, fy0, now, sc, Math.PI, 1); ctx.restore();
+      for (let q = 0; q < 6; q++) STFX.parts.push({x: fx0 + rand(-50, 50) * sc, y: cut, vx: rand(20, 140), vy: -rand(60, 200), t: 0, life: rand(.5, 1), color: Math.random() < .4 ? '#ffb35a' : '#4a4440', r: rand(1.5, 4)});
+      return;
+    }
     if (f.hp <= 0) { // fade and sink when defeated
       if (f.deadT == null || f.deadT > .6) return; f.deadT += dt;
       ctx.globalAlpha = Math.max(0, 1 - f.deadT / .6); stDrawFoe(f.key, fx0, fy0 + f.deadT * 40, now, k * (f.boss ? 1.5 : 1.3), Math.PI, .2); ctx.globalAlpha = 1; return;
     }
     f.flash = Math.max(0, f.flash - dt);
     const [fox, foy] = stFxOffset(f.id), fx = fx0 + fox, fy = fy0 + foy + Math.sin(now * 2.5 + i) * 2;
-    stDrawFoe(f.key, fx, fy, now, k * (f.boss ? 1.5 : 1.3), Math.PI, f.flash);
+    stDrawFoe(f.key, fx, fy, now, k * (f.boss ? 1.5 : 1.3), Math.PI, f.flash); stWoundDraw(f.w, fx, fy, k * (f.boss ? 1.5 : 1.3), -1, ST_FOES[f.key].draw === 'hero', now);
+    if (f.w) { const tags = [f.w.bleed && 'Bleeding', f.w.maim && 'Severed', f.w.hole && 'Pierced'].filter(Boolean).join(' · '); if (tags) { ctx.fillStyle = '#ff8a7a'; ctx.font = '600 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(tags, fx, fy - 102 * k); ctx.textAlign = 'left'; } }
     ctx.fillStyle = '#000a'; ctx.fillRect(fx - 40, fy - 120 * k, 80, 8); ctx.fillStyle = '#e0405a'; ctx.fillRect(fx - 40, fy - 120 * k, 80 * Math.max(0, f.hp / f.maxHp), 8);
     ctx.fillStyle = '#fff'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(f.name, fx, fy - 126 * k); ctx.textAlign = 'left';
   });
-  stEffectsDraw(dt); stFxDraw(dt); stCalloutDraw(dt);
+  stEffectsDraw(dt); stFxDraw(dt);
+  if (d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].outdoor)) stWeatherDraw(dt, b.tile, d.map === 'isles');
+  stCalloutDraw(dt); stIntroDraw(dt);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 function drawCharacterScaled(u, now, sc) { ctx.save(); ctx.translate(u.x, u.y); ctx.scale(sc, sc); ctx.translate(-u.x, -u.y); drawCharacter(ctx, u, now); ctx.restore(); }
@@ -6363,7 +6838,8 @@ function stPollPad() {
 function storyFrame(now, dt) {
   stPollPad();
   if (ST.mode === 'walk') stWalk(dt);
-  if (ST.mode === 'battle' && ST.battle) stDrawBattle(now / 1000, dt); else stDrawWorld(now / 1000);
+  stWeatherTick(dt);
+  if (ST.mode === 'battle' && ST.battle) stDrawBattle(now / 1000, dt); else if (ST.mode === 'sail' && ST.sail) stDrawSail(now / 1000, dt); else stDrawWorld(now / 1000, dt);
   $('game').classList.toggle('touch', touchUI.on);
   if (Math.random() < .05) stHud();
 }
