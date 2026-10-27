@@ -1164,6 +1164,7 @@ function updateHero(h, dt) {
     else moveToward(h, t.x, t.y, dt);
   } else if (c && c.type === 'move') {
     if (moveToward(h, c.x, c.y, dt)) h.cmd = null;
+    if (h.isPlayer && h.atkT <= 0 && device() !== 'pc') { const t = nearestEnemy(h, h.range + h.r, null, 0.8); if (t) tryAttack(h, t); }
   } else if (h.atkT <= 0) {
     const t = nearestEnemy(h, h.range + h.r, null, 0.8);
     if (t) tryAttack(h, t);
@@ -1628,6 +1629,13 @@ function render() {
     ctx.strokeStyle = 'rgba(242,193,78,.55)'; ctx.lineWidth = 4; ctx.setLineDash([14, 10]);
     ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(ax, ay); ctx.stroke(); ctx.setLineDash([]);
     ctx.beginPath(); ctx.arc(ax, ay, 18, 0, 7); ctx.stroke();
+  }
+  if (p.alive && device() !== 'pc') {
+    const t = autoTarget(p);
+    if (t && inView(t)) {
+      ctx.strokeStyle = '#ff6a4d'; ctx.lineWidth = 3; ctx.globalAlpha = .75 + Math.sin(now * 6) * .2; ctx.setLineDash([10, 8]);
+      ctx.beginPath(); ctx.ellipse(t.x, t.y + 6, t.r + 14, (t.r + 14) * .5, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    }
   }
   for (const p of G.pickups) {
     if (!inView(p, 60)) continue;
@@ -2366,9 +2374,19 @@ for (const k of 'qwer') {
   el.querySelector('.mc').textContent = AB[k].mana;
   el.addEventListener('click', () => playerCast(k));
 }
+// Each device gets its own easy control style: 'pc' (mouse and keyboard), 'pad' (controller) or 'touch' (phone).
+const device = () => G.pad ? 'pad' : (G.touch || touchUI.on) ? 'touch' : 'pc';
+const KEY_LABELS = {pc: {q: 'Q', w: 'W', e: 'E', r: 'R'}, pad: {q: 'X', w: 'Y', e: 'B', r: 'RB'}, touch: {q: '', w: '', e: '', r: ''}};
+const DEVICE_TIPS = {
+  pc: 'Click to move. Click an enemy to attack, or press Space. Q W E R cast at your cursor. B opens the shop.',
+  pad: 'Left stick moves. A attacks. X Y B RB cast, aimed with the right stick. LB opens the shop.',
+  touch: 'Joystick moves. Walk into enemies to fight. Tap a spell to fire it at the circled enemy.',
+};
+// the enemy a phone or controller player's next spell or attack goes to
+function autoTarget(p) { return nearestEnemy(p, 1000, u => u.kind === 'hero') || nearestEnemy(p, 900, u => u.kind === 'minion') || nearestEnemy(p, 700); }
 function autoAim(p, k) {
   if (k === 'w') return {x: p.x, y: p.y};
-  const t = nearestEnemy(p, 1000, u => u.kind === 'hero') || nearestEnemy(p, 900, u => u.kind === 'minion');
+  const t = autoTarget(p);
   if (k === 'e') { const f = t || FOUNTAIN[1 - p.team]; return {x: f.x, y: f.y}; }
   if (t) return {x: t.x, y: t.y};
   return {x: p.x + Math.cos(p.face) * 500, y: p.y + Math.sin(p.face) * 500};
@@ -2376,7 +2394,19 @@ function autoAim(p, k) {
 function playerCast(k) {
   if (!inGame()) return;
   const p = G.player; let aim;
-  if (G.pad && pad.aim !== null) { const d = k === 'r' ? 700 : k === 'e' ? 380 : 650; aim = {x: p.x + Math.cos(pad.aim) * d, y: p.y + Math.sin(pad.aim) * d}; }
+  if (G.pad && pad.aim !== null) {
+    const d = k === 'r' ? 700 : k === 'e' ? 380 : 650;
+    aim = {x: p.x + Math.cos(pad.aim) * d, y: p.y + Math.sin(pad.aim) * d};
+    if (k !== 'e' && k !== 'w') { // aim assist
+      let best = null, bd = .35;
+      for (const u of G.units) {
+        if (!u.alive || u.team === p.team || u.team === 2 && u.kind !== 'monster' || !targetable(u) || dist(u, p) > 1000) continue;
+        const da = Math.atan2(u.y - p.y, u.x - p.x) - pad.aim, off = Math.abs(Math.atan2(Math.sin(da), Math.cos(da)));
+        if (off < bd) { bd = off; best = u; }
+      }
+      if (best) aim = {x: best.x, y: best.y};
+    }
+  }
   else if (G.touch || G.pad) aim = autoAim(p, k);
   else aim = toWorld(mouse.x, mouse.y);
   if (!commandCast(k, aim.x, aim.y)) { const el = abEls[k].el; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
@@ -2395,6 +2425,7 @@ window.addEventListener('keydown', e => {
   if (e.repeat && 'qwer'.includes(k)) return;
   if (k.length === 1 && 'qwer'.includes(k)) { e.preventDefault(); G.pad = false; playerCast(k); }
   else if (k === 'b') toggleShop();
+  else if (k === ' ') { e.preventDefault(); G.pad = false; attackNearest(); }
 });
 
 // ---------- controller ----------
@@ -2530,6 +2561,8 @@ function updateHud() {
   hud.sBlue.textContent = G.kills[0]; hud.sRed.textContent = G.kills[1];
   hud.dBlue.textContent = '◆'.repeat(G.dragons[0]); hud.dRed.textContent = '◆'.repeat(G.dragons[1]);
   $('modeScore').textContent = modeScoreText();
+  const dev = device();
+  if (dev !== hud.dev) { hud.dev = dev; for (const k of 'qwer') abEls[k].el.querySelector('.k').textContent = KEY_LABELS[dev][k]; }
   for (const k of 'qwer') {
     const a = AB[k], e = abEls[k], c = p.cds[k], mx = a.cd * (1 - p.haste);
     e.cd.style.setProperty('--p', (c > 0 ? clamp(c / mx, 0, 1) * 360 : 0) + 'deg');
@@ -2622,7 +2655,7 @@ function refreshMain() { $('m-continue').disabled = !store.get(AUTO_KEY); }
 function begin(loaded) {
   hideMenus(); closeShop();
   G.started = true; G.paused = false; G.over = false; lastAuto = G.time;
-  if (!loaded) banner('Welcome to the Rift', 'Open the shop, then head to a lane.');
+  if (!loaded) banner('Welcome to the Rift', DEVICE_TIPS[device()]);
 }
 let pendingCfg = {map: 'vale', diff: 1, stage: -1, mode: 'conquest'}, heroBackTo = 'scr-mode', quickSel = {map: 'vale', mode: 'conquest', diff: 1};
 function startSolo(idx) {
