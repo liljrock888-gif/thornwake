@@ -256,6 +256,15 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
   #touch #ab-r{right:calc(4px + env(safe-area-inset-right,0px));bottom:calc(112px + env(safe-area-inset-bottom,0px))}
   #banner{top:16%}
 }
+#elems{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(132px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;align-items:center}
+#elems .el{position:relative;width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,.28);background:radial-gradient(circle at 40% 35%,var(--c),#10140f 125%);cursor:pointer;padding:0;box-shadow:0 3px 10px rgba(0,0,0,.45);touch-action:manipulation}
+#elems .el:active{filter:brightness(1.3)}
+#elems .ek{position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--gold);text-shadow:0 1px 2px #000;white-space:nowrap}
+#mixShow{display:flex;gap:4px;align-items:center;justify-content:center;min-width:64px;height:30px;padding:0 9px;margin-right:4px;border-radius:999px;background:var(--panel);border:1px solid var(--line);cursor:pointer;color:var(--muted);font-size:11px;touch-action:manipulation}
+#mixShow i{display:block;width:15px;height:15px;border-radius:50%;box-shadow:0 0 6px currentColor}
+#game.touch #elems{bottom:calc(214px + env(safe-area-inset-bottom,0px));gap:5px}
+#game.touch #elems .el{width:38px;height:38px} #game.touch #elems .ek{display:none} #game.touch #mixShow{min-width:52px}
+@media (max-height:420px){#game.touch #elems{bottom:calc(14px + env(safe-area-inset-bottom,0px))}}
 @media (prefers-reduced-motion:reduce){#banner,#feed div{transition:none}}
 </style>
 
@@ -299,6 +308,9 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
     </div>
   </div>
   <canvas id="mini" hidden></canvas>
+  <div id="elems" hidden>
+    <button id="mixShow" title="Your mix. Click to clear it (C)." aria-label="Current element mix, press to clear"></button>
+  </div>
   <div id="touch" hidden>
     <div id="joy" aria-label="Move"><div id="joyKnob"></div></div>
     <button id="atkBtn" aria-label="Attack the nearest enemy">Attack</button>
@@ -1205,7 +1217,7 @@ function updateHero(h, dt) {
   }
   const px = h.x, py = h.y;
   for (const k in h.cds) h.cds[k] = Math.max(0, h.cds[k] - dt);
-  h.atkT -= dt; h.aggroT = Math.max(0, h.aggroT - dt);
+  h.atkT -= dt; h.mixT = (h.mixT || 0) - dt; h.aggroT = Math.max(0, h.aggroT - dt);
   if (h.shieldT > 0) { h.shieldT -= dt; if (h.shieldT <= 0) h.shield = 0; }
   if (h.buffT > 0) h.buffT -= dt;
   if (h.barrage) { // Storm Barrage: rapid punches in a cone
@@ -1231,14 +1243,14 @@ function updateHero(h, dt) {
   if (c && c.type === 'attack') {
     const t = c.target;
     if (!valid(t, h)) h.cmd = null;
-    else if (dist(h, t) <= h.range + t.r + h.r) { h.face = Math.atan2(t.y - h.y, t.x - h.x); tryAttack(h, t); }
+    else if (dist(h, t) <= strikeReach(h) + t.r + h.r) { h.face = Math.atan2(t.y - h.y, t.x - h.x); heroStrike(h, t); }
     else moveToward(h, t.x, t.y, dt);
   } else if (c && c.type === 'move') {
     if (moveToward(h, c.x, c.y, dt)) h.cmd = null;
-    if (h.isPlayer && h.atkT <= 0 && device() !== 'pc') { const t = nearestEnemy(h, h.range + h.r, null, 0.8); if (t) tryAttack(h, t); }
-  } else if (h.atkT <= 0) {
-    const t = nearestEnemy(h, h.range + h.r, null, 0.8);
-    if (t) tryAttack(h, t);
+    if (h.isPlayer && h.atkT <= 0 && device() !== 'pc') { const t = nearestEnemy(h, strikeReach(h) + h.r, null, 0.8); if (t) heroStrike(h, t); }
+  } else if (h.atkT <= 0 || (h.isPlayer && mixUsable(h) && h.mixT <= 0)) {
+    const t = nearestEnemy(h, strikeReach(h) + h.r, null, 0.8);
+    if (t) heroStrike(h, t);
   }
   h.vx = (h.x - px) / dt; h.vy = (h.y - py) / dt;
   if (h.pet) updatePet(h, dt);
@@ -1399,7 +1411,7 @@ function update(dt) {
   if (G.mode === 'host') hostReadInputs();
   G.time += dt;
   if (G.time >= G.nextWave) { queueWave(); G.nextWave += 30; }
-  updatePickups();
+  updatePickups(); updateBurns(dt);
   for (let i = G.spawnQ.length - 1; i >= 0; i--) { const s = G.spawnQ[i]; if (G.time >= s.at) { spawnMinion(s.team, s.lane, s.type, s.tier || 0); G.spawnQ.splice(i, 1); } }
   for (const u of G.units) {
     if (u.hitFlash > 0) u.hitFlash -= dt;
@@ -1441,6 +1453,7 @@ function update(dt) {
       let hit = null;
       for (const u of G.units) if (u.alive && u.team !== p.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && Math.hypot(u.x - p.x, u.y - p.y) < u.r + p.r && !(p.hits && p.hits.includes(u))) { hit = u; break; }
       if (hit) {
+        if (p.mixFx) { mixHit(hit, p.mixFx, p.src); G.projs.splice(i, 1); sfx('thud', p.x, p.y); continue; }
         damage(hit, p.dmg, p.src); burst(p.x, p.y, boltLook(p.spell)[3], 14, 200, .4, 4); sfx('impact', p.x, p.y);
         if (p.hits) { p.hits.push(hit); if (p.spell === 'frost') hit.slowUntil = G.time + 2; } // pierces on
         else {
@@ -1481,6 +1494,112 @@ function bleed(u, n, gush) {
     G.blood.push({x: u.x + rand(-5, 5), y: u.y + rand(-3, 6), h: u.r * rand(.6, 1.4), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45, vh: rand(60, gush ? 320 : 200), r: rand(2, gush ? 5 : 3.5)});
   }
 }
+// ---------- elements: queue up to three and your attack casts the mix, over and over ----------
+// One element is your constant attack: free and nearly instant. Two or three hit much harder but cost mana and recharge.
+const ELEMENTS = {
+  fire:   {name: 'Fire', color: '#ff7a2a', note: 'burns'},
+  frost:  {name: 'Frost', color: '#9fe6ff', note: 'slows'},
+  storm:  {name: 'Storm', color: '#c8b8ff', note: 'chains'},
+  life:   {name: 'Life', color: '#6be08a', note: 'heals you'},
+  stone:  {name: 'Stone', color: '#b89a6a', note: 'boulder, knocks back'},
+  arcane: {name: 'Arcane', color: '#ff6ad5', note: 'piercing beam'},
+};
+const EL_KEYS = Object.keys(ELEMENTS);
+const OPPOSITE = {fire: 'frost', frost: 'fire'};
+function addElement(h, el) {
+  h.mix = h.mix || [];
+  const opp = OPPOSITE[el], i = opp ? h.mix.indexOf(opp) : -1;
+  if (i >= 0) h.mix.splice(i, 1); // fire and frost cancel each other
+  else if (h.mix.length < 3) h.mix.push(el);
+  else { h.mix.shift(); h.mix.push(el); }
+}
+const mixCount = (mix, el) => mix.filter(e => e === el).length;
+const mixCost = mix => mix.length <= 1 ? 0 : mix.length * 9;
+const mixWait = (h, mix) => mix.length <= 1 ? .3 : .5 + .25 * mix.length;
+const mixRange = mix => mix.includes('stone') ? 520 : mix.includes('arcane') ? 520 : 280;
+const lifeOnly = mix => mix.length > 0 && mix.every(e => e === 'life');
+const mixUsable = h => h.mix && h.mix.length && !lifeOnly(h.mix) && h.mana >= mixCost(h.mix);
+const isFoe = (u, h) => u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && targetable(u);
+function mixColor(mix) { // average of the queued elements' colors
+  let r = 0, g = 0, b = 0;
+  for (const e of mix) { const c = ELEMENTS[e].color; r += parseInt(c.slice(1, 3), 16); g += parseInt(c.slice(3, 5), 16); b += parseInt(c.slice(5, 7), 16); }
+  const n = mix.length || 1, hx = v => Math.round(v / n).toString(16).padStart(2, '0');
+  return '#' + hx(r) + hx(g) + hx(b);
+}
+// Casts the hero's mix toward (tx, ty). Damage grows with each element; a single element is weaker but free.
+function castMix(h, tx, ty) {
+  const mix = h.mix || [];
+  if (!mix.length || h.mixT > 0 || h.mana < mixCost(mix)) return false;
+  h.mana -= mixCost(mix); h.mixT = mixWait(h, mix) * (h.rapidUntil > G.time ? .6 : 1);
+  const per = 16 + 5 * h.level + .3 * h.ap + .25 * h.ad, power = mix.length === 1 ? per * .55 : per * mix.length * 1.15;
+  const col = mixColor(mix), dx = tx - h.x, dy = ty - h.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
+  h.face = Math.atan2(ny, nx); h.atkT = Math.max(h.atkT, .15);
+  const m = {mix, dmg: power, col};
+  if (lifeOnly(mix)) { // a healing spell for you and nearby allies
+    for (const u of G.units) if (u.alive && u.kind === 'hero' && u.team === h.team && dist(u, h) < 320) u.hp = Math.min(u.maxHp, u.hp + power * (u === h ? 1.2 : .6));
+    ring(h.x, h.y, '#6be08a', 320, .5); burst(h.x, h.y - 30, '#6be08a', 24, 180, .6, 4); sfx('shield', h.x, h.y);
+    return true;
+  }
+  if (mix.includes('stone')) { // a heavy boulder
+    G.projs.push({kind: 'bolt', spell: 'stone', mixFx: m, hits: null, x: h.x + nx * 30, y: h.y + ny * 30, vx: nx * 820, vy: ny * 820, range: 520, trav: 0, dmg: 0, src: h, team: h.team, r: 22});
+    sfx('swing', h.x, h.y);
+  } else if (mix.includes('arcane')) { // a piercing beam
+    for (const u of G.units) {
+      if (!isFoe(u, h)) continue;
+      const ux = u.x - h.x, uy = u.y - h.y, along = ux * nx + uy * ny;
+      if (along > 0 && along < 520 + u.r && Math.abs(ux * ny - uy * nx) < 30 + u.r) mixHit(u, m, h);
+    }
+    G.lasers.push({x1: h.x + nx * 26, y1: h.y - 30 + ny * 26, x2: h.x + nx * 520, y2: h.y - 30 + ny * 520, t: .25, max: .25, color: col, w: 14 + 6 * mix.length});
+    sfx('bolt', h.x, h.y);
+  } else { // a short cone of fire, frost or lightning
+    let first = null;
+    for (const u of G.units) {
+      if (!isFoe(u, h) || dist(u, h) > 280 + u.r) continue;
+      const da = Math.atan2(u.y - h.y, u.x - h.x) - h.face;
+      if (Math.abs(Math.atan2(Math.sin(da), Math.cos(da))) < .5) { mixHit(u, m, h); first = first || u; }
+    }
+    for (let i = 0; i < 10 + 6 * mix.length; i++) {
+      const a = h.face + rand(-.45, .45), sp = rand(380, 720), e = mix[i % mix.length];
+      G.fx.push({x: h.x + Math.cos(a) * 24, y: h.y - 22 + Math.sin(a) * 24, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: .38, max: .38, color: ELEMENTS[e].color, r: rand(4, 8)});
+    }
+    sfx(mix.includes('fire') ? 'flame' : mix.includes('frost') ? 'frost' : 'zap', h.x, h.y);
+  }
+  return true;
+}
+// What a mix does to one enemy it reaches.
+function mixHit(u, m, h) {
+  const n = el => mixCount(m.mix, el);
+  damage(u, m.dmg, h);
+  if (n('fire')) u.burn = {dps: m.dmg * .12 * n('fire'), until: G.time + 3, src: h, tick: 0};
+  if (n('frost')) u.slowUntil = Math.max(u.slowUntil || 0, G.time + 1 + .6 * n('frost'));
+  if (n('life') && h.alive) h.hp = Math.min(h.maxHp, h.hp + m.dmg * .25 * n('life'));
+  if (n('stone') && u.alive && u.kind !== 'tower') { const a = Math.atan2(u.y - h.y, u.x - h.x); u.x = clamp(u.x + Math.cos(a) * 45 * n('stone'), 30, W - 30); u.y = clamp(u.y + Math.sin(a) * 45 * n('stone'), 30, H - 30); }
+  if (n('storm')) { // arcs to nearby enemies
+    const pts = [[u.x, u.y - 20]]; let from = u;
+    for (let i = 0; i < n('storm') + 1; i++) {
+      let next = null, bd = 260;
+      for (const o of G.units) if (isFoe(o, h) && o !== u && !pts.some(pt => pt.o === o) && dist(o, from) < bd) { bd = dist(o, from); next = o; }
+      if (!next) break;
+      damage(next, m.dmg * .5, h); const pt = [next.x, next.y - 20]; pt.o = next; pts.push(pt); from = next;
+    }
+    if (pts.length > 1) G.zaps.push({pts, t: .25});
+  }
+  burst(u.x, u.y - 14, m.col, 6 + 2 * m.mix.length, 160, .3, 3);
+}
+function updateBurns(dt) {
+  for (const u of G.units) {
+    const b = u.burn; if (!b) continue;
+    if (!u.alive || G.time > b.until) { u.burn = null; continue; }
+    if ((b.tick -= dt) <= 0) { b.tick = .5; damage(u, b.dps * .5, b.src); G.fx.push({x: u.x + rand(-12, 12), y: u.y - rand(10, 40), vx: 0, vy: -50, t: .4, max: .4, color: '#ff7a2a', r: 4}); }
+  }
+}
+// The player's attack: their element mix if one is queued (and affordable), otherwise a normal hit.
+const strikeReach = h => h.isPlayer && mixUsable(h) ? mixRange(h.mix) : h.range;
+function heroStrike(h, t) {
+  if (h.isPlayer && mixUsable(h)) { if (h.mixT <= 0) castMix(h, t.x, t.y); }
+  else tryAttack(h, t);
+}
+
 // ---------- power-ups: pickups that appear around the map for any hero to grab ----------
 const POWERUPS = {
   heal:  {name: 'Health pack', color: '#6be08a', note: '+40% health'},
@@ -2492,13 +2611,24 @@ for (const k of 'qwer') {
 // Each device gets its own easy control style: 'pc' (mouse and keyboard), 'pad' (controller) or 'touch' (phone).
 const device = () => G.pad ? 'pad' : (G.touch || touchUI.on) ? 'touch' : 'pc';
 const KEY_LABELS = {pc: {q: 'Q', w: 'W', e: 'E', r: 'R'}, pad: {q: 'X', w: 'Y', e: 'B', r: 'RB'}, touch: {q: '', w: '', e: '', r: ''}};
+const EL_LABELS = {pc: ['1', '2', '3', '4', '5', '6'], pad: ['↑', '↓', '→', '←', 'LT', 'RT'], touch: ['', '', '', '', '', '']};
+const EL_PAD = [12, 13, 15, 14, 6, 7]; // controller buttons for fire, frost, storm, life, stone, arcane
 const DEVICE_TIPS = {
-  pc: 'Click to move. Click an enemy to attack, or press Space. Q W E R cast at your cursor. B opens the shop.',
-  pad: 'Left stick moves. A attacks. X Y B RB cast, aimed with the right stick. LB opens the shop.',
-  touch: 'Joystick moves. Walk into enemies to fight. Tap a spell to fire it at the circled enemy.',
+  pc: 'Click to move and attack. Keys 1-6 mix elements into your attack (C clears). Q W E R cast spells. B opens the shop.',
+  pad: 'Left stick moves, A attacks. D-pad, LT and RT mix elements into your attack. X Y B RB cast spells. LB opens the shop.',
+  touch: 'Joystick moves. Tap the colored elements to mix your attack, then fight. Tap a spell to fire it.',
 };
 // the enemy a phone or controller player's next spell or attack goes to
 function autoTarget(p) { return nearestEnemy(p, 1000, u => u.kind === 'hero') || nearestEnemy(p, 900, u => u.kind === 'minion') || nearestEnemy(p, 700); }
+for (const [i, el] of EL_KEYS.entries()) {
+  const b = document.createElement('button'), E = ELEMENTS[el];
+  b.className = 'el'; b.style.setProperty('--c', E.color); b.title = `${E.name}: ${E.note}`; b.setAttribute('aria-label', E.name);
+  b.innerHTML = '<span class="ek"></span>';
+  b.addEventListener('click', () => pickElement(el));
+  $('elems').appendChild(b);
+}
+$('mixShow').addEventListener('click', () => { if (inGame()) G.player.mix = []; });
+function pickElement(el) { if (inGame() && G.mode !== 'client') addElement(G.player, el); }
 function autoAim(p, k) {
   if (k === 'w') return {x: p.x, y: p.y};
   const t = autoTarget(p);
@@ -2541,6 +2671,8 @@ window.addEventListener('keydown', e => {
   if (k.length === 1 && 'qwer'.includes(k)) { e.preventDefault(); G.pad = false; playerCast(k); }
   else if (k === 'b') toggleShop();
   else if (k === ' ') { e.preventDefault(); G.pad = false; attackNearest(); }
+  else if (k >= '1' && k <= '6') { G.pad = false; pickElement(EL_KEYS[+k - 1]); }
+  else if (k === 'c') G.player.mix = [];
 });
 
 // ---------- controller ----------
@@ -2594,7 +2726,9 @@ function pollPad() {
     if (hit(2)) playerCast('q');
     if (hit(3)) playerCast('w');
     if (hit(1)) playerCast('e');
-    if (hit(5) || hit(7)) playerCast('r');
+    if (hit(5)) playerCast('r');
+    EL_PAD.forEach((bi, i) => { if (hit(bi)) pickElement(EL_KEYS[i]); });
+    if (hit(10) || hit(11)) p.mix = [];
     if (hit(4) || hit(8)) toggleShop();
     if (hit(9)) openPause();
   }
@@ -2603,6 +2737,7 @@ function pollPad() {
 window.addEventListener('gamepadconnected', () => { $('padHint').textContent = 'Controller connected. Use the D-pad and A to choose, B to go back.'; });
 function attackNearest() {
   const p = G.player;
+  if (G.mode !== 'client' && p.alive && lifeOnly(p.mix || [])) { castMix(p, p.x, p.y); return; }
   // pick a target within a short walk; the hero walks up and hits it on contact
   let t = nearestEnemy(p, 650 + p.range, u => u.kind === 'hero') || nearestEnemy(p, 650 + p.range);
   if (!t) { let bd = 600; for (const u of G.units) if (u.alive && u.kind === 'monster' && dist(u, p) < bd) { bd = dist(u, p); t = u; } }
@@ -2652,6 +2787,7 @@ function updateHud() {
   $('top').hidden = !playing; overlay.classList.toggle('art', !playing);
   $('hud').hidden = !playing; mini.hidden = !playing; $('menuBtn').hidden = !playing || !overlay.hidden;
   $('touch').hidden = !(playing && touchUI.on && overlay.hidden && !G.over);
+  if (!playing) $('elems').hidden = true;
   // on touch screens the ability buttons move next to the Attack button
   const abil = $('abil'), wantTouch = touchUI.on;
   if ($('game').classList.contains('touch') !== wantTouch) {
@@ -2677,7 +2813,18 @@ function updateHud() {
   hud.dBlue.textContent = '◆'.repeat(G.dragons[0]); hud.dRed.textContent = '◆'.repeat(G.dragons[1]);
   $('modeScore').textContent = modeScoreText();
   const dev = device();
-  if (dev !== hud.dev) { hud.dev = dev; for (const k of 'qwer') abEls[k].el.querySelector('.k').textContent = KEY_LABELS[dev][k]; }
+  if (dev !== hud.dev) {
+    hud.dev = dev; for (const k of 'qwer') abEls[k].el.querySelector('.k').textContent = KEY_LABELS[dev][k];
+    $('elems').querySelectorAll('.ek').forEach((e, i) => { e.textContent = EL_LABELS[dev][i]; });
+  }
+  $('elems').hidden = G.mode === 'client' || !overlay.hidden || G.over;
+  const mix = p.mix || [], sig = mix.join('.') + (mixUsable(p) || lifeOnly(mix) ? '' : '!');
+  if (sig !== hud.mixSig) {
+    hud.mixSig = sig; const ms = $('mixShow'); ms.innerHTML = '';
+    if (!mix.length) ms.textContent = 'No mix';
+    for (const e of mix) { const d = document.createElement('i'); d.style.background = d.style.color = ELEMENTS[e].color; ms.appendChild(d); }
+    ms.style.opacity = mix.length && !mixUsable(p) && !lifeOnly(mix) ? .5 : 1;
+  }
   for (const k of 'qwer') {
     const a = AB[k], e = abEls[k], c = p.cds[k], mx = a.cd * (1 - p.haste);
     e.cd.style.setProperty('--p', (c > 0 ? clamp(c / mx, 0, 1) * 360 : 0) + 'deg');
@@ -3547,7 +3694,7 @@ const MOVES = {
 };
 // look of each bolt spell, also sent to online players as a number
 const BOLT_LOOK = [['bolt', '#ffb35a', '#ff8a3a', '#fff1c2'], ['frost', '#9fe6ff', '#4fb8ff', '#ffffff'], ['drain', '#b06bff', '#7a2fff', '#f0d9ff'],
-  ['ki', '#ffe66b', '#fff2a8', '#ffffff'], ['void', '#e0304a', '#5a0010', '#ffd0d8']];
+  ['ki', '#ffe66b', '#fff2a8', '#ffffff'], ['void', '#e0304a', '#5a0010', '#ffd0d8'], ['stone', '#9a8a70', '#5a4a30', '#d8c8a8']];
 const boltLook = sp => BOLT_LOOK.find(b => b[0] === sp) || BOLT_LOOK[0];
 const SKINS = {
   none: {name: 'Classic', desc: 'Your hero\'s own colors.', price: 0},
