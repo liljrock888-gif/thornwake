@@ -343,9 +343,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
         <p class="rankname" id="rankName"></p>
         <div class="passbar rankbar"><i id="rankFill"></i></div>
         <p class="status ok" id="rankInfo"></p>
-        <div class="menu"><button class="mbtn primary" id="rankPlay">Find ranked match</button></div>
+        <div class="menu"><button class="mbtn primary" id="rankPlay">Find ranked match</button><button class="mbtn" id="rankCancel" hidden>Stop searching</button><button class="mbtn" id="rankBots">Ranked vs bots</button></div>
+        <p class="status ok" id="rankSearch" aria-live="polite"></p>
         <div class="list" id="rankLadder"></div>
-        <p class="status">Ranked matches are against bots matched to your rank, on a random map and mode. Leaving a ranked match counts as a loss, and ranked matches can't be saved.</p>
+        <p class="status">Find ranked match looks for real players near your rank, with bots filling any empty spots. Ranked vs bots puts you against bots matched to your rank. Both use a random map and mode. Leaving a ranked match counts as a loss, and ranked matches can't be saved.</p>
         <button class="mbtn small back" id="rankBack">Back</button>
       </section>
 
@@ -993,13 +994,21 @@ function cast(h, k, tx, ty) {
   if (chain && !chain.length) return false;
   const dx = tx - h.x, dy = ty - h.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
   h.mana -= a.mana; h.cds[k] = a.cd * (1 - h.haste);
-  sfx({q: 'bolt', w: 'shield', e: 'blink', r: 'ult'}[k], h.x, h.y);
+  sfx(SPELL_SFX[k === 'q' || k === 'r' ? h.kit && h.kit[k] : ''] || {q: 'bolt', w: 'shield', e: 'blink', r: 'ult'}[k], h.x, h.y);
   if (k === 'q') {
     h.face = Math.atan2(ny, nx);
-    const twin = h.kit && h.kit.q === 'twin', base = 60 + 28 * h.level + 0.7 * h.ap;
-    for (const off of twin ? [-.13, .13] : [0]) {
+    const q = h.kit ? h.kit.q : 'bolt', twin = q === 'twin', base = 60 + 28 * h.level + 0.7 * h.ap;
+    if (q === 'flame') {
+      for (const u of G.units) {
+        if (!u.alive || u.team === h.team || !(u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') || dist(u, h) > 430 + u.r) continue;
+        const da = Math.atan2(u.y - h.y, u.x - h.x) - h.face, off = Math.abs(Math.atan2(Math.sin(da), Math.cos(da)));
+        if (off < .6) damage(u, base * 1.15, h);
+      }
+      for (let i = 0; i < 34; i++) { const a = h.face + rand(-.55, .55), sp = rand(380, 820); G.fx.push({x: h.x + Math.cos(a) * 30, y: h.y - 20 + Math.sin(a) * 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: .45, max: .45, color: i % 3 ? '#ff7a2a' : '#ffd36a', r: rand(5, 11)}); }
+    } else for (const off of twin ? [-.13, .13] : [0]) {
       const c = Math.cos(off), sn = Math.sin(off), vx = nx * c - ny * sn, vy = nx * sn + ny * c;
-      G.projs.push({kind: 'bolt', x: h.x + vx * 30, y: h.y + vy * 30, vx: vx * 1150, vy: vy * 1150, range: 950, trav: 0, dmg: base * (twin ? .7 : 1), src: h, team: h.team, r: 16});
+      G.projs.push({kind: 'bolt', spell: q === 'frost' || q === 'drain' ? q : 'bolt', hits: q === 'frost' ? [] : null,
+        x: h.x + vx * 30, y: h.y + vy * 30, vx: vx * 1150, vy: vy * 1150, range: 950, trav: 0, dmg: base * (twin ? .7 : 1), src: h, team: h.team, r: 16});
     }
   } else if (k === 'w') {
     h.shield = 70 + 22 * h.level + 0.5 * h.ap; h.shieldT = 3; h.buffT = 2.5;
@@ -1017,6 +1026,18 @@ function cast(h, k, tx, ty) {
     } else if (kind === 'nova') {
       for (const u of G.units) if (u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && dist(u, h) < 330 + u.r) damage(u, rDamage(h) * .8, h);
       ring(h.x, h.y, '#bfefff', 330, .6); burst(h.x, h.y, '#dff7ff', 50, 380, .7, 5); sfx('boom', h.x, h.y);
+    } else if (kind === 'tempest') {
+      for (let i = 0; i < 6; i++) { const t = .35 + i * .22; G.blasts.push({x: px + rand(-170, 170), y: py + rand(-170, 170), t, max: t, r: 120, dmg: rDamage(h) * .32, src: h, team: h.team, style: 'storm'}); }
+    } else if (kind === 'vortex') {
+      for (const u of G.units) if (u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && targetable(u) && Math.hypot(u.x - px, u.y - py) < 400) {
+        u.x += (px - u.x) * .65; u.y += (py - u.y) * .65; if (u.kind === 'hero' && u.cmd) u.cmd = null;
+      }
+      ring(px, py, '#c79bff', 400, .5); burst(px, py, '#c79bff', 40, -260, .5, 4);
+      G.blasts.push({x: px, y: py, t: .5, max: .5, r: 210, dmg: rDamage(h) * .75, src: h, team: h.team, style: 'arcane'});
+    } else if (kind === 'phoenix') {
+      for (const u of G.units) if (u.alive && u.team !== h.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && dist(u, h) < 290 + u.r) damage(u, rDamage(h) * .6, h);
+      h.hp = Math.min(h.maxHp, h.hp + h.maxHp * .25); h.buffT = 3;
+      ring(h.x, h.y, '#ff7a2a', 290, .7); burst(h.x, h.y - 20, '#ff7a2a', 60, 420, .9, 6); burst(h.x, h.y - 40, '#ffd36a', 30, 240, 1, 5);
     } else if (kind === 'chain') {
       const pts = [[h.x, h.y - 30]];
       for (const t of chain) { damage(t, rDamage(h) * .6, h); pts.push([t.x, t.y - 10]); burst(t.x, t.y, '#bfe0ff', 10, 160, .35, 3); }
@@ -1060,7 +1081,7 @@ function spawnMinion(team, lane, type, tier) {
 function moveToward(u, x, y, dt) {
   const dx = x - u.x, dy = y - u.y, d = Math.hypot(dx, dy);
   if (d < 4) return true;
-  const sp = u.speed * (u.buffT > 0 ? 1.35 : 1) * (u.flag ? .85 : 1) * dt;
+  const sp = u.speed * (u.buffT > 0 ? 1.35 : 1) * (u.flag ? .85 : 1) * (u.slowUntil > G.time ? .6 : 1) * dt;
   u.face = Math.atan2(dy, dx);
   u.walk = (u.walk || 0) + Math.min(sp, d);
   if (sp >= d) { u.x = x; u.y = y; return true; }
@@ -1295,10 +1316,17 @@ function update(dt) {
     const p = G.projs[i];
     if (p.kind === 'bolt') {
       const sx = p.vx * dt, sy = p.vy * dt; p.x += sx; p.y += sy; p.trav += Math.hypot(sx, sy);
-      if (Math.random() < .8) G.fx.push({x: p.x, y: p.y, vx: rand(-30, 30), vy: rand(-30, 30), t: .3, max: .3, color: '#ffb35a', r: 5});
+      if (Math.random() < .8) G.fx.push({x: p.x, y: p.y, vx: rand(-30, 30), vy: rand(-30, 30), t: .3, max: .3, color: boltLook(p.spell)[1], r: 5});
       let hit = null;
-      for (const u of G.units) if (u.alive && u.team !== p.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && Math.hypot(u.x - p.x, u.y - p.y) < u.r + p.r) { hit = u; break; }
-      if (hit) { damage(hit, p.dmg, p.src); burst(p.x, p.y, '#ffcf7a', 14, 200, .4, 4); sfx('impact', p.x, p.y); G.projs.splice(i, 1); }
+      for (const u of G.units) if (u.alive && u.team !== p.team && (u.kind === 'minion' || u.kind === 'hero' || u.kind === 'monster') && Math.hypot(u.x - p.x, u.y - p.y) < u.r + p.r && !(p.hits && p.hits.includes(u))) { hit = u; break; }
+      if (hit) {
+        damage(hit, p.dmg, p.src); burst(p.x, p.y, boltLook(p.spell)[3], 14, 200, .4, 4); sfx('impact', p.x, p.y);
+        if (p.spell === 'frost') { hit.slowUntil = G.time + 2; p.hits.push(hit); } // pierces on
+        else {
+          if (p.spell === 'drain' && p.src.alive) { p.src.hp = Math.min(p.src.maxHp, p.src.hp + p.dmg * .5); burst(p.src.x, p.src.y - 20, '#b06bff', 10, 90, .5, 3); }
+          G.projs.splice(i, 1);
+        }
+      }
       else if (p.trav > p.range) G.projs.splice(i, 1);
     } else {
       const t = p.target;
@@ -1333,6 +1361,12 @@ function bleed(u, n, gush) {
   }
 }
 function starfallFx(b) {
+  if (b.style === 'storm') {
+    G.zaps.push({pts: [[b.x + rand(-40, 40), b.y - 420], [b.x + rand(-50, 50), b.y - 260], [b.x + rand(-30, 30), b.y - 120], [b.x, b.y]], t: .3});
+    burst(b.x, b.y, '#bfe0ff', 24, 260, .5, 4); ring(b.x, b.y, '#dff0ff', b.r, .4); sfx('zap', b.x, b.y);
+    return;
+  }
+  if (b.style === 'arcane') { burst(b.x, b.y, '#c79bff', 50, 380, .8, 6); burst(b.x, b.y, '#f0e0ff', 24, 200, .6, 4); ring(b.x, b.y, '#e6d4ff', b.r, .5); sfx('boom', b.x, b.y); return; }
   burst(b.x, b.y, '#f2c14e', 60, 420, .9, 6); burst(b.x, b.y, '#fff3c9', 30, 200, .6, 4); ring(b.x, b.y, '#fff3c9', b.r, .5);
   if (dist(b, G.player) < 900) G.shake = Math.max(G.shake, .3);
   sfx('boom', b.x, b.y);
@@ -1512,9 +1546,10 @@ function render() {
   for (const pr of G.projs) {
     if (!inView(pr)) continue;
     if (pr.kind === 'bolt') {
-      ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff8a3a'; ctx.shadowBlur = 20;
+      const lk = boltLook(pr.spell);
+      ctx.fillStyle = lk[1]; ctx.shadowColor = lk[2]; ctx.shadowBlur = 20;
       ctx.beginPath(); ctx.arc(pr.x, pr.y, 13, 0, 7); ctx.fill();
-      ctx.fillStyle = '#fff1c2'; ctx.beginPath(); ctx.arc(pr.x, pr.y, 6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.fillStyle = lk[3]; ctx.beginPath(); ctx.arc(pr.x, pr.y, 6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
     } else {
       ctx.fillStyle = pr.color; ctx.shadowColor = pr.color; ctx.shadowBlur = 12;
       ctx.beginPath(); ctx.arc(pr.x, pr.y, pr.size, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
@@ -1603,6 +1638,7 @@ function drawUnit(u, now) {
       ctx.strokeStyle = 'rgba(200,255,245,.75)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.ellipse(u.x, u.y - 22, 30 + Math.sin(now * 8) * 2, 46, 0, 0, 7); ctx.stroke();
     }
+    if (u.slowUntil > G.time && Math.random() < .5) G.fx.push({x: u.x + rand(-16, 16), y: u.y - rand(0, 40), vx: 0, vy: rand(-20, 10), t: .4, max: .4, color: '#bfefff', r: 2.5});
     if (u.buffT > 0 && Math.random() < .5) G.fx.push({x: u.x + rand(-15, 15), y: u.y + 14, vx: -u.vx * .2, vy: -u.vy * .2, t: .3, max: .3, color: '#7fd1c7', r: 3});
     if (u.trail && (Math.abs(u.vx) + Math.abs(u.vy) > 20) && Math.random() < .7) G.fx.push({x: u.x + rand(-8, 8), y: u.y + 12, vx: rand(-15, 15), vy: rand(-30, -5), t: .5, max: .5, color: u.trail, r: 3.5});
     if (u.level >= 15 && Math.random() < .35) G.fx.push({x: u.x + rand(-22, 22), y: u.y - rand(0, 70), vx: rand(-10, 10), vy: rand(-50, -20), t: .6, max: .6, color: u.level >= 18 ? '#fff3c9' : u.color, r: 2.5});
@@ -2514,7 +2550,7 @@ function openPause() {
 }
 function resume() { hideMenus(); G.paused = false; }
 function quitToMenu() {
-  if (G.mode === 'solo' && G.started && !G.over && G.cfg.ranked) applyRanked(false);
+  if (G.started && !G.over && G.cfg.ranked) applyRanked(false);
   else if (G.mode === 'solo' && G.started && !G.over) store.set(AUTO_KEY, serialize());
   leaveNet(); reset(0); show('scr-main');
 }
@@ -2710,7 +2746,7 @@ function renderGameList() {
     list.appendChild(b);
   }
 }
-$('mpHost').addEventListener('click', hostGame);
+$('mpHost').addEventListener('click', () => hostGame());
 $('mpJoin').addEventListener('click', () => {
   const code = $('codeInput').value.trim().toLowerCase();
   if (!/^[a-z0-9]{4}$/.test(code)) { $('multiStatus').textContent = 'A match code is 4 letters or numbers.'; return; }
@@ -2721,47 +2757,52 @@ $('mpBack').addEventListener('click', () => show('scr-main'));
 $('lobbyLeave').addEventListener('click', () => { leaveNet(); reset(0); openMulti(); });
 $('lobbyStart').addEventListener('click', hostStart);
 
-async function hostGame() {
+async function hostGame(ranked = false) {
   if (!NET.room) return;
   leaveNet();
   let code = '';
   while (code.length < 4) code += 'abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 31)];
   try { NET.game = await NET.room.join('tw-' + code); }
   catch (e) { $('multiStatus').textContent = 'Could not open a match room. Try again in a moment.'; return; }
-  Object.assign(NET, {role: 'host', code, myHero: 0, assign: {}, seen: {}, applied: {}, mapId: NET.mapId || 'vale', modeId: NET.modeId || 'conquest'});
+  Object.assign(NET, {role: 'host', code, myHero: 0, assign: {}, seen: {}, applied: {}, mapId: NET.mapId || 'vale', modeId: NET.modeId || 'conquest', ranked});
   NET.game.onPeers(onGamePeersHost, () => {});
   hostPresence(); advertise();
   show('scr-lobby'); renderLobby();
 }
-async function joinGame(code) {
+async function joinGame(code, ranked = false) {
   if (!NET.room) return;
   leaveNet();
   try { NET.game = await NET.room.join('tw-' + code); }
   catch (e) { $('multiStatus').textContent = 'Could not join that match. Check the code and try again.'; return; }
-  Object.assign(NET, {role: 'client', code, want: null, hostSeen: false, host: null, lastSnapObj: null, firstSnap: true, lastEv: 0, mv: null, castQ: [], buyQ: []});
+  Object.assign(NET, {role: 'client', code, ranked, want: null, hostSeen: false, host: null, lastSnapObj: null, firstSnap: true, lastEv: 0, mv: null, castQ: [], buyQ: []});
   NET.game.onPeers(onGamePeersClient, () => hostLost());
   show('scr-lobby'); renderLobby();
 }
 function leaveNet() {
   if (NET.game) NET.game.leave().catch(() => {});
-  if (NET.room && NET.role === 'host') NET.room.presence({host: null}).catch(() => {});
-  clearTimeout(NET.lostTimer);
-  Object.assign(NET, {game: null, role: null, assign: {}, applied: {}, want: null, hostSeen: false, host: null, lastSnapObj: null, lostTimer: 0, starting: false});
+  if (NET.room && NET.role === 'host') NET.room.presence({host: null, rinv: null}).catch(() => {});
+  clearTimeout(NET.lostTimer); clearTimeout(NET.rankStart);
+  Object.assign(NET, {game: null, role: null, assign: {}, applied: {}, want: null, hostSeen: false, host: null, lastSnapObj: null, lostTimer: 0, starting: false, ranked: false, launching: false, rankStart: 0, invited: null});
   if (G) G.mode = 'solo';
 }
 function advertise() {
-  if (!NET.room || NET.role !== 'host') return;
+  if (!NET.room || NET.role !== 'host' || NET.ranked) return; // ranked matches are private to the players matchmaking picked
   NET.room.presence({host: {code: NET.code, ph: G.started && G.mode === 'host' ? 'game' : 'lobby', n: 1 + Object.keys(NET.assign).length, mp: NET.mapId, mo: NET.modeId}}).catch(() => {});
 }
 function hostPresence() {
   if (!NET.game) return;
-  NET.game.presence({ph: G.mode === 'host' && G.started ? 'game' : 'lobby', hh: NET.myHero, as: NET.assign, mp: NET.mapId, mo: NET.modeId}).catch(() => {});
+  NET.game.presence({ph: G.mode === 'host' && G.started ? 'game' : 'lobby', hh: NET.myHero, as: NET.assign, mp: NET.mapId, mo: NET.modeId, rk: NET.ranked ? 1 : 0}).catch(() => {});
 }
 function hostAssign() {
   const taken = new Set([NET.myHero]), as = {};
   const peers = NET.game.peers().filter(p => !p.sameTab);
   for (const p of peers) NET.seen[p.peer] = NET.seen[p.peer] || Date.now();
   peers.sort((a, b) => NET.seen[a.peer] - NET.seen[b.peer]);
+  if (NET.ranked) { // ranked: players fill alternate teams in the order they arrived
+    const slots = [3, 1, 4, 2, 5];
+    peers.slice(0, 5).forEach((p, i) => { as[p.peer] = slots[i]; });
+    NET.assign = as; return;
+  }
   for (const p of peers) {
     const w = p.presence && p.presence.want;
     if (Number.isInteger(w) && w >= 0 && w < 6 && !taken.has(w)) { as[p.peer] = w; taken.add(w); }
@@ -2785,10 +2826,12 @@ function onGamePeersHost() {
   if (G.mode === 'host' && G.started) applyRemotes();
   if (JSON.stringify(NET.assign) !== before) { hostPresence(); advertise(); }
   if (!overlay.hidden && currentScreen === 'scr-lobby') renderLobby();
+  if (NET.ranked && !G.started && NET.invited && NET.invited.every(pe => pe in NET.assign)) hostStart();
 }
 function hostStart() {
-  if (NET.role !== 'host') return;
-  const cfg = {map: NET.mapId, diff: 1, stage: -1, mode: NET.modeId};
+  if (NET.role !== 'host' || NET.launching) return;
+  NET.launching = true; clearTimeout(NET.rankStart);
+  const cfg = {map: NET.mapId, diff: NET.ranked ? TIER_DIFF[rankOf(rankState().rp).tier] : 1, stage: -1, mode: NET.modeId, ranked: NET.ranked};
   showLoading(loadInfo(cfg, NET.myHero), () => {
     hostAssign(); reset(NET.myHero, cfg); G.mode = 'host'; applyRemotes(); applyLoadout();
   }, () => { begin(false); applyBoosts(); hostPresence(); advertise(); NET.lastSnap = 0; });
@@ -2818,8 +2861,8 @@ function renderLobby() {
     $('lobbyOpts').hidden = false;
     let n = 2;
     for (const p of peers) if (!p.sameTab) { const a = NET.assign[p.peer]; lines.push(['Player ' + n++ + (p.guest ? ' (guest)' : ''), a != null ? ROSTER[a].name : 'Choosing a hero']); }
-    $('lobbyStatus').textContent = 'Friends can join from Multiplayer or with this code. Empty hero slots are played by bots. Keep this tab open and visible while you host.';
-    $('lobbyStart').hidden = false;
+    $('lobbyStatus').textContent = NET.ranked ? 'Ranked match found. Starting as soon as everyone is in…' : 'Friends can join from Multiplayer or with this code. Empty hero slots are played by bots. Keep this tab open and visible while you host.';
+    $('lobbyStart').hidden = NET.ranked; $('lobbyOpts').hidden = NET.ranked;
   } else {
     const pr = NET.host ? NET.host.presence : null;
     $('lobbyStart').hidden = true; $('lobbyOpts').hidden = true;
@@ -2859,14 +2902,14 @@ function onGamePeersClient() {
     if (free != null) { NET.want = free; NET.game.presence({want: free}).catch(() => {}); }
   }
   if (pr.ph === 'game' && mine != null) {
-    if (G.mode !== 'client' || !G.started) startClient(mine, pr.mp, pr.mo);
+    if (G.mode !== 'client' || !G.started) startClient(mine, pr.mp, pr.mo, pr.rk === 1);
     if (G.mode === 'client' && pr.snap && pr.snap !== NET.lastSnapObj) { NET.lastSnapObj = pr.snap; try { applySnap(pr.snap); } catch (e) { /* ignore a malformed snapshot */ } }
   } else if (!overlay.hidden && currentScreen === 'scr-lobby') renderLobby();
 }
-function startClient(idx, map, mode) {
+function startClient(idx, map, mode, ranked) {
   if (NET.starting) return;
   NET.starting = true;
-  const cfg = {map: MAPS[map] ? map : 'vale', diff: 1, stage: -1, mode: MODES[mode] ? mode : 'conquest'};
+  const cfg = {map: MAPS[map] ? map : 'vale', diff: 1, stage: -1, mode: MODES[mode] ? mode : 'conquest', ranked: ranked && NET.ranked};
   showLoading(Object.assign(loadInfo(cfg, idx), {dur: 1600}), () => {
     reset(idx, cfg); G.mode = 'client';
     NET.firstSnap = true; NET.lastEv = 0; NET.mv = null; NET.castQ = []; NET.buyQ = [];
@@ -2913,7 +2956,7 @@ function hostReadInputs() {
 function hostTick(now) {
   if (!NET.game || now - NET.lastSnap < 100) return;
   NET.lastSnap = now;
-  NET.game.presence({ph: 'game', hh: NET.myHero, as: NET.assign, mp: NET.mapId, mo: NET.modeId, snap: encodeSnap()}).catch(() => {});
+  NET.game.presence({ph: 'game', hh: NET.myHero, as: NET.assign, mp: NET.mapId, mo: NET.modeId, rk: NET.ranked ? 1 : 0, snap: encodeSnap()}).catch(() => {});
 }
 
 // Snapshot format: compact base-36 strings so a whole match fits in one 4 KiB presence object.
@@ -2939,7 +2982,7 @@ function encodeSnap() {
   }
   for (const p of G.projs) {
     if (pr.length >= 40) break;
-    if (p.kind === 'bolt') pr.push(['b', f36(p.x / 4), f36(p.y / 4), f36((Math.atan2(p.vy, p.vx) * 180 / Math.PI + 360) % 360)].join(','));
+    if (p.kind === 'bolt') pr.push(['b', f36(p.x / 4), f36(p.y / 4), f36((Math.atan2(p.vy, p.vx) * 180 / Math.PI + 360) % 360), Math.max(0, BOLT_LOOK.indexOf(boltLook(p.spell)))].join(','));
     else if (p.src && p.target) pr.push(['a', f36(p.x / 4), f36(p.y / 4), f36(p.target.id), f36(p.src.id)].join(','));
   }
   const snap = {t: Math.round(G.time * 10), k: G.kills, d: G.dragons, mt: G.minionTier, ov: G.winner, hu: hu.join('.'),
@@ -3030,7 +3073,7 @@ function applySnap(s) {
   G.projs = [];
   for (const f of split(s.p)) {
     const x = p36(f[1]) * 4, y = p36(f[2]) * 4;
-    if (f[0] === 'b') { const a = p36(f[3]) * Math.PI / 180; G.projs.push({kind: 'bolt', x, y, vx: Math.cos(a) * 1150, vy: Math.sin(a) * 1150}); }
+    if (f[0] === 'b') { const a = p36(f[3]) * Math.PI / 180; G.projs.push({kind: 'bolt', spell: (BOLT_LOOK[+f[4]] || BOLT_LOOK[0])[0], x, y, vx: Math.cos(a) * 1150, vy: Math.sin(a) * 1150}); }
     else if (f[0] === 'a') {
       const t = ids.get(p36(f[3])), src = ids.get(p36(f[4]));
       if (t && src) G.projs.push({kind: 'auto', x, y, target: t, src, speed: projSpeed(src), size: projSize(src), color: projColor(src)});
@@ -3068,7 +3111,7 @@ function clientUpdate(dt) {
     const p = G.projs[i];
     if (p.kind === 'bolt') {
       p.x += p.vx * dt; p.y += p.vy * dt;
-      if (Math.random() < .8) G.fx.push({x: p.x, y: p.y, vx: rand(-30, 30), vy: rand(-30, 30), t: .3, max: .3, color: '#ffb35a', r: 5});
+      if (Math.random() < .8) G.fx.push({x: p.x, y: p.y, vx: rand(-30, 30), vy: rand(-30, 30), t: .3, max: .3, color: boltLook(p.spell)[1], r: 5});
     } else {
       const t = p.target;
       if (!t.alive) { G.projs.splice(i, 1); continue; }
@@ -3211,7 +3254,16 @@ const MOVES = {
   meteor: {slot: 'r', name: 'Meteor Rain', desc: 'Three meteors crash around the target.', price: 400},
   nova: {slot: 'r', name: 'Frost Nova', desc: 'An instant blast all around you.', price: 400},
   chain: {slot: 'r', name: 'Chain Lightning', desc: 'Arcs between up to 4 enemies near the cursor.', price: 500},
+  frost: {slot: 'q', name: 'Frost Lance', desc: 'An icy bolt that pierces every enemy in its path and slows them for 2 seconds.', price: 350},
+  drain: {slot: 'q', name: 'Soul Drain', desc: 'A dark bolt that heals you for half the damage it deals.', price: 350},
+  flame: {slot: 'q', name: 'Flame Wave', desc: 'A short-range blast of fire that burns every enemy in front of you.', price: 300},
+  tempest: {slot: 'r', name: 'Thunderstorm', desc: 'Six lightning strikes rain down on the target area.', price: 450},
+  vortex: {slot: 'r', name: 'Arcane Vortex', desc: 'Pulls nearby enemies together, then detonates.', price: 450},
+  phoenix: {slot: 'r', name: 'Phoenix Rising', desc: 'Burst into flame: burn enemies around you, heal a quarter of your health and run faster.', price: 500},
 };
+// look of each bolt spell, also sent to online players as a number
+const BOLT_LOOK = [['bolt', '#ffb35a', '#ff8a3a', '#fff1c2'], ['frost', '#9fe6ff', '#4fb8ff', '#ffffff'], ['drain', '#b06bff', '#7a2fff', '#f0d9ff']];
+const boltLook = sp => BOLT_LOOK.find(b => b[0] === sp) || BOLT_LOOK[0];
 const SKINS = {
   none: {name: 'Classic', desc: 'Your hero\'s own colors.', price: 0},
   gilded: {name: 'Gilded', color: '#ffd75e', price: 200},
@@ -3260,7 +3312,8 @@ function freshProfile() {
     eq: {skin: 'none', trail: 'none', q: 'bolt', r: 'starfall', pet: null}, pass: {premium: false, xp: 0, claimed: []}, stage: 0, cleared: []};
 }
 let PROF = Object.assign(freshProfile(), store.get(PROFILE_KEY) || {});
-const saveProfile = () => store.set(PROFILE_KEY, PROF);
+const saveHooks = [];
+const saveProfile = () => { store.set(PROFILE_KEY, PROF); for (const f of saveHooks) f(); };
 const owns = (list, id) => PROF[list].includes(id);
 function grant(r) {
   if (r.crowns) PROF.crowns += r.crowns;
@@ -3327,16 +3380,31 @@ window.Thornwake = {
   // applies one paid grant exactly once, keyed by its Stripe checkout session id
   grantPaid(g) {
     if (!g || typeof g.id !== 'string' || (PROF.paid || []).includes(g.id)) return false;
-    const r = g.grant || {};
     PROF.paid = (PROF.paid || []).concat(g.id);
+    if (g.revoke) { // a refunded purchase: take back what it gave, as far as it hasn't been spent
+      const r = g.revoke;
+      if (r.crowns) PROF.crowns = Math.max(0, PROF.crowns - r.crowns);
+      if (r.premium) PROF.pass.premium = false;
+      if (r.skin) { PROF.skins = PROF.skins.filter(k => k !== r.skin); if (PROF.eq.skin === r.skin) PROF.eq.skin = 'none'; }
+      if (g.productId) PROF.paidProducts = (PROF.paidProducts || []).filter(k => k !== g.productId);
+      saveProfile(); return true;
+    }
+    const r = g.grant || {};
     if (g.productId) PROF.paidProducts = (PROF.paidProducts || []).concat(g.productId);
     if (r.crowns) PROF.crowns += r.crowns;
     if (r.premium) PROF.pass.premium = true;
     if (r.skin) grant({skin: r.skin});
     saveProfile(); return true;
   },
-  banner, el, storeCard,
+  banner, el, storeCard, show,
   refresh() { if (!overlay.hidden && currentScreen === 'scr-store') renderStore(); },
+  // accounts add-on (accounts.js): cloud saves and an Account screen
+  getProfile: () => JSON.parse(JSON.stringify(PROF)),
+  replaceProfile(data) { PROF = Object.assign(freshProfile(), data); store.set(PROFILE_KEY, PROF); window.Thornwake.refresh(); },
+  onSave(fn) { saveHooks.push(fn); },
+  addMenuButton(id, label, onClick) { const b = el('button', 'mbtn', label); b.id = id; b.addEventListener('click', onClick); $('m-help').before(b); return b; },
+  addScreen(section) { section.classList.add('screen'); section.hidden = true; $('scr-main').parentNode.appendChild(section); },
+  currentScreen: () => overlay.hidden ? null : currentScreen,
 };
 const TABS = [['heroes', 'Heroes'], ['pets', 'Pets'], ['moves', 'Moves'], ['boosts', 'Boosts'], ['cosmetics', 'Cosmetics'], ['pass', 'Game Pass']];
 function openStore(tab, back) { if (tab) storeTab = tab; storeBack = back || 'scr-main'; renderStore(); show('scr-store'); }
@@ -3566,7 +3634,7 @@ function rankedCfg() {
 }
 // RP for a finished (or abandoned) ranked match; applied once
 function applyRanked(won) {
-  if (!G.cfg.ranked || G.rankDone || G.mode !== 'solo') return '';
+  if (!G.cfg.ranked || G.rankDone) return '';
   G.rankDone = true;
   const st = rankState(), before = rankOf(st.rp), p = G.player;
   let delta;
@@ -3577,9 +3645,56 @@ function applyRanked(won) {
   saveProfile();
   return `Ranked: ${delta >= 0 ? '+' : ''}${delta} RP` + (after.name !== before.name ? ` · ${before.name} → ${after.name}` + (after.floor > before.floor ? ' (promoted!)' : '') : ` · ${after.name}`);
 }
-$('m-ranked').addEventListener('click', () => { renderRanked(); show('scr-ranked'); });
-$('rankBack').addEventListener('click', () => show('scr-main'));
-$('rankPlay').addEventListener('click', () => { pendingCfg = rankedCfg(); heroScreen('scr-ranked'); });
+// Online ranked matchmaking through the shared room. Searching players list themselves in their presence;
+// the one who has waited longest picks up to five others closest to their RP, hosts the match and invites them.
+const RQ = {on: false, t: 0, since2: 0, timer: 0};
+async function findRanked() {
+  $('rankSearch').textContent = 'Connecting…';
+  const room = await netInit();
+  if (!room) { $('rankSearch').textContent = 'Online ranked isn\'t available in this view. Try Ranked vs bots.'; return; }
+  leaveNet();
+  Object.assign(RQ, {on: true, t: Date.now(), since2: 0});
+  room.presence({queue: {rp: rankState().rp, t: RQ.t}, rinv: null}).catch(() => {});
+  $('rankPlay').hidden = true; $('rankCancel').hidden = false;
+  clearInterval(RQ.timer); RQ.timer = setInterval(rankTick, 1000); rankTick();
+}
+function stopQueue(msg = '') {
+  if (RQ.on && NET.room) NET.room.presence({queue: null}).catch(() => {});
+  RQ.on = false; clearInterval(RQ.timer);
+  $('rankPlay').hidden = false; $('rankCancel').hidden = true; $('rankSearch').textContent = msg;
+}
+function rankTick() {
+  if (!RQ.on || !NET.room) return;
+  const peers = NET.room.peers(), me = peers.find(p => p.sameTab);
+  for (const p of peers) {
+    const inv = !p.sameTab && p.presence && p.presence.rinv;
+    if (inv && me && Array.isArray(inv.to) && inv.to.includes(me.peer) && /^[a-z0-9]{4}$/.test(inv.code)) { stopQueue(); joinGame(inv.code, true); return; }
+  }
+  const q = peers.filter(p => p.presence && p.presence.queue && Number.isFinite(p.presence.queue.t))
+    .sort((a, b) => a.presence.queue.t - b.presence.queue.t || (a.peer < b.peer ? -1 : 1));
+  $('rankSearch').textContent = `Searching for players… ${fmtTime((Date.now() - RQ.t) / 1000)} · ${q.length} searching now` + (q.length < 2 ? '. Waiting for someone else to search.' : '. Match starting soon.');
+  if (q.length < 2) { RQ.since2 = 0; return; }
+  RQ.since2 = RQ.since2 || Date.now();
+  // wait up to 12 seconds for a fuller match, unless all six spots can already be filled
+  if (!q[0].sameTab || (q.length < 6 && Date.now() - RQ.since2 < 12000)) return;
+  const rp = rankState().rp;
+  const picked = q.filter(p => !p.sameTab).sort((a, b) => Math.abs(a.presence.queue.rp - rp) - Math.abs(b.presence.queue.rp - rp)).slice(0, 5).map(p => p.peer);
+  stopQueue(); hostRanked(picked);
+}
+async function hostRanked(invited) {
+  const cfg = rankedCfg();
+  NET.mapId = cfg.map; NET.modeId = cfg.mode;
+  await hostGame(true);
+  if (NET.role !== 'host') return;
+  NET.invited = invited;
+  NET.room.presence({rinv: {code: NET.code, to: invited}}).catch(() => {});
+  NET.rankStart = setTimeout(hostStart, 15000); // start with whoever made it in
+}
+$('m-ranked').addEventListener('click', () => { renderRanked(); stopQueue(); show('scr-ranked'); });
+$('rankBack').addEventListener('click', () => { stopQueue(); show('scr-main'); });
+$('rankPlay').addEventListener('click', findRanked);
+$('rankCancel').addEventListener('click', () => stopQueue('Stopped searching.'));
+$('rankBots').addEventListener('click', () => { stopQueue(); pendingCfg = rankedCfg(); heroScreen('scr-ranked'); });
 
 // ---------- loading screen ----------
 const TIPS = [
@@ -3833,8 +3948,14 @@ const SFX = {
   flag:    {gap: .4,  play: (t, v) => notes(t, [67, 72], .12, .3, .09 * v, 'square')},
   capture: {gap: .5,  play: (t, v) => notes(t, [67, 72, 76, 79], .1, .5, .08 * v, 'square')},
   crack:   {gap: .06, play: (t, v) => { noiseHit(t, .3 * v, .06, 'bandpass', 3200); sweep(t, 'triangle', 700, 300, .05, .06 * v); }},
+  flame:   {gap: .2,  play: (t, v) => { noiseHit(t, .4 * v, .5, 'lowpass', 1800); sweep(t, 'sawtooth', 220, 90, .4, .08 * v); }},
+  frost:   {gap: .1,  play: (t, v) => { sweep(t, 'sine', 2400, 1200, .25, .08 * v); sweep(t + .03, 'triangle', 1600, 3000, .2, .05 * v); noiseHit(t, .1 * v, .2, 'highpass', 6000); }},
+  drain:   {gap: .1,  play: (t, v) => { sweep(t, 'sawtooth', 500, 160, .35, .06 * v); sweep(t, 'sine', 330, 110, .4, .12 * v); }},
+  vortex:  {gap: .3,  play: (t, v) => { sweep(t, 'sawtooth', 900, 80, .6, .07 * v); sweep(t, 'sine', 600, 60, .6, .2 * v); }},
+  phoenix: {gap: .5,  play: (t, v) => { noiseHit(t, .4 * v, .8, 'lowpass', 2200); notes(t + .05, [69, 76, 81, 88], .06, .5, .08 * v, 'sawtooth'); }},
   hatch:   {gap: .5,  play: (t, v) => { noiseHit(t, .3 * v, .25, 'highpass', 3000); notes(t + .05, [76, 81, 84, 88], .06, .45, .08 * v); }},
 };
+const SPELL_SFX = {frost: 'frost', drain: 'drain', flame: 'flame', tempest: 'ult', vortex: 'vortex', phoenix: 'phoenix'};
 const sfxLast = {};
 // Plays a sound; with a position it fades with distance from the camera and stays silent off screen.
 function sfx(name, x, y) {
