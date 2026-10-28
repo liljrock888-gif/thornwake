@@ -325,7 +325,9 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stHud .bar.xp{height:5px}#stHud .bar.xp i{background:linear-gradient(90deg,#8a5a1a,#ffd75e)}#stHud .bl{font-size:10px;letter-spacing:.1em;color:#c8b89a;margin-bottom:-2px}
 @media (max-width:640px){#stMini{width:118px;height:80px}#stQuest{top:calc(98px + env(safe-area-inset-top,0px));width:min(52vw,240px);font-size:12px}#stQuest .obj{font-size:13px}#stHint{display:none}}
 #game.touch #stHint{display:none}
-#stPartyHud{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(204px + env(safe-area-inset-top,0px));width:170px;display:flex;flex-direction:column;gap:4px;pointer-events:none}
+#stPartyHud{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(204px + env(safe-area-inset-top,0px));width:170px;display:flex;flex-direction:column;gap:4px;cursor:pointer}
+#stInvite{position:absolute;left:50%;top:calc(70px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:6;background:rgba(10,20,14,.95);border:1px solid #7fe08a;border-radius:12px;padding:10px 14px;box-shadow:0 8px 26px rgba(0,0,0,.5);text-align:center;max-width:min(92vw,360px)}
+#stInvite b{display:block;color:#bfffcb;font-size:14px;margin-bottom:6px}#stInvite .row{display:flex;gap:8px;justify-content:center}#stInvite button{padding:8px 16px;border-radius:8px;border:1px solid #3a6a4a;background:#1a2a20;font-size:14px;cursor:pointer}#stInvite button.ok{background:#2f7a45;border-color:#7fe08a}#stInvite small{display:block;margin-top:4px;color:#97a69b}
 #stPartyHud .pf{background:rgba(5,7,10,.7);border:1px solid #3a6a4a;border-radius:8px;padding:4px 8px}#stPartyHud b{font-size:12px;color:#7fe08a}#stPartyHud .bar{height:8px;margin-top:2px}
 #game.touch #stPartyHud{top:calc(150px + env(safe-area-inset-top,0px));width:140px}
 #stChat{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px));width:min(340px,60vw);font-size:13px;pointer-events:none}
@@ -5407,14 +5409,14 @@ const ST_TILE = 64, ST_W = 48, ST_H = 32;
 const ST_CLASSES = {
   warrior: {name: 'Warrior', look: 'knight', hp: 120, mp: 30, atk: 14, mag: 4, def: 8, spd: 6, skills: ['strike', 'guard', 'rally']},
   mage:    {name: 'Mage', look: 'mage', hp: 92, mp: 70, atk: 6, mag: 16, def: 5, spd: 7, skills: ['fireball', 'frost', 'lightning', 'ward']},
-  ranger:  {name: 'Ranger', look: 'ranger', hp: 95, mp: 45, atk: 12, mag: 8, def: 5, spd: 10, skills: ['rain', 'venom', 'strike']},
-  rogue:   {name: 'Rogue', look: 'rogue', hp: 90, mp: 40, atk: 13, mag: 6, def: 5, spd: 12, skills: ['venom', 'strike', 'drain']},
-  paladin: {name: 'Paladin', look: 'paladin', hp: 130, mp: 50, atk: 11, mag: 10, def: 10, spd: 5, skills: ['heal', 'guard', 'strike', 'ward']},
+  ranger:  {name: 'Ranger', look: 'ranger', hp: 106, mp: 45, atk: 13, mag: 8, def: 6, spd: 10, skills: ['rain', 'venom', 'strike']},
+  rogue:   {name: 'Rogue', look: 'rogue', hp: 100, mp: 40, atk: 14, mag: 6, def: 6, spd: 12, skills: ['venom', 'strike', 'drain']},
+  paladin: {name: 'Paladin', look: 'paladin', hp: 130, mp: 50, atk: 13, mag: 12, def: 10, spd: 5, skills: ['heal', 'guard', 'strike', 'ward']},
   gunner:  {name: 'Gunner', look: 'soldier', hp: 100, mp: 35, atk: 15, mag: 3, def: 6, spd: 8, skills: ['rain', 'strike', 'rally']},
-  necromancer: {name: 'Necromancer', look: 'warlock', hp: 88, mp: 75, atk: 5, mag: 17, def: 4, spd: 7, skills: ['bonespear', 'drain', 'wither']},
-  monk:    {name: 'Monk', look: 'kifighter', hp: 110, mp: 40, atk: 14, mag: 7, def: 6, spd: 11, skills: ['flurry', 'guard', 'heal']},
-  druid:   {name: 'Druid', look: 'shaman', hp: 105, mp: 60, atk: 8, mag: 13, def: 7, spd: 7, skills: ['thornlash', 'heal', 'quake']},
-  berserker: {name: 'Berserker', look: 'brute', hp: 140, mp: 25, atk: 17, mag: 2, def: 5, spd: 7, skills: ['quake', 'rally', 'strike']},
+  necromancer: {name: 'Necromancer', look: 'warlock', hp: 96, mp: 72, atk: 5, mag: 16, def: 5, spd: 7, skills: ['bonespear', 'drain', 'wither']},
+  monk:    {name: 'Monk', look: 'kifighter', hp: 108, mp: 40, atk: 14, mag: 6, def: 6, spd: 11, skills: ['flurry', 'guard', 'strike']},
+  druid:   {name: 'Druid', look: 'shaman', hp: 98, mp: 60, atk: 7, mag: 12, def: 6, spd: 7, skills: ['thornlash', 'heal', 'quake']},
+  berserker: {name: 'Berserker', look: 'brute', hp: 136, mp: 30, atk: 16, mag: 2, def: 5, spd: 7, skills: ['quake', 'rally', 'strike']},
   blademaster: {name: 'Blademaster', look: 'samurai', hp: 100, mp: 40, atk: 15, mag: 5, def: 6, spd: 10, skills: ['flurry', 'strike', 'guard']},
 };
 // Races: each has passive traits and one racial power usable once per battle.
@@ -5426,7 +5428,7 @@ const ST_RACES = {
   tuskborn: {name: 'Tuskborn', kind: 'Orc', skin: '#8aa86a', tusks: 1, desc: 'Proud mountain clans who settle debts in blood.', trait: '+12% health, +6% attack, +15% attack when badly hurt.', power: 'Blood Fury', pdesc: 'Fly into a rage: +60% attack and more criticals for 3 turns.', col: '#ff3a2a', hp: .12, atk: .06},
   stonekin: {name: 'Stonekin', kind: 'Dwarf', beard: 1, desc: 'Stout miners and smiths from under the Frost Peaks.', trait: '+12% defense. Bleeding cannot take hold.', power: 'Stoneskin', pdesc: 'Your skin turns to stone: take no damage until your next turn.', col: '#c9ced6', def: .12},
   felari:   {name: 'Felari', kind: 'Catfolk', skin: '#d9a868', cat: 1, tail: '#b8884a', desc: 'Sly, quick wanderers from the southern caravans.', trait: '+3 speed, +10% critical chance.', power: 'Shadowpounce', pdesc: 'Pounce on one enemy for a brutal 230% blow.', col: '#ffd75e', spd: 3, crit: .1},
-  scalekin: {name: 'Scalekin', kind: 'Lizardfolk', skin: '#6a9a6a', snout: 1, tail: '#5a8a5a', desc: 'Marsh dwellers whose wounds knit shut on their own.', trait: 'Regain 4% health every turn.', power: 'Shed Skin', pdesc: 'Slough off your wounds: heal 45% and close every injury.', col: '#9fffb8'},
+  scalekin: {name: 'Scalekin', kind: 'Lizardfolk', skin: '#6a9a6a', snout: 1, tail: '#5a8a5a', desc: 'Marsh dwellers whose wounds knit shut on their own.', trait: 'Regain 2.5% health every turn.', power: 'Shed Skin', pdesc: 'Slough off your wounds: heal 45% and close every injury.', col: '#9fffb8'},
 };
 const stRace = () => ST_RACES[stData().race] || ST_RACES.human;
 const ST_COLORS = ['#f2c14e', '#7fd1c7', '#e0405a', '#8f7bd8', '#7fe08a', '#ff8a4a', '#8fd4ff', '#ff9ccf'];
@@ -5442,12 +5444,12 @@ const ST_SKILLS = {
   heal:      {name: 'Heal', mp: 8, kind: 'heal', mult: 2.4, desc: 'Restores health to you and your ally.'},
   guard:     {name: 'Guard Up', mp: 5, kind: 'buff', buff: 'guard', desc: 'Double defense for 2 turns.'},
   rally:     {name: 'War Cry', mp: 6, kind: 'buff', buff: 'rally', desc: '+50% attack for 3 turns.'},
-  ward:      {name: 'Arcane Shield', mp: 9, kind: 'buff', buff: 'ward', desc: 'A shield of light that blocks 75% of all damage for 2 turns.'},
+  ward:      {name: 'Arcane Shield', mp: 10, kind: 'buff', buff: 'ward', desc: 'A shield of light that blocks 60% of all damage for 2 turns.'},
   bonespear: {name: 'Bone Spear', mp: 8, kind: 'mag', mult: 1.7, desc: 'A lance of grave-bone that pierces armor.'},
   wither:    {name: 'Wither', mp: 10, kind: 'mag', mult: .8, all: true, poison: true, desc: 'Rots every enemy, poisoning them for 3 turns.'},
-  flurry:    {name: 'Hundred Fists', mp: 7, kind: 'phys', mult: 1.3, twice: true, desc: 'A blur of blows that strikes twice.'},
+  flurry:    {name: 'Hundred Fists', mp: 7, kind: 'phys', mult: 1.15, twice: true, desc: 'A blur of blows that strikes twice.'},
   thornlash: {name: 'Thornlash', mp: 7, kind: 'mag', mult: 1.4, poison: true, desc: 'Barbed vines that poison for 3 turns.'},
-  quake:     {name: 'Earthshatter', mp: 11, kind: 'phys', mult: .95, all: true, slow: true, desc: 'Splits the ground under every enemy; some are stunned.'},
+  quake:     {name: 'Earthshatter', mp: 12, kind: 'phys', mult: .85, all: true, slow: true, slowP: .25, desc: 'Splits the ground under every enemy; some are stunned.'},
   flash:     {name: 'Flash Step', mp: 4, kind: 'phys', mult: .95, twice: true, sure: true, gift: true, desc: 'Two blows too fast to dodge.'},
   crush:     {name: 'Heaven\'s Crush', mp: 10, kind: 'phys', mult: 2.6, gift: true, desc: 'One perfect strike.'},
   wolfform:  {name: 'Wolf Form', mp: 8, kind: 'buff', buff: 'wolf', gift: true, desc: 'Become the beast for 3 turns: +80% attack, claws that make enemies bleed.'},
@@ -5542,7 +5544,7 @@ const ST_FOES = {
 };
 const ST_ENCOUNTERS = {b: [['knight'], ['bandit', 'bandit'], ['cultist', 'bandit']], a: [['goblin', 'bandit'], ['cultist'], ['imp', 'imp'], ['fiend']], g: [['werewolf'], ['bandit'], ['bandit', 'wolf'], ['frostwolf', 'bandit']], T: [['wolf'], ['wolf', 'pup'], ['pup', 'pup']], ':': [['goblin'], ['goblin', 'goblin'], ['bandit']], '*': [['frostwolf'], ['frostwolf', 'wolf']], C: [['knight'], ['knight', 'bandit']]};
 const ST_REGION = {p: 'Homestead Fields', F: 'Farmland', O: 'Coach Post', b: 'The Bone Marsh', a: 'The Ashfall Dunes', g: 'The Gloamwood', T: 'The Thornwood', ':': 'Sunken Ruins', '*': 'Frost Peaks', C: 'Hollow Castle', v: 'Thornwake, the Last Lit Village', '.': 'The Ashen Vale', '=': 'The Ashen Vale', B: 'River Bridge', S: 'Ashen Shrine', D: 'Dungeon Entrance'};
-const ST_BLOCKED = new Set(['~', '^', 'H', 'h', 'I', 'U', 'K', '#', 'W', 'Q', 'L', 'M', 'O']);
+const ST_BLOCKED = new Set(['~', '^', 'H', 'h', 'I', 'U', 'K', '#', 'W', 'Q', 'L', 'M']); // coach posts ('O') stand on the road, so you can walk past them
 // Coach posts: pay a driver to ride between towns along the roads
 const ST_COACHES = [{id: 'thornwake', name: 'Thornwake', x: 17, y: 11}, {id: 'ravenhollow', name: 'Ravenhollow', x: 12, y: 22}, {id: 'saltmere', name: 'Saltmere', x: 31, y: 12}, {id: 'harrow', name: 'Harrowfield', x: 27, y: 23}, {id: 'dunes', name: 'Ashfall Waystation', x: 43, y: 15}];
 const ST_CRYSTALS = [
@@ -6736,7 +6738,8 @@ function stJournal(tab) {
   m.classList.add('journal'); setTimeout(() => x.focus({preventScroll: true}), 0);
 }
 // ---- online: a shared story world. Everyone in story mode sees each other, can form parties that fight together, and can chat.
-const SW = {room: null, me: null, peers: [], vis: {}, seen: {}, myChat: [], log: [], party: null, inv: null, push: 0, sig: '', muted: {}, mounts: {}, handledInv: {}, last: 0};
+const SW = {room: null, me: null, peers: [], vis: {}, seen: {}, myChat: [], log: [], party: null, inv: null, push: 0, sig: '', muted: {}, mounts: {}, handledInv: {}, last: 0, invites: [], kick: [], tpAt: 0};
+const ST_PARTY_MAX = 4;
 // Chat and name filter. Words are normalized first (leetspeak, symbols, spacing, stretched letters) so disguised spellings are caught too.
 const ST_BAD_ANY = ['fuck', 'fuk', 'fck', 'phuck', 'shit', 'bitch', 'cunt', 'nigg', 'nigr', 'niga', 'faggot', 'fagot', 'asshole', 'whore', 'retard', 'rapist', 'molest', 'pedophil', 'paedophil', 'incest', 'porn', 'dildo', 'jizz', 'kike', 'wetback', 'tranny', 'towelhead', 'raghead', 'motherf', 'cocksuck', 'twat', 'wank', 'skank', 'slut', 'nazi', 'hitler', 'bestial', 'beastial', 'necrophil', 'cuck', 'spick', 'kkk', 'cumdump', 'cumslut', 'chinga', 'puta', 'mierda', 'pendejo'];
 const ST_BAD_SQ = ['fuck', 'shit', 'bitch', 'cunt', 'whore', 'retard', 'rapist', 'molest', 'slut', 'fagot', 'ashole', 'niger', 'niga', 'twat', 'wank', 'porn', 'kike']; // checked after squashing repeated letters
@@ -6765,7 +6768,7 @@ async function stNetJoin() { // join the shared story world, if this build has o
   try { SW.room = await lobby.join('story-world'); } catch (e) { SW.room = null; return; }
   SW.room.onPeers(() => { SW.peers = SW.room.peers(); const me = SW.peers.find(p => p.sameTab); if (me) SW.me = me.peer; stNetRead(); }, () => stChatSys('Lost connection to the world.'));
   SW.peers = SW.room.peers(); const me = SW.peers.find(p => p.sameTab); if (me) SW.me = me.peer;
-  stChatSys('Connected. Other adventurers in story mode will appear in the world. Walk up to one to invite them to your party. Press T to chat.'); stNetPush(true);
+  stChatSys('Connected. Open 👥 Party in the menu to invite anyone online, or walk up to another adventurer. Press T to chat, and start a message with /p for party only.'); stNetPush(true);
 }
 function stNetLeave() { if (!SW.room) return; try { SW.room.presence({sw: null, ch: []}); SW.room.leave(); } catch (e) { /* already gone */ } SW.room = null; SW.peers = []; SW.party = null; }
 const stOthers = () => SW.peers.filter(p => !p.sameTab && p.presence && p.presence.sw && !SW.muted[p.peer]);
@@ -6774,7 +6777,7 @@ const stPartyMembers = () => SW.party ? stOthers().filter(p => stPartyOf(p) === 
 function stNetPush(force) { // share where you are and what you look like, a few times a second
   if (!SW.room) return; const d = stData(), s = stStats(), M = d.riding && stM(d.mount);
   const sw = {n: stCleanName(stTitledName()), k: ST_CLASSES[d.cls].look, c: d.color, o: d.outfit || null, lv: d.lv, m: d.map, x: Math.round(d.x), y: Math.round(d.y), f: (ST.face || 0) > 1 ? 1 : 0, mv: ST.moving ? 1 : 0, pt: SW.party, inv: SW.inv,
-    hc: Math.max(0, Math.round(d.hp)), r: M ? {k: M.kind, c: M.color, m: M.mane, f: M.fly ? 1 : 0, g: M.glow || 0} : 0, b: ST.mode === 'battle' ? 1 : 0, at: Math.round(s.atk), hp: s.hp, g: d.guild ? d.guild.rank : ''};
+    hc: Math.max(0, Math.round(d.hp)), r: M ? {k: M.kind, c: M.color, m: M.mane, f: M.fly ? 1 : 0, g: M.glow || 0} : 0, b: ST.mode === 'battle' ? 1 : 0, at: Math.round(s.atk), hp: s.hp, g: d.guild ? d.guild.rank : '', kk: SW.party === SW.me && SW.kick.length ? SW.kick : null};
   const sig = JSON.stringify(sw); if (!force && sig === SW.sig && performance.now() - SW.last < 2000) return; SW.sig = sig; SW.last = performance.now();
   SW.room.presence({sw, ch: SW.myChat}).catch(() => {});
 }
@@ -6782,9 +6785,9 @@ function stNetRead() { // new chat lines and party invites from other players
   for (const p of stOthers()) {
     const P = p.presence, sw = P.sw;
     for (const m of P.ch || []) { const key = p.peer + ':' + m.i; if (SW.seen[key]) continue; SW.seen[key] = 1; if (m.p && m.p !== SW.party) continue; stChatAdd(stCleanName(String(sw.n || '')), stCleanChat(m.t), p.peer, !!m.p); } // re-filter what others send, in case their game is older
-    if (sw.inv && sw.inv.to === SW.me && !SW.handledInv[sw.inv.at] && ST.on) { SW.handledInv[sw.inv.at] = 1; const pid = sw.inv.pid;
-      const go = () => stSay([['', `${stCleanName(sw.n)} (level ${sw.lv}) invites you to their party. Party members fight beside each other and earn more XP.`]], null, [['Join the party', () => { SW.party = pid; stChatSys(`You joined ${sw.n}'s party.`); stNetPush(true); }], ['Decline', null]]);
-      if (ST.mode === 'walk') go(); else setTimeout(go, 1500); }
+    if (sw.inv && sw.inv.to === SW.me && !SW.handledInv[sw.inv.at] && ST.on) { SW.handledInv[sw.inv.at] = 1;
+      if (sw.inv.pid !== SW.party) { SW.invites = SW.invites.filter(v => v.peer !== p.peer); SW.invites.push({peer: p.peer, name: stCleanName(String(sw.n || '')), lv: sw.lv, pid: sw.inv.pid, at: Date.now()}); stInviteCard(); sfx('pickup'); } }
+    if (SW.party && p.peer === SW.party && sw.pt === SW.party && sw.kk && sw.kk.includes(SW.me)) { SW.party = null; SW.inv = null; stNetPush(true); stChatSys('The party leader removed you from the party.'); stPartyHudRender(); }
   }
 }
 function stNetTick(dt) {
@@ -6802,16 +6805,65 @@ function stDrawOthers(now) { // other players on this map, with name tags (party
     const bub = SW.bubble && SW.bubble[p.peer]; if (bub && performance.now() - bub.at < 6000) { ctx.font = '600 12px "Barlow Semi Condensed", sans-serif'; const w = Math.min(220, ctx.measureText(bub.t).width + 16); ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fillRect(v.x - w / 2, v.y - 96, w, 22); ctx.fillStyle = '#1a1206'; ctx.fillText(bub.t.length > 34 ? bub.t.slice(0, 33) + '…' : bub.t, v.x, v.y - 81); }
     ctx.textAlign = 'left'; }
 }
+// ---- parties: invite anyone online from the Party menu, accept invites from a card, teleport to your party
+const stPartyCount = pid => stOthers().filter(p => stPartyOf(p) === pid).length + (SW.party === pid ? 1 : 0);
+const stIsLeader = () => SW.party && SW.party === SW.me;
+function stInvitePeer(p) {
+  const sw = p.presence.sw; if (!SW.party) SW.party = SW.me; SW.kick = SW.kick.filter(k => k !== p.peer);
+  if (stPartyCount(SW.party) >= ST_PARTY_MAX) return stChatSys(`Parties hold ${ST_PARTY_MAX} adventurers at most.`);
+  SW.inv = {to: p.peer, pid: SW.party, at: Date.now()}; stNetPush(true); stChatSys(`You invited ${sw.n} to your party.`); stCallout(`Invite sent to ${sw.n}`, '#7fe08a');
+}
+function stAcceptInvite(v) {
+  SW.invites = SW.invites.filter(x => x !== v); stInviteCard();
+  if (stPartyCount(v.pid) >= ST_PARTY_MAX) return stChatSys(`${v.name}'s party is full.`);
+  SW.party = v.pid; SW.kick = []; stChatSys(`You joined ${v.name}'s party. Fight near each other to battle together.`); stCallout(`Joined ${v.name}'s party`, '#7fe08a'); sfx('levelup'); stNetPush(true); stPartyHudRender();
+}
+function stLeaveParty() { SW.party = null; SW.inv = null; SW.kick = []; stNetPush(true); stChatSys('You left the party.'); stPartyHudRender(); }
+function stTeleportTo(p) {
+  const sw = p.presence.sw, d = stData(); if (ST.battle) return;
+  if (performance.now() - SW.tpAt < 20000) return stCallout('Your party link is recharging. Try again in a few seconds.', '#c8b89a');
+  if (sw.m !== 'world' && !ST_DUNGEONS[sw.m]) return stChatSys(`You can't reach ${sw.n} right now.`);
+  SW.tpAt = performance.now(); stCloseMenu(); sfx('blink'); stEnterMap(sw.m, Math.floor(sw.x / ST_TILE), Math.floor(sw.y / ST_TILE)); d.x = sw.x - 40; d.y = sw.y; ST.cam.x = d.x; ST.cam.y = d.y; stCallout(`You join ${sw.n}`, '#7fe08a'); stNetPush(true);
+}
+function stInviteCard() { // a small card with Accept and Decline that waits while you play
+  let box = $('stInvite'); if (!box) { box = el('div'); box.id = 'stInvite'; $('story').appendChild(box); }
+  SW.invites = SW.invites.filter(v => Date.now() - v.at < 90000 && stOthers().some(p => p.peer === v.peer) && v.pid !== SW.party);
+  const sig = SW.invites.map(v => v.peer + v.at).join(); if (sig === box.dataset.sig) return; box.dataset.sig = sig; // only rebuild when invites change, so taps aren't lost
+  box.innerHTML = ''; box.hidden = !SW.invites.length; if (!SW.invites.length) return;
+  const v = SW.invites[SW.invites.length - 1]; box.appendChild(el('b', '', `👥 ${v.name} (level ${v.lv}) invites you to their party`));
+  const row = el('div', 'row'), a = el('button', 'ok', 'Join'), n = el('button', '', 'Decline');
+  a.addEventListener('click', () => stAcceptInvite(v)); n.addEventListener('click', () => { SW.invites = SW.invites.filter(x => x !== v); stInviteCard(); }); row.append(a, n); box.appendChild(row);
+  if (SW.invites.length > 1) box.appendChild(el('small', '', `+${SW.invites.length - 1} more in the Party menu`));
+}
+function stPartyMenu() {
+  const m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = ''; m.appendChild(el('h3', '', '👥 Party'));
+  if (!SW.room) { m.appendChild(el('p', '', 'You are offline. Parties need the online version of the game.')); const r = el('div', 'row'), c = el('button', '', 'Done'); c.addEventListener('click', stCloseMenu); r.appendChild(c); m.appendChild(r); return; }
+  const mem = stPartyMembers(), sec = t => m.appendChild(el('p', 'status', t));
+  m.appendChild(el('p', '', SW.party ? `Your party: ${mem.length + 1}/${ST_PARTY_MAX}${stIsLeader() ? ' (you lead it)' : ''}. Party members within a short walk join each other's battles and earn +15% XP each.` : 'You are not in a party. Invite anyone online below, or accept an invite. Parties fight together and earn bonus XP.'));
+  const tbl = el('div', 'trade comp'), rowOf = (name, note, btns) => { const act = el('span', 'tbtn'); for (const [l, fn, dis] of btns) { const x = el('button', '', l); x.disabled = !!dis; x.addEventListener('click', () => { fn(); if (!ST.mode || ST.mode === 'menu') stPartyMenu(); }); act.appendChild(x); } tbl.append(el('span', '', name), el('span', 'hint', note), act); };
+  const where = sw => sw.m === 'world' ? 'the Ashen Vale' : (ST_DUNGEONS[sw.m] ? ST_DUNGEONS[sw.m].name : 'somewhere far');
+  for (const v of SW.invites) rowOf(`✉ ${v.name}`, `Level ${v.lv}. Invited you to their party.`, [['Join', () => stAcceptInvite(v)], ['Decline', () => { SW.invites = SW.invites.filter(x => x !== v); stInviteCard(); }]]);
+  for (const p of mem) { const sw = p.presence.sw; rowOf(`${p.peer === SW.party ? '👑 ' : ''}${sw.n}`, `Level ${sw.lv} · ${Math.round(sw.hc != null ? sw.hc : sw.hp)}/${sw.hp} HP · in ${where(sw)}${sw.b ? ' · fighting' : ''}`,
+    [['Teleport to', () => stTeleportTo(p), sw.b || !!ST.battle]].concat(stIsLeader() ? [['Remove', () => { SW.kick.push(p.peer); stNetPush(true); stChatSys(`You removed ${sw.n} from the party.`); }]] : [])); }
+  const others = stOthers().filter(p => !(SW.party && stPartyOf(p) === SW.party));
+  for (const p of others.slice(0, 20)) { const sw = p.presence.sw, full = SW.party && stPartyCount(SW.party) >= ST_PARTY_MAX, pending = SW.inv && SW.inv.to === p.peer && Date.now() - SW.inv.at < 60000;
+    rowOf(sw.n, `Level ${sw.lv}${sw.g ? ` · ${sw.g}-Rank` : ''} · in ${where(sw)}${sw.pt ? ' · in a party' : ''}`, [[pending ? 'Invited' : 'Invite', () => stInvitePeer(p), full || pending || (SW.party && !stIsLeader())]]); }
+  if (!mem.length && !others.length && !SW.invites.length) m.appendChild(el('p', 'hint', 'No one else is in story mode right now.'));
+  m.appendChild(tbl);
+  if (SW.party && !stIsLeader() && others.length) m.appendChild(el('small', 'hint', 'Only the party leader (👑) can invite new members.'));
+  const r = el('div', 'row'); if (SW.party) { const l = el('button', '', 'Leave party'); l.addEventListener('click', () => { stLeaveParty(); stPartyMenu(); }); r.appendChild(l); }
+  const c = el('button', '', 'Done'); c.addEventListener('click', stCloseMenu); r.appendChild(c); m.appendChild(r);
+}
 function stPlayerMenu(p) { // walk up to another player
   const sw = p.presence.sw, inParty = SW.party && sw.pt === SW.party;
   stSay([['', `${sw.n}, a level ${sw.lv} adventurer${sw.g ? ` of the Guild (${sw.g}-Rank)` : ''}.${inParty ? ' They are in your party.' : ''}`]], null, [].concat(
-    inParty ? [] : [['Invite to your party', () => { if (!SW.party) SW.party = SW.me; SW.inv = {to: p.peer, pid: SW.party, at: Date.now()}; stNetPush(true); stChatSys(`You invited ${sw.n} to your party.`); }]],
-    SW.party ? [['Leave your party', () => { SW.party = null; SW.inv = null; stNetPush(true); stChatSys('You left the party.'); }]] : [],
+    inParty || (SW.party && !stIsLeader()) ? [] : [['Invite to your party', () => stInvitePeer(p)]],
+    SW.party ? [['Leave your party', () => stLeaveParty()]] : [], [['Party menu', () => setTimeout(stPartyMenu, 0)]],
     [['Wave', () => stChatSend('*waves*')], [`Mute ${sw.n}`, () => { SW.muted[p.peer] = 1; stChatSys(`${sw.n} is muted. You will no longer see them or their messages.`); }], ['Leave', null]]));
 }
 // ---- chat
 function stPartyHudRender() { // small party frames under your HUD
-  const box = $('stPartyHud'); if (!box) return; const M = stPartyMembers(); box.hidden = !M.length; box.innerHTML = '';
+  const box = $('stPartyHud'); if (!box) return; const M = stPartyMembers(); box.hidden = !M.length; box.innerHTML = ''; if (!box.dataset.tap) { box.dataset.tap = 1; box.addEventListener('click', () => { if (ST.mode === 'walk') stPartyMenu(); }); } stInviteCard();
   for (const p of M) { const sw = p.presence.sw, r = el('div', 'pf'), bar = el('div', 'bar hp'), i = el('i'); i.style.width = Math.max(0, Math.min(100, (sw.hc != null ? sw.hc : sw.hp) / (sw.hp || 1) * 100)) + '%'; bar.appendChild(i); r.append(el('b', '', `${sw.n} · Lv ${sw.lv}${sw.b ? ' ⚔' : ''}`), bar); box.appendChild(r); }
 }
 function stChatSys(t) { stChatAdd('', t, null, false, true); }
@@ -6842,7 +6894,7 @@ const ST_COMPANIONS = { // role decides what they do on their turn; hp and atk s
   liora:  {name: 'Liora', title: 'Shieldmaiden of Thornwake', look: 'valkyrie', color: '#9fd8ff', role: 'guard', hp: .9, atk: .75, fee: 0, desc: 'Fights beside you, and shields and heals you when you are badly hurt.', lines: ['Stay close!', 'Watch my back.', 'Together, then.']},
   garm:   {name: 'Garm the Ironwall', title: 'Mercenary of Valdris', look: 'brute', color: '#8a6a4a', role: 'tank', hp: 1.5, atk: .6, fee: 2500, male: true, desc: 'Draws enemy attacks onto himself and shrugs them off.', lines: ['Hit me, not them!', 'Come on, then.']},
   sylwen: {name: 'Sylwen of the Choir', title: 'Healer of Celestine', look: 'magicgirl', color: '#e8e2ff', role: 'healer', hp: .75, atk: .45, fee: 3000, desc: 'Heals you every turn and closes bleeding wounds.', lines: ['I have you.', 'Light keep us.']},
-  vex:    {name: 'Vex Nightblade', title: 'Assassin of Rougemarais', look: 'rogue', color: '#5a2a4a', role: 'assassin', hp: .7, atk: 1.05, fee: 3000, desc: 'Hits hard, lands frequent criticals and opens bleeding wounds.', lines: ['Quietly now.', 'They never see me.']},
+  vex:    {name: 'Vex Nightblade', title: 'Assassin of Rougemarais', look: 'rogue', color: '#5a2a4a', role: 'assassin', hp: .7, atk: .65, fee: 3000, desc: 'Hits hard, lands frequent criticals and opens bleeding wounds.', lines: ['Quietly now.', 'They never see me.']},
   orrin:  {name: 'Orrin Stormcaller', title: 'Hedge Mage of Saltmere', look: 'mage', color: '#4a7aff', role: 'mage', hp: .65, atk: .6, fee: 2800, male: true, desc: 'Calls lightning down on every enemy at once.', lines: ['Mind the thunder.', 'Stand back!']},
   fang:   {name: 'Fang', title: 'Direwolf of the Ironpine', beast: true, color: '#6a6a70', role: 'beast', hp: .95, atk: .55, fee: 2000, male: true, desc: 'A loyal direwolf that bites twice every turn.', lines: []},
 };
@@ -7341,6 +7393,7 @@ function stMiniDraw(now) {
   const o = stObjective();
   if (o && o.x != null && o.map === d.map) { const ox = clamp((o.x / ST_TILE - x0) * pxs, 6, W - 6), oy = clamp((o.y / ST_TILE - y0) * pxs, 6, H - 6); g.fillStyle = '#ffd75e'; g.save(); g.translate(ox, oy); g.rotate(now); g.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 3 : 7; g.lineTo(Math.cos(i * Math.PI / 5) * r, Math.sin(i * Math.PI / 5) * r); } g.fill(); g.restore(); }
   if (ST.tut && d.map === 'world') { g.fillStyle = '#7ab8ff'; g.beginPath(); g.arc((ST.tut.x / ST_TILE - x0) * pxs, (ST.tut.y / ST_TILE - y0) * pxs, 3, 0, 7); g.fill(); }
+  for (const p of stPartyMembers()) { const sw = p.presence.sw; if (sw.m !== d.map) continue; g.fillStyle = '#7fe08a'; g.strokeStyle = '#000'; g.lineWidth = 1.5; g.beginPath(); g.arc(clamp((sw.x / ST_TILE - x0) * pxs, 4, W - 4), clamp((sw.y / ST_TILE - y0) * pxs, 4, H - 4), 3.5, 0, 7); g.fill(); g.stroke(); } // your party
   const px = (ptx - x0) * pxs, py = (pty - y0) * pxs; g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.arc(px, py, 4, 0, 7); g.fill(); g.stroke();
   g.strokeStyle = 'rgba(255,215,94,.6)'; g.lineWidth = 2; g.strokeRect(1, 1, W - 2, H - 2);
 }
@@ -7737,7 +7790,7 @@ function stStartBattle(foes, bossId, tile) {
   const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06), CMP = stCompanion(), soloMul = CMP ? 1 : .85; // fighting alone, enemies are a little softer
   ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
     foes: foes.map((k, i) => { const F = ST_FOES[k], bs = bossId && ST_BOSS_SCALE[k] || [1, 1]; const hp = Math.round(F.hp * (1 + lvl) * bs[0] * soloMul); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl) * bs[1], xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
-    coop: stPartyMembers().filter(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 8 * ST_TILE).slice(0, 2).map((p, i) => { const sw = p.presence.sw; return {id: 'c' + i, peer: p.peer, name: sw.n, look: sw.k, color: sw.c, lv: sw.lv, atk: sw.at || 20, hp: sw.hp || 200, maxHp: sw.hp || 200}; }),
+    coop: stPartyMembers().filter(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 14 * ST_TILE).slice(0, 3).map((p, i) => { const sw = p.presence.sw; return {id: 'c' + i, peer: p.peer, name: sw.n, look: sw.k, color: sw.c, lv: sw.lv, atk: sw.at || 20, hp: sw.hp || 200, maxHp: sw.hp || 200}; }),
     ally: CMP ? {key: CMP.key, name: CMP.name, role: CMP.role, look: CMP.look, color: CMP.color, beast: CMP.beast, male: CMP.male, hp: Math.round(s.hp * CMP.hp), maxHp: Math.round(s.hp * CMP.hp), atk: Math.max(s.atk, s.mag * .9) * CMP.atk * (CMP.key === 'liora' && d.flags.lioraOath ? 1.1 : 1)} : null};
   ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
   STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
@@ -8235,7 +8288,7 @@ function stUseSkill(id) {
     ST.nextShot = null; sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
   stPick(f => { d.mp -= COST; ST.curSkill = id; stPlayerHit(f, power, S.kind, (t, dm) => {
-    if (S.burn) t.burn = 2; if (S.poison) t.poison = 3; if (S.slow && Math.random() < .5) { t.frozen = 1; stNum(t.id, 'Frozen', '#9fe6ff'); }
+    if (S.burn) t.burn = 2; if (S.poison) t.poison = 3; if (S.slow && Math.random() < (S.slowP || .5)) { t.frozen = 1; stNum(t.id, 'Frozen', '#9fe6ff'); }
     if (S.drain) { d.hp = Math.min(s.hp, d.hp + Math.round(dm / 2)); stNum('p', '+' + Math.round(dm / 2), '#6be08a'); stBurst('p', '#b06bff', 10); }
   }, SK_COLOR[id]); });
 }
@@ -8245,7 +8298,7 @@ const ST_SCROLLS = { // read in battle from Items, except Return which you read 
   sc_ice:    {name: 'Scroll of the Ice Prison', price: 35, desc: 'Freezes one enemy solid for a turn and hurts it.'},
   sc_storm:  {name: 'Scroll of Thunder', price: 45, desc: 'Calls down one huge lightning bolt.'},
   sc_mend:   {name: 'Scroll of Mending', price: 40, desc: 'Heal half your health and close your wounds.'},
-  sc_ward:   {name: 'Scroll of Warding', price: 45, desc: 'A shield that blocks 75% of all damage for 2 turns.'},
+  sc_ward:   {name: 'Scroll of Warding', price: 45, desc: 'A shield that blocks 60% of all damage for 2 turns.'},
   sc_drain:  {name: 'Scroll of Siphoning', price: 40, desc: 'Steal life from one enemy, healing you for what you take.'},
 };
 const ST_TELE = () => { const d = stData(), out = [['Thornwake', 'world', 12, 11], ['Saltmere harbor', 'world', 36, 16]]; d.ports = d.ports || {};
@@ -8263,7 +8316,7 @@ function stScrollShop(who) { // every shopkeeper keeps a few scrolls under the c
   const d = stData(), m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
   m.appendChild(el('h3', '', '📜 Magic scrolls')); m.appendChild(el('p', '', `${who}: "One use each, and worth every coin." You have ${d.gold} gold.`));
   const tbl = el('div', 'trade comp');
-  for (const k in ST_SCROLLS) { const S = ST_SCROLLS[k], pr = stPrice(S.price), act = el('span', 'tbtn'), x = el('button', '', `Buy (${pr})`); x.disabled = d.gold < pr;
+  for (const k in ST_SCROLLS) { const S = ST_SCROLLS[k], pr = stPrice(Math.round(S.price * (1 + d.lv * (S.field ? .03 : .08)))), act = el('span', 'tbtn'), x = el('button', '', `Buy (${pr})`); x.disabled = d.gold < pr;
     x.addEventListener('click', () => { if (d.gold < pr) return; d.gold -= pr; d.items[k] = (d.items[k] || 0) + 1; sfx('pickup'); stScrollShop(who); }); act.appendChild(x);
     tbl.append(el('span', '', `${S.name}${d.items[k] ? ` ×${d.items[k]}` : ''}`), el('span', 'hint', S.desc), act); }
   m.appendChild(tbl); const row = el('div', 'row'), c = el('button', '', 'Done'); c.addEventListener('click', stCloseMenu); row.appendChild(c); m.appendChild(row); stSave();
@@ -8314,7 +8367,7 @@ function stEnemyPhase() {
   if (b.foes.every(f => f.hp <= 0)) return stEndBattle('won'); // nothing left to fight
   if (b.ally && b.ally.hp > 0) { // your companion takes their turn
     const A = b.ally, t = b.foes.find(f => f.hp > 0), alive = b.foes.filter(f => f.hp > 0), hitOne = (tg, mul, col) => { const dm = Math.min(tg.hp, stDmg(A.atk * mul, tg.def)); tg.hp -= dm; tg.flash = .25; if (tg.hp <= 0) tg.deadT = 0; stAnim(tg.id, 'hurt'); stBurst(tg.id, col, 10); stNum(tg.id, dm, col); return dm; };
-    if (A.role === 'healer') { const hh = Math.round(s.hp * .1); d.hp = Math.min(s.hp, d.hp + hh); if (d.wounds) d.wounds.bleed = 0; stAnim('a', 'cast'); stEffect('sparkle', 'p', '#9fffb8'); stNum('p', '+' + hh, '#6be08a'); stLog(`${A.name} heals you for ${hh}.`); if (t && d.hp >= s.hp * .9) { stAnim('a', 'lunge'); hitOne(t, 1, '#e8e2ff'); } }
+    if (A.role === 'healer') { const hh = Math.round(s.hp * .08); d.hp = Math.min(s.hp, d.hp + hh); if (d.wounds) d.wounds.bleed = 0; stAnim('a', 'cast'); stEffect('sparkle', 'p', '#9fffb8'); stNum('p', '+' + hh, '#6be08a'); stLog(`${A.name} heals you for ${hh}.`); if (t && d.hp >= s.hp * .9) { stAnim('a', 'lunge'); hitOne(t, 1, '#e8e2ff'); } }
     else if (A.role === 'mage' && alive.length) { stAnim('a', 'cast'); let tot = 0; for (const tg of alive) { stEffect('zap', tg.id, '#8fb8ff'); tot += hitOne(tg, .7, '#8fb8ff'); } sfx('zap'); stLog(`${A.name} calls lightning on every enemy for ${tot}.`); }
     else if (A.role === 'beast' && t) { stAnim('a', 'lunge'); const d1 = hitOne(t, .75, '#cfd8e0'); const t2 = b.foes.find(f => f.hp > 0); const d2 = t2 ? hitOne(t2, .75, '#cfd8e0') : 0; sfx('claw'); stLog(`${A.name} bites twice for ${d1 + d2}.`); }
     else if (A.role === 'assassin' && t) { stAnim('a', 'lunge'); const cr = Math.random() < .3, dm = hitOne(t, cr ? 2.1 : 1.3, cr ? '#ffd75e' : '#c08aff'); if (t.hp > 0) { t.w = t.w || {}; t.w.bleed = 3; } sfx('impact'); stLog(`${A.name} strikes from the shadows for ${dm}${cr ? '. Critical!' : '.'}`); }
@@ -8333,7 +8386,7 @@ function stEnemyPhase() {
     if (!ST.battle || b.over) return;
     if (i >= alive.length) {
       for (const k of ['guard', 'rally', 'wolf', 'mist', 'vamp', 'rage', 'stone', 'ward']) if (b.buffs[k]) { b.buffs[k]--; if (k === 'ward' && !b.buffs.ward) stLog('Your shield fades.'); }
-      if (d.race === 'scalekin' && d.hp > 0) { const rg = Math.round(s.hp * .04); if (d.hp < s.hp) { d.hp = Math.min(s.hp, d.hp + rg); stNum('p', '+' + rg, '#9fffb8'); } }
+      if (d.race === 'scalekin' && d.hp > 0) { const rg = Math.round(s.hp * .025); if (d.hp < s.hp) { d.hp = Math.min(s.hp, d.hp + rg); stNum('p', '+' + rg, '#9fffb8'); } }
       if (d.race === 'stonekin' && d.wounds && d.wounds.bleed) d.wounds.bleed = 0;
       for (const x of b.foes) if (x.guard) x.guard--;
       b.defending = false; b.turn = 'player'; stRenderBattle(); stLowLine(); return;
@@ -8355,7 +8408,7 @@ function stEnemyPhase() {
           for (const v of extra === 'all' ? ['p', 'a'] : [b.ally && b.ally.hp > 0 && Math.random() < .3 ? 'a' : 'p']) {
             if (v === 'a' && !(b.ally && b.ally.hp > 0)) continue;
             if (v === 'p' ? Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade() - .03) : Math.random() < .1) { stDodgeFx(v, v === 'p' ? d.name : b.ally.name); continue; }
-            let dm = stDmg(f.atk * mult, v === 'p' ? s.def * (b.buffs.guard ? 2 : 1) : 6); if (v === 'p' && b.defending) dm = Math.round(dm / 2); if (v === 'p' && b.buffs.ward) dm = Math.round(dm * .25); if (v === 'p' && b.buffs.stone) dm = 0;
+            let dm = stDmg(f.atk * mult, v === 'p' ? s.def * (b.buffs.guard ? 2 : 1) : 6); if (v === 'p' && b.defending) dm = Math.round(dm / 2); if (v === 'p' && b.buffs.ward) dm = Math.round(dm * .4); if (v === 'p' && b.buffs.stone) dm = 0;
             if (v === 'p') { d.hp -= dm; stRageAdd(dm / s.hp * 140); } else b.ally.hp -= dm;
             stEffect(fx, v, col); stAnim(v, 'hurt', .4); stNum(v, dm, '#ff7a66', true); stGore(v, 14, true);
             if (v === 'p' && Math.random() < .2) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
@@ -8375,7 +8428,7 @@ function stEnemyPhase() {
     if (hitAlly ? Math.random() < .1 : Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade())) { stDodgeFx(victim, hitAlly ? b.ally.name : d.name); stRenderBattle(); return setTimeout(next, 600); }
     if (hitAlly) { const dm = stDmg(base, 6); b.ally.hp -= dm; stNum('a', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack on' : 'hits'} ${b.ally.name} for ${dm}.`); }
     else {
-      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); if (b.buffs.ward && dm > 0) { dm = Math.round(dm * .25); stEffect('dome', 'p', '#8fd4ff'); } if (b.buffs.stone) { dm = 0; stEffect('aura', 'p', '#c9ced6'); } d.hp -= dm; stRageAdd(dm / s.hp * 140); stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
+      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); if (b.buffs.ward && dm > 0) { dm = Math.round(dm * .4); stEffect('dome', 'p', '#8fd4ff'); } if (b.buffs.stone) { dm = 0; stEffect('aura', 'p', '#c9ced6'); } d.hp -= dm; stRageAdd(dm / s.hp * 140); stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
       stLog(`${f.name} ${fcrit ? 'lands a brutal critical! You take' : big ? 'unleashes a fierce attack! You take' : 'hits you for'} ${dm}${big || fcrit ? ' damage' : ''}.`);
       if (d.hp <= 0 && fcrit) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore('p', 50, true); STFX.slow = .7; }
       else if (fcrit || (big && Math.random() < .4)) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
@@ -8526,6 +8579,7 @@ function stOpenMenu() {
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
   if (!stData().race) btn('🧬 Choose race', () => stChooseRace());
   if (stData().items.sc_return) btn(`📜 Scroll of Return ×${stData().items.sc_return}`, () => stTeleport());
+  btn('👥 Party', () => stPartyMenu());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
