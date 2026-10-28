@@ -487,6 +487,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
         <input id="crName" maxlength="14" placeholder="Your name" aria-label="Hero name" autocomplete="off" spellcheck="false">
         <p class="status">Class</p><div class="row" id="crClass"></div>
         <p class="status">Color</p><div class="row" id="crColor"></div>
+        <p class="status">Voice</p><div class="row" id="crVoice"></div>
         <p class="status" id="crSkillNote">Pick 3 abilities</p><div class="row" id="crSkills"></div>
         <div class="row"><button class="mbtn primary" id="crStart">Begin your story</button><button class="mbtn small back" id="crBack">Back</button></div>
       </section>
@@ -5334,7 +5335,7 @@ const stRank = id => ST_RANK_AT.filter(n => stUses(id) >= n).length - 1;
 const stSkName = id => ST_EVOLVE[id] ? ST_EVOLVE[id][stRank(id)] : ST_SKILLS[id].name;
 function stMaster(id) {
   const d = stData(), was = stRank(id), old = stSkName(id); d.mastery = d.mastery || {}; d.mastery[id] = (d.mastery[id] || 0) + 1;
-  if (stRank(id) > was) setTimeout(() => { stCallout(`${old} evolved into ${stSkName(id)}!`, '#ffd75e'); stVoice(stSkName(id) + ' awakened!', 'ann'); sfx('evolve'); stLog(`Mastery! ${old} evolved into ${stSkName(id)} (rank ${stRank(id)}).`); }, 900);
+  if (stRank(id) > was) setTimeout(() => { stCallout(`${old} evolved into ${stSkName(id)}!`, '#ffd75e'); sfx('evolve'); stLog(`Mastery! ${old} evolved into ${stSkName(id)} (rank ${stRank(id)}).`); }, 900);
 }
 const stMasteryText = id => { const r = stRank(id), nx = ST_RANK_AT[r + 1]; return `${'★'.repeat(r)}${r ? ' ' : ''}` + (nx ? `${stUses(id)}/${nx} to evolve` : 'fully evolved'); };
 const ST_FOES = {
@@ -5834,7 +5835,7 @@ function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // draw
 }
 
 // ---- story menu and character creator
-let crSel = {cls: 'warrior', color: ST_COLORS[0], skills: []};
+let crSel = {cls: 'warrior', color: ST_COLORS[0], skills: [], voice: 'm'};
 function openStoryMenu() {
   const d = stData();
   $('stContinue').hidden = !d;
@@ -5846,6 +5847,9 @@ function renderCreator() {
   for (const id in ST_CLASSES) { const b = el('button', 'chip' + (crSel.cls === id ? ' sel' : ''), ST_CLASSES[id].name); b.addEventListener('click', () => { crSel.cls = id; crSel.skills = []; renderCreator(); }); cl.appendChild(b); }
   const co = $('crColor'); co.innerHTML = '';
   for (const c of ST_COLORS) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-pressed', c === crSel.color); b.setAttribute('aria-label', 'Color ' + c); b.addEventListener('click', () => { crSel.color = c; renderCreator(); }); co.appendChild(b); }
+  const vo = $('crVoice'); vo.innerHTML = '';
+  for (const [k, label] of [['m', 'Male voice'], ['f', 'Female voice']]) { const b = el('button', 'chip' + (crSel.voice === k ? ' sel' : ''), label); b.addEventListener('click', () => { crSel.voice = k; renderCreator(); stPreviewVoice(k); }); vo.appendChild(b); }
+  const hear = el('button', 'chip', 'Hear it ▶'); hear.addEventListener('click', () => stPreviewVoice(crSel.voice)); vo.appendChild(hear);
   const sk = $('crSkills'); sk.innerHTML = '';
   const rec = ST_CLASSES[crSel.cls].skills;
   for (const id in ST_SKILLS) {
@@ -5860,17 +5864,21 @@ function renderCreator() {
   g.setTransform(2.4, 0, 0, 2.4, c.width / 2, c.height * .85);
   drawCharacter(g, {look: ST_CLASSES[crSel.cls].look, color: crSel.color, team: 0, level: 3, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, 0);
 }
+function stPreviewVoice(sex) { // speaks with the chosen voice, before a story exists
+  musicStart(); if (!window.speechSynthesis) return;
+  try { const u = new SpeechSynthesisUtterance(sex === 'f' ? 'I remember dying. I will not do it twice.' : 'I remember dying. I will not do it twice.'), v = stPickVoice(sex); if (v) u.voice = v; u.rate = .98; speechSynthesis.cancel(); speechSynthesis.speak(u); setTimeout(() => stGrunt(sex, true, 'preview'), 2600); } catch (e) { /* no speech */ }
+}
 $('m-story').addEventListener('click', openStoryMenu);
 $('stBack').addEventListener('click', () => show('scr-main'));
 $('stContinue').addEventListener('click', () => startStory());
 $('stNew').addEventListener('click', () => {
   if (stData() && !confirm('Start a new story? Your current story progress will be replaced.')) return;
-  crSel = {cls: 'warrior', color: ST_COLORS[0], skills: []}; $('crName').value = ''; renderCreator(); show('scr-create');
+  crSel = {cls: 'warrior', color: ST_COLORS[0], skills: [], voice: 'm'}; $('crName').value = ''; renderCreator(); show('scr-create');
 });
 $('crBack').addEventListener('click', openStoryMenu);
 $('crStart').addEventListener('click', () => {
   const name = ($('crName').value.trim() || 'Wanderer').slice(0, 14), c = ST_CLASSES[crSel.cls];
-  PROF.story = {name, cls: crSel.cls, color: crSel.color, skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
+  PROF.story = {name, cls: crSel.cls, color: crSel.color, voice: crSel.voice, skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
     items: {potion: 3, ether: 1}, x: 11 * ST_TILE, y: 11 * ST_TILE + 32, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false,
     map: 'world', shrine: {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64}, lost: null};
   stSave(); startStory(true);
@@ -6273,13 +6281,20 @@ function stStartBattle(foes, bossId, tile) {
   const I = ST_INTRO[bossId], F0 = ST_FOES[foes[0]];
   STFX.intro = {t: 0, dur: bossId ? 2.8 : 1.5, boss: !!bossId, title: bossId ? F0.name : ST.battle.foes.length > 1 ? 'AMBUSH' : F0.name, sub: I ? I[0] : ST.battle.foes.map(f => f.name).join(' · '), color: F0.color || '#ff5a3a'};
   ST.battle.turn = 'intro'; stRenderBattle();
-  if (I) setTimeout(() => stVoice(I[1], 'boss'), 500); else if (ST.battle.ally && Math.random() < .5) setTimeout(() => stVoice(ST_LIORA_LINES[Math.floor(Math.random() * ST_LIORA_LINES.length)], 'a'), 300);
+  const bv = ST_FOE_SEX[bossId] === 'f' ? 'bossF' : 'boss';
+  if (I) { setTimeout(() => stVoice(I[1], bv), 500); setTimeout(() => { if (ST.battle && !ST.battle.over) stVoice(stLine('boss'), 'p'); }, 4200); } else if (ST.battle.ally && Math.random() < .5) setTimeout(() => stVoice(ST_LIORA_LINES[Math.floor(Math.random() * ST_LIORA_LINES.length)], 'a'), 300);
   setTimeout(() => { if (ST.battle && ST.battle.turn === 'intro') { ST.battle.turn = 'player'; stRenderBattle(); } }, STFX.intro.dur * 1000);
 }
 // Battle animation: who is 'p' (you), 'a' (Liora) or a foe index. Positions are refreshed every frame.
 const STFX = {anims: [], shots: [], nums: [], parts: [], pos: {}, limbs: [], beams: [], slow: 0};
 const stPos = who => STFX.pos[who] || [cw / 2, ch / 2];
-function stAnim(who, kind = 'lunge', dur = .32) { STFX.anims.push({who, kind, t: 0, dur}); }
+function stAnim(who, kind = 'lunge', dur = .32) {
+  STFX.anims.push({who, kind, t: 0, dur});
+  if (kind !== 'hurt' || !ST.battle) return; // whoever is hurt cries out
+  if (who === 'p') stGrunt(stSex('p'), dur > .36, 'p');
+  else if (who === 'a') stGrunt('f', dur > .36, 'a');
+  else { const f = ST.battle.foes.find(x => x.id === who); const sx = f && ST_FOE_SEX[f.key]; if (sx) stGrunt(sx, f.hp <= 0 || dur > .36, 'f' + who); }
+}
 function stNum(who, text, color = '#fff3c9', big, dy = 0) { const [x, y] = stPos(who); STFX.nums.push({x: x + rand(-14, 14), y: y - 90 - dy, text: String(text), color, t: 0, big}); }
 function stBurst(who, color, n = 14, spread = 160) { const [x, y] = stPos(who); for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = rand(40, spread); STFX.parts.push({x, y: y - 50, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, t: 0, life: rand(.35, .7), color, r: rand(2, 5)}); } }
 function stShot(from, to, color, size = 10, onHit) { STFX.shots.push({from, to, t: 0, dur: .32, color, size, onHit}); }
@@ -6433,15 +6448,54 @@ function stEffectsDraw(dt) {
 }
 // Voice lines, spoken by the browser. Each speaker has its own pitch and pace.
 const ST_VOICE = {p: [1, 1.05], a: [1.4, 1.08], boss: [.25, .78], foe: [.6, .95], ann: [.45, .82]};
+// Spoken lines use the most natural voice the device offers (neural, premium or enhanced voices first),
+// split into male and female. Novelty voices are skipped. Pitch stays near normal so they keep sounding human.
+const VOICE_MALE = /\b(daniel|alex|arthur|aaron|guy|ryan|christopher|eric|thomas|oliver|george|james|david|mark|brian|matthew|tom|evan|nathan|rishi|lee|gordon|male|reed|rocko|eddy)\b/i;
+const VOICE_FEMALE = /\b(samantha|karen|serena|moira|tessa|aria|jenny|sonia|libby|ava|zoe|allison|susan|victoria|kate|emma|hazel|fiona|catherine|joanna|salli|kimberly|michelle|natasha|female|flo|shelley|sandy|martha|nicky|siri)\b/i;
+const VOICE_JUNK = /albert|bad news|bahh|bells|boing|bubbles|cellos|wobble|zarvox|trinoids|whisper|jester|organ|superstar|ralph|fred|junior|kathy|princess|hysterical|good news|deranged/i;
+let voicePool = null;
+function stPickVoice(sex) {
+  if (!window.speechSynthesis) return null;
+  if (!voicePool || !voicePool.length) voicePool = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang) && !VOICE_JUNK.test(v.name));
+  const score = v => (/natural|neural|online/i.test(v.name) ? 8 : 0) + (/premium|enhanced/i.test(v.name) ? 6 : 0) + (/google/i.test(v.name) ? 3 : 0) + (/en[-_](gb|us)/i.test(v.lang) ? 1 : 0)
+    + ((sex === 'f' ? VOICE_FEMALE : VOICE_MALE).test(v.name) ? 10 : (sex === 'f' ? VOICE_MALE : VOICE_FEMALE).test(v.name) ? -10 : 0);
+  return voicePool.slice().sort((a, b) => score(b) - score(a))[0] || null;
+}
+if (window.speechSynthesis) speechSynthesis.addEventListener('voiceschanged', () => { voicePool = null; });
+const stSex = who => who === 'a' ? 'f' : who === 'p' ? (stData() && stData().voice) || 'm' : who === 'bossF' ? 'f' : 'm';
 function stVoice(text, who = 'foe') {
   if (PROF.voiceOff || music.vol <= 0 || !window.speechSynthesis) return;
   try {
-    const u = new SpeechSynthesisUtterance(text), [pitch, rate] = ST_VOICE[who] || ST_VOICE.foe, vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
-    u.pitch = pitch; u.rate = rate; u.volume = Math.min(1, music.vol + .2); if (vs.length) u.voice = vs[(who === 'a' ? 1 : who === 'boss' ? 2 : 0) % vs.length];
-    if (speechSynthesis.speaking && who !== 'ann') speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text), v = stPickVoice(stSex(who));
+    if (v) u.voice = v;
+    u.pitch = who === 'boss' ? .7 : who === 'bossF' ? .85 : 1; u.rate = who === 'boss' || who === 'bossF' ? .86 : .98; u.volume = Math.min(1, music.vol + .2);
+    if (speechSynthesis.speaking) speechSynthesis.cancel();
     speechSynthesis.speak(u);
   } catch (e) { /* speech unavailable */ }
 }
+// Pain: a short voiced grunt made from a buzzing source shaped by vowel formants, deeper for men and bosses
+const stGruntAt = {};
+function stGrunt(sex, big, key) {
+  if (PROF.voiceOff || !music.ctx || music.vol <= 0) return;
+  const nowMs = performance.now(); if (stGruntAt[key] && nowMs - stGruntAt[key] < 350) return; stGruntAt[key] = nowMs;
+  const a = music.ctx, t = a.currentTime + .01, f0 = (sex === 'f' ? 235 : sex === 'boss' ? 72 : 118) * rand(.92, 1.08), dur = big ? .42 : .24;
+  const o = a.createOscillator(), env = a.createGain(), jit = a.createOscillator(), jg = a.createGain();
+  o.type = 'sawtooth'; o.frequency.setValueAtTime(f0 * (big ? 1.35 : 1.2), t); o.frequency.exponentialRampToValueAtTime(f0 * .78, t + dur);
+  jit.frequency.value = 28; jg.gain.value = f0 * .03; jit.connect(jg); jg.connect(o.frequency);
+  env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(big ? .5 : .36, t + .025); env.gain.exponentialRampToValueAtTime(.001, t + dur);
+  const fs = sex === 'f' ? 1.17 : sex === 'boss' ? .85 : 1, vowel = Math.random() < .5 ? [[720, 1, 9], [1160, .55, 11], [2550, .22, 14]] : [[560, 1, 9], [980, .5, 11], [2400, .2, 14]];
+  for (const [f, gv, q] of vowel) { const bp = a.createBiquadFilter(), g = a.createGain(); bp.type = 'bandpass'; bp.frequency.value = f * fs; bp.Q.value = q; g.gain.value = gv * 2.2; o.connect(bp); bp.connect(g); g.connect(env); }
+  env.connect(music.out); o.start(t); jit.start(t); o.stop(t + dur + .05); jit.stop(t + dur + .05);
+  if (!music.noise) return; const n = a.createBufferSource(), nf = a.createBiquadFilter(), ng = a.createGain(); n.buffer = music.noise; nf.type = 'bandpass'; nf.frequency.value = 1600 * fs; nf.Q.value = 1.2;
+  ng.gain.setValueAtTime(.08, t); ng.gain.exponentialRampToValueAtTime(.001, t + dur * .8); n.connect(nf); nf.connect(ng); ng.connect(music.out); n.start(t, Math.random() * .5); n.stop(t + dur);
+}
+const ST_FOE_SEX = {witch: 'f', mara: 'f', king: 'boss', brother: 'boss', stalker: 'boss', bandit: 'm', knight: 'm', guard: 'm', cultist: 'm', corsair: 'm'};
+// Threatened, bloodied, facing a boss: your hero speaks
+const ST_HERO_LINES = {
+  boss: ['Then come and take it.', 'I have died before. I am not afraid of you.', 'This ends here.', 'Stand aside, or fall.'],
+  low: ['Not yet. Not like this.', 'I will not fall here.', 'Is that all you have?', 'Get up. Get up!'],
+};
+const stLine = k => ST_HERO_LINES[k][Math.floor(Math.random() * ST_HERO_LINES[k].length)];
 const ST_INTRO = { // boss title cards and their opening words
   king: ['Lord of Hollows', 'Kneel, little candle. Kneel, and be hollow.'],
   golem: ['Guardian of the Ember Shard', 'Intruder. Return. To. Stone.'],
@@ -6529,11 +6583,11 @@ function stPlayerHit(f, base, kind, extra, color) {
     stEffect(SK_FX[sk] || 'slash', f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'));
     const oblit = beam && f.hp <= 0 && (total >= before + f.maxHp * .25 || total >= f.maxHp * .55);
     const lethal = !oblit && f.hp <= 0 && (crit || total >= before + f.maxHp * .3);
-    if (oblit) { f.oblit = true; stCallout('OBLITERATED', color || '#fff3c9'); stVoice('Obliterated!', 'ann'); STFX.pools.push({x: stPos(f.id)[0], y: stPos(f.id)[1] + 8, r: 40, rot: 0, scorch: true}); STFX.slow = .5; }
+    if (oblit) { f.oblit = true; stCallout('OBLITERATED', color || '#fff3c9'); STFX.pools.push({x: stPos(f.id)[0], y: stPos(f.id)[1] + 8, r: 40, rot: 0, scorch: true}); STFX.slow = .5; }
     else {
       if (kind !== 'mag' || sk === 'drain') stGore(f.id, crit ? 22 : 12, f.hp <= 0 ? true : undefined);
       if (f.hp <= 0) stGore(f.id, 30, true);
-      if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stVoice('Lethal blow!', 'ann'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; if (!f.w.maim) stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
+      if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; if (!f.w.maim) stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
       else if (f.hp > 0) stWound(f.id, f, kind, crit, rk, beam);
     }
     stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? total + '!' : total, crit ? '#ffd75e' : '#ffffff', crit);
@@ -6550,7 +6604,7 @@ function stPlayerHit(f, base, kind, extra, color) {
 function stUseSkill(id) {
   const S = ST_SKILLS[id], d = stData(), s = stStats(), b = ST.battle;
   if (d.mp < S.mp) return;
-  const nm = stSkName(id); stCallout(`${d.name}: "${nm}!"`, SK_COLOR[id] || '#ffe9a8'); stVoice(nm + '!', 'p');
+  const nm = stSkName(id); stCallout(`${d.name}: "${nm}!"`, SK_COLOR[id] || '#ffe9a8');
   const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag : s.atk * (b.buffs.rally ? 1.5 : 1)) * (S.mult || 1) * (S.kind === 'heal' || S.all ? 1 + .2 * stRank(id) : 1);
   if (S.kind === 'heal' || S.kind === 'buff' || S.all) stMaster(id);
   if (S.kind === 'heal') {
@@ -6583,6 +6637,7 @@ function stEndTurn() {
   b.turn = 'enemy'; stRenderBattle();
   setTimeout(stEnemyPhase, 650);
 }
+function stLowLine() { const b = ST.battle, d = stData(); if (b && !b.lowLine && d.hp > 0 && d.hp < stStats().hp * .3) { b.lowLine = true; setTimeout(() => stVoice(stLine('low'), 'p'), 450); } }
 function stEnemyPhase() {
   const b = ST.battle, d = stData(), s = stStats(); if (!b || b.over) return;
   if (b.ally && b.ally.hp > 0) { // Liora fights by your side
@@ -6601,7 +6656,7 @@ function stEnemyPhase() {
     if (i >= alive.length) {
       for (const k of ['guard', 'rally']) if (b.buffs[k]) b.buffs[k]--;
       for (const x of b.foes) if (x.guard) x.guard--;
-      b.defending = false; b.turn = 'player'; stRenderBattle(); return;
+      b.defending = false; b.turn = 'player'; stRenderBattle(); stLowLine(); return;
     }
     const f = alive[i++];
     if (f.hp <= 0) return next();
@@ -6611,7 +6666,7 @@ function stEnemyPhase() {
     const moves = ST_FOE_MOVES[f.key];
     if (moves && Math.random() < (f.boss ? .45 : .5)) { // a named move: called out, then it lands
       const [mname, fx, mult, col, extra] = moves[Math.floor(Math.random() * moves.length)];
-      stCallout(`${f.name.split(',')[0]}: "${mname}!"`, col); stVoice(mname + '!', f.boss ? 'boss' : 'foe'); stLog(`${f.name} calls out: ${mname}!`); sfx(f.boss ? 'roar' : 'zap'); stAnim(f.id, 'cast', .5);
+      stCallout(`${f.name.split(',')[0]}: "${mname}!"`, col); stLog(`${f.name} calls out: ${mname}!`); sfx(f.boss ? 'roar' : 'zap'); stAnim(f.id, 'cast', .5);
       setTimeout(() => {
         if (!ST.battle || b.over) return;
         if (extra === 'heal') { const h = Math.round(f.maxHp * .14); f.hp = Math.min(f.maxHp, f.hp + h); stEffect(fx, f.id, col); stNum(f.id, '+' + h, '#6be08a', true); }
@@ -6640,7 +6695,7 @@ function stEnemyPhase() {
     else {
       const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); d.hp -= dm; stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
       stLog(`${f.name} ${fcrit ? 'lands a brutal critical! You take' : big ? 'unleashes a fierce attack! You take' : 'hits you for'} ${dm}${big || fcrit ? ' damage' : ''}.`);
-      if (d.hp <= 0 && fcrit) { stCallout('LETHAL BLOW', '#ff2a2a'); stVoice('Lethal blow!', 'ann'); stGore('p', 50, true); STFX.slow = .7; }
+      if (d.hp <= 0 && fcrit) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore('p', 50, true); STFX.slow = .7; }
       else if (fcrit || (big && Math.random() < .4)) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
     }
     stAnim(victim, 'hurt', .35); stBurst(victim, big ? '#ff5a1f' : '#e0405a', big ? 10 : 4); stGore(victim, big ? 20 : 9, big ? true : undefined); if (big) stEffect('slash', victim, '#ff5a1f');
@@ -6675,7 +6730,7 @@ function stEndBattle(result) {
   while (d.xp >= stXpNeed(d.lv)) { d.xp -= stXpNeed(d.lv); d.lv++; const s = stStats(); d.hp = s.hp; d.mp = s.mp; lines.push(['', `Level up! You are now level ${d.lv}. Health and mana fully restored.`]); if (d.lv % 2 === 1 && d.skills.length < Object.keys(ST_SKILLS).length) learn = true; }
   if (b.bossId) {
     d.flags[b.bossId] = true;
-    if (ST_INTRO[b.bossId]) setTimeout(() => stVoice({king: 'The dark... is coming.', golem: 'Stone... remembers...', drake: 'So... warm...', stalker: 'At last... a face...', brother: 'Liora... I\'m sorry.', witch: 'Thank you.'}[b.bossId], 'boss'), 300);
+    if (ST_INTRO[b.bossId]) setTimeout(() => stVoice({king: 'The dark... is coming.', golem: 'Stone... remembers...', drake: 'So... warm...', stalker: 'At last... a face...', brother: 'Liora... I\'m sorry.', witch: 'Thank you.'}[b.bossId], ST_FOE_SEX[b.bossId] === 'f' ? 'bossF' : 'boss'), 300);
     lines.unshift(['', b.bossId === 'king' ? 'LORD OF HOLLOWS FELLED' : b.bossId === 'stalker' ? 'NAMELESS HUNTER FELLED' : 'GUARDIAN FELLED']);
     if (b.bossId === 'witch') { d.mounts = d.mounts || []; if (!d.mounts.includes('nightmare')) d.mounts.push('nightmare'); lines.push(['', 'Her black mare, the Cinder Nightmare, steps out of the smoke and kneels to you. Its mane is still burning. (New mount!)']); }
     if (b.bossId === 'witch') lines.push(['Sister Vey', '"Thank you… I was so tired of burning…"'], ['', 'The black candles go out one by one. Among her things you find a hundred years of letters, all addressed to a daughter, none ever sent.']);
@@ -6721,7 +6776,8 @@ function stOpenMenu() {
   const row = el('div', 'row'), btn = (l, fn) => { const b = el('button', '', l); b.addEventListener('click', fn); row.appendChild(b); return b; };
   btn('Drink potion', () => { if (d.items.potion) { d.items.potion--; d.hp = Math.min(s.hp, d.hp + 60); sfx('pickup'); stCloseMenu(); stOpenMenu(); } });
   for (const k of d.mounts || []) if (k !== d.mount) btn(`Choose ${ST_MOUNTS[k].name}`, () => { d.mount = k; stCloseMenu(); stOpenMenu(); });
-  btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Voice lines on.', 'ann'); });
+  btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
+  btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
 }
