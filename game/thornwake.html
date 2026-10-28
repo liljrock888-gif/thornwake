@@ -2549,6 +2549,7 @@ function animState(u, stride) {
   return {moving, ph, sw: moving ? Math.sin(ph) : 0, atk: !!u.atkCd && u.atkT > u.atkCd - .2, dir: Math.cos(u.face) >= 0 ? 1 : -1};
 }
 // Heroes grow 1.5% per level and pick up a new detail at every level; levels 6, 11 and 16 are full evolutions.
+const hitFlick = () => Math.floor(performance.now() / 45) % 2 ? .45 : 1; // the blink a unit gives when struck
 function drawCharacter(c, u, now) {
   if (LOOKS[u.look].monster) return drawMonsterHero(c, u, now, LOOKS[u.look]);
   const O = u.outfit, L = O ? Object.assign({}, LOOKS[u.look], O.hat ? {hat: O.hat} : {}, O.body ? {body: O.body} : {}, O.skin ? {skin: O.skin} : {}, O.cape ? {cape: O.cape === 'none' ? null : O.cape} : {}) : LOOKS[u.look], A = animState(u, 13), lv = u.level || 1, form = formOf(lv);
@@ -2564,7 +2565,7 @@ function drawCharacter(c, u, now) {
   }
   c.scale(A.dir * sc, sc);
   c.rotate(A.moving ? .07 : Math.sin(now * 1.1 + u.id) * .015); // lean into a run, sway a little when idle
-  if (u.hitFlash > 0) c.filter = 'brightness(2.2)';
+  if (u.hitFlash > 0) c.globalAlpha *= hitFlick(); /* a quick flicker; canvas filters stall the frame */
   const RC = O && O.race && ST_RACES[O.race]; if (RC && !O.skin && RC.skin) L.skin = RC.skin;
   if (RC && RC.tail) { const sw = Math.sin(now * 3 + u.id) * 4; c.strokeStyle = RC.tail; c.lineCap = 'round'; c.lineWidth = RC.snout ? 7 : 4; c.beginPath(); c.moveTo(-6, -20 - bob); c.quadraticCurveTo(-22, -18 + sw, -26 + sw, RC.snout ? -6 : -34); c.stroke(); c.lineCap = 'butt'; } // tails sway behind
   if (lv >= 16) {
@@ -2897,7 +2898,7 @@ function drawWeapon(c, w, u, hx, hy, atk, now) {
 function drawTank(c, x, y, face, team, flash, scale = 1) {
   const col = TEAM_COLOR[team];
   c.save(); c.translate(x, y + 4); c.scale(scale, scale);
-  if (flash > 0) c.filter = 'brightness(2.2)';
+  if (flash > 0) c.globalAlpha *= hitFlick(); /* a quick flicker; canvas filters stall the frame */
   c.fillStyle = 'rgba(0,0,0,.4)'; c.beginPath(); c.ellipse(0, 10, 40, 14, 0, 0, 7); c.fill();
   c.fillStyle = '#2b2f26'; c.fillRect(-34, -4, 68, 16); // tracks
   c.fillStyle = '#4b5a35'; c.fillRect(-30, -18, 60, 18); // hull
@@ -2912,7 +2913,7 @@ function drawMinion(c, u, now) {
   if (u.type === 'tank') return drawTank(c, u.x, u.y, u.face || 0, u.team, u.hitFlash, 1);
   const P = FOLK[u.team], A = animState(u, 8), tier = u.tier || 0;
   c.save(); c.translate(u.x, u.y + 6);
-  if (u.hitFlash > 0) c.filter = 'brightness(2.2)';
+  if (u.hitFlash > 0) c.globalAlpha *= hitFlick(); /* a quick flicker; canvas filters stall the frame */
   if (u.type === 'melee') {
     const sc = (1 + tier * .12) * (u.big || 1), skin = tier >= 3 ? shade(P.skin, -.25) : P.skin;
     c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(0, 2, 15 * sc, 6 * sc, 0, 0, 7); c.fill();
@@ -3037,7 +3038,7 @@ function drawWolf(c, u, now) {
   c.save(); c.translate(u.x, u.y + 10 * s);
   c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(0, 0, 30 * s, 8 * s, 0, 0, 7); c.fill();
   c.scale(A.dir * s, s);
-  if (u.hitFlash > 0) c.filter = 'brightness(2.2)';
+  if (u.hitFlash > 0) c.globalAlpha *= hitFlick(); /* a quick flicker; canvas filters stall the frame */
   c.strokeStyle = dk; c.lineWidth = 6; c.lineCap = 'round';
   c.beginPath(); c.moveTo(-21, -24); c.quadraticCurveTo(-37, -32 + Math.sin(now * 6 + u.id) * 4, -34, -14); c.stroke();
   c.fillStyle = dk;
@@ -3061,7 +3062,7 @@ function drawGolem(c, u, now) {
   c.save(); c.translate(u.x, u.y + 12 * s);
   c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(0, 0, 30 * s, 9 * s, 0, 0, 7); c.fill();
   c.scale(A.dir * s, s);
-  if (u.hitFlash > 0) c.filter = 'brightness(2.2)';
+  if (u.hitFlash > 0) c.globalAlpha *= hitFlick(); /* a quick flicker; canvas filters stall the frame */
   c.fillStyle = dk;
   c.beginPath(); c.arc(-10 + A.sw * 3, -7, 8, 0, 7); c.fill(); c.beginPath(); c.arc(10 - A.sw * 3, -7, 8, 0, 7); c.fill();
   c.beginPath(); c.arc(-21, A.atk ? -36 : -26, 8, 0, 7); c.fill();
@@ -3085,7 +3086,7 @@ function drawDragon(c, u, now) {
   const ds = u.sc || 1;
   if (!u.noShadow) { c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(u.x + 10 * ds, u.y + 36 * ds, 80 * ds, 30 * ds, 0, 0, 7); c.fill(); }
   c.translate(u.x, u.y - 14 * ds + flap * 3); c.rotate(u.face); if (u.sc) c.scale(u.sc, u.sc);
-  if (u.hitFlash > 0) c.filter = 'brightness(1.8)';
+  if (u.hitFlash > 0) c.globalAlpha *= hitFlick(); /* a quick flicker; canvas filters stall the frame */
   c.fillStyle = P.body;
   c.beginPath(); c.moveTo(-26, -10); c.quadraticCurveTo(-70, wag * .5 - 6, -100, wag); c.quadraticCurveTo(-70, wag * .5 + 6, -26, 10); c.closePath(); c.fill();
   c.fillStyle = P.wing; c.beginPath(); c.moveTo(-96, wag - 7); c.lineTo(-120, wag); c.lineTo(-96, wag + 7); c.closePath(); c.fill();
@@ -7547,8 +7548,15 @@ function stShowLine() {
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
 const stRockAt = (x, y) => ST_ROCKS.find(r => r.x === Math.floor(x / ST_TILE) && r.y === Math.floor(y / ST_TILE));
 const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && stM(d.mount) && stM(d.mount).fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && stM(d.mount) && stM(d.mount).fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
+function stFindOpen(d) { // never arrive inside a wall, on furniture or out at sea: step to the nearest open ground
+  const ok = (x, y) => !stBlocked(x, y) && [[0, 24], [24, 0], [-24, 0], [0, -24]].some(([ox, oy]) => !stBlocked(x + ox, y + oy));
+  if (ok(d.x, d.y)) return;
+  for (let r = 1; r <= 14; r++) { let best = null, bd = 1e9;
+    for (let oy = -r; oy <= r; oy++) for (let ox = -r; ox <= r; ox++) { if (Math.max(Math.abs(ox), Math.abs(oy)) !== r) continue; const x = d.x + ox * ST_TILE, y = d.y + oy * ST_TILE, dist = ox * ox + oy * oy; if (dist < bd && ok(x, y)) { bd = dist; best = [x, y]; } }
+    if (best) { d.x = best[0]; d.y = best[1]; return; } }
+}
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
-  const d = stData(); if (key !== 'world') d.riding = false; d.map = key; if (ST_PORTS[key]) { d.ports = d.ports || {}; d.ports[key] = true; } // remembered for Scrolls of Return d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
+  const d = stData(); if (key !== 'world') d.riding = false; d.map = key; if (ST_PORTS[key]) { d.ports = d.ports || {}; d.ports[key] = true; } /* remembered for Scrolls of Return */ d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; stFindOpen(d); ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
   if (key !== 'world') {
     if (!ST.dunC[key]) stDrawDungeonCanvas(key);
@@ -8482,7 +8490,7 @@ function stRacePower() {
 function stEndTurn() {
   const b = ST.battle; if (!b || b.over) return; if (b.foes.every(f => f.hp <= 0)) { b.turn = 'won'; stRenderBattle(); stCallout('VICTORY', '#ffd75e'); return stEndBattle('won'); }
   b.turn = 'enemy'; stRenderBattle();
-  setTimeout(stEnemyPhase, 650);
+  setTimeout(stEnemyPhase, 480);
 }
 function stLowLine() { const b = ST.battle, d = stData(); if (b && !b.lowLine && d.hp > 0 && d.hp < stStats().hp * .3) { b.lowLine = true; setTimeout(() => stVoice(stLine('low'), 'p'), 450); } }
 function stEnemyPhase() {
@@ -8518,7 +8526,7 @@ function stEnemyPhase() {
     if (f.hp <= 0) return next();
     if (f.w && f.w.bleed) { const bd = Math.min(f.hp, Math.max(3, Math.round(f.maxHp * .05))); f.hp -= bd; f.w.bleed--; stNum(f.id, bd, '#ff4a4a'); stGore(f.id, 6, false); if (f.hp <= 0) { f.deadT = 0; stLog(`${f.name} bleeds out.`); if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
     if (f.burn || f.poison) { const dot = Math.min(f.hp, Math.round(f.maxHp * .06)); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
-    if (f.frozen) { f.frozen = 0; stLog(`${f.name} is frozen solid and can't move!`); return setTimeout(next, 600); }
+    if (f.frozen) { f.frozen = 0; stLog(`${f.name} is frozen solid and can't move!`); return setTimeout(next, 450); }
     const moves = ST_FOE_MOVES[f.key];
     if (moves && Math.random() < (f.boss ? .45 : .5)) { // a named move: called out, then it lands
       const [mname, fx, mult, col, extra] = moves[Math.floor(Math.random() * moves.length)];
@@ -8540,7 +8548,7 @@ function stEnemyPhase() {
           ST.hurt = .4; sfx('boom');
         }
         if (d.hp <= 0) return setTimeout(() => stEndBattle('lost'), 500);
-        stRenderBattle(); setTimeout(next, 700);
+        stRenderBattle(); setTimeout(next, 520);
       }, 650);
       return;
     }
@@ -8548,7 +8556,7 @@ function stEnemyPhase() {
     const big = f.boss && Math.random() < .3, base = f.atk * (big ? 1.6 : 1);
     stAnim(f.id, 'lunge', big ? .45 : .32);
     const victim = hitAlly ? 'a' : 'p';
-    if (hitAlly ? Math.random() < .1 : Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade())) { stDodgeFx(victim, hitAlly ? b.ally.name : d.name); stRenderBattle(); return setTimeout(next, 600); }
+    if (hitAlly ? Math.random() < .1 : Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade())) { stDodgeFx(victim, hitAlly ? b.ally.name : d.name); stRenderBattle(); return setTimeout(next, 450); }
     if (hitAlly) { const dm = stDmg(base, 6); b.ally.hp -= dm; stNum('a', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack on' : 'hits'} ${b.ally.name} for ${dm}.`); }
     else {
       const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); if (b.buffs.ward && dm > 0) { dm = Math.round(dm * .4); stEffect('dome', 'p', '#8fd4ff'); } if (b.buffs.stone) { dm = 0; stEffect('aura', 'p', '#c9ced6'); } d.hp -= dm; stRageAdd(dm / s.hp * 140); stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
@@ -8559,7 +8567,7 @@ function stEnemyPhase() {
     stAnim(victim, 'hurt', .35); stBurst(victim, big ? '#ff5a1f' : '#e0405a', big ? 10 : 4); stGore(victim, big ? 20 : 9, big ? true : undefined); if (big) stEffect('slash', victim, '#ff5a1f');
     ST.hurt = big ? .45 : .25; sfx(big ? 'boom' : 'hurt');
     if (d.hp <= 0) return setTimeout(() => stEndBattle('lost'), 500);
-    stRenderBattle(); setTimeout(next, 650);
+    stRenderBattle(); setTimeout(next, 480);
   };
   setTimeout(next, b.ally ? 600 : 0);
 }
@@ -8618,7 +8626,7 @@ function stEndBattle(result) {
   }
   { const SC = ST_SHARD_ACT[b.bossId]; if (SC && d.ch === SC.ch) { d.ch = SC.ch + 1; stActSkip(); lines.push(...SC.lines); if (SC.crowns) { PROF.crowns += SC.crowns; lines.push(['', `${SC.title}. You earned ${SC.crowns} Crowns.`]); } } }
   if (b.bossId === 'seraphiel') lines.push(['Seraphiel', 'Enough. The body is worthy. Now hear the terms.']);
-  if (/^exam/.test(b.bossId || '')) { const g = d.guild, nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], pay = {C: [150, 0], B: [300, 50], A: [600, 100], S: [1000, 500]}[nx]; g.rank = nx; d.gold += pay[0]; PROF.crowns += pay[1]; lines.push(['', `PROMOTED TO ${nx}-RANK. ${pay[0]} gold${pay[1] ? ` and ${pay[1]} Crowns` : ''}. ` + {C: 'Ships to Valdris will now carry you.', B: 'The B-Rank wilds of Valdris are open to you.', A: 'You may vote on the Council\'s edicts, and sail to Aetherfall.', S: 'You hold a seat on the Council of the Free Compact. Your word is law on the roads.'}[nx]]); setTimeout(() => stCallout(`${nx}-RANK ADVENTURER`, '#ffd75e'), 800); delete d.flags[b.bossId]; }
+  if (/^exam/.test(b.bossId || '') && d.guild) { const g = d.guild, nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], pay = {C: [150, 0], B: [300, 50], A: [600, 100], S: [1000, 500]}[nx]; g.rank = nx; d.gold += pay[0]; PROF.crowns += pay[1]; lines.push(['', `PROMOTED TO ${nx}-RANK. ${pay[0]} gold${pay[1] ? ` and ${pay[1]} Crowns` : ''}. ` + {C: 'Ships to Valdris will now carry you.', B: 'The B-Rank wilds of Valdris are open to you.', A: 'You may vote on the Council\'s edicts, and sail to Aetherfall.', S: 'You hold a seat on the Council of the Free Compact. Your word is law on the roads.'}[nx]]); setTimeout(() => stCallout(`${nx}-RANK ADVENTURER`, '#ffd75e'), 800); delete d.flags[b.bossId]; }
   const after = b.bossId === 'seraphiel' ? stTrialChoice : learn ? stLearnSkill : null;
   setTimeout(() => { done(); stSay(lines, ST_BOSS_REWARD[b.bossId] ? () => stShowRewards(b.bossId, after) : after); }, 600);
 }
