@@ -329,6 +329,8 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stMenuBtn{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 #stPrompt{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(5,7,10,.75);border:1px solid var(--gold);color:var(--gold);font-weight:600}
 #stDialog{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(94vw,720px);padding:14px 18px}
+#stBond{position:absolute;right:12px;top:10px;padding:4px 12px;border-radius:999px;border:1px solid #ff8aa8;background:rgba(255,138,168,.12);color:#ff8aa8;font:inherit;font-size:13px;font-weight:700;cursor:pointer}#stBond:focus{outline:2px solid #ff8aa8}
+#stMenu .bondbar{height:10px;margin:2px 0 8px}#stMenu .bondbar i{background:linear-gradient(90deg,#a0405a,#ff8aa8)}#stMenu p.hint{color:#c8b89a;font-size:13px}
 #stDialog b{color:var(--gold);font-family:var(--display);font-size:20px;font-weight:400}
 #stDialog p{margin:6px 0 10px;line-height:1.45}
 #stBattle{position:absolute;inset:auto 0 0 0;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
@@ -380,7 +382,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
     <div id="stQuest" class="panel"></div>
     <button id="stMenuBtn" class="panel">Menu</button><button id="stRide" class="panel" hidden>Ride</button>
     <div id="stPrompt" hidden></div><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
-    <div id="stDialog" class="panel" hidden><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
+    <div id="stDialog" class="panel" hidden><button id="stBond" hidden></button><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
     <div id="stBattle" hidden><div id="stLog" class="panel"></div><div id="stParty" class="panel"></div><div id="stActions" class="panel"></div></div>
     <div id="stMenu" class="panel" hidden></div>
     <div id="stPad"><button data-d="up">▲</button><button data-d="left">◀</button><button data-d="right">▶</button><button data-d="down">▼</button><button id="stA">A</button></div>
@@ -5454,7 +5456,7 @@ const ST_FOES = {
   king:    {name: 'The Hollow King', hp: 700, atk: 32, def: 14, spd: 10, xp: 400, gold: 300, draw: 'hero', look: 'warlock', color: '#7a1fff', boss: true},
 };
 const ST_ENCOUNTERS = {b: [['knight'], ['bandit', 'bandit'], ['cultist', 'bandit']], a: [['goblin', 'bandit'], ['cultist'], ['imp', 'imp'], ['fiend']], g: [['werewolf'], ['bandit'], ['bandit', 'wolf'], ['frostwolf', 'bandit']], T: [['wolf'], ['wolf', 'pup'], ['pup', 'pup']], ':': [['goblin'], ['goblin', 'goblin'], ['bandit']], '*': [['frostwolf'], ['frostwolf', 'wolf']], C: [['knight'], ['knight', 'bandit']]};
-const ST_REGION = {F: 'Farmland', O: 'Coach Post', b: 'The Bone Marsh', a: 'The Ashfall Dunes', g: 'The Gloamwood', T: 'The Thornwood', ':': 'Sunken Ruins', '*': 'Frost Peaks', C: 'Hollow Castle', v: 'Thornwake, the Last Lit Village', '.': 'The Ashen Vale', '=': 'The Ashen Vale', B: 'River Bridge', S: 'Ashen Shrine', D: 'Dungeon Entrance'};
+const ST_REGION = {p: 'Homestead Fields', F: 'Farmland', O: 'Coach Post', b: 'The Bone Marsh', a: 'The Ashfall Dunes', g: 'The Gloamwood', T: 'The Thornwood', ':': 'Sunken Ruins', '*': 'Frost Peaks', C: 'Hollow Castle', v: 'Thornwake, the Last Lit Village', '.': 'The Ashen Vale', '=': 'The Ashen Vale', B: 'River Bridge', S: 'Ashen Shrine', D: 'Dungeon Entrance'};
 const ST_BLOCKED = new Set(['~', '^', 'H', 'h', 'I', 'U', 'K', '#', 'W', 'Q', 'L', 'M', 'O']);
 // Coach posts: pay a driver to ride between towns along the roads
 const ST_COACHES = [{id: 'thornwake', name: 'Thornwake', x: 17, y: 11}, {id: 'ravenhollow', name: 'Ravenhollow', x: 12, y: 22}, {id: 'saltmere', name: 'Saltmere', x: 31, y: 12}, {id: 'harrow', name: 'Harrowfield', x: 27, y: 23}, {id: 'dunes', name: 'Ashfall Waystation', x: 43, y: 15}];
@@ -5491,7 +5493,8 @@ function stBuildMap() {
   for (const [x, y] of [[12, 11], [9, 12], [21, 14], [9, 4], [24, 8], [8, 21], [34, 11], [32, 20]]) m[y][x] = 'S'; // Ashen Shrines
   m[16][24] = 'D'; m[2][4] = 'D'; m[9][44] = 'D'; m[2][10] = 'D'; // entrances: the catacombs, the ice crypt and Duskwatch Castle
   for (const c of ST_COACHES) m[c.y][c.x] = 'O'; // coach posts
-  fill(20, 21, 26, 25, 'v'); bld(21, 21, 'H'); bld(24, 21, 'H'); fill(20, 24, 26, 25, 'F'); // Harrowfield and its fields
+  fill(20, 21, 26, 25, 'v'); bld(21, 21, 'H'); bld(24, 21, 'H'); fill(20, 24, 26, 25, 'F');
+  fill(20, 26, 25, 27, 'p'); bld(27, 25, 'H'); // the homestead for sale: twelve plots and a house // Harrowfield and its fields
   for (let y = 22; y <= 23; y++) m[y][14] = '='; for (let x = 15; x <= 19; x++) m[23][x] = '='; m[23][27] = 'O';
   fill(15, 15, 17, 17, 'F'); fill(6, 24, 8, 24, 'F'); // Thornwake's and Ravenhollow's fields
   for (let y = 14; y <= 17; y++) for (let x = 38; x <= 39; x++) m[y][x] = '~'; // Saltmere harbor
@@ -5567,7 +5570,7 @@ const ST_DUNGEONS = {
   jail: {name: 'Thornwake Cells', home: true, lit: true, pool: [], theme: {floor: '#3a3a3a', wall: '#141414', glow: '#9fb4c8'}, exit: [13, 9], rows: ['##########', '#.k#.b#..#', '#..#..#..#', '#j.#j.#..#', '#........#', '#c.......#', '####E#####']},
 };
 // Houses you can walk into: the door is the middle of the house's south wall
-const ST_HOUSES = [{key: 'guildhall', x: 16, y: 13, start: [6, 7]}, {key: 'alden', x: 11, y: 8}, {key: 'wrenhome', x: 16, y: 8}, {key: 'mill', x: 10, y: 19}, {key: 'grave', x: 4, y: 22}, {key: 'nets', x: 36, y: 13}];
+const ST_HOUSES = [{key: 'homestead', x: 27, y: 25}, {key: 'guildhall', x: 16, y: 13, start: [6, 7]}, {key: 'alden', x: 11, y: 8}, {key: 'wrenhome', x: 16, y: 8}, {key: 'mill', x: 10, y: 19}, {key: 'grave', x: 4, y: 22}, {key: 'nets', x: 36, y: 13}];
 // Mounts: speed multiplier; fliers cross rivers and mountains. Gold, Crowns (premium) or a boss drop.
 const ST_MOUNTS = {
   mare:      {name: 'Ashen Mare', kind: 'horse', color: '#6a5a4a', mane: '#2a201a', speed: 1.6, price: 150},
@@ -5687,6 +5690,8 @@ ST_DUNGEONS.stair = {name: 'The Celestial Stair', lit: true, holy: true, boss: '
   '#c...................#',
   '#.........B..........#',
   '######################']};
+ST_DUNGEONS.homestead = {name: 'Your Homestead', home: true, own: true, lit: true, pool: [], theme: {floor: '#6a4a30', wall: '#2a1c14', glow: '#ffb35a'}, exit: [27, 26], rows: [
+  '##########', '#f..k..bb#', '#........#', '#..tt..b.#', '#..tt....#', '#........#', '####E#####']};
 ST_DUNGEONS.guildhall = {name: 'The Adventurers\' Guild Hall', home: true, guild: true, lit: true, pool: [], theme: {floor: '#5a4a3a', wall: '#2a1e16', glow: '#ffb35a'}, exit: [16, 14], rows: [
   '##############',
   '#q...t..t...k#',
@@ -5697,6 +5702,7 @@ ST_DUNGEONS.guildhall = {name: 'The Adventurers\' Guild Hall', home: true, guild
   '#f..........k#',
   '#............#',
   '######E#######']};
+const stM = id => ST_MOUNTS[id] || ((stData() && stData().bred) || {})[id]; // a bought mount, or a foal you bred
 const ST_DOOR_AT = {'24,16': 'catacomb', '4,2': 'crypt', '44,9': 'duskwatch', '10,2': 'stair', 'rouge:36,18': 'vcrypt'};
 const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0, mara: 0, seraphiel: 0, marquis: 0, ignaroth: 0, unmaker: 0};
 const ST_MAP = stBuildMap();
@@ -5739,6 +5745,7 @@ const ST_NPCS = [
   {id: 'lucien', name: 'Pere Lucien', map: 'rouge', x: 19, y: 7, look: 'paladin', color: '#e8e2d0'},
   {id: 'silas', name: 'Silas the Gravekeeper', map: 'rouge', x: 31, y: 14, look: 'hunter', color: '#5a5a5a'},
   {id: 'countessNpc', name: 'The Countess', map: 'vcrypt', x: 15, y: 2, look: 'witch', color: '#6a0a2a', lv: 18, hideIf: 'countessDone'},
+  {id: 'herald', name: 'Herald Aldous', x: 13, y: 9, look: 'paladin', color: '#c9a24a'},
   {id: 'edda', name: 'Warden Edda', x: 10, y: 12, look: 'paladin', color: '#7a9ac8', need: 'tutDone'},
   {id: 'garth', name: 'Garth the Stablemaster', x: 14, y: 8, look: 'hunter', color: '#8a5a2a'},
   {id: 'ulric', name: 'Captain Ulric', x: 13, y: 12, look: 'knight', color: '#4a6a9a'},
@@ -5795,6 +5802,7 @@ function stStats() { // base class stats grown by level, plus gear and alignment
   const W = d.wounds || {};
   const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (W.hole ? .75 : 1), spd: c.spd + .4 * L};
   if (d.guild && stEdict() === 'wall') st.def *= 1.1;
+  { const close = Object.values(d.bonds || {}).filter(b => b.pts >= 80).length, mul = 1 + Math.min(.09, close * .03) + (d.spouse ? .05 : 0) + Math.min(.06, ((d.family && d.family.kids) || []).length * .02); if (mul > 1) { st.atk *= mul; st.def *= mul; st.mag *= mul; st.hp = Math.round(st.hp * mul); } } // friends and family fight beside you in spirit
   for (const k in d.gear || {}) { const G = ST_GEAR[k]; if (!G || !d.gear[k]) continue; st.atk += G.atk || 0; st.def += G.def || 0; st.mag += G.mag || 0; st.spd += G.spd || 0; }
   if (d.hr) { st.hp = Math.round(st.hp * 1.35); st.atk = st.atk * 1.5 + 6; st.def += 6; st.spd += 6; st.mag = 0; } // Heavenly Restriction: a perfect body, no magic at all
   if (d.pact) { st.atk += 6; st.mag += 6; }
@@ -5807,13 +5815,50 @@ function stSave() { saveProfile(); }
 // Alignment: -10 (Ashen) to +10 (Light). Light makes shops cheaper and toughens you; Ashen makes you hit harder.
 const stAlign = () => stData().align || 0;
 const stAlignName = (a = stAlign()) => a >= 6 ? 'Lightbearer' : a >= 3 ? 'Kind Soul' : a <= -6 ? 'Ashen Fiend' : a <= -3 ? 'Ruthless' : 'Grey Wanderer';
-const stPrice = n => Math.round(n * (stAlign() >= 3 ? .8 : stAlign() <= -3 ? 1.25 : 1));
+// ---- consequences: every town remembers what you did there. Reputation changes prices, service, guards, and how people feel about you.
+const ST_TOWN_NAME = {thornwake: 'Thornwake', ravenhollow: 'Ravenhollow', saltmere: 'Saltmere', harrowfield: 'Harrowfield', halcyon: 'Port Halcyon', rouge: 'Rougemarais', corvane: 'Port Corvane', highmarch: 'Highmarch', celestine: 'Celestine'};
+const ST_MAP_TOWN = {alden: 'thornwake', wrenhome: 'thornwake', jail: 'thornwake', guildhall: 'thornwake', homestead: 'harrowfield', mill: 'ravenhollow', grave: 'ravenhollow', nets: 'saltmere', isles: 'halcyon', rouge: 'rouge', vcrypt: 'rouge', land3: 'celestine'};
+function stTownAt(map, x, y) {
+  if (map === 'world') { const v = stVillage(x, y); return v.startsWith('Harrow') ? 'harrowfield' : v.startsWith('Saltmere') ? 'saltmere' : v === 'Ravenhollow' ? 'ravenhollow' : 'thornwake'; }
+  if (map === 'land2') return x < 20 * ST_TILE ? 'corvane' : 'highmarch';
+  return ST_MAP_TOWN[map] || null;
+}
+const stTownHere = () => { const d = stData(); return d ? stTownAt(d.map, d.x, d.y) : null; };
+const stRepOf = t => ((stData().rep || {})[t] || 0);
+const stRepName = r => r <= -60 ? 'Hated' : r <= -25 ? 'Distrusted' : r < 25 ? 'Neutral' : r < 60 ? 'Liked' : 'Honored';
+function stRep(t, n) {
+  if (!t || !n) return; const d = stData(); d.rep = d.rep || {}; if (n > 0 && stClass() <= 1) n = Math.round(n * 1.25); /* common folk trust one of their own */ const was = stRepName(stRepOf(t)); d.rep[t] = clamp(stRepOf(t) + n, -100, 100);
+  setTimeout(() => stCallout(`${ST_TOWN_NAME[t]} will remember that (${n > 0 ? '+' : ''}${n})`, n > 0 ? '#8fe08a' : '#ff8a6a'), 2200);
+  if (stRepName(stRepOf(t)) !== was) setTimeout(() => stCallout(`${ST_TOWN_NAME[t]} now sees you as ${stRepName(stRepOf(t))}`, n > 0 ? '#8fe08a' : '#ff6a4d'), 3700);
+}
+const stTownMul = () => { const r = stRepOf(stTownHere()); return r <= -60 ? 1.5 : r <= -25 ? 1.25 : r >= 60 ? .85 : r >= 25 ? .92 : 1; };
+// ---- social status: Commoner to Duke. The Herald in Thornwake grants each rank once you have earned it.
+const ST_STATUS = [ // [name for him, name for her, requirement text, check, patent fee, daily stipend]
+  ['Commoner', 'Commoner', '', () => true, 0, 0],
+  ['Freeholder', 'Freeholder', 'Own land (the Harrowfield homestead)', d => !!d.farm, 0, 0],
+  ['Sir', 'Dame', 'Free the Vale from the Hollow King and be Liked in Thornwake', d => d.flags.king && stRepOf('thornwake') >= 25, 1000, 50],
+  ['Baron', 'Baroness', 'B-Rank in the Guild and Liked in two towns', d => stRankAtLeast('B') && Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t) >= 25).length >= 2, 3000, 150],
+  ['Count', 'Countess', 'A-Rank, Ignaroth slain, and Liked in four towns', d => stRankAtLeast('A') && d.flags.ignaroth && Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t) >= 25).length >= 4, 8000, 400],
+  ['Duke', 'Duchess', 'S-Rank and the Unmaker destroyed', d => stRankAtLeast('S') && d.flags.unmaker, 20000, 1000],
+];
+const stClass = () => (stData().status || 0);
+const stTitle = (i = stClass()) => ST_STATUS[i][stData().voice === 'f' ? 1 : 0];
+const stTitledName = () => { const d = stData(), i = stClass(); return i >= 2 ? `${stTitle(i)} ${d.name}` : d.name; };
+const stPrice = n => Math.round(n * (stAlign() >= 3 ? .8 : stAlign() <= -3 ? 1.25 : 1) * stTownMul() * (stClass() >= 2 ? .9 : 1)); // nobles are given credit and courtesy
+const ST_SHOPKEEPS = ['merchant', 'inn', 'sela', 'hask', 'mira', 'brann', 'kesh', 'odile', 'remy', 'odo', 'garth', 'doro', 'hela', 'sorrel', 'aris', 'yuun', 'dunn'];
+function stSpouseCheck() { // a spouse who loses faith in you leaves
+  const d = stData(); if (!d.spouse || stBond(d.spouse).pts >= 30) return;
+  const nm = stNpcName(d.spouse); d.exSpouse = d.spouse; d.spouse = null;
+  setTimeout(() => stSay([['', `When you come home, the house is quiet. ${nm} has left a letter on the table.`], [nm, '"I married someone kind. I don\'t know who you are anymore. I\'m sorry."']]), 600);
+}
 function stShift(n) {
   const d = stData(), was = stAlignName(); d.align = clamp((d.align || 0) + n, -10, 10);
+  if (d.spouse) { stBond(d.spouse).pts += n < 0 ? n * 2 : n; stSpouseCheck(); } // your spouse sees what you become
   stCallout(n > 0 ? `Light +${n}` : `Ashen ${n}`, n > 0 ? '#ffe9a8' : '#ff5a3a');
   if (stAlignName() !== was) setTimeout(() => stCallout(`You are now: ${stAlignName()}`, n > 0 ? '#ffe9a8' : '#ff5a3a'), 1500);
 }
-function stCrime(gold, why) { const d = stData(); d.crime = (d.crime || 0) + gold; stShift(-2); if (d.guild) { d.guild.pts = Math.max(0, d.guild.pts - 15); setTimeout(() => stCallout('The Guild records your crime: -15 standing', '#c8b89a'), 3000); } sfx('crack'); setTimeout(() => stCallout(`Crime: ${why} · Bounty ${d.crime}`, '#ff3a3a'), 1500); }
+function stCrime(gold, why) { const d = stData(); if (stClass() >= 2) gold *= 2; d.crime = (d.crime || 0) + gold; /* a noble's crimes cost double */ stShift(-2); stRep(stTownHere(), -10);
+  for (const n of ST_NPCS) if ((n.map || 'world') === d.map && ST_SOCIAL[n.id] && Math.hypot(n.x * ST_TILE - d.x, n.y * ST_TILE - d.y) < 6 * ST_TILE) stBond(n.id).pts -= 5; /* witnesses think less of you */ if (d.guild) { d.guild.pts = Math.max(0, d.guild.pts - 15); setTimeout(() => stCallout('The Guild records your crime: -15 standing', '#c8b89a'), 3000); } sfx('crack'); setTimeout(() => stCallout(`Crime: ${why} · Bounty ${d.crime}`, '#ff3a3a'), 1500); }
 function stPickpocket(who) { // a quick hand: sometimes it works
   const d = stData();
   if (Math.random() < .5) { d.items.potion++; stShift(-1); stSay([['', `While ${who} looks away, a potion slips into your coat.`]]); }
@@ -5823,11 +5868,11 @@ function stArrest(guard) { // pay the fine, serve time, or fight your way out
   const d = stData(), dark = stAlign() <= -3;
   ST.guardCd = 25;
   stSay([[guard, `Halt! You've a bounty of ${d.crime} gold on your head${dark ? ', you ashen dog' : ''}. Pay your fine, or it's the cells.`]], null, [
-    [`Pay the fine (${d.crime} gold)`, () => { if (d.gold < d.crime) return stSay([[guard, 'You haven\'t the coin. The cells, then.']], stJail); d.gold -= d.crime; d.crime = 0; stSay([[guard, 'Debt paid. Keep your hands where I can see them.']]); }],
+    [`Pay the fine (${d.crime} gold)`, () => { if (d.gold < d.crime) return stSay([[guard, 'You haven\'t the coin. The cells, then.']], stJail); d.gold -= d.crime; d.crime = 0; stRep(stTownHere(), 3); stSay([[guard, 'Debt paid. Keep your hands where I can see them.']]); }],
     ['Go quietly to jail', stJail],
     ['Resist arrest', () => stStartBattle(['guard', 'guard'], null, 'v')]]);
 }
-function stJail() {
+function stJail() { stRep('thornwake', -5);
   const d = stData(), lostXp = Math.floor(d.xp / 2); d.xp -= lostXp; d.crime = 0; d.jailed = (d.jailed || 0) + 1;
   stEnterMap('jail', 1, 2);
   stSay([['', 'Iron. Straw. The smell of everyone who sat here before you.'], ['', `Three days pass in the Thornwake cells. Your skills dull from disuse (you lose ${lostXp} XP). Then the bars swing open.`], ['Warden Holt', 'Your debt to Thornwake is paid. Walk out the door, and don\'t make me see you again.']]);
@@ -6089,6 +6134,7 @@ function stMarketPrice(mk, g) { // today's price: the market's need, plus a dail
 const stCargoCap = () => 20 + ((stData().mounts || []).length ? 15 : 0);
 const stCargoUsed = () => Object.values(stData().cargo || {}).reduce((a, b) => a + b, 0);
 function stTrade(mk) {
+  if (stRepOf(stTownHere()) <= -60) return stSay([['', 'The stallholders turn their backs on you. Nobody here will trade with you.']]);
   const d = stData(), M = ST_MARKETS[mk], m = $('stMenu'); d.cargo = d.cargo || {}; d.seen = d.seen || {}; d.trade = d.trade || {spent: 0, earned: 0};
   ST.mode = 'menu'; m.hidden = false; m.innerHTML = ''; d.seen[mk] = {};
   for (const g in ST_GOODS) d.seen[mk][g] = stMarketPrice(mk, g).sell;
@@ -6117,6 +6163,7 @@ function stTrade(mk) {
 const ST_MATS = {
   trout: ['River Trout', 6, 'fish'], carp: ['Mud Carp', 5, 'fish'], eel: ['Grey Eel', 12, 'fish'], salmon: ['Silver Salmon', 14, 'fish'], moonfish: ['Moonfish', 40, 'fish'], boot: ['Old Boot', 1, 'junk'],
   snapper: ['Red Snapper', 9, 'fish'], tuna: ['Bluefin Tuna', 18, 'fish'], pearl: ['Brightwater Pearl', 60, 'gem'], sunfish: ['Golden Sunfish', 45, 'fish'],
+  carrot: ['Carrot', 4, 'crop'], pumpkin: ['Pumpkin', 10, 'crop'], moonberry: ['Moonberry', 18, 'crop'],
   catfish: ['Bayou Catfish', 10, 'fish'], gar: ['Gator Gar', 22, 'fish'], bloodgill: ['Bloodgill', 55, 'fish'],
   copper: ['Copper Ore', 6, 'ore'], iron: ['Iron Ore', 10, 'ore'], silver: ['Silver Ore', 20, 'ore'], gold: ['Gold Ore', 32, 'ore'], sunsteel: ['Sunsteel Ore', 60, 'ore'], moonstone: ['Moonstone', 50, 'gem'], gem: ['Rough Ruby', 70, 'gem'],
 };
@@ -6236,14 +6283,16 @@ function stGuildBoard() { // take, track and turn in guild quests
   const nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], need = ST_RANK_PTS[g.rank], pay = q => { const P = ST_GQ_PAY[q.rank], mul = (q.kind === 'boss' ? 2 : 1); return [Math.round(P[0] * mul * (stEdict() === 'bounty' ? 1.3 : 1)), P[1] * mul, P[2] * mul]; };
   m.append(el('h3', '', `Quest board · ${g.rank}-Rank`), el('p', '', nx ? `Standing ${g.pts}/${need} toward your ${nx}-Rank exam.` : 'S-Rank. There is no higher rank.'));
   const bar = el('div', 'bar rankbar'), fill = el('i'); fill.style.width = (nx ? Math.min(100, g.pts / need * 100) : 100) + '%'; bar.appendChild(fill); m.appendChild(bar);
-  m.appendChild(el('h3', '', `Your quests (${g.quests.length}/3)`));
+  m.appendChild(el('h3', '', g.quests.length ? 'Your current quest' : 'Your current quest: none'));
+  if (g.quests.length > 1) g.quests = g.quests.slice(0, 1); // the Compact allows one contract per member at a time
   const mine = el('div', 'trade gq');
-  if (!g.quests.length) mine.append(el('span', 'hint', 'None taken. Pick from the board below.'));
+  if (!g.quests.length) mine.append(el('span', 'hint', 'None taken. Pick one from the board below. You can hold one quest at a time: finish or abandon it before taking another.'));
   for (const a of g.quests) { const q = stGQ(a.id); if (!q) continue; const ok = stGQDone(q), P = pay(q);
     const prog = q.kind === 'hunt' ? `${a.prog}/${q.need}` : q.kind === 'gather' ? `${Math.min(q.need, (d.mats || {})[q.mat] || 0)}/${q.need}` : ok ? 'done' : 'not yet';
     const act = el('span', 'tbtn'), tb = el('button', ok ? 'primary' : '', ok ? 'Turn in' : 'Abandon');
     tb.addEventListener('click', () => {
       if (ok) { if (q.kind === 'gather') d.mats[q.mat] -= q.need; const tax = stRankAtLeast('A') ? 0 : Math.round(P[0] * .1); d.gold += P[0] - tax; g.pts += P[1]; d.xp += P[2]; g.done.push(q.id); sfx('levelup'); stCallout(`${q.name}: +${P[0] - tax} gold · +${P[1]} standing`, '#ffd75e'); if (tax) setTimeout(() => stCallout(`The Compact levies ${tax} gold (10%)`, '#c8b89a'), 1500); }
+      if (!ok) { g.pts = Math.max(0, g.pts - 10); stCallout('Abandoned: -10 standing. The Compact frowns on broken contracts.', '#c8b89a'); }
       g.quests = g.quests.filter(x => x !== a); stGuildBoard();
     });
     act.appendChild(tb); mine.append(el('span', '', `[${q.rank}] ${q.name}`), el('span', 'hint', q.text), el('span', '', prog), act); }
@@ -6251,7 +6300,7 @@ function stGuildBoard() { // take, track and turn in guild quests
   m.appendChild(el('h3', '', 'On the board'));
   const avail = el('div', 'trade gq');
   for (const q of ST_GQUESTS) { if (ST_RANKS.indexOf(q.rank) > ST_RANKS.indexOf(g.rank) || g.quests.some(a => a.id === q.id) || (q.kind === 'boss' && g.done.includes(q.id))) continue;
-    const P = pay(q), b = el('button', '', 'Take'); b.disabled = g.quests.length >= 3;
+    const P = pay(q), b = el('button', '', g.quests.length ? 'One at a time' : 'Take'); b.disabled = g.quests.length >= 1;
     b.addEventListener('click', () => { g.quests.push({id: q.id, prog: 0}); sfx('pickup'); stGuildBoard(); });
     const act = el('span', 'tbtn'); act.appendChild(b); avail.append(el('span', '', `[${q.rank}] ${q.name}`), el('span', 'hint', q.text), el('span', '', `${P[0]}g · +${P[1]}`), act); }
   m.appendChild(avail);
@@ -6266,11 +6315,40 @@ function stAreaRule(x, y) {
 const ST_MEALS = { // cooked at inns; eat them in battle from Items
   grilled: {name: 'Grilled Fish', need: {any: 2}, lv: 1, hp: 90, desc: '+90 HP'},
   stew: {name: 'Hearty Fish Stew', need: {eel: 1, salmon: 1}, lv: 2, hp: 160, cure: true, desc: '+160 HP, stops bleeding'},
+  pumpkinStew: {name: 'Pumpkin Stew', need: {pumpkin: 1, carrot: 2}, lv: 2, hp: 200, cure: true, desc: '+200 HP, stops bleeding'},
+  moonPie: {name: 'Moonberry Pie', need: {moonberry: 3}, lv: 4, hp: 150, mp: 80, desc: '+150 HP, +80 MP'},
   islandPlatter: {name: 'Island Platter', need: {snapper: 1, tuna: 1}, lv: 3, hp: 180, mp: 30, desc: '+180 HP, +30 MP'},
   moonBroth: {name: 'Moonfish Broth', need: {moonfish: 1}, lv: 4, hp: 120, mp: 60, desc: '+120 HP, +60 MP'},
   bayouGumbo: {name: 'Bayou Gumbo', need: {catfish: 2, gar: 1}, lv: 4, hp: 240, cure: true, desc: '+240 HP, stops bleeding'},
 };
-const ST_PROF_NAME = {fishing: 'Fishing', mining: 'Mining', crafting: 'Crafting'};
+const ST_PROF_NAME = {fishing: 'Fishing', mining: 'Mining', crafting: 'Crafting', farming: 'Farming'};
+// ---- farming: buy the homestead from Farmer Odo, buy seeds, plant, wait (real minutes), harvest
+const ST_CROPS = {
+  wheat: {name: 'Wheat', price: 4, grow: 3, give: ['grain', 3, 'cargo'], lv: 1, ripe: '#e8c25a'}, carrot: {name: 'Carrots', price: 6, grow: 5, give: ['carrot', 3], lv: 1, ripe: '#ff8a2a'},
+  pumpkin: {name: 'Pumpkins', price: 12, grow: 8, give: ['pumpkin', 2], lv: 3, ripe: '#ff7a1a'}, moonberry: {name: 'Moonberries', price: 20, grow: 12, give: ['moonberry', 3], lv: 5, ripe: '#b06bff'},
+};
+const stPlotAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE); return stData().map === 'world' && ST_MAP[ty] && ST_MAP[ty][tx] === 'p' ? tx + ',' + ty : null; };
+const stCropProg = P => { const C = ST_CROPS[P.crop]; return Math.min(1, (Date.now() - P.at) / (C.grow * 60000 * Math.max(.5, 1 - (stProfLv('farming') - 1) * .05))); };
+function stPlot(key) {
+  const d = stData(), F = d.farm, P = F.plots[key];
+  if (P && stCropProg(P) >= 1) { // harvest
+    const C = ST_CROPS[P.crop], lv = stProfLv('farming'), n = C.give[1] + (lv >= 4 ? 1 : 0) + (lv >= 8 ? 1 : 0);
+    if (C.give[2] === 'cargo') { d.cargo = d.cargo || {}; d.cargo[C.give[0]] = (d.cargo[C.give[0]] || 0) + n; } else stMat(C.give[0], n);
+    delete F.plots[key]; stProfXp('farming', 6 + C.grow); sfx('pickup'); stCallout(`Harvested ${n} ${C.give[2] === 'cargo' ? 'Grain' : ST_MATS[C.give[0]][0]}`, C.ripe); return;
+  }
+  if (P) { const left = Math.ceil((1 - stCropProg(P)) * ST_CROPS[P.crop].grow * Math.max(.5, 1 - (stProfLv('farming') - 1) * .05)); return stSay([['', `The ${ST_CROPS[P.crop].name.toLowerCase()} are growing. About ${left} more minute${left > 1 ? 's' : ''}.`]]); }
+  const have = Object.entries(d.seeds || {}).filter(([, n]) => n > 0);
+  if (!have.length) return stSay([['', 'Bare soil, turned and ready. You have no seeds. Farmer Odo in Harrowfield sells them.']]);
+  stSay([['', 'What will you plant?']], null, have.map(([k, n]) => [`${ST_CROPS[k].name} seeds (×${n}) · ${ST_CROPS[k].grow} min`, () => { d.seeds[k]--; F.plots[key] = {crop: k, at: Date.now()}; stProfXp('farming', 2); sfx('swing'); }]).concat([['Not now', null]]));
+}
+function stDrawCrops(now) { // soil plots and whatever is growing in them
+  const d = stData(); if (!d.farm || d.map !== 'world') return; const wind = ST.wx ? ST.wx.wind : .3;
+  for (const key in d.farm.plots) { const P = d.farm.plots[key], C = ST_CROPS[P.crop], [tx, ty] = key.split(',').map(Number), k = stCropProg(P), x = tx * ST_TILE + 32, y = ty * ST_TILE + 44;
+    for (const ox of [-18, 0, 18]) { const sw = Math.sin(now * 2 + tx + ox) * (1 + wind * 2), h = 6 + k * 22;
+      ctx.strokeStyle = k >= 1 && P.crop === 'wheat' ? C.ripe : '#5aa03a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + ox, y); ctx.quadraticCurveTo(x + ox + sw * .5, y - h * .6, x + ox + sw, y - h); ctx.stroke();
+      if (k >= 1 && P.crop !== 'wheat') { ctx.fillStyle = C.ripe; if (P.crop === 'moonberry') { ctx.shadowColor = C.ripe; ctx.shadowBlur = 10; } ctx.beginPath(); ctx.arc(x + ox + sw, y - h + (P.crop === 'pumpkin' ? 16 : 0), P.crop === 'pumpkin' ? 9 : 5, 0, 7); ctx.fill(); ctx.shadowBlur = 0; } }
+    if (k >= 1) { ctx.fillStyle = '#ffd75e'; ctx.font = '800 16px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('✓', x, y - 40 + Math.sin(now * 4) * 3); ctx.textAlign = 'left'; } }
+}
 const stProfLv = k => ((stData().prof || {})[k] || {lv: 1}).lv;
 const stProfTitle = lv => ['', 'Novice', 'Novice', 'Apprentice', 'Apprentice', 'Journeyman', 'Journeyman', 'Adept', 'Expert', 'Master', 'Grandmaster'][Math.min(10, lv)];
 function stProfXp(k, n) {
@@ -6376,6 +6454,138 @@ function stCraft(station) {
   m.appendChild(tbl);
   const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row); setTimeout(() => x.focus({preventScroll: true}), 0);
 }
+// ---- breeding: two mounts of the same kind make a foal. It inherits a blend of their coats and speed, and may carry a rare mutation.
+const ST_FOAL_NAMES = ['Ember', 'Dusk', 'Thistle', 'Storm', 'Willow', 'Cinder', 'Frost', 'Nova', 'Bramble', 'Gale', 'Sorrow', 'Lantern', 'Rue', 'Tansy', 'Halcyon', 'Ashling'];
+const ST_KIND_NAME = {horse: 'Steed', wolf: 'Wolf', elk: 'Elk', drake: 'Drake', gryphon: 'Gryphon'};
+const stBlendHex = (a, b) => '#' + [1, 3, 5].map(i => Math.round((parseInt(a.substr(i, 2), 16) + parseInt(b.substr(i, 2), 16)) / 2 + rand(-18, 18))).map(v => clamp(v, 0, 255).toString(16).padStart(2, '0')).join('');
+const BREED_MIN = 5;
+function stBreedMenu() {
+  const d = stData(), own = d.mounts || [];
+  if (d.breeding) { const left = Math.ceil((d.breeding.ready - Date.now()) / 60000);
+    if (left > 0) return stSay([['Garth the Stablemaster', `Your ${stM(d.breeding.a).name} and ${stM(d.breeding.b).name} are still in the paddock. Give them about ${left} more minute${left > 1 ? 's' : ''}.`]]);
+    return stCollectFoal(); }
+  const pairs = []; for (let i = 0; i < own.length; i++) for (let j = i + 1; j < own.length; j++) if (stM(own[i]).kind === stM(own[j]).kind) pairs.push([own[i], own[j]]);
+  if (!pairs.length) return stSay([['Garth the Stablemaster', 'Breeding takes two of a kind. Two horses, two wolves, two drakes. Bring me a pair and I\'ll put them in the paddock.']]);
+  stSay([['Garth the Stablemaster', `Pick a pair. The foal takes after both: a blend of their coats, about their speed, sometimes a little better. Now and then, something rare. ${stPrice(100)} gold for the paddock and the feed, and about ${BREED_MIN} minutes.`]], null,
+    pairs.slice(0, 6).map(([a, b]) => [`${stM(a).name} + ${stM(b).name}`, () => {
+      if (d.gold < stPrice(100)) return stSay([['Garth the Stablemaster', 'Feed isn\'t free.']]);
+      d.gold -= stPrice(100); d.breeding = {a, b, ready: Date.now() + BREED_MIN * 60000}; if (d.riding && (d.mount === a || d.mount === b)) d.riding = false; sfx('pet');
+      stSay([['Garth the Stablemaster', `Into the paddock with them. Come back in ${BREED_MIN} minutes and you'll have a foal.`]]); }]).concat([['Not now', null]]));
+}
+function stCollectFoal() {
+  const d = stData(), A = stM(d.breeding.a), B = stM(d.breeding.b), gen = Math.max(A.gen || 1, B.gen || 1) + 1, r = Math.random();
+  const glow = r < .12 ? ['#ffd75e', '#9fe6ff', '#ff6a8a', '#b06bff'][Math.floor(Math.random() * 4)] : null, starborn = !A.fly && !B.fly && r < .04;
+  const F = {name: `${ST_FOAL_NAMES[Math.floor(Math.random() * ST_FOAL_NAMES.length)]}, Gen ${gen} ${ST_KIND_NAME[A.kind] || 'Foal'}`, kind: A.kind, color: stBlendHex(A.color, B.color), mane: Math.random() < .5 ? A.mane : B.mane,
+    speed: Math.round(Math.min(2.8, (A.speed + B.speed) / 2 + rand(-.05, .15) + .02 * gen) * 100) / 100, fly: A.fly || B.fly || starborn, glow, gen, parents: [A.name, B.name]};
+  const id = 'b' + Date.now().toString(36); d.bred = d.bred || {}; d.bred[id] = F; d.mounts.push(id); d.breeding = null; sfx('levelup');
+  stCallout(`A foal is born: ${F.name}!`, glow || '#ffe9a8');
+  stSay([['Garth the Stablemaster', `There. ${F.name}. Speed ${F.speed}${F.speed > Math.max(A.speed, B.speed) ? ', faster than either parent' : ''}.` + (glow ? ' And look at that coat. It shimmers. One in a hundred, that.' : '') + (starborn ? ' Gods. It has WINGS. Neither parent flies. I have never seen a starborn foal.' : '')],
+    ['Garth the Stablemaster', 'Choose it from your mounts in the menu. Breed it again later; each generation runs a little faster.']]);
+}
+// ---- bonds: friendship with everyone, romance with some. Talk daily, give gifts, spend time together.
+const ST_SOCIAL = { // loves and likes are gift ids (items, materials or trade goods); romance marks who can be courted
+  elder: {loves: ['relic'], likes: ['wine', 'ether']}, herald: {loves: ['relic'], likes: ['wine', 'silk']}, merchant: {loves: ['silk'], likes: ['spice', 'gold']}, inn: {loves: ['grilled', 'trout'], likes: ['wine', 'stew'], romance: true},
+  guild: {loves: ['rum'], likes: ['iron', 'furs']}, liora: {loves: ['moonstone'], likes: ['sunfish', 'gem', 'silver'], romance: true}, tam: {loves: ['rum'], likes: ['wine', 'relic']},
+  hask: {loves: ['rum'], likes: ['furs']}, ansel: {loves: ['relic'], likes: ['ether', 'wine']}, corin: {loves: ['furs'], likes: ['iron', 'potion']}, sela: {loves: ['silk'], likes: ['pearl', 'spice'], romance: true},
+  mira: {loves: ['salmon'], likes: ['trout', 'stew', 'fish'], romance: true}, brann: {loves: ['sunsteel'], likes: ['gold', 'iron'], romance: true}, dunn: {loves: ['moonfish'], likes: ['eel', 'carp']},
+  garth: {loves: ['grain'], likes: ['wool', 'potion'], romance: true}, edda: {loves: ['silver'], likes: ['potion', 'grilled'], romance: true}, lyra: {loves: ['pearl'], likes: ['silk', 'spice'], romance: true},
+  oona: {loves: ['tuna'], likes: ['snapper', 'rum'], romance: true}, kesh: {loves: ['gold'], likes: ['spice', 'rum'], romance: true}, sabine: {loves: ['rum'], likes: ['catfish', 'wine'], romance: true},
+  odile: {loves: ['wine'], likes: ['bloodgill', 'silk'], romance: true}, lucien: {loves: ['relic'], likes: ['potion']}, aris: {loves: ['moonstone'], likes: ['pearl', 'gem'], romance: true},
+  tobin: {loves: ['grain'], likes: ['iron']}, mae: {loves: ['potion'], likes: ['wool', 'grain']}, hollis: {loves: ['grain'], likes: ['iron']}, agna: {loves: ['wool'], likes: ['grain']}, osric: {loves: ['relic'], likes: ['rum']}, maud: {loves: ['salmon'], likes: ['fish']},
+  odo: {loves: ['iron'], likes: ['rum', 'carrot']}, ulric: {loves: ['iron'], likes: ['rum']}, dorn: {loves: ['catfish'], likes: ['rum']}, imra: {loves: ['silk'], likes: ['pearl']}, doro: {loves: ['gold'], likes: ['spice']},
+  hela: {loves: ['fish'], likes: ['rum']}, sol: {loves: ['relic'], likes: ['gem']}, holt: {loves: ['rum'], likes: ['iron']}, vesk: {loves: ['gold'], likes: ['wine']}, silas: {loves: ['relic'], likes: ['moonberry']}, pilgrim: {loves: ['moonstone'], likes: ['relic']}, malphas: {loves: ['bloodgill'], likes: ['wine', 'relic']}, garrick: {loves: ['silver'], likes: ['furs']}, valen: {loves: ['relic'], likes: ['wine']}, sorrel: {loves: ['rum'], likes: ['grain'], romance: true}, yuun: {loves: ['gem'], likes: ['relic'], romance: true},
+};
+const ST_BOND_LV = [[0, 'Stranger'], [15, 'Acquaintance'], [40, 'Friend'], [80, 'Close Friend'], [130, 'Best Friend']];
+const stToday = () => Math.floor(Date.now() / 864e5);
+const stBond = id => { const d = stData(); d.bonds = d.bonds || {}; return d.bonds[id] || (d.bonds[id] = {pts: 0}); };
+const stBondName = id => { const d = stData(), b = stBond(id); if (d.spouse === id) return 'Spouse'; if (d.romance === id) return 'Sweetheart'; let n = 'Stranger'; for (const [p, nm] of ST_BOND_LV) if (b.pts >= p) n = nm; return n; };
+const stNpcName = id => id === 'liora' ? 'Liora' : (ST_NPCS.find(n => n.id === id) || {}).name || id;
+function stBondAdd(id, n, quiet) {
+  const b = stBond(id), was = stBondName(id); b.pts = clamp(b.pts + n, -20, 200);
+  if (!quiet) stCallout(`${n >= 0 ? '♥' : '✕'} ${stNpcName(id)} ${n >= 0 ? '+' : ''}${n}`, n >= 0 ? '#ff8aa8' : '#c8b89a');
+  if (stBondName(id) !== was && n > 0) setTimeout(() => stCallout(`${stNpcName(id)}: ${stBondName(id)}`, '#ff8aa8'), 1300);
+}
+function stBondDaily(id) { // the first chat of the day always counts
+  if (!ST_SOCIAL[id]) return; const b = stBond(id), d = stData();
+  if (b.talked !== stToday()) { b.talked = stToday(); stBondAdd(id, 2, true);
+    if (b.pts >= 130 && b.giftBack !== stToday()) { b.giftBack = stToday(); const g = [['potion', 2], ['ether', 1]][Math.floor(Math.random() * 2)]; d.items[g[0]] += g[1]; setTimeout(() => stCallout(`${stNpcName(id)} gives you ${g[1]} ${g[0]}${g[1] > 1 ? 's' : ''} ♥`, '#ff8aa8'), 1200); } }
+}
+function stGiftOptions() { // everything you could hand someone: items, cooked meals, fish, ore, gems and trade goods
+  const d = stData(), out = [];
+  for (const k of ['potion', 'ether']) if (d.items[k]) out.push([k, k === 'potion' ? 'Potion' : 'Ether', d.items[k], () => d.items[k]--]);
+  for (const k in ST_MEALS) if (d.items[k]) out.push([k, ST_MEALS[k].name, d.items[k], () => d.items[k]--]);
+  for (const k in d.mats || {}) if (d.mats[k] > 0) out.push([k, ST_MATS[k][0], d.mats[k], () => d.mats[k]--]);
+  for (const k in d.cargo || {}) if (d.cargo[k] > 0) out.push([k, ST_GOODS[k][0], d.cargo[k], () => d.cargo[k]--]);
+  return out;
+}
+function stSocial(id) { // the bond panel: give a gift, spend time, and court those who can be courted
+  const d = stData(), S = ST_SOCIAL[id], b = stBond(id), m = $('stMenu'), name = stNpcName(id); if (!S) return;
+  ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  const lvl = stBondName(id), next = ST_BOND_LV.find(([p]) => p > b.pts);
+  m.append(el('h3', '', `♥ ${name}`), el('p', '', `${lvl} · bond ${Math.max(0, Math.round(b.pts))}${next ? ` (${next[0]} for ${next[1]})` : ''}` + (S.romance || b.open ? ' · can be courted' : '')));
+  const bar = el('div', 'bar bondbar'), fi = el('i'); fi.style.width = Math.min(100, Math.max(0, b.pts) / 1.3) + '%'; bar.appendChild(fi); m.appendChild(bar);
+  const known = b.pts >= 40 || b.likesKnown; m.appendChild(el('p', 'hint', known ? `Loves: ${S.loves.map(k => (ST_MATS[k] || ST_GOODS[k] || [ST_MEALS[k] ? ST_MEALS[k].name : k])[0]).join(', ')}. Likes: ${S.likes.map(k => k === 'fish' ? 'any fish' : (ST_MATS[k] || ST_GOODS[k] || [ST_MEALS[k] ? ST_MEALS[k].name : k])[0]).join(', ')}.` : 'Become friends to learn what they love. Until then, try gifts and watch how they react.'));
+  const perks = [b.pts >= 40 && 'Friend: they share their story', b.pts >= 80 && 'Close Friend: they fight harder for you (+3% to all your stats)', b.pts >= 130 && 'Best Friend: a small gift for you every day'].filter(Boolean);
+  if (perks.length) m.appendChild(el('p', 'hint', perks.join(' · ')));
+  const row = el('div', 'row'), btn = (l, fn, dis) => { const x = el('button', '', l); x.disabled = !!dis; x.addEventListener('click', fn); row.appendChild(x); return x; };
+  btn(b.gift === stToday() ? 'Gift given today' : 'Give a gift', () => stGiftMenu(id), b.gift === stToday());
+  btn(b.time === stToday() ? 'Spent time today' : 'Spend time together', () => {
+    b.time = stToday(); stBondAdd(id, 5); sfx('pickup');
+    const R = d.romance === id || d.spouse === id, lines = R ? [`You walk with ${name} until the lamps are lit. Neither of you says much. Neither of you needs to.`, `${name} rests their head on your shoulder and tells you about the things they are afraid of. You tell them yours.`, `You share a meal and a bad joke. ${name} laughs until they cry, then pretends they did not.`]
+      : b.pts >= 40 ? [`${name} tells you about who they were before the Hollowing. It is a long story, and a sad one, and they seem lighter after.`, `You help ${name} with their work. They do not thank you, exactly, but they save you the last of the bread.`] : [`You and ${name} talk about the weather, the wolves, the price of salt. It is a start.`, `${name} is wary of you, but lets you sit with them a while.`];
+    stCloseMenu(); stSay([['', lines[Math.floor(Math.random() * lines.length)]]], () => stSocial(id));
+  }, b.time === stToday());
+  const married = ['tobin', 'mae', 'hollis', 'agna'].includes(id), fch = married ? 0 : Math.min(.75, .08 + Math.max(0, b.pts) * .0045 + (d.romance === id || d.spouse === id ? .35 : 0));
+  btn(b.flirt === stToday() ? 'Flirted today' : `Flirt (${Math.round(fch * 100)}% chance)`, () => {
+    b.flirt = stToday(); stCloseMenu();
+    if (married) { stBondAdd(id, -3); return stSay([[name, 'I\'m married. Happily. Go and bother someone who isn\'t.']], () => stSocial(id)); }
+    if (Math.random() < fch) { b.flirts = (b.flirts || 0) + 1; stBondAdd(id, 6); sfx('pickup'); const opened = !S.romance && !b.open && b.flirts >= 3; if (opened) b.open = true;
+      stSay([[name, ['You\'re trouble. I like trouble.', 'Stop that. No, don\'t stop.', 'Is it warm in here, or is it you?', 'Say that again. Slower.', 'Careful. I might start to believe you.'][Math.floor(Math.random() * 5)]]].concat(opened ? [['', `${name} has started looking at you differently. You could court them now.`]] : []), () => stSocial(id)); }
+    else { stBondAdd(id, -2); stSay([[name, ['...Did you just wink at me? Are you all right?', 'Ha. No.', 'I\'ll pretend I didn\'t hear that.', 'That was terrible. Truly. Try again some other day.'][Math.floor(Math.random() * 4)]]], () => stSocial(id)); }
+  }, b.flirt === stToday());
+  if ((S.romance || b.open) && !d.spouse && d.romance !== id && b.pts >= 80) btn('Confess your feelings', () => {
+    if (d.romance) return stSay([['', `You are already courting ${stNpcName(d.romance)}. Your heart can only take one road at a time.`]], () => stSocial(id));
+    d.romance = id; stBondAdd(id, 10); sfx('levelup'); stCloseMenu();
+    stSay([[name, b.pts >= 110 ? 'I was hoping you would say that. I was going to say it first, and lose my nerve, again.' : 'I... yes. Yes. Gods help us both.'], ['', `You are courting ${name}. At bond 130, with a Moonsilver Ring from Brann the Smith, you could ask for more.`]], () => stSocial(id));
+  });
+  if (d.romance === id && !d.spouse) btn(d.items.ring ? 'Propose with the Moonsilver Ring' : 'Propose (needs a Moonsilver Ring)', () => {
+    if (b.pts < 130) return stSay([[name, 'Ask me again when we have been through a little more together.'], ['', `Bond ${Math.round(b.pts)} of 130.`]], () => stSocial(id));
+    d.items.ring--; d.spouse = id; d.romance = null; sfx('evolve'); stCallout(`You married ${name}!`, '#ff8aa8'); stCloseMenu();
+    stSay([['', `In the ash-grey light of the shrine, before Maren and half the village, you and ${name} are wed. Someone cries. It might be Old Tam.`], ['', `Beloved's Blessing: +5% to all your stats, and your spouse tends your wounds after every battle.`]], () => stSocial(id));
+  }, !d.items.ring);
+  if (d.romance === id || d.spouse === id) btn(d.spouse === id ? 'Part ways' : 'End the courtship', () => { stCloseMenu(); stSay([['', `Are you sure? ${name} will not forget it.`]], null, [['Yes, part ways', () => { if (d.spouse === id) d.spouse = null; d.romance = null; stBondAdd(id, -40); }], ['No', () => stSocial(id)]]); });
+  btn('Done', stCloseMenu);
+  m.appendChild(row); setTimeout(() => row.querySelector('button:not(:disabled)').focus({preventScroll: true}), 0);
+}
+const ST_KID_NAMES = ['Ash', 'Briar', 'Wren', 'Pip', 'Rowan', 'Tamsin', 'Fen', 'Ivy', 'Corin', 'Juniper', 'Ember', 'Sorrel', 'Linden', 'Hazel', 'Robin', 'Teal'];
+const stKidStage = k => { const age = Date.now() - k.born; return age < 15 * 60000 ? 'baby' : age < 120 * 60000 ? 'toddler' : 'child'; };
+function stSpouseHome() {
+  const d = stData(), id = d.spouse, name = stNpcName(id), F = d.family || (d.family = {kids: []}); ST.talkNpc = id; stBondDaily(id);
+  const pend = F.pending && F.pending > Date.now(), arrived = F.pending && F.pending <= Date.now();
+  if (arrived) { const nm = ST_KID_NAMES[Math.floor(Math.random() * ST_KID_NAMES.length)]; F.kids.push({name: nm, born: Date.now()}); F.pending = null; sfx('evolve'); stCallout(`Welcome to the family, ${nm}!`, '#ff8aa8');
+    return stSay([[name, 'Come and meet them. Look. Look at their tiny hands.'], ['', `${nm} has joined your family. They will grow up here, in this house, a little each day.`]]); }
+  stSay([[name, F.kids.length ? `The little one${F.kids.length > 1 ? 's are' : ' is'} asleep, finally. Sit with me a while.` : 'Welcome home. I kept the fire going.']], null,
+    [['Rest together', () => { d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); stSay([['', 'You sleep better than you have since you woke in the ash.']]); }], ['♥ Spend time', () => stSocial(id)]].concat(
+      pend ? [['Talk about the baby on the way', () => stSay([[name, `Soon. About ${Math.ceil((F.pending - Date.now()) / 60000)} more minutes, the midwife says. I'm terrified. I'm so happy.`]])]] :
+      F.kids.length < 3 ? [['Start a family together', () => { F.pending = Date.now() + 10 * 60000; stBondAdd(id, 8); stSay([[name, F.kids.length ? 'Another? Gods, yes. This house could use more noise.' : 'A family. Here, with you. Yes.'], ['', 'A child will join your family in about 10 minutes. Come home to meet them.']]); }]] : [], [['Leave', null]]));
+}
+function stKidTalk(i) {
+  const d = stData(), K = d.family.kids[i], st = stKidStage(K), a = stAlign();
+  const line = st === 'baby' ? `${K.name} gurgles at you and grabs your finger with a grip like a smith's vice.` : st === 'toddler' ? `${K.name} toddles over, holds up a pebble, and says your name. Almost.`
+    : a >= 3 ? `${K.name}: "When I grow up I'm going to help people like you do!"` : a <= -3 ? `${K.name}: "The other kids say you're scary. I told them you're only scary to bad people. Right?"` : `${K.name}: "Can we go fishing? You promised. You PROMISED."`;
+  if (K.gift !== stToday() && st !== 'baby') { K.gift = stToday(); d.items.potion++; setTimeout(() => stCallout(`${K.name} gives you a drawing (and a potion they found) ♥`, '#ff8aa8'), 800); }
+  stSay([['', line]]);
+}
+function stGiftMenu(id) {
+  const S = ST_SOCIAL[id], opts = stGiftOptions(), name = stNpcName(id), b = stBond(id);
+  if (!opts.length) return stSay([['', 'You have nothing to give. Fish, mine, cook or trade, and bring something back.']], () => stSocial(id));
+  stCloseMenu();
+  stSay([['', `What will you give ${name}?`]], null, opts.slice(0, 10).map(([k, label, n, take]) => [`${label} (×${n})`, () => {
+    take(); b.gift = stToday(); const fishy = ST_MATS[k] && ST_MATS[k][2] === 'fish', love = S.loves.includes(k), like = S.likes.includes(k) || (fishy && S.likes.includes('fish'));
+    const n2 = love ? 14 : like ? 7 : ST_MATS[k] && ST_MATS[k][2] === 'junk' ? -4 : 2; stBondAdd(id, n2); sfx(n2 > 6 ? 'levelup' : 'pickup'); if (love) b.likesKnown = true;
+    stSay([[name, love ? `For me? This is... this is exactly what I wanted. How did you know?` : like ? 'Oh, that\'s kind. Thank you.' : n2 < 0 ? 'Is... is this a boot?' : 'Thank you. I suppose.']], () => stSocial(id));
+  }]).concat([['Never mind', () => stSocial(id)]]));
+}
 function stToggleRide() {
   const d = stData(), own = d.mounts || [];
   if (ST.mode !== 'walk') return;
@@ -6386,11 +6596,12 @@ function stToggleRide() {
     d.riding = false;
     if (stBlocked(d.x, d.y + 14)) { d.riding = true; return stCallout('You can\'t land here.', '#ffd75e'); }
   } else d.riding = true;
-  sfx(d.riding ? 'pet' : 'blink'); stCallout(d.riding ? `Riding the ${ST_MOUNTS[d.mount].name}` : 'Dismounted', '#ffe9a8'); stHud();
+  sfx(d.riding ? 'pet' : 'blink'); stCallout(d.riding ? `Riding the ${stM(d.mount).name}` : 'Dismounted', '#ffe9a8'); stHud();
 }
 function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // drawn under the rider; legs gallop with distance walked
-  const M = ST_MOUNTS[id], dir = Math.cos(face) < 0 ? -1 : 1, ph = walk * .045, fly = M.fly;
+  const M = stM(id), dir = Math.cos(face) < 0 ? -1 : 1, ph = walk * .045, fly = M.fly;
   g.save(); g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(x, y + 4, fly ? 30 : 42, fly ? 8 : 11, 0, 0, 7); g.fill();
+  if (M.glow) { const ag = g.createRadialGradient(x, y - 30, 4, x, y - 30, 60); ag.addColorStop(0, M.glow + '88'); ag.addColorStop(1, M.glow + '00'); g.fillStyle = ag; g.fillRect(x - 60, y - 90, 120, 120); } // a mutation shimmer
   g.translate(x, y - (fly ? 26 + Math.sin(now * 4) * 5 : 0)); g.scale(dir, 1);
   if (fly) { // wings
     const flap = Math.sin(now * (M.kind === 'gryphon' ? 7 : 5)) * .6;
@@ -6609,7 +6820,7 @@ function stDrawDungeonCanvas(key) {
 function stDrawMapCanvas() {
   const c = document.createElement('canvas'); c.width = ST_W * ST_TILE; c.height = ST_H * ST_TILE;
   const g = c.getContext('2d'), R = mulberry(11);
-  const col = {b: '#26281c', a: '#6a5844', Q: '#34452f', g: '#1a2620', '.': '#34452f', T: '#1f3322', '~': '#173f52', '^': '#4a4d52', '=': '#6a6048', v: '#5e5440', H: '#5a3226', ':': '#435a55', '#': '#626e6a', '*': '#b8c4cc', C: '#2a2433', W: '#1a1622', B: '#6a5230', G: '#5a14c0', S: '#34452f', D: '#1a1a1a', P: '#173f52', L: '#5e5440', M: '#5e5440', O: '#5e5440', F: '#4a3a24'};
+  const col = {b: '#26281c', a: '#6a5844', Q: '#34452f', g: '#1a2620', '.': '#34452f', T: '#1f3322', '~': '#173f52', '^': '#4a4d52', '=': '#6a6048', v: '#5e5440', H: '#5a3226', ':': '#435a55', '#': '#626e6a', '*': '#b8c4cc', C: '#2a2433', W: '#1a1622', B: '#6a5230', G: '#5a14c0', S: '#34452f', D: '#1a1a1a', p: '#4a3420', P: '#173f52', L: '#5e5440', M: '#5e5440', O: '#5e5440', F: '#4a3a24'};
   for (let y = 0; y < ST_H; y++) for (let x = 0; x < ST_W; x++) {
     const t = ST_MAP[y][x], px = x * ST_TILE, py = y * ST_TILE;
     g.fillStyle = col[t] || '#3f6b3a'; g.fillRect(px, py, ST_TILE, ST_TILE);
@@ -6617,6 +6828,7 @@ function stDrawMapCanvas() {
     if (t === 'b') { if (R() < .35) { g.fillStyle = '#d8d0b8'; g.fillRect(px + R() * 50, py + R() * 50, 12, 3); g.fillRect(px + R() * 50, py + R() * 50, 3, 9); } if (R() < .3) { g.fillStyle = 'rgba(80,90,40,.5)'; g.beginPath(); g.ellipse(px + 32, py + 40, 22, 9, 0, 0, 7); g.fill(); } }
     if (t === 'a') { g.strokeStyle = 'rgba(40,30,20,.35)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px, py + 20 + R() * 20); g.quadraticCurveTo(px + 32, py + 10 + R() * 30, px + 64, py + 24 + R() * 20); g.stroke(); }
     if (t === 'g' || t === 'T') for (let i = 0; i < 2; i++) { const tx = px + 14 + R() * 36, ty = py + 20 + R() * 36; g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(tx, ty + 4, 16, 6, 0, 0, 7); g.fill(); (ST.treesBy.world = ST.treesBy.world || []).push({x: tx, y: ty, s: .8 + R() * .5, dark: t === 'g', ph: R() * 6}); }
+    if (t === 'p') { g.fillStyle = '#3a2614'; for (let i = 0; i < 3; i++) g.fillRect(px + 4, py + 8 + i * 20, 56, 8); g.strokeStyle = '#6a4a2a'; g.lineWidth = 2; g.strokeRect(px + 1, py + 1, 62, 62); }
     if (t === 'F') { for (let i = 0; i < 4; i++) { g.fillStyle = '#3a2a18'; g.fillRect(px, py + 4 + i * 16, 64, 5); g.fillStyle = (x + y) % 3 ? '#6a8a3a' : '#c9a24a'; for (let j = 0; j < 8; j++) g.fillRect(px + 3 + j * 8, py + 1 + i * 16, 3, 6); } }
     if (t === 'O') { g.fillStyle = '#4a3020'; g.fillRect(px + 28, py + 10, 8, 50); g.fillStyle = '#8a6a3a'; g.fillRect(px + 10, py + 12, 44, 16); g.fillStyle = '#1a1206'; g.font = '700 11px sans-serif'; g.textAlign = 'center'; g.fillText('COACH', px + 32, py + 24); g.textAlign = 'left'; g.fillStyle = '#ffb35a'; g.beginPath(); g.arc(px + 44, py + 36, 4, 0, 7); g.fill(); }
     if (t === 'P') { g.fillStyle = '#6a4a2a'; for (let i = 0; i < 4; i++) g.fillRect(px + 2, py + 4 + i * 15, 60, 11); g.fillStyle = '#3a2a1a'; g.fillRect(px + 4, py + 56, 6, 8); g.fillRect(px + 54, py + 56, 6, 8); }
@@ -6781,6 +6993,7 @@ function stSay(lines, onDone, choices) {
 function stShowLine() {
   const dl = ST.dlg, [who, text] = dl.lines[dl.i], last = dl.i === dl.lines.length - 1;
   $('stDialog').hidden = false; $('stWho').textContent = who || 'You'; $('stText').textContent = text;
+  const bn = $('stBond'), sid = ST.talkNpc; bn.hidden = !(sid && ST_SOCIAL[sid]); if (!bn.hidden) bn.textContent = `♥ ${stBondName(sid)}`;
   const ch = $('stChoices'); ch.innerHTML = '';
   const opts = last && dl.choices ? dl.choices : [[last ? 'Done' : 'Next', null]];
   for (const [label, fn] of opts) {
@@ -6788,7 +7001,7 @@ function stShowLine() {
     b.addEventListener('click', () => {
       if (!last) { dl.i++; stShowLine(); return; }
       $('stDialog').hidden = true; ST.mode = 'walk'; ST.dlg = null;
-      if (fn) fn(); if (dl.onDone) dl.onDone(); stHud(); stSave();
+      if (fn) fn(); if (dl.onDone) dl.onDone(); if (ST.mode === 'walk') ST.talkNpc = null; stHud(); stSave();
     });
     ch.appendChild(b);
   }
@@ -6798,7 +7011,7 @@ function stShowLine() {
 // ---- the world: movement, interaction and random encounters
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
 const stRockAt = (x, y) => ST_ROCKS.find(r => r.x === Math.floor(x / ST_TILE) && r.y === Math.floor(y / ST_TILE));
-const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
+const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && stM(d.mount) && stM(d.mount).fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && stM(d.mount) && stM(d.mount).fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
   const d = stData(); if (key !== 'world') d.riding = false; d.map = key; d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
@@ -6818,6 +7031,8 @@ function stNearby() {
   const d = stData(), near = (tx, ty) => Math.hypot(d.x - (tx * ST_TILE + 32), d.y - (ty * ST_TILE + 32)) < 80, grid = stGrid();
   for (const n of ST_NPCS) if ((n.map || 'world') === d.map && stNpcShown(n, d) && near(n.x, n.y)) return {kind: 'npc', n};
   if (d.map === 'world') for (const r of ST_ROCKS) if (near(r.x, r.y)) return {kind: 'mine', r};
+  const pk = stPlotAt(d.x, d.y + 14); if (pk) return {kind: 'plot', key: pk};
+  if (d.map === 'homestead') { if (d.spouse && near(6, 3)) return {kind: 'spouse'}; for (const [i, kid] of (d.family && d.family.kids || []).entries()) if (near(2 + i * 2, 4)) return {kind: 'kid', i}; }
   if (d.map === 'world') {
     for (const h of ST_HOUSES) if (Math.hypot(d.x - (h.x + 1) * ST_TILE, d.y - (h.y + 2) * ST_TILE) < 60) return {kind: 'house', h};
     for (const c of ST_CHESTS) if (stChestShown(c, d) && near(c.x, c.y)) return {kind: 'chest', c};
@@ -6846,6 +7061,8 @@ function stInteract(pre) {
   const it = pre || stNearby(), d = stData(); if (!it) return;
   if (it.kind === 'chest' && ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home && !it.stolen) return stSay([['', d.map === 'jail' ? 'A locked chest of confiscated goods. The warden is right there.' : 'A family\'s coffer. Everything they have is in here. They are watching you.']], null,
     [['Steal it (a crime)', () => { stCrime(40, 'burglary'); it.stolen = true; stInteract(it); }], ['Leave it', null]]);
+  if (it.kind === 'house' && it.h.key === 'homestead' && !d.farm) return stSay([['', 'A sturdy farmhouse with an empty field beside it. A sign on the door: FOR SALE. ENQUIRE WITH FARMER ODO.']]);
+  if (it.kind === 'house' && it.h.key === 'homestead') { stEnterMap('homestead', 4, 5); return; }
   if (it.kind === 'house') { const D = ST_DUNGEONS[it.h.key]; return stSay([['', `The door of ${D.name} is unlatched. Smoke curls from the chimney.`]], null, [['Go inside', () => stEnterMap(it.h.key, ...(it.h.start || [4, 5]))], ['Leave them be', null]]); }
   if (it.kind === 'chest') {
     d.chests.push(it.c.id); const L = it.c.loot, got = [];
@@ -6860,6 +7077,9 @@ function stInteract(pre) {
   else if (it.kind === 'gate') stSay([['', 'A seal of violet light bars the gate. It hums like a held breath. Two shards would break it. You carry ' + Math.max(0, d.ch - 1) + '.']]);
   else if (it.kind === 'shrine') stRest();
   else if (it.kind === 'fish') stGatherStart('fish', it.spot);
+  else if (it.kind === 'plot') { if (!d.farm) stSay([['', 'A plowed field with a FOR SALE sign. Farmer Odo in Harrowfield holds the deed.']]); else stPlot(it.key); }
+  else if (it.kind === 'spouse') stSpouseHome();
+  else if (it.kind === 'kid') stKidTalk(it.i);
   else if (it.kind === 'board') { if (d.guild) stGuildBoard(); else stSay([['', 'Contracts, bounties and pleas, pinned three deep. Only guild members may take them. Talk to Clerk Lyra at the desk.']]); }
   else if (it.kind === 'mine') {
     const r = it.r, need = ST_ORE_LV[r.ore];
@@ -6914,6 +7134,12 @@ function stInteract(pre) {
   } else if (it.kind === 'npc') stTalk(it.n.id);
 }
 function stTalk(id) {
+  ST.talkNpc = id; stBondDaily(id);
+  const t = stTownHere();
+  if (ST_SHOPKEEPS.includes(id) && t && stRepOf(t) <= -60) return stSay([[stNpcName(id), `I know what you did in ${ST_TOWN_NAME[t]}. We don't serve your kind here. Get out before I call the watch.`], ['', `${ST_TOWN_NAME[t]} hates you (reputation ${stRepOf(t)}). Do good deeds here, pay your fines and help its people to win them back.`]]);
+  stTalkBody(id);
+}
+function stTalkBody(id) {
   const d = stData();
   if (id === 'elder') {
     if (d.ch === 0) {
@@ -6952,7 +7178,7 @@ function stTalk(id) {
   }
   else if (id === 'hessa') stSay([['Hessa', 'Don\'t come closer. I can feel it. The Hollowing. It started in my hands and now it\'s behind my eyes.'], ['Hessa', 'Wren sent you? Of course she did. Stubborn as her father.'],
     ['Hessa', 'If I go home, I will have a few good weeks with her before I forget her face. If I stay, she will remember me as I was. You choose. I can\'t.']], null,
-    [['Bring her home', () => { d.flags.hessaDone = true; d.flags.hessaHome = true; d.gold += 50; stShift(2); stSay([['', 'You walk her back slowly, past the harbor, past the shrines. At the edge of Thornwake she straightens, wipes her face, and goes to her daughter.']]); }],
+    [['Bring her home', () => { d.flags.hessaDone = true; d.flags.hessaHome = true; d.gold += 50; stShift(2); stRep('thornwake', 8); stSay([['', 'You walk her back slowly, past the harbor, past the shrines. At the edge of Thornwake she straightens, wipes her face, and goes to her daughter.']]); }],
      ['Grant her rest', () => { d.flags.hessaDone = true; d.flags.hessaRest = true; d.items.potion += 3; stSay([['', 'She thanks you. She asks you to make it quick. You do. You take her red scarf back to Thornwake.'], ['', 'It is the right thing, you tell yourself. You will tell yourself for a long time.']]); }]]);
   else if (id === 'hessaHome') stSay([['Hessa', 'Every morning I wake up and I still know her name. Every morning, that is a gift. Thank you.']]);
   else if (id === 'hask' || id === 'mira') stSay([[id === 'hask' ? 'Innkeeper Hask' : 'Innkeeper Mira', id === 'hask' ? 'Ravenhollow\'s only bed. The ravens are the only thing that sleeps sound here. 10 gold.' : 'Salt in the air keeps the dead away. Mostly. A room is 10 gold, and the stew is free if you don\'t ask what\'s in it.']], null,
@@ -6974,7 +7200,7 @@ function stTalk(id) {
   else if (id === 'brann') {
     const w = d.weapon || 0, next = ST_WEAPONS[w + 1];
     stSay([['Brann the Smith', next ? `You're carrying ${ST_WEAPONS[w].name}. I can make you ${next.name} (+${next.atk} attack) for ${next.price} gold. You have ${d.gold}.` : 'That blade is the best I\'ll ever make. Don\'t waste it on wolves.']], null,
-      (next ? [[`Forge it (${next.price} gold)`, () => { if (d.gold >= next.price) { d.gold -= next.price; d.weapon = w + 1; sfx('cannon'); } }]] : []).concat([['Craft at the forge', () => stCraft('forge')]], d.pickaxe ? [] : [[`Buy a pickaxe (${stPrice(40)} gold)`, () => { if (d.gold < stPrice(40)) return; d.gold -= stPrice(40); d.pickaxe = true; sfx('pickup'); stSay([['Brann the Smith', 'Ore rocks glint in the Thornwood, the ruins, the peaks and the dunes. Soft copper first. The hard stuff fights back.']]); }]], [['Not now', null]]));
+      (next ? [[`Forge it (${next.price} gold)`, () => { if (d.gold >= next.price) { d.gold -= next.price; d.weapon = w + 1; sfx('cannon'); } }]] : []).concat([['Craft at the forge', () => stCraft('forge')]], d.romance && !d.items.ring ? [[`Buy a Moonsilver Ring (${stPrice(300)} gold)`, () => { if (d.gold < stPrice(300)) return; d.gold -= stPrice(300); d.items.ring = 1; sfx('shield'); stSay([['Brann the Smith', 'Moonsilver. Doesn\'t tarnish, doesn\'t break. Hope the same goes for whoever you give it to.']]); }]] : [], d.pickaxe ? [] : [[`Buy a pickaxe (${stPrice(40)} gold)`, () => { if (d.gold < stPrice(40)) return; d.gold -= stPrice(40); d.pickaxe = true; sfx('pickup'); stSay([['Brann the Smith', 'Ore rocks glint in the Thornwood, the ruins, the peaks and the dunes. Soft copper first. The hard stuff fights back.']]); }]], [['Not now', null]]));
   }
   else if (id === 'dunn' && d.flags.bell && !d.flags.bellDone) stSay([['Dunn the Fisher', 'The Drowned Bell. Gods. My father rang that bell every dusk so the boats could find the harbor.'], ['Dunn the Fisher', 'Maybe the boats will come home now. Maybe nothing will. Either way, take this. It\'s all I have.']], () => { d.flags.bellDone = true; d.gold += 150; d.items.ether++; sfx('levelup'); });
   else if (id === 'dunn' && !d.flags.bellQuest) stSay([['Dunn the Fisher', 'The harbor bell sank when the marsh swallowed the old chapel. Without it, nobody\'s boat comes home.'], ['Dunn the Fisher', 'It\'s in the Bone Marsh, south of Ravenhollow, under the green water. Bring it back and I\'ll make it worth your while.']], null,
@@ -6986,13 +7212,13 @@ function stTalk(id) {
       ['Refuse it (Light)', () => { d.flags.pilgrimChoice = true; stShift(3); stSay([['The Pale Pilgrim', 'Hm. Then carry it well, little candle.']]); }]] : null);
   else if (id === 'garth') {
     const own = d.mounts || (d.mounts = []), list = Object.entries(ST_MOUNTS).filter(([k, M]) => !own.includes(k) && !M.drop && (!M.need || d.ch >= M.need));
-    stSay([['Garth the Stablemaster', own.length ? `How's the ${ST_MOUNTS[d.mount || own[0]].name} treating you? Press R, Y or the Ride button to call it.` : 'Legs are for the dead. The living ride. I\'ve beasts for any purse, and one for a purse heavier than most.'],
+    stSay([['Garth the Stablemaster', own.length ? `How's the ${stM(d.mount || own[0]).name} treating you? Press R, Y or the Ride button to call it.` : 'Legs are for the dead. The living ride. I\'ve beasts for any purse, and one for a purse heavier than most.'],
       ['Garth the Stablemaster', `You have ${d.gold} gold and ${PROF.crowns} Crowns.` + (d.ch < 2 ? ' Come back when you\'ve a shard. I\'ve a drake that only answers to shard-bearers.' : '')]], null,
       list.map(([k, M]) => [`${M.name} (${M.crowns ? M.crowns + ' Crowns' : stPrice(M.price) + ' gold'})${M.fly ? ', flies' : ''}`, () => {
         if (M.crowns ? PROF.crowns < M.crowns : d.gold < stPrice(M.price)) return stSay([['Garth the Stablemaster', 'Come back with the coin. Beasts eat whether you can pay or not.']]);
         if (M.crowns) PROF.crowns -= M.crowns; else d.gold -= stPrice(M.price);
         own.push(k); d.mount = k; sfx('levelup'); stSay([['', `The ${M.name} is yours.${M.fly ? ' It can fly over rivers and mountains.' : ''} Press R (Y on a controller, or the Ride button) to mount up.`]]);
-      }]).concat([['Just looking', null]]));
+      }]).concat(own.length >= 2 || d.breeding ? [[d.breeding && d.breeding.ready <= Date.now() ? 'Collect your foal' : 'Breed mounts', () => stBreedMenu()]] : [], [['Just looking', null]]));
   }
   else if (id === 'ulric' || id === 'dorn') {
     const who = id === 'ulric' ? 'Captain Ulric' : 'Watchman Dorn', a = stAlign();
@@ -7004,8 +7230,8 @@ function stTalk(id) {
   else if (id === 'mae') {
     if (d.flags.maeHelp) stSay([['Mae Alden', 'He sleeps through the night now. I didn\'t know how loud the quiet would be. Thank you.']]);
     else stSay([['Mae Alden', 'Tobin coughs grey at night. He thinks I can\'t hear. Brother Ansel in Ravenhollow brews a tonic, but it\'s 30 gold. We don\'t have 30 gold. We don\'t have 3.']], null,
-      [['Give her 30 gold', () => { if (d.gold < 30) return stSay([['', 'Your purse is too light.']]); d.gold -= 30; d.flags.maeHelp = true; stShift(2); stSay([['Mae Alden', 'I… I don\'t know what to say. Pip, thank them. PIP.']]); }],
-       ['Not my concern', () => stShift(-1)]]);
+      [['Give her 30 gold', () => { if (d.gold < 30) return stSay([['', 'Your purse is too light.']]); d.gold -= 30; d.flags.maeHelp = true; stShift(2); stRep('thornwake', 8); stSay([['Mae Alden', 'I… I don\'t know what to say. Pip, thank them. PIP.']]); }],
+       ['Not my concern', () => { stShift(-1); stRep('thornwake', -3); }]]);
   }
   else if (id === 'pip' || id === 'bet' || id === 'rook' || id === 'tilly' || id === 'fen' || id === 'ilse') {
     const a = stAlign(), N = {pip: 'Pip', bet: 'Bet', rook: 'Rook', tilly: 'Tilly', fen: 'Fen', ilse: 'Ilse'}[id];
@@ -7019,20 +7245,20 @@ function stTalk(id) {
   else if (id === 'hollis') {
     if (d.flags.hollisDone) stSay([['Hollis the Miller', d.flags.hollisPaid ? 'Bet and Rook will eat this winter. I\'ll grind your flour free till the day I die.' : 'Get out of my house. You took the last coin from a man with two children. Get out.']]);
     else stSay([['Hollis the Miller', 'Reeve Garrow comes for the tithe at the new moon. 60 gold, or he takes the mill. Without the mill we\'re beggars, and beggars don\'t last a winter here.'], ['Hollis the Miller', 'I\'m not asking. I wouldn\'t ask a stranger. I\'m just… telling someone.']], null,
-      [['Pay their debt (60 gold)', () => { if (d.gold < 60) return stSay([['', 'You don\'t have 60 gold.']]); d.gold -= 60; d.flags.hollisDone = d.flags.hollisPaid = true; stShift(3); stSay([['', 'Hollis stares at the coins. Agna starts to cry, very quietly, into her apron.']]); }],
-       ['Shake him down for coin', () => { d.flags.hollisDone = true; d.gold += 25; stShift(-3); stSay([['', 'He gives you everything in the jar. 25 gold. The children watch from behind the bed.']]); }],
+      [['Pay their debt (60 gold)', () => { if (d.gold < 60) return stSay([['', 'You don\'t have 60 gold.']]); d.gold -= 60; d.flags.hollisDone = d.flags.hollisPaid = true; stShift(3); stRep('ravenhollow', 12); stSay([['', 'Hollis stares at the coins. Agna starts to cry, very quietly, into her apron.']]); }],
+       ['Shake him down for coin', () => { d.flags.hollisDone = true; d.gold += 25; stShift(-3); stRep('ravenhollow', -15); stSay([['', 'He gives you everything in the jar. 25 gold. The children watch from behind the bed.']]); }],
        ['Nothing I can do', null]]);
   }
   else if (id === 'agna') stSay([['Agna Hollis', d.flags.hollisPaid ? 'I\'ve lit a candle for you at the shrine. I don\'t know if the old gods are listening. I lit it anyway.' : 'We buried two in the spring. I won\'t bury these two. I won\'t.']]);
   else if (id === 'osric') {
     if (d.flags.osricDone) stSay([['Osric the Gravedigger', d.flags.osricRob ? 'Rings and teeth, we split even. The dead don\'t miss them. Ilse does, a little.' : 'They rest easier with a stranger\'s prayer. Strange, but true.']]);
     else stSay([['Osric the Gravedigger', 'Six fresh ones tonight. Hollowing took the Tell family whole. I\'ve one shovel and a bad back.'], ['Osric the Gravedigger', 'Of course… they were buried with their rings. Nobody would know. I\'m only saying.']], null,
-      [['Help him bury them', () => { d.flags.osricDone = true; d.xp += 25; stShift(2); stSay([['', 'You dig until your hands bleed. Osric says the old words. The ravens watch and, for once, keep their distance. (+25 XP)']]); }],
-       ['Rob the graves with him', () => { d.flags.osricDone = d.flags.osricRob = true; d.gold += 50; stShift(-3); stSay([['', 'Six graves. Six rings. One locket with a child\'s hair in it. 50 gold, your share.']]); }],
+      [['Help him bury them', () => { d.flags.osricDone = true; d.xp += 25; stShift(2); stRep('ravenhollow', 6); stSay([['', 'You dig until your hands bleed. Osric says the old words. The ravens watch and, for once, keep their distance. (+25 XP)']]); }],
+       ['Rob the graves with him', () => { d.flags.osricDone = d.flags.osricRob = true; d.gold += 50; stShift(-3); stRep('ravenhollow', -12); stSay([['', 'Six graves. Six rings. One locket with a child\'s hair in it. 50 gold, your share.']]); }],
        ['Leave', null]]);
   }
   else if (id === 'maud') stSay([['Maud the Net-Mender', d.flags.bellDone ? 'The bell rang last night. I stood on the pier till dawn. Nothing came. But it rang, and that\'s more than yesterday.' : 'My Ennis went out to follow the sound of the drowned bell. The sea kept him. Some nights I mend his nets anyway.']], null,
-    d.flags.maudCoin ? null : [['Leave her 20 gold for bread', () => { if (d.gold < 20) return; d.gold -= 20; d.flags.maudCoin = true; stShift(1); }], ['Leave', null]]);
+    d.flags.maudCoin ? null : [['Leave her 20 gold for bread', () => { if (d.gold < 20) return; d.gold -= 20; d.flags.maudCoin = true; stShift(1); stRep('saltmere', 5); }], ['Leave', null]]);
   else if (id === 'vesk') stSay([['Vesk the Thief', d.jailed > 1 ? 'Back again? We should get matching cells.' : 'First time in? I\'m here for stealing bread. Fourth time. The bread is better in here.'], ['Vesk the Thief', stAlign() <= -3 ? 'You\'ve the eyes of a real one. Rob the rich, and the watch\'ll find you. Rob the poor, and only the gods will. Choose your marks.' : 'Word of advice: guards come for you in any village. Pay the fine if you can. The cells are cheaper, but they cost you in other ways.']]);
   else if (id === 'holt') stSay([['Warden Holt', d.crime > 0 ? 'Stealing from the WARDEN\'S chest? In the WARDEN\'S jail? Get out. I can\'t afford to feed you twice.' : 'Your sentence is served. The door\'s there. Use it.']]);
   else if (id === 'garrick') {
@@ -7045,7 +7271,7 @@ function stTalk(id) {
   }
   else if (id === 'ysolde') stSay([['Ysolde of the Pack', 'You came at night, alone, to the Gloamwood. Either very brave, or the hunter\'s dog.'], ['Ysolde of the Pack', 'We take only what the cruel would waste. Garrick hunts us for the bounty on our pelts. Ask him how many children he has skinned.'],
     ['Ysolde of the Pack', 'Or. Kneel, and I will give you the bite. You will be one of us: strong under the moon, a beast in battle. Forever.']], null, [
-    ['Join the pack', () => { if (d.vamp || d.hr) return stSay([['Ysolde of the Pack', d.vamp ? 'Ugh. Dead blood. The bite would rot in you. Go away, leech.' : 'The heavens have bound you. There is no room in you for the moon.']]); d.were = true; d.flags.ysoldeDone = true; for (const k of ['wolfform', 'howl']) if (!d.skills.includes(k)) d.skills.push(k); stShift(-1); sfx('roar'); stCallout('YOU ARE OF THE PACK', '#cfd8e0');
+    ['Join the pack', () => { if (d.vamp || d.hr) return stSay([['Ysolde of the Pack', d.vamp ? 'Ugh. Dead blood. The bite would rot in you. Go away, leech.' : 'The heavens have bound you. There is no room in you for the moon.']]); d.were = true; d.flags.ysoldeDone = true; stRep('ravenhollow', -20); for (const k of ['wolfform', 'howl']) if (!d.skills.includes(k)) d.skills.push(k); stShift(-1); sfx('roar'); stCallout('YOU ARE OF THE PACK', '#cfd8e0');
       stSay([['', 'Her teeth are gentle, which is the worst part. Then the moon pours into you like cold water.'], ['', 'New abilities: Wolf Form and Blood Moon Howl. At night you are stronger and faster. Garrick will know.']]); }],
     ['Fight her', () => stBossFight('ysolde')], ['Leave', null]]);
   else if (id === 'sabine') stSay([['Dockmaster Sabine', 'Welcome to Rougemarais. Sun hasn\'t risen here in a hundred years. The vampires prefer it that way, and they own the city.'], ['Dockmaster Sabine', 'Mind the streets. Thralls hunt anyone without a crest. The ship leaves from my pier whenever you\'re tired of being prey.']]);
@@ -7060,12 +7286,28 @@ function stTalk(id) {
   }
   else if (id === 'silas') { const n = stLetters(); stSay([['Silas the Gravekeeper', n >= 3 ? 'You have all three letters. I can see it on you. The Delacroix-Noir crypt will open for its own blood.' : n ? `You found one of the old letters. ${n} of 3. The others went where the family went: to a witch's castle in the dunes, and a gravedigger's coffer up north.` : 'Every tomb here has a name but one. The crypt with the red crest. It opens only for the family. And the family is all dead. Mostly.']]); }
   else if (id === 'countessNpc') stSay([['The Countess', 'So. The lost child comes home. You do not remember me. You should not. They took you from the crib and drowned you in the Ashen Vale, and the ash gave you back.'], ['The Countess', 'You are Delacroix-Noir. My blood. Awaken it, and you will be what you were born to be: strong at night, undying, hungry.']], null, [
-    ['Awaken the blood', () => { if (d.were || d.hr) return stSay([['The Countess', d.were ? 'You smell of wet dog. The wolf has your blood already. A pity.' : 'The heavens have bound you. Even I cannot unbind that.']]); d.vamp = true; d.flags.countessDone = true; for (const k of ['bloodfeast', 'mist', 'vampform']) if (!d.skills.includes(k)) d.skills.push(k); stShift(-2); sfx('drain'); stCallout('THE BLOOD AWAKENS', '#c0102a');
+    ['Awaken the blood', () => { if (d.were || d.hr) return stSay([['The Countess', d.were ? 'You smell of wet dog. The wolf has your blood already. A pity.' : 'The heavens have bound you. Even I cannot unbind that.']]); d.vamp = true; d.flags.countessDone = true; stRep('rouge', 15); stRep('thornwake', -10); for (const k of ['bloodfeast', 'mist', 'vampform']) if (!d.skills.includes(k)) d.skills.push(k); stShift(-2); sfx('drain'); stCallout('THE BLOOD AWAKENS', '#c0102a');
       stSay([['', 'She cuts her palm and you drink. It tastes like coming home.'], ['', 'You are a vampire of the Delacroix-Noir line. New abilities: Blood Feast, Mist Form and Blood Ascension. You are stronger at night. Sunlight weakens you.']]); }],
     ['Refuse your blood', () => { d.flags.countessDone = true; d.signet = true; stShift(2); stSay([['The Countess', 'Then take the signet, at least. Wear it, and remember what you threw away.'], ['', 'Delacroix-Noir Signet: +3 magic, +3 defense.']]); }],
     ['Destroy her', () => stBossFight('countess')]]);
+  else if (id === 'herald') {
+    const i = stClass(), nx = ST_STATUS[i + 1], C = ST_STATUS[i], paid = d.stipend === stToday();
+    const lines = [['Herald Aldous', `By the rolls of the Vale, you are ${i ? stTitle(i) + ' ' + d.name : 'a commoner'}.` + (i >= 2 ? ` Your holdings pay a stipend of ${C[5]} gold a day.` : ' Commoners pay no dues, and the people trust their own: you win reputation faster.')],
+      ['Herald Aldous', nx ? `To rise to ${nx[0] === nx[1] ? nx[0] : nx[0] + ' or ' + nx[1]}: ${nx[2]}.${nx[4] ? ` The patent costs ${nx[4]} gold.` : ''} Nobles pay less at market, but their crimes cost double.` : 'You stand at the very top of the rolls. There is nowhere higher, only further to fall.']];
+    stSay(lines, null, [].concat(nx ? [[`Claim the rank of ${stTitle(i + 1)}${nx[4] ? ` (${nx[4]} gold)` : ''}`, () => {
+      if (!nx[3](d)) return stSay([['Herald Aldous', `Not yet. ${nx[2]}.`]]);
+      if (d.gold < nx[4]) return stSay([['Herald Aldous', `The patent is ${nx[4]} gold. Even honor has a price.`]]);
+      d.gold -= nx[4]; d.status = i + 1; sfx('evolve'); stCallout(`You are now ${stTitledName()}`, '#ffd75e'); for (const t of ['thornwake', 'ravenhollow', 'saltmere', 'harrowfield']) stRep(t, 5);
+      stSay([['Herald Aldous', `Kneel. Rise, ${stTitledName()}. The Vale will speak your name with a title from this day on.`]]); }]] : [],
+      i >= 2 ? [[paid ? 'Stipend collected today' : `Collect your stipend (${C[5]} gold)`, () => { if (paid) return; d.stipend = stToday(); d.gold += C[5]; sfx('pickup'); stCallout(`+${C[5]} gold from your holdings`, '#ffd75e'); }]] : [], [['Leave', null]]));
+  }
   else if (id === 'edda') stSay([['Warden Edda', ['Rest at shrines before you go somewhere new. Always.', 'Guild quests pay, and they build standing. Standing earns exams. Exams earn ranks.', 'Fish when you can. A cooked meal has saved more lives than any sword.', 'If a place says Danger, believe it. Come back stronger.', 'Every move you use grows stronger. Use the ones you like.'][(d.lv + d.ch) % 5]]], null, [['Show me around again', () => stTutStart(true)], ['Thanks, Edda', null]]);
-  else if (id === 'odo') stSay([['Farmer Odo', 'Harrowfield grows the grain that feeds three villages, and nobody remembers our name. Grain and wool, cheap as dirt. Cheaper, some years.']], null, [['Trade goods', () => stTrade('harrow')], ['Leave', null]]);
+  else if (id === 'odo') stSay([['Farmer Odo', d.farm ? 'How are the fields? Water is free, the sun is free, the waiting is the hard part.' : 'Harrowfield grows the grain that feeds three villages. That old homestead south of here is for sale, if you want to put down roots. 600 gold for the deed.']], null,
+    [['Trade goods', () => stTrade('harrow')]].concat(d.farm ? [] : [[`Buy the homestead (${stPrice(600)} gold)`, () => { if (d.gold < stPrice(600)) return stSay([['Farmer Odo', 'Six hundred. Land is the one thing nobody is making more of.']]); d.gold -= stPrice(600); d.farm = {plots: {}}; d.seeds = {wheat: 6, carrot: 3}; sfx('levelup'); stCallout('You own a homestead!', '#ffd75e');
+      stSay([['Farmer Odo', 'It\'s yours: the house and the twelve plots beside it. Here, six wheat and three carrot seeds to start. Stand on a plot and press E to plant. Come back when it\'s ripe.']]); }]],
+      d.farm ? [['Buy seeds', () => stSay([['Farmer Odo', 'What\'ll it be? Five seeds a bag.']], null, Object.entries(ST_CROPS).map(([k, C]) => [`${C.name} ×5 (${stPrice(C.price * 5)} gold)${stProfLv('farming') < C.lv ? `, farming ${C.lv}` : ''}`, () => {
+        if (stProfLv('farming') < C.lv) return stSay([['Farmer Odo', `${C.name} are fussy. Get some seasons under your belt first. (Requires farming level ${C.lv}.)`]]);
+        if (d.gold < stPrice(C.price * 5)) return; d.gold -= stPrice(C.price * 5); d.seeds[k] = (d.seeds[k] || 0) + 5; sfx('pickup'); }]).concat([['Done', null]]))]] : [], [['Leave', null]]));
   else if (id === 'malphas') {
     if (d.hr) stSay([['Malphas the Smiling', 'The heavens bound you up like a parcel. How dull. Run along, little saint.']]);
     else if (d.pact) stSay([['Malphas the Smiling', 'Enjoying the fire? Of course you are. Everyone does, at first.']]);
@@ -7098,7 +7340,7 @@ function stWalk(dt) {
   if (ST.padMove) { dx += ST.padMove[0]; dy += ST.padMove[1]; }
   const m = Math.hypot(dx, dy); ST.moving = m > .1;
   if (!ST.moving) return;
-  const sp = 230 * (d.riding && ST_MOUNTS[d.mount] ? ST_MOUNTS[d.mount].speed : 1) * dt / Math.max(1, m), nx = d.x + dx * sp, ny = d.y + dy * sp;
+  const sp = 230 * (d.riding && stM(d.mount) ? stM(d.mount).speed : 1) * dt / Math.max(1, m), nx = d.x + dx * sp, ny = d.y + dy * sp;
   const rule = stAreaRule(nx, ny + 14), here = stAreaRule(d.x, d.y + 14);
   if (rule && !stRankAtLeast(rule.rank) && !(here && here.name === rule.name)) { // guild territory
     if (!ST.ruleT || performance.now() - ST.ruleT > 3500) { ST.ruleT = performance.now(); stCallout(`Guild territory: ${rule.name}. ${rule.rank === 'D' ? 'Members only. Join at the Guild Hall in Thornwake.' : `${rule.rank}-Rank or higher.`}`, '#ffd75e'); }
@@ -7112,6 +7354,7 @@ function stWalk(dt) {
   if (zk !== ST.lastZone) { ST.lastZone = zk; if (zl > d.lv) stCallout(`Danger: level ${zl} area. You are level ${d.lv}.`, '#ff6a4d'); }
   if (d.map !== 'world') return; // dungeons have hunters instead of random encounters
   ST.guardCd = Math.max(0, (ST.guardCd || 0) - dt);
+  if (!ST.guardCd && stTileAt(d.x, d.y) === 'v' && stRepOf(stTownHere()) <= -60 && !d.crime) { ST.guardCd = 60; d.riding = false; return stSay([['Town Guard', `You. ${ST_TOWN_NAME[stTownHere()]} has had enough of you. Leave, or we'll put you in the ground.`]], null, [['Leave quietly', () => { d.y += 80; }], ['Draw your weapon', () => stStartBattle(['guard', 'guard'], null, 'v')]]); }
   if (d.crime > 0 && !ST.guardCd && stTileAt(d.x, d.y) === 'v') { d.riding = false; return stArrest(d.x > 29 * ST_TILE ? 'Watchman Dorn' : 'Captain Ulric'); }
   if (d.flags.liora && !d.flags.lioraQuest && stTileAt(d.x, d.y) === 'b') {
     d.flags.lioraQuest = true;
@@ -7650,11 +7893,12 @@ function stEndBattle(result) {
     return stSay([['', 'YOU PERISHED'], ['', 'You wake at the shrine, gasping, ash in your mouth.' + (lostGold ? ` Your ${lostGold} gold lies where you fell, as Lost Embers. Die again before you reach it and it is gone.` : '')]], () => stSave());
   }
   if (ST.fighting) { ST.fighting.alive = false; ST.fighting = null; }
+  if (d.spouse) { const s0 = stStats(); d.hp = Math.min(s0.hp, d.hp + Math.round(s0.hp * .1)); } // your spouse tends your wounds
   const xp = b.foes.reduce((a, f) => a + f.xp, 0), gold = b.foes.reduce((a, f) => a + f.gold, 0);
   d.xp += xp; d.gold += gold; sfx('levelup');
   const lines = [['', `Victory! You earn ${xp} XP and ${gold} gold.`]];
   if (!b.bossId && d.guild) { const zk = stZoneKey(); for (const a of d.guild.quests || []) { const q = stGQ(a.id); if (q && q.kind === 'hunt' && q.zone === zk && a.prog < q.need) { a.prog++; lines.push(['', `Guild quest "${q.name}": ${a.prog} of ${q.need}.` + (a.prog >= q.need ? ' Turn it in at a guild hall.' : '')]); } } }
-  if (b.foes.some(f => f.key === 'guard')) { d.crime = (d.crime || 0) + 60; d.align = clamp((d.align || 0) - 2, -10, 10); ST.guardCd = 40; lines.push(['', `The guards lie still in the road. Your bounty climbs to ${d.crime} gold. Every watchman in the vale knows your face now.`]); }
+  if (b.foes.some(f => f.key === 'guard')) { stRep(stTownHere(), -25); d.crime = (d.crime || 0) + 60; d.align = clamp((d.align || 0) - 2, -10, 10); ST.guardCd = 40; lines.push(['', `The guards lie still in the road. Your bounty climbs to ${d.crime} gold. Every watchman in the vale knows your face now.`]); }
   if (!b.bossId && d.bounty && b.tile === ST_BOUNTIES.find(x => x.id === d.bounty.id).tile && d.bounty.prog < ST_BOUNTIES.find(x => x.id === d.bounty.id).need) {
     const B = ST_BOUNTIES.find(x => x.id === d.bounty.id); d.bounty.prog++; lines.push(['', `Contract "${B.name}": ${d.bounty.prog} of ${B.need}.` + (d.bounty.prog >= B.need ? ' Return to Guildmaster Oskar.' : '')]);
   }
@@ -7670,6 +7914,8 @@ function stEndBattle(result) {
     if (b.bossId === 'brother') { d.flags.lioraOath = true; lines.push(['Liora', 'Aldric. You waited for me. Of course you did. You always did.'], ['', 'She closes his eyes with two fingers and stands for a long time in the rain. When she turns back to you, something in her has hardened, and something has healed.'], ['Liora', 'I swore an oath to bring him rest. It is done. My sword is yours until the end.'], ['', 'Liora fights harder now (+6 attack).']); }
     if (b.bossId === 'ysolde') { d.flags.ysoldeDone = true; lines.push(['Ysolde', '"The moon... will remember... you..."'], ['', 'The great grey wolf shrinks into an old woman, and then into nothing but fur. Garrick will want to hear.']); }
     if (b.bossId === 'garrick') lines.push(['Garrick', '"Should have... brought more silver..."'], ['', 'The hunter lies in the mud. Somewhere in the Gloamwood, the pack howls your name.']);
+    const townGain = {golem: [['thornwake', 5]], drake: [['thornwake', 5]], king: [['thornwake', 15], ['ravenhollow', 10], ['saltmere', 10], ['harrowfield', 10]], mara: [['halcyon', 25]], ysolde: [['ravenhollow', 15]], stalker: [['ravenhollow', 10]], witch: [['saltmere', 8]], marquis: [['rouge', -15]], ignaroth: [['highmarch', 25], ['corvane', 15]], unmaker: [['celestine', 30]], brother: [['ravenhollow', 5]]}[b.bossId];
+    if (townGain) for (const [t, n] of townGain) stRep(t, n);
     if (b.bossId === 'marquis') lines.push(['Marquis Valcourt', '"A century... of nights... and you end it... with no manners at all..."'], ['', 'He crumbles into red ash on the cathedral steps. Somewhere above, a bell rings for the first time in living memory. Pere Lucien will want to know.']);
     if (b.bossId === 'countess') { d.flags.countessDone = true; lines.push(['The Countess', '"My child... my own child..."'], ['', 'She smiles at the end, which is worse than anything she could have said. The last of the Delacroix-Noir is you.']); }
     if (b.bossId === 'mara') lines.push(['Mara', '"Ha… not bad… for a landlubber…"'], ['', 'Her crew scatters into the surf. Her red flag comes down. Harbormaster Oona will want to hear of this.']);
@@ -7726,7 +7972,7 @@ function stOpenMenu() {
     el('h3', '', 'Abilities'), el('p', '', ['attack'].concat(d.skills).map(k => `${stSkName(k)}${k === 'attack' ? '' : ` (${ST_SKILLS[k].mp} MP)`}: ${stMasteryText(k)}`).join(' · ') + '. Use a move to master it. Mastered moves crit harder, open worse wounds, and fire magic as beams that can obliterate.'),
     ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed (-20% attack)', d.wounds.hole && 'Pierced (-25% defense)'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
     el('h3', '', 'Bag'), el('p', '', `${d.items.potion} potions · ${d.items.ether} ethers` + (d.items.blade ? ' · Royal Blade' : '')),
-    el('h3', '', 'Professions'), el('p', '', ['fishing', 'mining', 'crafting'].map(k => { const P = (d.prof || {})[k] || {lv: 1, xp: 0}; return `${ST_PROF_NAME[k]} ${P.lv} (${stProfTitle(P.lv)}, ${P.xp}/${20 + P.lv * 25} xp)`; }).join(' · ') + `. ${d.rod ? '' : 'Buy a fishing rod from Dunn in Saltmere. '}${d.pickaxe ? '' : 'Buy a pickaxe from Brann in Saltmere. '}Forge gear at Brann's, cook at any inn.`),
+    el('h3', '', 'Professions'), el('p', '', ['fishing', 'mining', 'crafting', 'farming'].map(k => { const P = (d.prof || {})[k] || {lv: 1, xp: 0}; return `${ST_PROF_NAME[k]} ${P.lv} (${stProfTitle(P.lv)}, ${P.xp}/${20 + P.lv * 25} xp)`; }).join(' · ') + `. ${d.rod ? '' : 'Buy a fishing rod from Dunn in Saltmere. '}${d.pickaxe ? '' : 'Buy a pickaxe from Brann in Saltmere. '}Forge gear at Brann's, cook at any inn.`),
     el('h3', '', 'Materials'), el('p', '', Object.entries(d.mats || {}).filter(([, n]) => n).map(([k, n]) => `${n} ${ST_MATS[k][0]}`).join(' · ') || 'None yet. Fish and mine to gather them.'),
     ...(Object.keys(d.gear || {}).length ? [el('h3', '', 'Crafted gear'), el('p', '', Object.keys(d.gear).map(k => `${ST_GEAR[k].name} (${ST_GEAR[k].desc})`).join(' · '))] : []),
     el('h3', '', 'Cargo'), el('p', '', (Object.entries(d.cargo || {}).filter(([, n]) => n).map(([g, n]) => `${n} ${ST_GOODS[g][0]}`).join(' · ') || 'Empty') + ` (${stCargoUsed()}/${stCargoCap()}). Trade with merchants in every town; buy cheap where goods are made.`),
@@ -7741,19 +7987,24 @@ function stOpenMenu() {
       d.map === 'rouge' && !d.flags.marquis ? 'The Crimson Prince: end Marquis Valcourt on the cathedral steps (level 22+).' : d.flags.marquis && !d.flags.lucienPaid ? 'The Crimson Prince: tell Pere Lucien.' : '',
       stLetters() && !d.flags.countessDone ? `???: bloodline letters ${stLetters()} of 3.` + (stLetters() >= 3 ? ' A crypt in Rougemarais waits for you.' : '') : '',
     ].filter(Boolean).join(' · ') || 'None right now. Talk to people; everyone here has lost something.'),
+    el('h3', '', 'Status'), el('p', '', `${stClass() ? stTitle() : 'Commoner'}. ` + (ST_STATUS[stClass() + 1] ? `Next: ${stTitle(stClass() + 1)} (${ST_STATUS[stClass() + 1][2]}${ST_STATUS[stClass() + 1][4] ? `, ${ST_STATUS[stClass() + 1][4]} gold` : ''}). Ask Herald Aldous in Thornwake.` : 'The highest rank in the Vale.') + (stClass() >= 2 ? ' Nobles get 10% off at market and a daily stipend, but their crimes cost double.' : ' Commoners gain reputation 25% faster.')),
+    el('h3', '', 'Reputation'), el('p', '', Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t) || ['thornwake', 'ravenhollow', 'saltmere'].includes(t)).map(t => `${ST_TOWN_NAME[t]}: ${stRepName(stRepOf(t))} (${stRepOf(t) > 0 ? '+' : ''}${stRepOf(t)})`).join(' · ') + '. Towns remember your deeds: good ones lower prices; crimes and cruelty raise them, close shops and turn the guards against you.'),
     el('h3', '', 'Contract'), el('p', '', d.bounty ? (B => `${B.name}: ${B.text}, ${d.bounty.prog}/${B.need}.`)(ST_BOUNTIES.find(x => x.id === d.bounty.id)) : 'None. Visit the guild in Thornwake.'),
     el('h3', '', 'Alignment'), el('p', '', `${stAlignName()} (${stAlign() > 0 ? '+' : ''}${stAlign()}). ${stAlign() >= 3 ? 'Light: shops are 20% cheaper, +3 defense.' : stAlign() <= -3 ? 'Ashen: shops charge 25% more, +3 attack.' : 'Your choices will tip you toward Light or Ash.'}` + (d.crime ? ` Bounty: ${d.crime} gold. Guards will stop you in any village.` : '') + (d.jailed ? ` Jailed ${d.jailed} time${d.jailed > 1 ? 's' : ''}.` : '')),
-    el('h3', '', 'Mounts'), el('p', '', (d.mounts || []).length ? (d.mounts || []).map(k => ST_MOUNTS[k].name + (k === d.mount ? ' (chosen)' : '')).join(' · ') + '. Press R, Y or Ride to mount up.' : 'None. Garth the Stablemaster in Thornwake sells horses, wolves, elk and drakes.'),
+    el('h3', '', 'Mounts'), el('p', '', (d.mounts || []).length ? (d.mounts || []).map(k => stM(k).name + ` (speed ${stM(k).speed}${stM(k).fly ? ', flies' : ''}${stM(k).glow ? ', shimmering' : ''})` + (k === d.mount ? ' (chosen)' : '')).join(' · ') + (d.breeding ? ` · A foal is ${d.breeding.ready <= Date.now() ? 'ready at Garth\'s stable' : 'on the way'}` : '') + '. Press R, Y or Ride to mount up.' : 'None. Garth the Stablemaster in Thornwake sells horses, wolves, elk and drakes.'),
     el('h3', '', 'Gear'), el('p', '', `${ST_WEAPONS[d.weapon || 0].name}` + (d.items.blade ? ' · Royal Blade' : '') + (d.charm ? ' · Corin\'s Charm (+4 defense)' : '') + (d.blessed ? ' · Ansel\'s blessing (+3 magic)' : '')));
   const row = el('div', 'row'), btn = (l, fn) => { const b = el('button', '', l); b.addEventListener('click', fn); row.appendChild(b); return b; };
   btn('Drink potion', () => { if (d.items.potion) { d.items.potion--; d.hp = Math.min(s.hp, d.hp + 60); sfx('pickup'); stCloseMenu(); stOpenMenu(); } });
-  for (const k of d.mounts || []) if (k !== d.mount) btn(`Choose ${ST_MOUNTS[k].name}`, () => { d.mount = k; stCloseMenu(); stOpenMenu(); });
+  for (const k of d.mounts || []) if (k !== d.mount) btn(`Choose ${stM(k).name}`, () => { d.mount = k; stCloseMenu(); stOpenMenu(); });
   { // sort the sections into tabs: Hero, Quests, Bag, Skills, Guild
-    const TAB = {Abilities: 'Hero', Wounds: 'Hero', Alignment: 'Hero', Mounts: 'Hero', Gear: 'Hero', 'Crafted gear': 'Hero', Quest: 'Quests', 'Side stories': 'Quests', Contract: 'Quests', Bag: 'Bag', Materials: 'Bag', Cargo: 'Bag', Professions: 'Skills', Guild: 'Guild'};
+    const known = Object.entries(d.bonds || {}).filter(([k, b]) => ST_SOCIAL[k] && b.pts > 0).sort((a, b2) => b2[1].pts - a[1].pts);
+    m.append(el('h3', '', 'Bonds'), el('p', '', (d.spouse ? `Married to ${stNpcName(d.spouse)}. ` : d.romance ? `Courting ${stNpcName(d.romance)}. ` : '') + (known.length ? known.map(([k, b]) => `${stNpcName(k)}: ${stBondName(k)} (${Math.round(b.pts)})`).join(' · ') : 'No bonds yet. Talk to people every day, give gifts, and spend time with them. Press ♥ while talking to someone.')));
+    if (d.flags.liora && ST_SOCIAL.liora) { const lb = el('button', '', '♥ Talk with Liora'); lb.addEventListener('click', () => { stCloseMenu(); stBondDaily('liora'); stSocial('liora'); }); m.appendChild(lb); }
+    const TAB = {Status: 'Hero', Reputation: 'Quests', Bonds: 'Bonds', Abilities: 'Hero', Wounds: 'Hero', Alignment: 'Hero', Mounts: 'Hero', Gear: 'Hero', 'Crafted gear': 'Hero', Quest: 'Quests', 'Side stories': 'Quests', Contract: 'Quests', Bag: 'Bag', Materials: 'Bag', Cargo: 'Bag', Professions: 'Skills', Guild: 'Guild'};
     const g = d.guild; m.append(el('h3', '', 'Guild'), el('p', '', g ? `${g.rank}-Rank of the Free Guild Compact. Standing ${g.pts}${ST_RANK_PTS[g.rank] ? ` of ${ST_RANK_PTS[g.rank]} for your next exam` : ''}. Edict in force: ${ST_EDICTS[stEdict()][0]} (${ST_EDICTS[stEdict()][1]}). Active quests: ${(g.quests || []).map(a => stGQ(a.id) && stGQ(a.id).name).filter(Boolean).join(', ') || 'none'}.` : 'Not a member. Join at the Guild Hall in Thornwake to travel guild territory and take paid quests.'));
     let cur = 'Hero'; const kids = [...m.children]; for (const k of kids) { if (k.tagName === 'H3' && TAB[k.textContent]) cur = TAB[k.textContent]; k.dataset.tab = cur; }
     const bar = el('div', 'tabs'), showTab = t => { ST.menuTab = t; for (const k of kids) k.hidden = k.dataset.tab !== t; for (const b of bar.children) b.classList.toggle('on', b.textContent === t); };
-    for (const t of ['Hero', 'Quests', 'Bag', 'Skills', 'Guild']) { const b = el('button', '', t); b.addEventListener('click', () => showTab(t)); bar.appendChild(b); }
+    for (const t of ['Hero', 'Quests', 'Bag', 'Skills', 'Bonds', 'Guild']) { const b = el('button', '', t); b.addEventListener('click', () => showTab(t)); bar.appendChild(b); }
     m.insertBefore(bar, m.firstChild); showTab(ST.menuTab || 'Hero');
   }
   btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
@@ -7767,7 +8018,7 @@ $('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu(
 // ---- HUD and drawing
 function stHud() {
   const d = stData(); if (!d) return; const s = stStats();
-  const hn = $('stHudName'); hn.textContent = ''; hn.className = 'hn'; hn.append(document.createTextNode(d.name), el('span', 'badge lvb', `Lv ${d.lv}`), el('span', 'badge rkb', d.guild ? `${d.guild.rank}-Rank` : 'No guild'));
+  const hn = $('stHudName'); hn.textContent = ''; hn.className = 'hn'; hn.append(document.createTextNode(stTitledName()), el('span', 'badge lvb', `Lv ${d.lv}`), el('span', 'badge rkb', d.guild ? `${d.guild.rank}-Rank` : 'No guild'));
   if (!$('stXpBar')) { const xb = el('div', 'bar xp'); xb.id = 'stXpBar'; xb.appendChild(el('i')); xb.title = 'Experience'; $('stHud').insertBefore(xb, $('stGold')); for (const [id, lb] of [['stHp', 'HEALTH'], ['stMp', 'MANA']]) $('stHud').insertBefore(el('small', 'bl', lb), $(id).parentNode); }
   $('stXpBar').firstChild.style.width = Math.min(100, d.xp / stXpNeed(d.lv) * 100) + '%';
   $('stHint').textContent = device() === 'pad' ? 'Left stick: move · A: interact · Start: menu · Y: ride' : 'WASD or arrows: move · E: interact · M: menu · R: ride';
@@ -7777,7 +8028,7 @@ function stHud() {
   const tl = stTileAt(d.x, d.y), zl = stZoneLv(), zn = stZoneAt(d.x, d.y), where = (zn ? zn.name : d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale') + (zl > 1 ? ` (Lv ${zl}${zl > d.lv ? ', dangerous' : ''})` : '');
   const outside = d.map === 'world' || d.map === 'isles', C = stClock(), wx = [outside ? `${stTimeName(C.h)} ${stTimeText(C.h)}` : '', ST.wx && ST.wx.k > .5 && outside ? ST_WX_NAME[ST.wx.kind] : ''].filter(Boolean).join(' · ');
   const ob = stObjective();
-  $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', 'Objective'), el('div', 'obj', ob ? ob.text : ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)), el('span', 'loc', where + (wx ? ` · ${wx}` : '')), ...(d.lost ? [el('span', 'loc', `Lost Embers: ${d.lost.gold} gold wait where you fell.`)] : []));
+  $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', 'Objective'), el('div', 'obj', ob ? ob.text : ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)), el('span', 'loc', where + (stTownHere() && stRepOf(stTownHere()) ? ` · ${ST_TOWN_NAME[stTownHere()]}: ${stRepName(stRepOf(stTownHere()))}` : '') + (wx ? ` · ${wx}` : '')), ...(d.lost ? [el('span', 'loc', `Lost Embers: ${d.lost.gold} gold wait where you fell.`)] : []));
 }
 const stUnit = (look, color, x, y, face, walk, id, level = 3) => ({look, color, team: 0, level, face, x, y, walk, _lw: walk - 1, atkT: 0, atkCd: 1, hitFlash: 0, id});
 function stDrawWorld(now, dt = 1 / 60) {
@@ -7792,12 +8043,20 @@ function stDrawWorld(now, dt = 1 / 60) {
     if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) stDrawFoe(ST_DUNGEONS[d.map].boss, x * ST_TILE + 32, y * ST_TILE + 40, now, .75, Math.PI);
   }));
   const isles = dun && ST_DUNGEONS[d.map].outdoor; stAmbient(dt, now, Zs, d, dun, isles);
+  stDrawCrops(now);
   if (!dun) for (const r of ST_ROCKS) if (Math.abs(r.x * ST_TILE - ST.cam.x) < cw / Zs && Math.abs(r.y * ST_TILE - ST.cam.y) < ch / Zs) stDrawRock(r, now);
   stTutDraw(now);
   if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6, f.face || 0);
   if (d.lost && d.lost.map === d.map) { ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff7a2a'; ctx.shadowBlur = 20; ctx.globalAlpha = .7 + Math.sin(now * 4) * .3; ctx.beginPath(); ctx.arc(d.lost.x, d.lost.y, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
   if (!dun) for (const c of ST_CHESTS) if (stChestShown(c, d)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
   if (!dun) for (const b of ST_BOSSES) if (!d.flags[b.id]) { const x = b.x * ST_TILE + 32, y = b.y * ST_TILE + 32; ctx.strokeStyle = '#ff6a4d'; ctx.globalAlpha = .5 + Math.sin(now * 3) * .3; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 34, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; stDrawFoe(b.id, x, y + 10, now, .7, Math.PI); }
+  if (d.map === 'homestead') { // your spouse and children at home
+    if (d.spouse) { const n = ST_NPCS.find(x => x.id === d.spouse) || {look: 'valkyrie', color: '#9fd8ff'}; drawCharacter(ctx, stUnit(n.look, n.color, 6 * ST_TILE + 32, 3 * ST_TILE + 30, Math.PI, 0, 88), now); ctx.fillStyle = '#ff8aa8'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(`♥ ${stNpcName(d.spouse)}`, 6 * ST_TILE + 32, 3 * ST_TILE - 44); ctx.textAlign = 'left'; }
+    (d.family && d.family.kids || []).forEach((K, i) => { const x = (2 + i * 2) * ST_TILE + 32, y = 4 * ST_TILE + 30, st = stKidStage(K);
+      if (st === 'baby') { ctx.fillStyle = '#6a4424'; ctx.fillRect(x - 18, y - 14, 36, 18); ctx.fillStyle = '#f0e6d8'; ctx.beginPath(); ctx.ellipse(x, y - 14 + Math.sin(now * 2) * 1, 12, 7, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#e8c8a8'; ctx.beginPath(); ctx.arc(x - 6, y - 16, 5, 0, 7); ctx.fill(); }
+      else drawCharacterScaled(stUnit(['rogue', 'magicgirl', 'hunter'][i % 3], ['#ff9ccf', '#9fd8ff', '#e0c060'][i % 3], x, y, Math.sin(now * .5 + i) > 0 ? 0 : Math.PI, st === 'child' ? now * 20 : 0, 90 + i), now, st === 'toddler' ? .45 : .6);
+      ctx.fillStyle = '#fff3c9'; ctx.font = '600 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(K.name, x, y - (st === 'baby' ? 26 : 50)); ctx.textAlign = 'left'; });
+  }
   for (const n of ST_NPCS) if ((n.map || 'world') === d.map && stNpcShown(n, d)) {
     const x = n.x * ST_TILE + 32, y = n.y * ST_TILE + 30, u = stUnit(n.look, n.color, x, y, Math.PI, 0, 20 + n.x); if (n.horns) { u.horns = true; u.level = 12; } if (n.lv) { u.level = n.lv; u.noHalo = true; }
     if (n.kid) drawCharacterScaled(u, now, .65); else drawCharacter(ctx, u, now);
@@ -7805,7 +8064,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   }
   if (!dun) for (const h of ST_HOUSES) { const x = (h.x + 1) * ST_TILE, y = (h.y + 2) * ST_TILE - 4; ctx.fillStyle = '#2a1a10'; ctx.fillRect(x - 12, y - 30, 24, 30); ctx.fillStyle = '#ffb35a'; ctx.globalAlpha = .5 + Math.sin(now * 2 + h.x) * .15; ctx.fillRect(x - 8, y - 26, 16, 10); ctx.globalAlpha = 1; } // lit doorways
   if (d.flags.liora) drawCharacter(ctx, stUnit('valkyrie', '#9fd8ff', d.x - 46 * (Math.cos(ST.face || 0) || 1), d.y + 6, ST.face || 0, ST.walk || 0, 31, d.lv), now);
-  const ride = !dun && d.riding && ST_MOUNTS[d.mount];
+  const ride = !dun && d.riding && stM(d.mount);
   if (ride) { stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); drawCharacter(ctx, stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 4 * Math.cos(ST.face || 0), d.y - 26 - (ride.fly ? 26 + Math.sin(now * 4) * 5 : 0), ST.face || 0, 0, 30, d.lv), now); }
   else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); drawCharacter(ctx, pu, now); }
   stObjArrow(now);
@@ -7825,7 +8084,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
+  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
   $('stRide').hidden = dun || !(d.mounts || []).length; $('stRide').textContent = d.riding ? 'Dismount' : 'Ride';
 }
 function stDrawFoe(key, x, y, now, scale, face, flash) {
@@ -7914,6 +8173,7 @@ for (const b of document.querySelectorAll('#stPad [data-d]')) {
 $('stA').addEventListener('click', () => { if (ST.mode === 'walk') stInteract(); else if (ST.mode === 'gather') stGatherPress(); });
 $('game').addEventListener('pointerdown', e => { if (ST.on && ST.mode === 'gather' && e.target.id !== 'stA') stGatherPress(); });
 $('stRide').addEventListener('click', stToggleRide);
+$('stBond').addEventListener('click', () => { const id = ST.talkNpc; if (!id || !ST_SOCIAL[id]) return; $('stDialog').hidden = true; ST.dlg = null; ST.mode = 'walk'; stSocial(id); });
 function stPollPad() {
   const gp = readPad(); if (!gp) { ST.padMove = null; return; }
   const bt = i => !!(gp.buttons[i] && gp.buttons[i].pressed), hit = i => bt(i) && !ST.pad.prev[i];
