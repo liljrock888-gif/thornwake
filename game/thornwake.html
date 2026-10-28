@@ -372,6 +372,15 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stMenu.journal p{white-space:pre-line;line-height:1.5}#stMenu.journal{width:min(94vw,640px)}
 #stRide{position:absolute;left:calc(176px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 #stMenuBtn{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stLoad{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 45%,#16221d,#050806 75%);opacity:0;transition:opacity .22s ease;pointer-events:auto;padding:24px}
+#stLoad.on{opacity:1}#stLoad .ldIn{text-align:center;max-width:520px;width:100%}
+#stLoad small{display:block;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+#stLoad h2{margin:0;font-family:var(--display);font-size:clamp(28px,6vw,46px);letter-spacing:.05em;background:linear-gradient(#fff3c9,#e8b04a 60%,#8a5a1a);-webkit-background-clip:text;background-clip:text;color:transparent}
+#stLoad #stLoadSub{margin:6px 0 18px;color:#d8c8a8;font-size:15px}
+#stLoad .ldBar{height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin:0 auto;max-width:280px}#stLoad .ldBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#c8951e,#ffd75e);border-radius:4px}
+#stLoad.on .ldBar i{animation:ldFill var(--ld,.8s) ease-out forwards}@keyframes ldFill{to{width:100%}}
+#stLoad .ldTip{margin-top:18px;color:#97a69b;font-size:13px;font-style:italic;min-height:2.8em}
+@media (prefers-reduced-motion:reduce){#stLoad{transition:none}#stLoad.on .ldBar i{animation:none;width:100%}}
 #stPrompt{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(5,7,10,.75);border:1px solid var(--gold);color:var(--gold);font-weight:600}
 #stDialog{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(94vw,720px);padding:14px 18px}
 #stBond{position:absolute;right:12px;top:10px;padding:4px 12px;border-radius:999px;border:1px solid #ff8aa8;background:rgba(255,138,168,.12);color:#ff8aa8;font:inherit;font-size:13px;font-weight:700;cursor:pointer}#stBond:focus{outline:2px solid #ff8aa8}
@@ -459,6 +468,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
     <div id="stHud" class="panel"><b id="stHudName"></b><div class="bar hp"><i id="stHp"></i><span id="stHpT"></span></div><div class="bar mp"><i id="stMp"></i><span id="stMpT"></span></div><small id="stGold"></small></div>
     <div id="stQuest" class="panel"></div>
     <button id="stMenuBtn" class="panel">Menu</button><button id="stJournalBtn" class="panel">Journal</button><button id="stRide" class="panel" hidden>Ride</button>
+    <div id="stLoad" hidden aria-live="polite"><div class="ldIn"><small id="stLoadKind"></small><h2 id="stLoadName"></h2><p id="stLoadSub"></p><div class="ldBar"><i></i></div><p class="ldTip" id="stLoadTip"></p></div></div>
     <div id="stPrompt" hidden></div><div id="stPartyHud"></div><div id="stChat"><div id="stChatHead">Offline</div><div id="stChatLog"></div><input id="stChatIn" hidden maxlength="120" placeholder="Say something (/p for party only)" aria-label="Chat message" autocomplete="off"></div><button id="stChatBtn" class="panel" aria-label="Chat">💬</button><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
     <div id="stDialog" class="panel" hidden><button id="stBond" hidden></button><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
     <div id="stBattle" hidden><div id="stLog" class="panel"></div><div id="stParty" class="panel"></div><div id="stActions" class="panel"></div></div>
@@ -3585,6 +3595,7 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 // What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
 const UPDATES = [
+  {id: 50, date: 'Oct 28', title: 'Loading screens and fixes', items: ['A loading screen with the place name, its level and a tip when you step into a new place.', 'Fixed arriving inside walls, furniture or the sea when entering places.', 'Smoother battles: no more stutter when hits land, and quicker enemy turns.']},
   {id: 48, date: 'Oct 28', title: 'What\'s new panel', items: ['This list! See every update right from the main menu.']},
   {id: 47, date: 'Oct 28', title: 'Smoother frame rate', items: ['Towns and big lands draw up to 3× faster.', 'Slow phones switch to a lite mode with fewer glow effects.']},
   {id: 46, date: 'Oct 28', title: 'Stat points', items: ['Spend 5 points at creation and 2 per level on Strength, Intellect, Vitality, Endurance, Agility and Spirit.', 'Reset them at any Ashen Shrine for a fee.']},
@@ -7548,6 +7559,18 @@ function stShowLine() {
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
 const stRockAt = (x, y) => ST_ROCKS.find(r => r.x === Math.floor(x / ST_TILE) && r.y === Math.floor(y / ST_TILE));
 const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && stM(d.mount) && stM(d.mount).fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && stM(d.mount) && stM(d.mount).fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
+function stLoadScreen(key) { // a short title card while you step into a new place
+  const D = ST_DUNGEONS[key], box = $('stLoad'); if (!box || !ST.on) return;
+  const kind = key === 'world' ? 'The open road' : D.home ? 'Home' : key === 'guildhall' ? 'Guild hall' : D.land ? 'New land' : D.city ? 'City' : D.outdoor ? 'Islands' : 'Dungeon';
+  const need = ST_MAP_LV[key] || (ST_PORTS[key] && ST_PORTS[key].lv) || 0, lvTxt = need ? `Recommended level ${need}+` : '';
+  $('stLoadKind').textContent = kind; $('stLoadName').textContent = key === 'world' ? 'The Ashen Vale' : D.name;
+  $('stLoadSub').textContent = [lvTxt, D && D.boss && !stData().flags[D.boss] && ST_FOES[D.boss] ? `Somewhere inside: ${ST_FOES[D.boss].name.split(',')[0]}` : ''].filter(Boolean).join(' · ');
+  $('stLoadTip').textContent = 'Tip: ' + LOAD_TIPS[Math.floor(Math.random() * LOAD_TIPS.length)];
+  const big = key === 'world' || (D && (D.land || D.city || D.outdoor)), hold = big ? 900 : 600; box.style.setProperty('--ld', hold / 1000 + 's');
+  clearTimeout(ST.loadT); clearTimeout(ST.loadT2); box.hidden = false; box.classList.remove('on'); void box.offsetWidth; box.classList.add('on');
+  ST.loadUntil = performance.now() + hold + 120; ST.touchMove = null; for (const k in (ST.keys || {})) ST.keys[k] = false;
+  ST.loadT = setTimeout(() => { box.classList.remove('on'); ST.loadT2 = setTimeout(() => { box.hidden = true; }, 240); }, hold);
+}
 function stFindOpen(d) { // never arrive inside a wall, on furniture or out at sea: step to the nearest open ground
   const ok = (x, y) => !stBlocked(x, y) && [[0, 24], [24, 0], [-24, 0], [0, -24]].some(([ox, oy]) => !stBlocked(x + ox, y + oy));
   if (ok(d.x, d.y)) return;
@@ -7556,7 +7579,7 @@ function stFindOpen(d) { // never arrive inside a wall, on furniture or out at s
     if (best) { d.x = best[0]; d.y = best[1]; return; } }
 }
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
-  const d = stData(); if (key !== 'world') d.riding = false; d.map = key; if (ST_PORTS[key]) { d.ports = d.ports || {}; d.ports[key] = true; } /* remembered for Scrolls of Return */ d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; stFindOpen(d); ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
+  const d = stData(); if (d.map !== key) stLoadScreen(key); if (key !== 'world') d.riding = false; d.map = key; if (ST_PORTS[key]) { d.ports = d.ports || {}; d.ports[key] = true; } /* remembered for Scrolls of Return */ d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; stFindOpen(d); ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
   if (key !== 'world') {
     if (!ST.dunC[key]) stDrawDungeonCanvas(key);
@@ -7879,6 +7902,7 @@ function stHunters(dt) { // dungeon enemies wander home, and charge when they se
   }
 }
 function stWalk(dt) {
+  if (ST.loadUntil && performance.now() < ST.loadUntil) return; // standing still while the place loads
   const d = stData(); let dx = 0, dy = 0;
   if (d.map !== 'world') stHunters(dt);
   if (ST.mode !== 'walk') return;
@@ -9132,7 +9156,7 @@ function frame(now) {
 }
 // ---------- start screen: an animated poster, Press Start, a loading page, then the main menu ----------
 const POSTER = {on: true, t0: performance.now(), embers: [], loading: false};
-const LOAD_TIPS = ['Grind a move to evolve it. Mastered magic fires as beams that can obliterate.', 'Rest at an Ashen Shrine to heal your wounds, even a severed arm.', 'Buy goods where they are made and sell them where they are wanted.', 'Some doors only open at night. Some only open for blood.', 'The faster fighter dodges more blows.', 'Rougemarais never sees the sun. Do not go there before level 12.', 'Fill your Rage meter, then unleash it.'];
+const LOAD_TIPS = ['Grind a move to evolve it. Mastered magic fires as beams that can obliterate.', 'Rest at an Ashen Shrine to heal your wounds, even a severed arm.', 'Buy goods where they are made and sell them where they are wanted.', 'Some doors only open at night. Some only open for blood.', 'The faster fighter dodges more blows.', 'Rougemarais never sees the sun. Do not go there before level 20.', 'Spend your stat points in Menu, then Stats. Shrines can reset them.', 'A Scroll of Return takes you to any town or land you have reached.', 'Every race has a power it can call on once per battle.', 'Companions join adventurers of level 45 and above.', 'Open the Party menu to invite anyone who is online.', 'Fill your Rage meter, then unleash it.'];
 function drawPoster(now) { // original key art: a hero on a cliff under a blood moon, a castle, a cathedral, a dragon and a howling wolf
   const c = $('posterCv'), W = innerWidth, H = innerHeight, r = Math.min(2, devicePixelRatio || 1);
   if (c.width !== Math.round(W * r)) { c.width = Math.round(W * r); c.height = Math.round(H * r); }
