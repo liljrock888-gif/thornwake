@@ -325,6 +325,12 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stHud .bar.xp{height:5px}#stHud .bar.xp i{background:linear-gradient(90deg,#8a5a1a,#ffd75e)}#stHud .bl{font-size:10px;letter-spacing:.1em;color:#c8b89a;margin-bottom:-2px}
 @media (max-width:640px){#stMini{width:118px;height:80px}#stQuest{top:calc(98px + env(safe-area-inset-top,0px));width:min(52vw,240px);font-size:12px}#stQuest .obj{font-size:13px}#stHint{display:none}}
 #game.touch #stHint{display:none}
+#stChat{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px));width:min(340px,60vw);font-size:13px;pointer-events:none}
+#stChat.open{pointer-events:auto;background:rgba(5,7,10,.78);border:1px solid var(--line);border-radius:10px;padding:6px}
+#stChatHead{font-size:11px;color:#8fd4ff;letter-spacing:.05em;margin-bottom:2px;text-shadow:0 1px 2px #000}
+#stChatLog{max-height:180px;overflow:auto;text-shadow:0 1px 2px #000,0 0 3px #000}#stChatLog div{margin:1px 0;color:#fff3e0;word-wrap:break-word}#stChatLog b{color:#8fd4ff;cursor:pointer;pointer-events:auto}#stChatLog .party,#stChatLog .party b{color:#7fe08a}#stChatLog .sys{color:#c8b89a;font-style:italic}
+#stChatIn{width:100%;box-sizing:border-box;margin-top:4px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#0c1411;color:#fff3e0;font:inherit;font-size:16px}
+#stChatBtn{position:absolute;left:calc(268px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 10px;font:inherit;cursor:pointer}
 #stJournalBtn{position:absolute;left:calc(84px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 #stMenu.journal p{white-space:pre-line;line-height:1.5}#stMenu.journal{width:min(94vw,640px)}
 #stRide{position:absolute;left:calc(176px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
@@ -360,6 +366,27 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stMenu .row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 #stPad{position:absolute;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px}
 #game.touch #stPad{display:grid}
+#stJoyZone{position:absolute;left:0;top:28%;bottom:0;width:50%;touch-action:none;pointer-events:auto}
+#stJoyBase{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2px solid rgba(255,243,224,.35);background:rgba(10,14,12,.25);opacity:0;transition:opacity .15s;pointer-events:none}
+#stJoyBase.on{opacity:1}#stJoyKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff3e0,#c9a24a);box-shadow:0 2px 10px rgba(0,0,0,.5);transform:translate(-50%,-50%)}
+#game.touch #stPad [data-d]{display:none}
+#game.touch #stA{width:88px;height:88px;font-size:24px;right:calc(22px + env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px))}
+#game.touch #stMenuBtn,#game.touch #stJournalBtn,#game.touch #stRide,#game.touch #stChatBtn{position:fixed;left:auto;top:auto;width:56px;height:56px;padding:0;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.05}
+#game.touch #stMenuBtn{right:calc(122px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+#game.touch #stJournalBtn{right:calc(116px + env(safe-area-inset-right,0px));bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+#game.touch #stRide{right:calc(60px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px))}
+#game.touch #stChatBtn{right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px));font-size:22px}
+#game.touch #stHud{width:168px;padding:6px 8px;gap:2px;font-size:13px}#game.touch #stHud .bl{display:none}#game.touch #stHud .bar{height:11px}
+#game.touch #stQuest{cursor:pointer}#game.touch #stQuest.mini .loc{display:none}#game.touch #stQuest.mini .obj{font-size:12px;max-height:2.6em;overflow:hidden}
+#game.touch #stPrompt{bottom:calc(132px + env(safe-area-inset-bottom,0px));padding:10px 18px;font-size:16px;cursor:pointer;background:rgba(5,7,10,.88)}
+#game.touch #stDialog{bottom:calc(8px + env(safe-area-inset-bottom,0px));width:calc(100vw - 16px);max-height:60vh;overflow:auto;padding:12px 14px}
+#game.touch #stDialog p{font-size:16px}#game.touch #stChoices{flex-direction:column}#game.touch #stChoices button{min-height:48px;font-size:16px;width:100%;text-align:left}
+#game.touch #stBattle{grid-template-columns:1fr;gap:6px}#game.touch #stActions .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}#game.touch #stActions button{min-height:50px;font-size:15px}
+#game.touch #stParty .pm{font-size:12px}#game.touch #stLog{font-size:13px;min-height:34px;padding:6px 10px}
+#game.touch #stMenu{width:100vw;max-width:100vw;max-height:88vh;top:auto;bottom:0;left:0;transform:none;border-radius:16px 16px 0 0;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px))}
+#game.touch #stMenu button{min-height:44px;font-size:15px}#game.touch #stMenu .tabs{flex-wrap:nowrap;overflow-x:auto}#game.touch #stMenu .tabs button{flex:0 0 auto}
+#game.touch #stChat{bottom:auto;top:calc(198px + env(safe-area-inset-top,0px));width:min(300px,62vw)}#game.touch #stChat.open{top:calc(10px + env(safe-area-inset-top,0px));width:calc(100vw - 20px);z-index:5}
+#game.touch #stMini{width:110px;height:74px}
 #stPad button{border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(20,28,24,.7);color:#fff;font-size:18px;touch-action:none}
 #stPad [data-d=up]{grid-area:1/2} #stPad [data-d=left]{grid-area:2/1} #stPad [data-d=right]{grid-area:2/3} #stPad [data-d=down]{grid-area:3/2}
 #stA{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));width:76px;height:76px;border-radius:50%!important;background:radial-gradient(circle at 40% 35%,#f5cf63,#c8951e)!important;color:#1a1206!important;font-weight:700}
@@ -380,10 +407,11 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
   </div>
   <button id="menuBtn" class="panel" hidden>Menu</button>
   <div id="story" hidden>
+    <div id="stJoyZone" hidden><div id="stJoyBase"><div id="stJoyKnob"></div></div></div>
     <div id="stHud" class="panel"><b id="stHudName"></b><div class="bar hp"><i id="stHp"></i><span id="stHpT"></span></div><div class="bar mp"><i id="stMp"></i><span id="stMpT"></span></div><small id="stGold"></small></div>
     <div id="stQuest" class="panel"></div>
     <button id="stMenuBtn" class="panel">Menu</button><button id="stJournalBtn" class="panel">Journal</button><button id="stRide" class="panel" hidden>Ride</button>
-    <div id="stPrompt" hidden></div><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
+    <div id="stPrompt" hidden></div><div id="stChat"><div id="stChatHead">Offline</div><div id="stChatLog"></div><input id="stChatIn" hidden maxlength="120" placeholder="Say something (/p for party only)" aria-label="Chat message" autocomplete="off"></div><button id="stChatBtn" class="panel" aria-label="Chat">💬</button><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
     <div id="stDialog" class="panel" hidden><button id="stBond" hidden></button><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
     <div id="stBattle" hidden><div id="stLog" class="panel"></div><div id="stParty" class="panel"></div><div id="stActions" class="panel"></div></div>
     <div id="stMenu" class="panel" hidden></div>
@@ -5704,7 +5732,7 @@ ST_DUNGEONS.guildhall = {name: 'The Adventurers\' Guild Hall', home: true, guild
   '#f..........k#',
   '#............#',
   '######E#######']};
-const stM = id => ST_MOUNTS[id] || ((stData() && stData().bred) || {})[id]; // a bought mount, or a foal you bred
+const stM = id => ST_MOUNTS[id] || ((stData() && stData().bred) || {})[id] || (SW.mounts || {})[id]; // a bought mount, or a foal you bred
 const ST_DOOR_AT = {'24,16': 'catacomb', '4,2': 'crypt', '44,9': 'duskwatch', '10,2': 'stair', 'rouge:36,18': 'vcrypt'};
 const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0, mara: 0, seraphiel: 0, marquis: 0, ignaroth: 0, unmaker: 0};
 const ST_MAP = stBuildMap();
@@ -6650,6 +6678,84 @@ function stJournal(tab) {
   const row = el('div', 'row'), x = el('button', '', 'Close journal'); x.addEventListener('click', () => { ST.journal = false; stCloseMenu(); }); row.appendChild(x); m.appendChild(row);
   m.classList.add('journal'); setTimeout(() => x.focus({preventScroll: true}), 0);
 }
+// ---- online: a shared story world. Everyone in story mode sees each other, can form parties that fight together, and can chat.
+const SW = {room: null, me: null, peers: [], vis: {}, seen: {}, myChat: [], log: [], party: null, inv: null, push: 0, sig: '', muted: {}, mounts: {}, handledInv: {}, last: 0};
+const ST_BADWORDS = /\b(fuck\w*|shit\w*|bitch\w*|cunt\w*|nigg\w*|fag\w*|dick\w*|pussy|asshole\w*|slut\w*|whore\w*|retard\w*|cock\w*|bastard\w*)\b/gi;
+const stCleanChat = t => String(t).replace(/[\u0000-\u001f<>]/g, '').slice(0, 120).replace(ST_BADWORDS, w => w[0] + '*'.repeat(w.length - 1));
+async function stNetJoin() { // join the shared story world, if this build has online rooms
+  if (SW.room || PROF.onlineOff) return;
+  const lobby = await netInit(); if (!lobby) { stChatSys('Offline: no online server here. Co-op and chat need the online version of the game.'); return; }
+  try { SW.room = await lobby.join('story-world'); } catch (e) { SW.room = null; return; }
+  SW.room.onPeers(() => { SW.peers = SW.room.peers(); const me = SW.peers.find(p => p.sameTab); if (me) SW.me = me.peer; stNetRead(); }, () => stChatSys('Lost connection to the world.'));
+  SW.peers = SW.room.peers(); const me = SW.peers.find(p => p.sameTab); if (me) SW.me = me.peer;
+  stChatSys('Connected. Other adventurers in story mode will appear in the world. Walk up to one to invite them to your party. Press T to chat.'); stNetPush(true);
+}
+function stNetLeave() { if (!SW.room) return; try { SW.room.presence({sw: null, ch: []}); SW.room.leave(); } catch (e) { /* already gone */ } SW.room = null; SW.peers = []; SW.party = null; }
+const stOthers = () => SW.peers.filter(p => !p.sameTab && p.presence && p.presence.sw && !SW.muted[p.peer]);
+const stPartyOf = p => p.presence.sw.pt;
+const stPartyMembers = () => SW.party ? stOthers().filter(p => stPartyOf(p) === SW.party) : [];
+function stNetPush(force) { // share where you are and what you look like, a few times a second
+  if (!SW.room) return; const d = stData(), s = stStats(), M = d.riding && stM(d.mount);
+  const sw = {n: stTitledName(), k: ST_CLASSES[d.cls].look, c: d.color, lv: d.lv, m: d.map, x: Math.round(d.x), y: Math.round(d.y), f: (ST.face || 0) > 1 ? 1 : 0, mv: ST.moving ? 1 : 0, pt: SW.party, inv: SW.inv,
+    r: M ? {k: M.kind, c: M.color, m: M.mane, f: M.fly ? 1 : 0, g: M.glow || 0} : 0, b: ST.mode === 'battle' ? 1 : 0, at: Math.round(s.atk), hp: s.hp, g: d.guild ? d.guild.rank : ''};
+  const sig = JSON.stringify(sw); if (!force && sig === SW.sig && performance.now() - SW.last < 2000) return; SW.sig = sig; SW.last = performance.now();
+  SW.room.presence({sw, ch: SW.myChat}).catch(() => {});
+}
+function stNetRead() { // new chat lines and party invites from other players
+  for (const p of stOthers()) {
+    const P = p.presence, sw = P.sw;
+    for (const m of P.ch || []) { const key = p.peer + ':' + m.i; if (SW.seen[key]) continue; SW.seen[key] = 1; if (m.p && m.p !== SW.party) continue; stChatAdd(sw.n, m.t, p.peer, !!m.p); }
+    if (sw.inv && sw.inv.to === SW.me && !SW.handledInv[sw.inv.at] && ST.on) { SW.handledInv[sw.inv.at] = 1; const pid = sw.inv.pid;
+      const go = () => stSay([['', `${sw.n} (level ${sw.lv}) invites you to their party. Party members fight beside each other and earn more XP.`]], null, [['Join the party', () => { SW.party = pid; stChatSys(`You joined ${sw.n}'s party.`); stNetPush(true); }], ['Decline', null]]);
+      if (ST.mode === 'walk') go(); else setTimeout(go, 1500); }
+  }
+}
+function stNetTick(dt) {
+  if (!SW.room) return; SW.push -= dt; if (SW.push <= 0) { SW.push = .16; stNetPush(); }
+  const d = stData(); for (const p of stOthers()) { const sw = p.presence.sw, v = SW.vis[p.peer] || (SW.vis[p.peer] = {x: sw.x, y: sw.y, w: 0}); if (Math.hypot(sw.x - v.x, sw.y - v.y) > 600) { v.x = sw.x; v.y = sw.y; } v.x += (sw.x - v.x) * Math.min(1, dt * 10); v.y += (sw.y - v.y) * Math.min(1, dt * 10); if (sw.mv) v.w += dt * 400; }
+  if (SW.party && !stPartyMembers().length && !SW.partyOwn) { /* everyone else left: keep the id so they can rejoin */ }
+}
+function stDrawOthers(now) { // other players on this map, with name tags (party members in green)
+  const d = stData();
+  for (const p of stOthers()) { const sw = p.presence.sw; if (sw.m !== d.map) continue; const v = SW.vis[p.peer]; if (!v) continue; const party = SW.party && sw.pt === SW.party;
+    if (sw.r) { const mid = 'peer:' + p.peer; SW.mounts[mid] = {name: '', kind: sw.r.k, color: sw.r.c, mane: sw.r.m, fly: !!sw.r.f, glow: sw.r.g || null, speed: 1}; ctx.save(); ctx.translate(v.x, v.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-v.x, -(v.y + 10)); stDrawMount(ctx, mid, v.x, v.y + 10, sw.f ? Math.PI : 0, v.w, now, !!sw.mv); ctx.restore(); }
+    stDrawCh(stUnit(sw.k, sw.c, v.x, v.y - (sw.r ? 21 + (sw.r.f ? 21 : 0) : 0), sw.f ? Math.PI : 0, sw.mv ? v.w : 0, 200 + (p.peer.charCodeAt(0) || 0), sw.lv), now);
+    ctx.textAlign = 'center'; ctx.font = '700 13px "Barlow Semi Condensed", sans-serif'; ctx.fillStyle = party ? '#7fe08a' : '#8fd4ff'; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = 3;
+    const tag = `${sw.n} · Lv ${sw.lv}${sw.g ? ' · ' + sw.g : ''}${sw.b ? ' ⚔' : ''}`; ctx.strokeText(tag, v.x, v.y - 60); ctx.fillText(tag, v.x, v.y - 60);
+    const bub = SW.bubble && SW.bubble[p.peer]; if (bub && performance.now() - bub.at < 6000) { ctx.font = '600 12px "Barlow Semi Condensed", sans-serif'; const w = Math.min(220, ctx.measureText(bub.t).width + 16); ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fillRect(v.x - w / 2, v.y - 96, w, 22); ctx.fillStyle = '#1a1206'; ctx.fillText(bub.t.length > 34 ? bub.t.slice(0, 33) + '…' : bub.t, v.x, v.y - 81); }
+    ctx.textAlign = 'left'; }
+}
+function stPlayerMenu(p) { // walk up to another player
+  const sw = p.presence.sw, inParty = SW.party && sw.pt === SW.party;
+  stSay([['', `${sw.n}, a level ${sw.lv} adventurer${sw.g ? ` of the Guild (${sw.g}-Rank)` : ''}.${inParty ? ' They are in your party.' : ''}`]], null, [].concat(
+    inParty ? [] : [['Invite to your party', () => { if (!SW.party) SW.party = SW.me; SW.inv = {to: p.peer, pid: SW.party, at: Date.now()}; stNetPush(true); stChatSys(`You invited ${sw.n} to your party.`); }]],
+    SW.party ? [['Leave your party', () => { SW.party = null; SW.inv = null; stNetPush(true); stChatSys('You left the party.'); }]] : [],
+    [['Wave', () => stChatSend('*waves*')], [`Mute ${sw.n}`, () => { SW.muted[p.peer] = 1; stChatSys(`${sw.n} is muted. You will no longer see them or their messages.`); }], ['Leave', null]]));
+}
+// ---- chat
+function stChatSys(t) { stChatAdd('', t, null, false, true); }
+function stChatAdd(who, text, peer, party, sys) {
+  if (PROF.chatOff && !sys) return; SW.log.push({who, text, peer, party, sys, at: Date.now()}); if (SW.log.length > 40) SW.log.shift();
+  if (peer) { SW.bubble = SW.bubble || {}; SW.bubble[peer] = {t: text, at: performance.now()}; }
+  stChatRender();
+}
+function stChatRender() {
+  const box = $('stChatLog'); if (!box) return; box.innerHTML = ''; const open = !$('stChatIn').hidden, now = Date.now();
+  for (const m of SW.log.slice(open ? -14 : -6)) { if (!open && now - m.at > 25000) continue; const row = el('div', m.sys ? 'sys' : m.party ? 'party' : '');
+    if (m.who) { const n = el('b', '', m.who + ': '); if (m.peer) { n.title = 'Click to mute'; n.addEventListener('click', () => { SW.muted[m.peer] = 1; stChatSys(`${m.who} muted.`); }); } row.appendChild(n); }
+    row.appendChild(document.createTextNode(m.text)); box.appendChild(row); }
+  const n = stOthers().length; $('stChatHead').textContent = SW.room ? `🌐 ${n + 1} online${SW.party ? ` · party of ${stPartyMembers().length + 1}` : ''}` : 'Offline';
+  box.scrollTop = box.scrollHeight;
+}
+function stChatSend(raw) {
+  const d = stData(); let t = String(raw || '').trim(); if (!t) return; let party = false; if (t.startsWith('/p ')) { party = true; t = t.slice(3); }
+  if (SW.chatT && performance.now() - SW.chatT < 1500) return stChatSys('Slow down a little.'); SW.chatT = performance.now();
+  t = stCleanChat(t); if (!t) return; if (!SW.room) return stChatSys('You are offline.');
+  const msg = {i: Math.random().toString(36).slice(2, 8), t}; if (party) { if (!SW.party) return stChatSys('You are not in a party.'); msg.p = SW.party; }
+  SW.myChat.push(msg); if (SW.myChat.length > 6) SW.myChat.shift(); stChatAdd(stTitledName(), t, null, party); SW.room.presence({ch: SW.myChat}).catch(() => {});
+}
+function stChatOpen() { if (PROF.chatOff) return stCallout('Chat is off. Turn it on in the menu.', '#c8b89a'); const i = $('stChatIn'); i.hidden = false; $('stChat').classList.add('open'); stChatRender(); setTimeout(() => i.focus(), 0); }
+function stChatClose() { const i = $('stChatIn'); i.value = ''; i.hidden = true; $('stChat').classList.remove('open'); i.blur(); stChatRender(); }
 function stToggleRide() {
   const d = stData(), own = d.mounts || [];
   if (ST.mode !== 'walk') return;
@@ -6958,10 +7064,10 @@ function startStory(fresh) {
     ['', 'Rest at Ashen Shrines (the swords in the ash) to heal. If you die, you drop your gold where you fall. Return for it, or lose it forever.'],
     ['', 'Move with the arrow keys, WASD, the left stick or the on-screen pad. Interact with E, A or the A button.'],
   ], () => stTutStart());
-  stHud();
+  stHud(); stNetJoin(); stChatRender();
 }
 function stLeave() {
-  stSave(); ST.on = false; document.body.classList.remove('story'); $('story').hidden = true; musicForce(null); try { speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+  stNetLeave(); stSave(); ST.on = false; document.body.classList.remove('story'); $('story').hidden = true; musicForce(null); try { speechSynthesis.cancel(); } catch (e) { /* no speech */ }
   reset(0); G.started = false; show('scr-main');
 }
 
@@ -7100,6 +7206,7 @@ function stRest() { // an Ashen Shrine: heal fully, set your return point, and t
 }
 function stNearby() {
   const d = stData(), near = (tx, ty) => Math.hypot(d.x - (tx * ST_TILE + 32), d.y - (ty * ST_TILE + 32)) < 80, grid = stGrid();
+  for (const p of stOthers()) { const v = SW.vis[p.peer]; if (p.presence.sw.m === d.map && v && Math.hypot(d.x - v.x, d.y - v.y) < 70) return {kind: 'player', p}; }
   for (const n of ST_NPCS) if ((n.map || 'world') === d.map && stNpcShown(n, d) && near(n.x, n.y)) return {kind: 'npc', n};
   if (d.map === 'world') for (const r of ST_ROCKS) if (near(r.x, r.y)) return {kind: 'mine', r};
   const pk = stPlotAt(d.x, d.y + 14); if (pk) return {kind: 'plot', key: pk};
@@ -7147,6 +7254,7 @@ function stInteract(pre) {
   } else if (it.kind === 'gate' && d.ch >= 3) stSay([['', 'The seal shatters as the shards draw near. The gate of the Hollow Keep groans open onto a hall of cold torches.']], null, [['Enter the keep', () => stEnterMap('keep', 2, 2)], ['Not yet', null]]);
   else if (it.kind === 'gate') stSay([['', 'A seal of violet light bars the gate. It hums like a held breath. Two shards would break it. You carry ' + Math.max(0, d.ch - 1) + '.']]);
   else if (it.kind === 'shrine') stRest();
+  else if (it.kind === 'player') stPlayerMenu(it.p);
   else if (it.kind === 'fish') stGatherStart('fish', it.spot);
   else if (it.kind === 'plot') { if (!d.farm) stSay([['', 'A plowed field with a FOR SALE sign. Farmer Odo in Harrowfield holds the deed.']]); else stPlot(it.key); }
   else if (it.kind === 'spouse') stSpouseHome();
@@ -7409,6 +7517,7 @@ function stWalk(dt) {
   if (ST.mode !== 'walk') return;
   if (ST.keys.left) dx--; if (ST.keys.right) dx++; if (ST.keys.up) dy--; if (ST.keys.down) dy++;
   if (ST.padMove) { dx += ST.padMove[0]; dy += ST.padMove[1]; }
+  if (ST.touchMove) { dx += ST.touchMove[0]; dy += ST.touchMove[1]; }
   const m = Math.hypot(dx, dy); ST.moving = m > .1;
   if (!ST.moving) return;
   const sp = 230 * (d.riding && stM(d.mount) ? stM(d.mount).speed : 1) * dt / Math.max(1, m), nx = d.x + dx * sp, ny = d.y + dy * sp;
@@ -7445,6 +7554,7 @@ function stStartBattle(foes, bossId, tile) {
   const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06);
   ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
     foes: foes.map((k, i) => { const F = ST_FOES[k], bs = bossId && ST_BOSS_SCALE[k] || [1, 1]; const hp = Math.round(F.hp * (1 + lvl) * bs[0]); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl) * bs[1], xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
+    coop: stPartyMembers().filter(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 8 * ST_TILE).slice(0, 2).map((p, i) => { const sw = p.presence.sw; return {id: 'c' + i, name: sw.n, look: sw.k, color: sw.c, lv: sw.lv, atk: sw.at || 20, hp: sw.hp || 200, maxHp: sw.hp || 200}; }),
     ally: d.flags.liora ? {name: 'Liora', hp: 80 + 12 * d.lv, maxHp: 80 + 12 * d.lv, atk: 10 + 2 * d.lv + (d.flags.lioraOath ? 6 : 0)} : null};
   ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
   STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
@@ -7476,7 +7586,7 @@ function stFxOffset(who) { // lunges toward the other side and back, hurt shakes
   let ox = 0, oy = 0;
   for (const a of STFX.anims) if (a.who === who) {
     const k = Math.sin(Math.PI * Math.min(1, a.t / a.dur));
-    if (a.kind === 'lunge') ox += (who === 'p' || who === 'a' ? 1 : -1) * 70 * k;
+    if (a.kind === 'lunge') ox += (who === 'p' || who === 'a' || /^c\d/.test(who) ? 1 : -1) * 70 * k;
     else if (a.kind === 'hurt') ox += Math.sin(a.t * 70) * 7 * (1 - a.t / a.dur);
     else if (a.kind === 'cast') oy -= 14 * k;
     else if (a.kind === 'dodge') { ox += (who === 'p' || who === 'a' ? -1 : 1) * 54 * k; oy -= 12 * k; }
@@ -7883,6 +7993,8 @@ function stEnemyPhase() {
     else if (t) { const dm = stDmg(b.ally.atk * 1.2, t.def); stAnim('a', 'lunge'); setTimeout(() => { t.hp -= dm; t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(t.id, 'hurt'); stBurst(t.id, '#9fd8ff', 12); stNum(t.id, dm); sfx('impact'); }, 160); stLog(`Liora strikes ${t.name} for ${dm}.`); }
     if (b.foes.every(f => f.hp <= 0)) return setTimeout(() => stEndBattle('won'), 450);
   }
+  for (const c of b.coop || []) { const t = b.foes.filter(f => f.hp > 0).sort((x, y) => x.hp - y.hp)[0]; if (!t) break; const dm = stDmg(c.atk * 1.15, t.def); t.hp -= dm; t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(c.id, 'lunge'); stAnim(t.id, 'hurt'); stBurst(t.id, '#7fe08a', 10); stNum(t.id, dm, '#7fe08a'); stLog(`${c.name} strikes ${t.name} for ${dm}.`); } // your party fights too
+  if ((b.coop || []).length && b.foes.every(f => f.hp <= 0)) return setTimeout(() => stEndBattle('won'), 450);
   if (d.wounds && d.wounds.bleed) { // your own bleeding
     const bd = Math.max(3, Math.round(s.hp * .04)); d.hp -= bd; d.wounds.bleed--; stNum('p', bd, '#ff4a4a'); stGore('p', 6, false); stLog(`You bleed for ${bd}.`);
     if (d.hp <= 0) return setTimeout(() => stEndBattle('lost'), 500);
@@ -7960,8 +8072,9 @@ function stEndBattle(result) {
   if (d.spouse) { const s0 = stStats(); d.hp = Math.min(s0.hp, d.hp + Math.round(s0.hp * .1)); } // your spouse tends your wounds
   d.kills = d.kills || {}; for (const f of b.foes) d.kills[f.key] = (d.kills[f.key] || 0) + 1;
   const xp = b.foes.reduce((a, f) => a + f.xp, 0), gold = b.foes.reduce((a, f) => a + f.gold, 0);
+  const coopN = (b.coop || []).length, xpB = Math.round(xp * .15 * coopN); if (coopN) { d.xp += xpB; }
   d.xp += xp; d.gold += gold; sfx('levelup');
-  const lines = [['', `Victory! You earn ${xp} XP and ${gold} gold.`]];
+  const lines = [['', `Victory! You earn ${xp} XP and ${gold} gold.` + (coopN ? ` Party bonus: +${xpB} XP.` : '')]];
   if (!b.bossId && d.guild) { const zk = stZoneKey(); for (const a of d.guild.quests || []) { const q = stGQ(a.id); if (q && q.kind === 'hunt' && q.zone === zk && a.prog < q.need) { a.prog++; lines.push(['', `Guild quest "${q.name}": ${a.prog} of ${q.need}.` + (a.prog >= q.need ? ' Turn it in at a guild hall.' : '')]); } } }
   if (b.foes.some(f => f.key === 'guard')) { stRep(stTownHere(), -25); d.crime = (d.crime || 0) + 60; d.align = clamp((d.align || 0) - 2, -10, 10); ST.guardCd = 40; lines.push(['', `The guards lie still in the road. Your bounty climbs to ${d.crime} gold. Every watchman in the vale knows your face now.`]); }
   if (!b.bossId && d.bounty && b.tile === ST_BOUNTIES.find(x => x.id === d.bounty.id).tile && d.bounty.prog < ST_BOUNTIES.find(x => x.id === d.bounty.id).need) {
@@ -8072,6 +8185,8 @@ function stOpenMenu() {
     for (const t of ['Hero', 'Quests', 'Bag', 'Skills', 'Bonds', 'Guild']) { const b = el('button', '', t); b.addEventListener('click', () => showTab(t)); bar.appendChild(b); }
     m.insertBefore(bar, m.firstChild); showTab(ST.menuTab || 'Hero');
   }
+  btn(`Chat: ${PROF.chatOff ? 'Off' : 'On'}`, () => { PROF.chatOff = !PROF.chatOff; saveProfile(); stCloseMenu(); stOpenMenu(); stChatRender(); });
+  btn(`Online world: ${PROF.onlineOff ? 'Off' : 'On'}`, () => { PROF.onlineOff = !PROF.onlineOff; saveProfile(); if (PROF.onlineOff) stNetLeave(); else stNetJoin(); stCloseMenu(); stOpenMenu(); });
   btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
   btn('📖 Journal', () => stJournal());
@@ -8080,6 +8195,18 @@ function stOpenMenu() {
 }
 function stCloseMenu() { $('stMenu').hidden = true; $('stMenu').classList.remove('journal'); ST.journal = false; ST.mode = 'walk'; stHud(); }
 $('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu() : stOpenMenu());
+{ // the thumbstick: touch anywhere on the left side and drag
+  const Z = $('stJoyZone'), B = $('stJoyBase'), K = $('stJoyKnob'), R = 56; let id = null, ox = 0, oy = 0;
+  Z.addEventListener('pointerdown', e => { if (ST.mode !== 'walk') return; e.preventDefault(); id = e.pointerId; ox = e.clientX; oy = e.clientY; Z.setPointerCapture(id); const r = Z.getBoundingClientRect(); B.style.left = (ox - r.left) + 'px'; B.style.top = (oy - r.top) + 'px'; B.classList.add('on'); K.style.transform = 'translate(-50%,-50%)'; ST.touchMove = [0, 0]; });
+  Z.addEventListener('pointermove', e => { if (e.pointerId !== id) return; let dx = e.clientX - ox, dy = e.clientY - oy; const m = Math.hypot(dx, dy); if (m > R) { dx *= R / m; dy *= R / m; } K.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; ST.touchMove = m < 8 ? [0, 0] : [dx / R, dy / R]; });
+  const end = e => { if (e.pointerId !== id) return; id = null; ST.touchMove = null; B.classList.remove('on'); };
+  Z.addEventListener('pointerup', end); Z.addEventListener('pointercancel', end);
+}
+$('stPrompt').addEventListener('click', () => { if (ST.mode === 'walk') stInteract(); }); // tap the prompt to act on it
+$('stQuest').addEventListener('click', () => { if (touchUI.on) $('stQuest').classList.toggle('mini'); }); // tap the tracker to fold it away on a phone
+$('stChatBtn').addEventListener('click', () => $('stChatIn').hidden ? stChatOpen() : stChatClose());
+$('stChatIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { stChatSend($('stChatIn').value); $('stChatIn').value = ''; if (device() === 'touch') stChatClose(); } else if (e.key === 'Escape') stChatClose(); });
+setInterval(() => { if (ST.on) stChatRender(); }, 5000);
 $('stJournalBtn').addEventListener('click', () => ST.mode === 'menu' && ST.journal ? stCloseMenu() : (ST.mode === 'walk' || ST.mode === 'menu') && stJournal());
 
 // ---- HUD and drawing
@@ -8114,7 +8241,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   const isles = dun && ST_DUNGEONS[d.map].outdoor; stAmbient(dt, now, Zs, d, dun, isles);
   stDrawCrops(now);
   if (!dun) for (const r of ST_ROCKS) if (Math.abs(r.x * ST_TILE - ST.cam.x) < cw / Zs && Math.abs(r.y * ST_TILE - ST.cam.y) < ch / Zs) stDrawRock(r, now);
-  stTutDraw(now);
+  stTutDraw(now); stDrawOthers(now);
   if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6 * ST_CS, f.face || 0);
   if (d.lost && d.lost.map === d.map) { ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff7a2a'; ctx.shadowBlur = 20; ctx.globalAlpha = .7 + Math.sin(now * 4) * .3; ctx.beginPath(); ctx.arc(d.lost.x, d.lost.y, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
   if (!dun) for (const c of ST_CHESTS) if (stChestShown(c, d)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
@@ -8153,7 +8280,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
+  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({player: 'Meet ' + (near.p ? near.p.presence.sw.n : ''), plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
   $('stRide').hidden = dun || !(d.mounts || []).length; $('stRide').textContent = d.riding ? 'Dismount' : 'Ride';
 }
 function stDrawFoe(key, x, y, now, scale, face, flash) {
@@ -8191,6 +8318,8 @@ function stDrawBattle(now, dt) {
   else drawCharacterScaled(pu, now, k * 1.3);
   if (d.hr && Math.random() < .35) STFX.parts.push({x: px + rand(-22, 22), y: py - rand(0, 80), vx: 0, vy: -rand(40, 90), t: 0, life: .6, color: 'rgba(255,250,230,.55)', r: rand(1.5, 3)}); // the Restricted body steams with power
   stWoundDraw(d.wounds, px + pox, py + poy + bob, k * 1.3, 1, true, now);
+  (b.coop || []).forEach((c, i) => { const cx = px - (130 + i * 60) * k, cy = py - (26 - i * 50) * k; STFX.pos[c.id] = [cx, cy]; const [ox, oy] = stFxOffset(c.id), cu = stUnit(c.look, c.color, cx + ox, cy + oy + bob, 0, 0, 300 + i, c.lv); if (STFX.anims.some(a => a.who === c.id && a.kind === 'lunge')) cu.atkT = 1; drawCharacterScaled(cu, now, k * 1.15);
+    ctx.fillStyle = '#7fe08a'; ctx.font = '700 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(c.name, cx, cy - 92 * k); ctx.textAlign = 'left'; });
   if (b.ally) { const [aox, aoy] = stFxOffset('a'), au = stUnit('valkyrie', '#9fd8ff', px - 70 * k + aox, py + 30 * k + aoy - bob, 0, 0, 31, d.lv); if (STFX.anims.some(a => a.who === 'a' && a.kind === 'lunge')) au.atkT = 1; drawCharacterScaled(au, now, k * 1.2); }
   b.foes.forEach((f, i) => {
     const n = b.foes.length, fx0 = cw * (.66 + (n > 1 ? (i - (n - 1) / 2) * .12 : 0)), fy0 = ch * (.55 + (i % 2) * .05);
@@ -8229,6 +8358,7 @@ window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (ST_KEYS[k] && ST.mode === 'walk') { ST.keys[ST_KEYS[k]] = true; e.preventDefault(); }
   if ((k === 'e' || k === 'enter' || k === ' ') && ST.mode === 'walk') { e.preventDefault(); stInteract(); }
+  if ((k === 't' || k === '/') && !e.repeat && ST.mode === 'walk') { e.preventDefault(); stChatOpen(); if (k === '/') $('stChatIn').value = '/'; return; }
   if (k === 'j' && !e.repeat && (ST.mode === 'walk' || ST.mode === 'menu')) { e.preventDefault(); ST.journal && ST.mode === 'menu' ? stCloseMenu() : stJournal(); }
   if ((k === 'escape' || k === 'm') && ST.mode !== 'gather') { e.preventDefault(); ST.mode === 'menu' ? stCloseMenu() : stOpenMenu(); }
   if (k === 'r' && ST.mode === 'walk' && !e.repeat) { e.preventDefault(); stToggleRide(); }
@@ -8268,10 +8398,12 @@ function stPollPad() {
 function storyFrame(now, dt) {
   stPollPad();
   if (ST.mode === 'walk') { stWalk(dt); stTutTick(dt); }
+  stNetTick(dt);
   if ((ST.miniF = (ST.miniF || 0) + 1) % 5 === 0 && ST.mode !== 'battle') stMiniDraw(now / 1000);
   stWeatherTick(dt);
   if (ST.mode === 'battle' && ST.battle) stDrawBattle(now / 1000, dt); else if (ST.mode === 'sail' && ST.sail) stDrawSail(now / 1000, dt); else stDrawWorld(now / 1000, dt);
   $('game').classList.toggle('touch', touchUI.on);
+  $('stJoyZone').hidden = !(touchUI.on && (ST.mode === 'walk')); if ($('stJoyZone').hidden && ST.touchMove) { ST.touchMove = null; $('stJoyBase').classList.remove('on'); }
   if (Math.random() < .05) stHud();
 }
 
