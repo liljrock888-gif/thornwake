@@ -4411,9 +4411,12 @@ const PASS = [
 ];
 const PROFILE_KEY = 'thornwake.profile';
 function freshProfile() {
-  return {v: 1, crowns: 300, heroes: [0, 1, 2, 3, 4, 5], skins: ['none'], trails: ['none'], moves: ['bolt', 'starfall'], pets: [], eggs: 1, boosts: {tome: 0, purse: 0, xp2: 0},
+  return {v: 1, epoch: DATA_EPOCH, crowns: 300, heroes: [0, 1, 2, 3, 4, 5], skins: ['none'], trails: ['none'], moves: ['bolt', 'starfall'], pets: [], eggs: 1, boosts: {tome: 0, purse: 0, xp2: 0},
     eq: {skin: 'none', trail: 'none', q: 'bolt', r: 'starfall', pet: null}, pass: {premium: false, xp: 0, claimed: []}, stage: 0, cleared: []};
 }
+// Raising DATA_EPOCH wipes every player's progress once, the next time they open the game. Cloud saves from an older epoch are ignored too (see online.js).
+const DATA_EPOCH = 1, EPOCH_KEY = 'thornwake.epoch';
+if ((store.get(EPOCH_KEY) || 0) < DATA_EPOCH) { for (const k of [PROFILE_KEY, AUTO_KEY, 'thornwake.cloud', ...SAVE_KEYS]) store.del(k); store.set(EPOCH_KEY, DATA_EPOCH); }
 let PROF = Object.assign(freshProfile(), store.get(PROFILE_KEY) || {});
 const ensureFreeHeroes = () => { for (const [i, r] of ROSTER.entries()) if (r.free && !PROF.heroes.includes(i)) PROF.heroes.push(i); };
 ensureFreeHeroes();
