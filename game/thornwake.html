@@ -378,7 +378,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #game.touch #stChatBtn{right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px));font-size:22px}
 #game.touch #stHud{width:168px;padding:6px 8px;gap:2px;font-size:13px}#game.touch #stHud .bl{display:none}#game.touch #stHud .bar{height:11px}
 #game.touch #stQuest{cursor:pointer}#game.touch #stQuest.mini .loc{display:none}#game.touch #stQuest.mini .obj{font-size:12px;max-height:2.6em;overflow:hidden}
-#game.touch #stPrompt{bottom:calc(132px + env(safe-area-inset-bottom,0px));padding:10px 18px;font-size:16px;cursor:pointer;background:rgba(5,7,10,.88)}
+#game.touch #stPrompt{bottom:calc(206px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 24px);text-align:center;padding:10px 18px;font-size:16px;cursor:pointer;background:rgba(5,7,10,.88)}
 #game.touch #stDialog{bottom:calc(8px + env(safe-area-inset-bottom,0px));width:calc(100vw - 16px);max-height:60vh;overflow:auto;padding:12px 14px}
 #game.touch #stDialog p{font-size:16px}#game.touch #stChoices{flex-direction:column}#game.touch #stChoices button{min-height:48px;font-size:16px;width:100%;text-align:left}
 #game.touch #stBattle{grid-template-columns:1fr;gap:6px}#game.touch #stActions .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}#game.touch #stActions button{min-height:50px;font-size:15px}
@@ -387,6 +387,9 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #game.touch #stMenu button{min-height:44px;font-size:15px}#game.touch #stMenu .tabs{flex-wrap:nowrap;overflow-x:auto}#game.touch #stMenu .tabs button{flex:0 0 auto}
 #game.touch #stChat{bottom:auto;top:calc(198px + env(safe-area-inset-top,0px));width:min(300px,62vw)}#game.touch #stChat.open{top:calc(10px + env(safe-area-inset-top,0px));width:calc(100vw - 20px);z-index:5}
 #game.touch #stMini{width:110px;height:74px}
+#game.touch #story:not([data-mode=walk]) #stPad,#game.touch #story:not([data-mode=walk]) #stMenuBtn,#game.touch #story:not([data-mode=walk]) #stJournalBtn,#game.touch #story:not([data-mode=walk]) #stRide,#game.touch #story:not([data-mode=walk]) #stChatBtn{display:none!important}
+#story[data-mode=battle] #stMini,#story[data-mode=sail] #stMini,#game.touch #story[data-mode=battle] #stQuest,#game.touch #story[data-mode=battle] #stChat{display:none!important}
+#game.touch #story[data-mode=gather] #stPad{display:grid!important}#game.touch #story[data-mode=gather] #stPad [data-d]{display:none}
 #stPad button{border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(20,28,24,.7);color:#fff;font-size:18px;touch-action:none}
 #stPad [data-d=up]{grid-area:1/2} #stPad [data-d=left]{grid-area:2/1} #stPad [data-d=right]{grid-area:2/3} #stPad [data-d=down]{grid-area:3/2}
 #stA{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));width:76px;height:76px;border-radius:50%!important;background:radial-gradient(circle at 40% 35%,#f5cf63,#c8951e)!important;color:#1a1206!important;font-weight:700}
@@ -8402,7 +8405,7 @@ function storyFrame(now, dt) {
   if ((ST.miniF = (ST.miniF || 0) + 1) % 5 === 0 && ST.mode !== 'battle') stMiniDraw(now / 1000);
   stWeatherTick(dt);
   if (ST.mode === 'battle' && ST.battle) stDrawBattle(now / 1000, dt); else if (ST.mode === 'sail' && ST.sail) stDrawSail(now / 1000, dt); else stDrawWorld(now / 1000, dt);
-  $('game').classList.toggle('touch', touchUI.on);
+  $('game').classList.toggle('touch', touchUI.on); $('story').dataset.mode = ST.mode;
   $('stJoyZone').hidden = !(touchUI.on && (ST.mode === 'walk')); if ($('stJoyZone').hidden && ST.touchMove) { ST.touchMove = null; $('stJoyBase').classList.remove('on'); }
   if (Math.random() < .05) stHud();
 }
