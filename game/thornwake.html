@@ -381,6 +381,10 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stLoad.on .ldBar i{animation:ldFill var(--ld,.8s) ease-out forwards}@keyframes ldFill{to{width:100%}}
 #stLoad .ldTip{margin-top:18px;color:#97a69b;font-size:13px;font-style:italic;min-height:2.8em}
 @media (prefers-reduced-motion:reduce){#stLoad{transition:none}#stLoad.on .ldBar i{animation:none;width:100%}}
+#maintBar{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;background:#3a1a10;border:1px solid #ff8a4a;color:#ffe2cc;border-radius:10px;padding:8px 16px;font-weight:600;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.5);text-align:center;max-width:calc(100vw - 32px)}
+#maintScr{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 40%,#16221d,#050806 75%);text-align:center}
+#maintScr h1{margin:0 0 8px;font-family:var(--display);font-size:clamp(30px,7vw,52px);background:linear-gradient(#fff3c9,#e8b04a 60%,#8a5a1a);-webkit-background-clip:text;background-clip:text;color:transparent}
+#maintScr p{color:#d8c8a8;font-size:16px;margin:6px auto;max-width:440px;line-height:1.5}#maintScr .small{color:#97a69b;font-size:13px}
 #stPrompt{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(5,7,10,.75);border:1px solid var(--gold);color:var(--gold);font-weight:600}
 #stDialog{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(94vw,720px);padding:14px 18px}
 #stBond{position:absolute;right:12px;top:10px;padding:4px 12px;border-radius:999px;border:1px solid #ff8aa8;background:rgba(255,138,168,.12);color:#ff8aa8;font:inherit;font-size:13px;font-weight:700;cursor:pointer}#stBond:focus{outline:2px solid #ff8aa8}
@@ -9139,7 +9143,41 @@ if (location.hash === '#trailer') {
   $('trPlay').addEventListener('click', () => startTrailer(false));
   $('trRec').addEventListener('click', () => startTrailer(true));
 }
+// Maintenance: the site's /maintenance.json can warn players and then close the game for an update.
+// {"mode": "open"} | {"mode": "warn", "at": "<ISO time it closes>"} | {"mode": "closed"}; an optional "msg" replaces the default text.
+const MAINT = {m: null, closed: false, timer: 0};
+async function maintCheck() {
+  try { const r = await fetch('/maintenance.json?t=' + Date.now(), {cache: 'no-store'}); if (!r.ok) return; maintApply(await r.json()); } catch (e) { /* no file here, as in the Claude artifact */ }
+  clearTimeout(MAINT.timer); MAINT.timer = setTimeout(maintCheck, MAINT.m && MAINT.m.mode === 'warn' ? 20000 : 60000);
+}
+function maintApply(m) {
+  MAINT.m = m; const closeAt = m && m.mode === 'warn' ? Date.parse(m.at) : NaN;
+  if (m && (m.mode === 'closed' || (m.mode === 'warn' && Date.now() >= closeAt))) return maintClose(m);
+  if (MAINT.closed && (!m || m.mode === 'open')) { location.reload(); return; } // back from the update: load the new version
+  let bar = document.getElementById('maintBar');
+  if (m && m.mode === 'warn' && closeAt) { if (!bar) { bar = document.createElement('div'); bar.id = 'maintBar'; bar.setAttribute('role', 'status'); document.body.appendChild(bar); } maintTick(); }
+  else if (bar) bar.remove();
+}
+function maintTick() {
+  const bar = document.getElementById('maintBar'), m = MAINT.m; if (!bar || !m || m.mode !== 'warn') return;
+  const left = Math.max(0, Date.parse(m.at) - Date.now()), mins = Math.floor(left / 60000), secs = Math.floor(left / 1000) % 60;
+  bar.textContent = `⚠ The server is shutting down for an update in ${mins ? mins + ' min ' : ''}${secs}s. Your progress is saved.`;
+  if (left <= 0) return maintClose(m); setTimeout(maintTick, 1000);
+}
+function maintClose(m) {
+  if (MAINT.closed) return; MAINT.closed = true;
+  try { saveProfile(); } catch (e) { /* storage blocked */ }
+  try { if (typeof stNetLeave === 'function') stNetLeave(); } catch (e) { /* already offline */ }
+  const bar = document.getElementById('maintBar'); if (bar) bar.remove();
+  const scr = document.createElement('div'); scr.id = 'maintScr'; scr.setAttribute('role', 'alert');
+  scr.innerHTML = '<div><h1>Down for an update</h1><p></p><p class="small">Your progress is saved. This page reloads by itself when the game is back.</p></div>';
+  scr.querySelector('p').textContent = (m && m.msg) || 'Thornwake is getting an update. We will be back soon.';
+  document.body.appendChild(scr); try { music.vol = 0; if (music.ctx) music.ctx.suspend(); } catch (e) { /* no audio yet */ }
+  for (const ev of ['keydown', 'keyup', 'pointerdown', 'touchstart', 'wheel']) addEventListener(ev, e => { if (MAINT.closed) { e.stopPropagation(); e.preventDefault(); } }, {capture: true, passive: false});
+}
+if (location.protocol.startsWith('http') && !/claude\.ai|claudeusercontent/.test(location.hostname)) maintCheck();
 function frame(now) {
+  if (MAINT.closed) { requestAnimationFrame(frame); return; } // nothing runs behind the maintenance screen
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   if (TR.on) { trailerFrame(now, dt); requestAnimationFrame(frame); return; }
   if (ST.on) { storyFrame(now, dt); requestAnimationFrame(frame); return; }
