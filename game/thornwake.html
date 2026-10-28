@@ -325,7 +325,9 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stHud .bar.xp{height:5px}#stHud .bar.xp i{background:linear-gradient(90deg,#8a5a1a,#ffd75e)}#stHud .bl{font-size:10px;letter-spacing:.1em;color:#c8b89a;margin-bottom:-2px}
 @media (max-width:640px){#stMini{width:118px;height:80px}#stQuest{top:calc(98px + env(safe-area-inset-top,0px));width:min(52vw,240px);font-size:12px}#stQuest .obj{font-size:13px}#stHint{display:none}}
 #game.touch #stHint{display:none}
-#stRide{position:absolute;left:calc(84px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stJournalBtn{position:absolute;left:calc(84px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stMenu.journal p{white-space:pre-line;line-height:1.5}#stMenu.journal{width:min(94vw,640px)}
+#stRide{position:absolute;left:calc(176px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 #stMenuBtn{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 #stPrompt{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(5,7,10,.75);border:1px solid var(--gold);color:var(--gold);font-weight:600}
 #stDialog{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(94vw,720px);padding:14px 18px}
@@ -380,7 +382,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
   <div id="story" hidden>
     <div id="stHud" class="panel"><b id="stHudName"></b><div class="bar hp"><i id="stHp"></i><span id="stHpT"></span></div><div class="bar mp"><i id="stMp"></i><span id="stMpT"></span></div><small id="stGold"></small></div>
     <div id="stQuest" class="panel"></div>
-    <button id="stMenuBtn" class="panel">Menu</button><button id="stRide" class="panel" hidden>Ride</button>
+    <button id="stMenuBtn" class="panel">Menu</button><button id="stJournalBtn" class="panel">Journal</button><button id="stRide" class="panel" hidden>Ride</button>
     <div id="stPrompt" hidden></div><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
     <div id="stDialog" class="panel" hidden><button id="stBond" hidden></button><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
     <div id="stBattle" hidden><div id="stLog" class="panel"></div><div id="stParty" class="panel"></div><div id="stActions" class="panel"></div></div>
@@ -6092,7 +6094,7 @@ function stAmbient(dt, now, Zs, d, dun, isles) {
       const p0 = R[w.seg], p1 = R[w.seg + 1], x = p0[0] + (p1[0] - p0[0]) * w.k, y = p0[1] + (p1[1] - p0[1]) * w.k + 10, face = (p1[0] - p0[0]) * (w.fwd ? 1 : -1) < 0 ? Math.PI : 0; w.walk += 3;
       if (!inView(x, y)) continue;
       if (w.look === 'cart') { const dir = Math.cos(face) < 0 ? -1 : 1; ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x - dir * 70 - 26, y - 34, 52, 26); ctx.fillStyle = '#c9b48a'; ctx.beginPath(); ctx.ellipse(x - dir * 70, y - 38, 26, 12, 0, Math.PI, 0); ctx.fill(); ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 3; for (const wx of [-14, 14]) { ctx.beginPath(); ctx.arc(x - dir * 70 + wx, y - 6, 9, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x - dir * 70 + wx + Math.cos(w.walk * .1) * 9, y - 6 + Math.sin(w.walk * .1) * 9); ctx.lineTo(x - dir * 70 + wx - Math.cos(w.walk * .1) * 9, y - 6 - Math.sin(w.walk * .1) * 9); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(x - dir * 44, y - 20); ctx.lineTo(x - dir * 10, y - 22); ctx.stroke(); stDrawMount(ctx, 'mare', x, y, face, w.walk * 4, now, true); }
-      else drawCharacterScaled(stUnit(w.look, w.color, x, y, face, w.walk, 40 + w.r, 2), now, .9);
+      else stDrawCh(stUnit(w.look, w.color, x, y, face, w.walk, 40 + w.r, 2), now, .95);
     }
     // wild animals graze near you and bolt when you come close
     if (A.crit.length < 6 && Math.random() < .05) { const x = ST.cam.x + rand(-vw, vw), y = ST.cam.y + rand(-vh, vh), t = tileAt(x, y); if ('.T*g:'.includes(t) && Math.hypot(x - d.x, y - d.y) > 300) A.crit.push({kind: t === 'T' || t === 'g' ? 'deer' : 'rabbit', x, y, vx: 1, vy: 0, t: 0, ph: Math.random() * 6}); }
@@ -6586,6 +6588,68 @@ function stGiftMenu(id) {
     stSay([[name, love ? `For me? This is... this is exactly what I wanted. How did you know?` : like ? 'Oh, that\'s kind. Thank you.' : n2 < 0 ? 'Is... is this a boot?' : 'Thank you. I suppose.']], () => stSocial(id));
   }]).concat([['Never mind', () => stSocial(id)]]));
 }
+// ---- the journal: everything you know, any time (J, the Journal button, or Back on a controller)
+const ST_LORE = [
+  ['The Hollowing', () => true, 'A sickness of the soul that empties people and beasts alike. The hollowed forget their names, then their faces, then everything but hunger.'],
+  ['Ashen Shrines', () => true, 'Swords driven into the ash by those who came before. Kneel at one to heal and to set where the ash returns you when you die.'],
+  ['The Hollow King', d => d.ch >= 1, 'Once a good king. He held the Hollowing back like a dam holds a river, and drank the land dry to do it.'],
+  ['The Two Shards', d => d.ch >= 2, 'The Ember Shard and the Frost Shard sealed the Hollow Castle. Carry both and the seal will break.'],
+  ['The Free Guild Compact', d => !!d.guild, 'The Adventurers\' Guild governs every road beyond the walls. Merit is the only crown: D-Ranks work, A-Ranks vote, S-Ranks sit the Council and decree.'],
+  ['The Moon Pack', d => d.flags.wolfQuest, 'Werewolves of the Gloamwood, led by Ysolde. They walk only when the moon is up.'],
+  ['The Heavenly Restriction', d => d.flags.hrQuest, 'An old rite above the Frost Peaks: give up every spark of magic, forever, for a body made perfect.'],
+  ['The Delacroix-Noir', () => stLetters() > 0, 'An old vampire house of Rougemarais. Its letters speak of a child drowned in the Vale, whom the ash gave back.'],
+  ['Valdris', d => d.lv >= 20 || stRankAtLeast('C'), 'Across the sea, a land with no king, governed by the Guild Compact from Highmarch. Only ranked adventurers may land.'],
+  ['Aetherfall', d => d.lv >= 35 || stRankAtLeast('A'), 'The Shattered Heavens: floating isles over a starry void, where the Unmaker waits at the Abyssal Rift.'],
+];
+const ST_GUIDE = [
+  ['Controls', 'Move with WASD, the arrows, the left stick or the on-screen pad. E or A interacts. M opens the menu, J this journal, R rides your mount. In battle, pick an action with the buttons.'],
+  ['Combat', 'Attack hits one enemy. Skills are stronger and cost MP; they grow stronger and evolve the more you use them. Items heal. Defend halves the damage you take. The faster fighter dodges more. Fill the Rage meter and press RAGE! for a burst of power.'],
+  ['Wounds and death', 'Hard hits can make you bleed, sever a limb or pierce you. Potions stop bleeding; shrines and inns heal everything. Die, and you drop your gold where you fell: walk back to pick it up.'],
+  ['Levels and danger', 'Every region shows its level. Dungeons and bosses will not let you in below their level. The Ashen Vale runs from level 1 to 25, Valdris 26 to 40, and Aetherfall 41 to 55.'],
+  ['The Guild', 'Join at the Guild Hall in Thornwake. Take one quest at a time from the board. Earn standing, then sit an exam with the Guildmaster to rise from D to S-Rank. Some lands are guild territory.'],
+  ['Travel', 'Coaches run between towns. Ships sail from Saltmere to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Garth sells mounts, and breeds them in pairs.'],
+  ['Professions', 'Fishing (rod from Dunn), mining (pickaxe from Brann), farming (homestead from Farmer Odo) and crafting (forge at Brann\'s, cooking at inns). Each has its own level.'],
+  ['Trade', 'Every market buys and sells at its own prices, and prices change daily. Buy where goods are made, sell where they are wanted.'],
+  ['Bonds and family', 'Press ♥ while talking to someone. Talk daily, give gifts and spend time to grow close. Flirt with any adult. Court, marry with a Moonsilver Ring, and raise children at your homestead.'],
+  ['Reputation and status', 'Towns remember what you do: good deeds lower prices, crimes close shops and turn the guards. Herald Aldous raises you from Commoner to Duke as you earn it.'],
+  ['Alignment', 'Your choices tip you toward Light or Ash. Light makes shops cheaper and toughens you; Ash makes you hit harder. Your spouse sees what you become.'],
+];
+function stJournal(tab) {
+  const d = stData(), m = $('stMenu'); if (ST.mode !== 'walk' && ST.mode !== 'menu') return;
+  ST.mode = 'menu'; ST.journal = true; m.hidden = false; m.innerHTML = ''; tab = tab || ST.jTab || 'Story'; ST.jTab = tab;
+  m.appendChild(el('h3', '', '📖 Journal'));
+  const bar = el('div', 'tabs'); for (const t of ['Story', 'Quests', 'Places', 'People', 'Bestiary', 'Guide']) { const b = el('button', t === tab ? 'on' : '', t); b.addEventListener('click', () => stJournal(t)); bar.appendChild(b); } m.appendChild(bar);
+  const sec = (h, p) => { m.appendChild(el('h3', '', h)); m.appendChild(el('p', '', p)); }, ob = stObjective();
+  if (tab === 'Story') {
+    sec('Now', ob ? ob.text : 'Wander as you will.');
+    sec('The road so far', ST_QUESTS.map((q, i) => `${i < d.ch ? '✓' : i === d.ch ? '▶' : '·'} Chapter ${i + 1}: ${q.replace('%p', d.pelts).split('. ')[0]}.`).join('\n'));
+    for (const [h, ok, p] of ST_LORE) if (ok(d)) sec(h, p);
+  } else if (tab === 'Quests') {
+    sec('Main quest', ob ? ob.text : 'Complete.');
+    const g = d.guild, a = g && (g.quests || [])[0] && stGQ(g.quests[0].id); sec('Guild quest', a ? `[${a.rank}] ${a.name}: ${a.text}.${a.kind === 'hunt' ? ` ${g.quests[0].prog}/${a.need}.` : ''} Turn in at a guild board.` : g ? 'None. Take one from a guild quest board.' : 'Join the Adventurers\' Guild in Thornwake to take quests.');
+    const side = [
+      d.flags.bellQuest && !d.flags.bellDone && 'The Drowned Bell: find it in the Bone Marsh, return it to Dunn in Saltmere.', d.flags.wrenQuest && !d.flags.hessaDone && 'Wren\'s Mother: search the Ashfall Dunes.',
+      d.flags.corinQuest && !d.flags.stalker && 'Corin\'s Hunter: find what stalks the Gloamwood.', d.flags.lioraQuest && !d.flags.brother && 'Liora\'s Oath: find her brother in the Bone Marsh.',
+      d.flags.hrQuest && !d.flags.hrDone && 'The Heavenly Restriction: climb the Celestial Stair (level 18).', d.flags.wolfQuest && !d.flags.ysoldeDone && 'The Moon Pack: Ysolde walks the Gloamwood at night (level 14).',
+      stLetters() && !d.flags.countessDone && `The Bloodline: ${stLetters()} of 3 letters found.`, d.breeding && `A foal is ${d.breeding.ready <= Date.now() ? 'ready at Garth\'s stable' : 'on the way'}.`,
+      d.family && d.family.pending && 'A child will soon join your family at the homestead.', d.farm && Object.values(d.farm.plots).some(P => stCropProg(P) >= 1) && 'Crops are ripe at your homestead.'].filter(Boolean);
+    sec('Side stories and errands', side.join('\n') || 'None right now. Talk to people; everyone here has lost something.');
+  } else if (tab === 'Places') {
+    const seen = d.places || {}, list = Object.entries(seen).sort((a, b) => a[1] - b[1]);
+    sec('Visited', list.length ? list.map(([n, lv]) => `${n} · level ${lv}${lv > d.lv ? ' (dangerous)' : ''}`).join('\n') : 'Nowhere yet.');
+    sec('Rumored', [['The Sunken Catacombs', 4], ['The Ice Crypt', 7], ['The Hollow Keep', 12], ['Duskwatch Castle (guild members)', 15], ['The Celestial Stair', 18], ['Rougemarais (ship, level 20)', 20], ['Valdris (ship, C-Rank)', 26], ['Aetherfall (ship, A-Rank)', 41]].filter(([n]) => !Object.keys(seen).some(k => n.startsWith(k.split(',')[0]))).map(([n, lv]) => `? ${n} · level ${lv}`).join('\n'));
+    sec('Reputation', Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t)).map(t => `${ST_TOWN_NAME[t]}: ${stRepName(stRepOf(t))}`).join('\n') || 'No town has formed an opinion of you yet.');
+  } else if (tab === 'People') {
+    const met = Object.entries(d.bonds || {}).filter(([k, b]) => ST_SOCIAL[k] && b.talked).sort((a, b) => b[1].pts - a[1].pts);
+    sec('Family', (d.spouse ? `Spouse: ${stNpcName(d.spouse)}` : d.romance ? `Courting: ${stNpcName(d.romance)}` : 'No partner.') + ((d.family && d.family.kids.length) ? `\nChildren: ${d.family.kids.map(k => `${k.name} (${stKidStage(k)})`).join(', ')}` : ''));
+    sec('People you know', met.length ? met.map(([k, b]) => { const n = ST_NPCS.find(x => x.id === k), where = n ? (n.map && ST_DUNGEONS[n.map] ? ST_DUNGEONS[n.map].name : ST_TOWN_NAME[stTownAt('world', n.x * ST_TILE, n.y * ST_TILE)]) : 'with you'; return `${stNpcName(k)} · ${stBondName(k)} · ${where}`; }).join('\n') : 'Talk to people to meet them.');
+  } else if (tab === 'Bestiary') {
+    const K = Object.entries(d.kills || {}).sort((a, b) => b[1] - a[1]);
+    sec(`Creatures defeated (${K.reduce((a, [, n]) => a + n, 0)})`, K.length ? K.map(([k, n]) => { const F = ST_FOES[k]; return F ? `${F.name} ×${n}` + (n >= 3 ? ` · HP ${F.hp}, attack ${F.atk}, defense ${F.def}${F.boss ? ', boss' : ''}` : ' · defeat 3 to learn more') : ''; }).filter(Boolean).join('\n') : 'Nothing yet. Win a battle.');
+  } else for (const [h, p] of ST_GUIDE) sec(h, p);
+  const row = el('div', 'row'), x = el('button', '', 'Close journal'); x.addEventListener('click', () => { ST.journal = false; stCloseMenu(); }); row.appendChild(x); m.appendChild(row);
+  m.classList.add('journal'); setTimeout(() => x.focus({preventScroll: true}), 0);
+}
 function stToggleRide() {
   const d = stData(), own = d.mounts || [];
   if (ST.mode !== 'walk') return;
@@ -6699,7 +6763,7 @@ function stDrawCityCanvas(key) { // cobblestones, townhouses with iron balconies
     if (t === 'H' || t === 'I') { // a three-storey townhouse with balconies
       const fc = FAC[(x * 7 + y * 3) % FAC.length], top = py - 96;
       g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(px, py + 54, 64, 10);
-      g.fillStyle = fc; g.fillRect(px + 1, top, 62, py + 60 - top); g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(px + 1, top, 4, py + 60 - top);
+      g.fillStyle = fc; g.fillRect(px + 1, top, 62, py + 60 - top); stThicken(g, px + 1, top, 62, py + 60 - top, fc); g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(px + 1, top, 4, py + 60 - top);
       g.fillStyle = '#2a2026'; g.fillRect(px - 2, top - 8, 68, 10); // cornice
       for (let f = 0; f < 3; f++) for (const wx of [12, 38]) { const wy = top + 12 + f * 50; const lit = R() < .55; g.fillStyle = lit ? '#ffc870' : '#1a1418'; g.globalAlpha = lit ? .85 : 1; g.fillRect(px + wx, wy, 14, 22); g.globalAlpha = 1; g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(px + wx - 3, wy, 3, 22); g.fillRect(px + wx + 14, wy, 3, 22); } // windows and shutters
       g.fillStyle = '#111'; for (const by of [top + 38, top + 88]) { g.fillRect(px + 2, by, 60, 3); for (let i = 0; i < 8; i++) g.fillRect(px + 4 + i * 8, by - 14, 2, 14); g.fillRect(px + 2, by - 15, 60, 2); } // wrought-iron balconies
@@ -6740,13 +6804,13 @@ function stDrawLandCanvas(key) { // the far lands: sea or void, sand, meadow, ro
     if (t === 'L') { g.fillStyle = '#141414'; g.fillRect(px + 30, py - 10, 4, 66); g.fillStyle = '#1a1a1a'; g.fillRect(px + 24, py - 24, 16, 16); g.fillStyle = D.void ? '#c8e8ff' : '#ffd08a'; g.shadowColor = g.fillStyle; g.shadowBlur = 22; g.fillRect(px + 27, py - 21, 10, 10); g.shadowBlur = 0; }
     if (t === 'W') { g.fillStyle = D.void ? '#a8a0c8' : '#6a6460'; g.fillRect(px, py + 4, 64, 56); g.fillStyle = 'rgba(0,0,0,.25)'; for (let i = 0; i < 3; i++) g.fillRect(px, py + 18 + i * 14, 64, 2); g.fillStyle = D.void ? '#c8c0e8' : '#7a7470'; for (let i = 0; i < 3; i++) g.fillRect(px + 4 + i * 22, py - 6, 14, 12); }
     if (t === 'H') { // a cottage with a steep roof
-      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(px + 2, py + 54, 64, 10); g.fillStyle = P.hut; g.fillRect(px + 6, py + 8, 52, 50); g.fillStyle = '#3a2414'; g.fillRect(px + 24, py + 30, 16, 28);
+      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(px + 2, py + 54, 64, 10); g.fillStyle = P.hut; g.fillRect(px + 6, py + 8, 52, 50); stThicken(g, px + 6, py + 8, 52, 50, P.hut); g.fillStyle = '#3a2414'; g.fillRect(px + 24, py + 30, 16, 28);
       g.fillStyle = '#ffd08a'; g.globalAlpha = .8; g.fillRect(px + 10, py + 20, 10, 10); g.fillRect(px + 44, py + 20, 10, 10); g.globalAlpha = 1;
       g.fillStyle = P.roof; g.beginPath(); g.moveTo(px - 8, py + 14); g.lineTo(px + 32, py - 48); g.lineTo(px + 72, py + 14); g.closePath(); g.fill();
     }
     if (t === 'J') { // a tall townhouse
       const fc = FAC[(x * 7 + y * 3) % FAC.length], top = py - 80;
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(px, py + 54, 64, 10); g.fillStyle = fc; g.fillRect(px + 1, top, 62, py + 60 - top); g.fillStyle = P.roof; g.beginPath(); g.moveTo(px - 2, top + 4); g.lineTo(px + 32, top - 28); g.lineTo(px + 66, top + 4); g.fill();
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(px, py + 54, 64, 10); g.fillStyle = fc; g.fillRect(px + 1, top, 62, py + 60 - top); stThicken(g, px + 1, top, 62, py + 60 - top, fc); g.fillStyle = P.roof; g.beginPath(); g.moveTo(px - 2, top + 4); g.lineTo(px + 32, top - 28); g.lineTo(px + 66, top + 4); g.fill();
       for (let f = 0; f < 3; f++) for (const wx of [12, 38]) { const wy = top + 12 + f * 44, lit = R() < .6; g.fillStyle = lit ? (D.void ? '#c8e8ff' : '#ffc870') : '#1a1418'; g.globalAlpha = lit ? .85 : 1; g.fillRect(px + wx, wy, 14, 20); g.globalAlpha = 1; }
       g.fillStyle = '#1a1210'; g.fillRect(px + 24, py + 30, 16, 30);
     }
@@ -6780,7 +6844,7 @@ function stDrawOutdoorCanvas(key) { // sea, sand, grass, huts, a pier; palms are
     if (t === 'S') { g.fillStyle = '#3a3330'; g.beginPath(); g.ellipse(px + 32, py + 48, 20, 8, 0, 0, 7); g.fill(); g.strokeStyle = '#c9c0b0'; g.lineWidth = 4; g.beginPath(); g.moveTo(px + 32, py + 48); g.lineTo(px + 36, py + 14); g.stroke(); }
     if (t === 'H') { // a stilted hut with a tall thatched roof
       g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(px + 2, py + 54, 64, 10);
-      g.fillStyle = '#a07a4a'; g.fillRect(px + 6, py + 10, 52, 48); g.fillStyle = '#5a3a1a'; g.fillRect(px + 24, py + 30, 16, 28);
+      g.fillStyle = '#a07a4a'; g.fillRect(px + 6, py + 10, 52, 48); stThicken(g, px + 6, py + 10, 52, 48, '#a07a4a'); g.fillStyle = '#5a3a1a'; g.fillRect(px + 24, py + 30, 16, 28);
       g.fillStyle = '#ffd08a'; g.globalAlpha = .8; g.fillRect(px + 10, py + 22, 10, 10); g.fillRect(px + 44, py + 22, 10, 10); g.globalAlpha = 1;
       g.fillStyle = '#c9a24a'; g.beginPath(); g.moveTo(px - 8, py + 16); g.lineTo(px + 32, py - 50); g.lineTo(px + 72, py + 16); g.closePath(); g.fill();
       g.strokeStyle = 'rgba(120,80,20,.6)'; g.lineWidth = 2; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(px + 32, py - 50); g.lineTo(px - 6 + i * 15, py + 16); g.stroke(); }
@@ -6817,6 +6881,12 @@ function stDrawDungeonCanvas(key) {
   }));
   ST.dunC[key] = c;
 }
+function stThicken(g, x, y, w, h, wall) { // give a wall block depth: a shaded side face, a stone footing and a bold outline
+  g.fillStyle = shade(wall, -.38); g.beginPath(); g.moveTo(x + w, y); g.lineTo(x + w + 9, y + 7); g.lineTo(x + w + 9, y + h + 3); g.lineTo(x + w, y + h); g.closePath(); g.fill();
+  g.fillStyle = '#56504a'; g.fillRect(x - 3, y + h - 10, w + 12, 12); g.fillStyle = 'rgba(0,0,0,.28)'; for (let i = 0; i < w + 12; i += 13) g.fillRect(x - 3 + i, y + h - 10, 2, 12); g.fillRect(x - 3, y + h - 4, w + 12, 2);
+  g.strokeStyle = 'rgba(14,9,6,.9)'; g.lineWidth = 3; g.strokeRect(x, y, w, h);
+}
+function stThickRoof(g, color) { g.strokeStyle = 'rgba(22,10,5,.92)'; g.lineWidth = 4; g.lineJoin = 'round'; g.stroke(); }
 function stDrawMapCanvas() {
   const c = document.createElement('canvas'); c.width = ST_W * ST_TILE; c.height = ST_H * ST_TILE;
   const g = c.getContext('2d'), R = mulberry(11);
@@ -6850,11 +6920,11 @@ function stDrawMapCanvas() {
     const px = x * ST_TILE, py = y * ST_TILE, W2 = ST_TILE * 2, wall = {H: '#a8946a', I: '#8a6a4a', U: '#6a6a7a', K: '#5a4a40'}[t], roof = {H: '#6a2a1e', I: '#3a4a2a', U: '#2a2a4a', K: '#2a2420'}[t];
     g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(px + 10, py + W2 - 14, W2 - 4, 12);
     g.fillStyle = '#3a2a1a'; g.fillRect(px + 92, py - 64, 16, 44); g.fillStyle = '#2a1e14'; g.fillRect(px + 89, py - 68, 22, 6); // chimney
-    g.fillStyle = wall; g.fillRect(px + 8, py + 10, W2 - 16, W2 - 18); // two storeys
+    g.fillStyle = wall; g.fillRect(px + 8, py + 10, W2 - 16, W2 - 18); stThicken(g, px + 8, py + 10, W2 - 16, W2 - 18, wall); // two storeys
     g.fillStyle = 'rgba(0,0,0,.15)'; for (let i = 0; i < 7; i++) g.fillRect(px + 8, py + 22 + i * 15, W2 - 16, 2);
     g.fillStyle = 'rgba(40,24,12,.6)'; g.fillRect(px + 8, py + 10, 6, W2 - 18); g.fillRect(px + W2 - 14, py + 10, 6, W2 - 18); g.fillRect(px + 8, py + 54, W2 - 16, 6); // timber frame
     g.fillStyle = '#ffd08a'; g.globalAlpha = .8; g.fillRect(px + 22, py + 26, 16, 16); g.fillRect(px + W2 - 38, py + 26, 16, 16); g.globalAlpha = 1; // upstairs windows
-    g.fillStyle = roof; g.beginPath(); g.moveTo(px - 8, py + 18); g.lineTo(px + ST_TILE, py - 78); g.lineTo(px + W2 + 8, py + 18); g.closePath(); g.fill();
+    g.fillStyle = roof; g.beginPath(); g.moveTo(px - 8, py + 18); g.lineTo(px + ST_TILE, py - 78); g.lineTo(px + W2 + 8, py + 18); g.closePath(); g.fill(); stThickRoof(g); g.fillStyle = shade(roof, -.35); g.fillRect(px - 8, py + 16, W2 + 16, 8); // thick eaves
     g.fillStyle = 'rgba(255,255,255,.08)'; g.beginPath(); g.moveTo(px + ST_TILE, py - 78); g.lineTo(px + W2 + 8, py + 18); g.lineTo(px + ST_TILE + 10, py + 18); g.closePath(); g.fill();
     g.fillStyle = 'rgba(0,0,0,.2)'; for (let i = 1; i < 5; i++) g.fillRect(px - 8 + i * 6, py + 18 - i * 19, W2 + 16 - i * 12, 2); // shingles
     g.fillStyle = '#ffd08a'; g.globalAlpha = .7; g.beginPath(); g.arc(px + ST_TILE, py - 20, 8, 0, 7); g.fill(); g.globalAlpha = 1; // attic window
@@ -6934,9 +7004,9 @@ function stTutTick(dt) { // Edda walks her path, waits for you if you fall behin
 }
 function stTutDraw(now) {
   const d = stData(), T = ST.tut; if (!T || d.map !== 'world') return;
-  drawCharacter(ctx, stUnit('paladin', '#7a9ac8', T.x, T.y, T.face || 0, T.walking ? T.walk : 0, 77, 8), now);
-  ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Warden Edda', T.x, T.y - 74);
-  if (!T.walking && !T.wait) { ctx.fillStyle = '#ffd75e'; ctx.font = '800 22px "Barlow Semi Condensed", sans-serif'; ctx.fillText('!', T.x, T.y - 92 + Math.sin(now * 5) * 4); }
+  stDrawCh(stUnit('paladin', '#7a9ac8', T.x, T.y, T.face || 0, T.walking ? T.walk : 0, 77, 8), now);
+  ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Warden Edda', T.x, T.y - 56);
+  if (!T.walking && !T.wait) { ctx.fillStyle = '#ffd75e'; ctx.font = '800 22px "Barlow Semi Condensed", sans-serif'; ctx.fillText('!', T.x, T.y - 72 + Math.sin(now * 5) * 4); }
   ctx.textAlign = 'left';
 }
 
@@ -7894,6 +7964,7 @@ function stEndBattle(result) {
   }
   if (ST.fighting) { ST.fighting.alive = false; ST.fighting = null; }
   if (d.spouse) { const s0 = stStats(); d.hp = Math.min(s0.hp, d.hp + Math.round(s0.hp * .1)); } // your spouse tends your wounds
+  d.kills = d.kills || {}; for (const f of b.foes) d.kills[f.key] = (d.kills[f.key] || 0) + 1;
   const xp = b.foes.reduce((a, f) => a + f.xp, 0), gold = b.foes.reduce((a, f) => a + f.gold, 0);
   d.xp += xp; d.gold += gold; sfx('levelup');
   const lines = [['', `Victory! You earn ${xp} XP and ${gold} gold.`]];
@@ -8009,11 +8080,13 @@ function stOpenMenu() {
   }
   btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
+  btn('📖 Journal', () => stJournal());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
 }
-function stCloseMenu() { $('stMenu').hidden = true; ST.mode = 'walk'; stHud(); }
+function stCloseMenu() { $('stMenu').hidden = true; $('stMenu').classList.remove('journal'); ST.journal = false; ST.mode = 'walk'; stHud(); }
 $('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu() : stOpenMenu());
+$('stJournalBtn').addEventListener('click', () => ST.mode === 'menu' && ST.journal ? stCloseMenu() : (ST.mode === 'walk' || ST.mode === 'menu') && stJournal());
 
 // ---- HUD and drawing
 function stHud() {
@@ -8021,15 +8094,17 @@ function stHud() {
   const hn = $('stHudName'); hn.textContent = ''; hn.className = 'hn'; hn.append(document.createTextNode(stTitledName()), el('span', 'badge lvb', `Lv ${d.lv}`), el('span', 'badge rkb', d.guild ? `${d.guild.rank}-Rank` : 'No guild'));
   if (!$('stXpBar')) { const xb = el('div', 'bar xp'); xb.id = 'stXpBar'; xb.appendChild(el('i')); xb.title = 'Experience'; $('stHud').insertBefore(xb, $('stGold')); for (const [id, lb] of [['stHp', 'HEALTH'], ['stMp', 'MANA']]) $('stHud').insertBefore(el('small', 'bl', lb), $(id).parentNode); }
   $('stXpBar').firstChild.style.width = Math.min(100, d.xp / stXpNeed(d.lv) * 100) + '%';
-  $('stHint').textContent = device() === 'pad' ? 'Left stick: move · A: interact · Start: menu · Y: ride' : 'WASD or arrows: move · E: interact · M: menu · R: ride';
+  $('stHint').textContent = device() === 'pad' ? 'Left stick: move · A: interact · Start: menu · Back: journal · Y: ride' : 'WASD or arrows: move · E: interact · M: menu · J: journal · R: ride';
   $('stHp').style.width = Math.max(0, d.hp / s.hp * 100) + '%'; $('stHpT').textContent = `${Math.max(0, Math.round(d.hp))}/${s.hp}`;
   $('stMp').style.width = d.mp / s.mp * 100 + '%'; $('stMpT').textContent = `${Math.round(d.mp)}/${s.mp}`;
   $('stGold').textContent = `${d.gold} gold · ${d.items.potion} potions` + (d.crime ? ` · Bounty ${d.crime}` : '');
   const tl = stTileAt(d.x, d.y), zl = stZoneLv(), zn = stZoneAt(d.x, d.y), where = (zn ? zn.name : d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale') + (zl > 1 ? ` (Lv ${zl}${zl > d.lv ? ', dangerous' : ''})` : '');
   const outside = d.map === 'world' || d.map === 'isles', C = stClock(), wx = [outside ? `${stTimeName(C.h)} ${stTimeText(C.h)}` : '', ST.wx && ST.wx.k > .5 && outside ? ST_WX_NAME[ST.wx.kind] : ''].filter(Boolean).join(' · ');
-  const ob = stObjective();
+  const ob = stObjective(); d.places = d.places || {}; { const pn = (zn ? zn.name : d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale'); if (!(pn in d.places)) d.places[pn] = zl; }
   $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', 'Objective'), el('div', 'obj', ob ? ob.text : ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)), el('span', 'loc', where + (stTownHere() && stRepOf(stTownHere()) ? ` · ${ST_TOWN_NAME[stTownHere()]}: ${stRepName(stRepOf(stTownHere()))}` : '') + (wx ? ` · ${wx}` : '')), ...(d.lost ? [el('span', 'loc', `Lost Embers: ${d.lost.gold} gold wait where you fell.`)] : []));
 }
+const ST_CS = .72; // how big characters are drawn on the world map, so they fit the streets and doorways
+function stDrawCh(u, now, k = 1) { drawCharacterScaled(u, now, ST_CS * k); }
 const stUnit = (look, color, x, y, face, walk, id, level = 3) => ({look, color, team: 0, level, face, x, y, walk, _lw: walk - 1, atkT: 0, atkCd: 1, hitFlash: 0, id});
 function stDrawWorld(now, dt = 1 / 60) {
   const d = stData(), Zs = Math.max(.7, Math.min(1.2, Math.min(cw, ch) / 700));
@@ -8046,27 +8121,27 @@ function stDrawWorld(now, dt = 1 / 60) {
   stDrawCrops(now);
   if (!dun) for (const r of ST_ROCKS) if (Math.abs(r.x * ST_TILE - ST.cam.x) < cw / Zs && Math.abs(r.y * ST_TILE - ST.cam.y) < ch / Zs) stDrawRock(r, now);
   stTutDraw(now);
-  if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6, f.face || 0);
+  if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6 * ST_CS, f.face || 0);
   if (d.lost && d.lost.map === d.map) { ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff7a2a'; ctx.shadowBlur = 20; ctx.globalAlpha = .7 + Math.sin(now * 4) * .3; ctx.beginPath(); ctx.arc(d.lost.x, d.lost.y, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
   if (!dun) for (const c of ST_CHESTS) if (stChestShown(c, d)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
   if (!dun) for (const b of ST_BOSSES) if (!d.flags[b.id]) { const x = b.x * ST_TILE + 32, y = b.y * ST_TILE + 32; ctx.strokeStyle = '#ff6a4d'; ctx.globalAlpha = .5 + Math.sin(now * 3) * .3; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 34, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; stDrawFoe(b.id, x, y + 10, now, .7, Math.PI); }
   if (d.map === 'homestead') { // your spouse and children at home
-    if (d.spouse) { const n = ST_NPCS.find(x => x.id === d.spouse) || {look: 'valkyrie', color: '#9fd8ff'}; drawCharacter(ctx, stUnit(n.look, n.color, 6 * ST_TILE + 32, 3 * ST_TILE + 30, Math.PI, 0, 88), now); ctx.fillStyle = '#ff8aa8'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(`♥ ${stNpcName(d.spouse)}`, 6 * ST_TILE + 32, 3 * ST_TILE - 44); ctx.textAlign = 'left'; }
+    if (d.spouse) { const n = ST_NPCS.find(x => x.id === d.spouse) || {look: 'valkyrie', color: '#9fd8ff'}; stDrawCh(stUnit(n.look, n.color, 6 * ST_TILE + 32, 3 * ST_TILE + 30, Math.PI, 0, 88), now); ctx.fillStyle = '#ff8aa8'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(`♥ ${stNpcName(d.spouse)}`, 6 * ST_TILE + 32, 3 * ST_TILE - 44); ctx.textAlign = 'left'; }
     (d.family && d.family.kids || []).forEach((K, i) => { const x = (2 + i * 2) * ST_TILE + 32, y = 4 * ST_TILE + 30, st = stKidStage(K);
       if (st === 'baby') { ctx.fillStyle = '#6a4424'; ctx.fillRect(x - 18, y - 14, 36, 18); ctx.fillStyle = '#f0e6d8'; ctx.beginPath(); ctx.ellipse(x, y - 14 + Math.sin(now * 2) * 1, 12, 7, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#e8c8a8'; ctx.beginPath(); ctx.arc(x - 6, y - 16, 5, 0, 7); ctx.fill(); }
-      else drawCharacterScaled(stUnit(['rogue', 'magicgirl', 'hunter'][i % 3], ['#ff9ccf', '#9fd8ff', '#e0c060'][i % 3], x, y, Math.sin(now * .5 + i) > 0 ? 0 : Math.PI, st === 'child' ? now * 20 : 0, 90 + i), now, st === 'toddler' ? .45 : .6);
+      else stDrawCh(stUnit(['rogue', 'magicgirl', 'hunter'][i % 3], ['#ff9ccf', '#9fd8ff', '#e0c060'][i % 3], x, y, Math.sin(now * .5 + i) > 0 ? 0 : Math.PI, st === 'child' ? now * 20 : 0, 90 + i), now, st === 'toddler' ? .55 : .7);
       ctx.fillStyle = '#fff3c9'; ctx.font = '600 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(K.name, x, y - (st === 'baby' ? 26 : 50)); ctx.textAlign = 'left'; });
   }
   for (const n of ST_NPCS) if ((n.map || 'world') === d.map && stNpcShown(n, d)) {
     const x = n.x * ST_TILE + 32, y = n.y * ST_TILE + 30, u = stUnit(n.look, n.color, x, y, Math.PI, 0, 20 + n.x); if (n.horns) { u.horns = true; u.level = 12; } if (n.lv) { u.level = n.lv; u.noHalo = true; }
-    if (n.kid) drawCharacterScaled(u, now, .65); else drawCharacter(ctx, u, now);
-    ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n.name, x, y - (n.kid ? 50 : 74)); ctx.textAlign = 'left';
+    stDrawCh(u, now, n.kid ? .65 : 1);
+    ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n.name, x, y - (n.kid ? 40 : 56)); ctx.textAlign = 'left';
   }
   if (!dun) for (const h of ST_HOUSES) { const x = (h.x + 1) * ST_TILE, y = (h.y + 2) * ST_TILE - 4; ctx.fillStyle = '#2a1a10'; ctx.fillRect(x - 12, y - 30, 24, 30); ctx.fillStyle = '#ffb35a'; ctx.globalAlpha = .5 + Math.sin(now * 2 + h.x) * .15; ctx.fillRect(x - 8, y - 26, 16, 10); ctx.globalAlpha = 1; } // lit doorways
-  if (d.flags.liora) drawCharacter(ctx, stUnit('valkyrie', '#9fd8ff', d.x - 46 * (Math.cos(ST.face || 0) || 1), d.y + 6, ST.face || 0, ST.walk || 0, 31, d.lv), now);
+  if (d.flags.liora) stDrawCh(stUnit('valkyrie', '#9fd8ff', d.x - 36 * (Math.cos(ST.face || 0) || 1), d.y + 4, ST.face || 0, ST.walk || 0, 31, d.lv), now);
   const ride = !dun && d.riding && stM(d.mount);
-  if (ride) { stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); drawCharacter(ctx, stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 4 * Math.cos(ST.face || 0), d.y - 26 - (ride.fly ? 26 + Math.sin(now * 4) * 5 : 0), ST.face || 0, 0, 30, d.lv), now); }
-  else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); drawCharacter(ctx, pu, now); }
+  if (ride) { ctx.save(); ctx.translate(d.x, d.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-d.x, -(d.y + 10)); stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); ctx.restore(); stDrawCh(stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 3 * Math.cos(ST.face || 0), d.y - 21 - (ride.fly ? 21 + Math.sin(now * 4) * 4 : 0), ST.face || 0, 0, 30, d.lv), now); }
+  else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); stDrawCh(pu, now); }
   stObjArrow(now);
   stAmbientOver(dt, now);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -8160,6 +8235,7 @@ window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (ST_KEYS[k] && ST.mode === 'walk') { ST.keys[ST_KEYS[k]] = true; e.preventDefault(); }
   if ((k === 'e' || k === 'enter' || k === ' ') && ST.mode === 'walk') { e.preventDefault(); stInteract(); }
+  if (k === 'j' && !e.repeat && (ST.mode === 'walk' || ST.mode === 'menu')) { e.preventDefault(); ST.journal && ST.mode === 'menu' ? stCloseMenu() : stJournal(); }
   if ((k === 'escape' || k === 'm') && ST.mode !== 'gather') { e.preventDefault(); ST.mode === 'menu' ? stCloseMenu() : stOpenMenu(); }
   if (k === 'r' && ST.mode === 'walk' && !e.repeat) { e.preventDefault(); stToggleRide(); }
   if (ST.mode === 'gather' && !e.repeat) { if (k === 'escape') { e.preventDefault(); stGatherEnd(); } else if (k === 'e' || k === 'enter' || k === ' ') { e.preventDefault(); stGatherPress(); } }
@@ -8181,7 +8257,7 @@ function stPollPad() {
   G.pad = true;
   if (ST.mode === 'walk') {
     ST.padMove = [lx + (bt(15) ? 1 : 0) - (bt(14) ? 1 : 0), ly + (bt(13) ? 1 : 0) - (bt(12) ? 1 : 0)];
-    if (hit(0)) stInteract(); if (hit(9)) stOpenMenu(); if (hit(3)) stToggleRide();
+    if (hit(0)) stInteract(); if (hit(9)) stOpenMenu(); if (hit(3)) stToggleRide(); if (hit(8)) stJournal();
   } else if (ST.mode === 'gather') { ST.padMove = null; if (hit(0)) stGatherPress(); if (hit(1)) stGatherEnd();
   } else {
     ST.padMove = null;
