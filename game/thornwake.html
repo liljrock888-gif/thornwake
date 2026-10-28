@@ -325,6 +325,9 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stHud .bar.xp{height:5px}#stHud .bar.xp i{background:linear-gradient(90deg,#8a5a1a,#ffd75e)}#stHud .bl{font-size:10px;letter-spacing:.1em;color:#c8b89a;margin-bottom:-2px}
 @media (max-width:640px){#stMini{width:118px;height:80px}#stQuest{top:calc(98px + env(safe-area-inset-top,0px));width:min(52vw,240px);font-size:12px}#stQuest .obj{font-size:13px}#stHint{display:none}}
 #game.touch #stHint{display:none}
+#stPartyHud{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(204px + env(safe-area-inset-top,0px));width:170px;display:flex;flex-direction:column;gap:4px;pointer-events:none}
+#stPartyHud .pf{background:rgba(5,7,10,.7);border:1px solid #3a6a4a;border-radius:8px;padding:4px 8px}#stPartyHud b{font-size:12px;color:#7fe08a}#stPartyHud .bar{height:8px;margin-top:2px}
+#game.touch #stPartyHud{top:calc(150px + env(safe-area-inset-top,0px));width:140px}
 #stChat{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));bottom:calc(40px + env(safe-area-inset-bottom,0px));width:min(340px,60vw);font-size:13px;pointer-events:none}
 #stChat.open{pointer-events:auto;background:rgba(5,7,10,.78);border:1px solid var(--line);border-radius:10px;padding:6px}
 #stChatHead{font-size:11px;color:#8fd4ff;letter-spacing:.05em;margin-bottom:2px;text-shadow:0 1px 2px #000}
@@ -362,7 +365,8 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stMenu .rwList{display:flex;flex-direction:column;gap:6px;margin:10px 0}#stMenu .rw{display:grid;grid-template-columns:34px 1fr;grid-template-rows:auto auto;align-items:center;text-align:left;padding:6px 10px;border-radius:10px;background:rgba(255,215,94,.08);border:1px solid rgba(255,215,94,.25)}
 #stMenu .rwIc{grid-row:1/3;font-size:20px;color:#ffd75e;text-align:center}#stMenu .rw small{color:#c8b89a}#stMenu button.primary{background:linear-gradient(#f5cf63,#c8951e);color:#1a1206;border-color:#f5cf63}
 #stMenu .tabs{display:flex;gap:4px;margin:-4px 0 8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}#stMenu .tabs button{padding:6px 12px;border-radius:999px;background:transparent}#stMenu .tabs button.on{background:var(--gold);color:#1a1206;border-color:var(--gold)}
-.outfit{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}.outfit .orow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.outfit .olab{min-width:72px;font-size:13px;color:var(--muted)}.outfit .oswatches{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.outfit{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}.outfit .orow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}#stMenu .trade.comp{grid-template-columns:1fr 2fr auto}@media (max-width:600px){#stMenu .trade.comp{grid-template-columns:1fr auto}#stMenu .trade.comp .hint{grid-column:1/-1}}
+.outfit .onote{color:var(--gold);font-size:12px}.outfit .olab{min-width:72px;font-size:13px;color:var(--muted)}.outfit .oswatches{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .outfit select{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font:inherit}.outfit .sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,0,0,.5);cursor:pointer;padding:0}.outfit .sw[aria-pressed=true]{outline:2px solid var(--gold);outline-offset:2px}.outfit .chip{padding:3px 9px;font-size:12px}
 #stMenu .wardCv{display:block;margin:0 auto;width:160px;height:160px}
 #stMenu h3{margin:4px 0;font-family:var(--display);font-weight:400;color:var(--gold)}
@@ -391,7 +395,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #game.touch #stChat{bottom:auto;top:calc(198px + env(safe-area-inset-top,0px));width:min(300px,62vw)}#game.touch #stChat.open{top:calc(10px + env(safe-area-inset-top,0px));width:calc(100vw - 20px);z-index:5}
 #game.touch #stMini{width:110px;height:74px}
 #game.touch #story:not([data-mode=walk]) #stPad,#game.touch #story:not([data-mode=walk]) #stMenuBtn,#game.touch #story:not([data-mode=walk]) #stJournalBtn,#game.touch #story:not([data-mode=walk]) #stRide,#game.touch #story:not([data-mode=walk]) #stChatBtn{display:none!important}
-#story[data-mode=battle] #stMini,#story[data-mode=sail] #stMini,#game.touch #story[data-mode=battle] #stQuest,#game.touch #story[data-mode=battle] #stChat{display:none!important}
+#story[data-mode=battle] #stPartyHud,#story[data-mode=battle] #stMini,#story[data-mode=sail] #stMini,#game.touch #story[data-mode=battle] #stQuest,#game.touch #story[data-mode=battle] #stChat{display:none!important}
 #game.touch #story[data-mode=gather] #stPad{display:grid!important}#game.touch #story[data-mode=gather] #stPad [data-d]{display:none}
 #stPad button{border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(20,28,24,.7);color:#fff;font-size:18px;touch-action:none}
 #stPad [data-d=up]{grid-area:1/2} #stPad [data-d=left]{grid-area:2/1} #stPad [data-d=right]{grid-area:2/3} #stPad [data-d=down]{grid-area:3/2}
@@ -417,7 +421,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
     <div id="stHud" class="panel"><b id="stHudName"></b><div class="bar hp"><i id="stHp"></i><span id="stHpT"></span></div><div class="bar mp"><i id="stMp"></i><span id="stMpT"></span></div><small id="stGold"></small></div>
     <div id="stQuest" class="panel"></div>
     <button id="stMenuBtn" class="panel">Menu</button><button id="stJournalBtn" class="panel">Journal</button><button id="stRide" class="panel" hidden>Ride</button>
-    <div id="stPrompt" hidden></div><div id="stChat"><div id="stChatHead">Offline</div><div id="stChatLog"></div><input id="stChatIn" hidden maxlength="120" placeholder="Say something (/p for party only)" aria-label="Chat message" autocomplete="off"></div><button id="stChatBtn" class="panel" aria-label="Chat">💬</button><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
+    <div id="stPrompt" hidden></div><div id="stPartyHud"></div><div id="stChat"><div id="stChatHead">Offline</div><div id="stChatLog"></div><input id="stChatIn" hidden maxlength="120" placeholder="Say something (/p for party only)" aria-label="Chat message" autocomplete="off"></div><button id="stChatBtn" class="panel" aria-label="Chat">💬</button><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
     <div id="stDialog" class="panel" hidden><button id="stBond" hidden></button><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
     <div id="stBattle" hidden><div id="stLog" class="panel"></div><div id="stParty" class="panel"></div><div id="stActions" class="panel"></div></div>
     <div id="stMenu" class="panel" hidden></div>
@@ -5415,8 +5419,9 @@ const ST_SKILLS = {
   vampform:  {name: 'Blood Ascension', mp: 10, kind: 'buff', buff: 'vamp', gift: true, desc: 'Take your true form for 3 turns: +50% attack and magic, every blow heals you.'},
   mist:      {name: 'Mist Form', mp: 7, kind: 'buff', buff: 'mist', gift: true, desc: 'Turn to mist for 2 turns: most attacks pass through you.'},
 };
-// Mastery: every use of a move counts. At 8, 20 and 40 uses it evolves: more damage, more criticals, worse wounds.
-const ST_RANK_AT = [0, 8, 20, 40];
+// Mastery: every use of a move counts. A move evolves once it has enough uses AND you are a high enough level: more damage, more criticals, worse wounds.
+const ST_RANK_AT = [0, 12, 35, 80];
+const ST_RANK_LV = [0, 12, 28, 45]; // level needed for each evolution
 const ST_EVOLVE = {
   flash:     ['Flash Step', 'Afterimage', 'Thousand Steps', 'Godspeed'],
   crush:     ['Heaven\'s Crush', 'Sky Breaker', 'Heavenfall', 'Restriction Unbound'],
@@ -5439,13 +5444,13 @@ const ST_EVOLVE = {
 };
 const ST_BEAMS = {fireball: 1, frost: 1, drain: 1}; // from rank 2 these fire as beams, which can obliterate
 const stUses = id => ((stData().mastery || {})[id]) || 0;
-const stRank = id => ST_RANK_AT.filter(n => stUses(id) >= n).length - 1;
+const stRank = id => { const u = stUses(id), lv = stData().lv; let r = 0; while (r < 3 && u >= ST_RANK_AT[r + 1] && lv >= ST_RANK_LV[r + 1]) r++; return r; };
 const stSkName = id => ST_EVOLVE[id] ? ST_EVOLVE[id][stRank(id)] : ST_SKILLS[id].name;
 function stMaster(id) {
   const d = stData(), was = stRank(id), old = stSkName(id); d.mastery = d.mastery || {}; d.mastery[id] = (d.mastery[id] || 0) + 1;
   if (stRank(id) > was) setTimeout(() => { stCallout(`${old} evolved into ${stSkName(id)}!`, '#ffd75e'); sfx('evolve'); stLog(`Mastery! ${old} evolved into ${stSkName(id)} (rank ${stRank(id)}).`); }, 900);
 }
-const stMasteryText = id => { const r = stRank(id), nx = ST_RANK_AT[r + 1]; return `${'★'.repeat(r)}${r ? ' ' : ''}` + (nx ? `${stUses(id)}/${nx} to evolve` : 'fully evolved'); };
+const stMasteryText = id => { const r = stRank(id), nx = ST_RANK_AT[r + 1], nl = ST_RANK_LV[r + 1]; return `${'★'.repeat(r)}${r ? ' ' : ''}` + (!nx ? 'fully evolved' : stUses(id) >= nx && stData().lv < nl ? `mastered, evolves at level ${nl}` : `${Math.min(stUses(id), nx)}/${nx} to evolve${stData().lv < nl ? ` (level ${nl})` : ''}`); };
 const ST_FOES = {
   wolf:    {name: 'Thornwolf', hp: 42, atk: 9, def: 2, spd: 9, xp: 12, gold: 6, draw: 'wolf'},
   pup:     {name: 'Wolf Pup', hp: 22, atk: 6, def: 1, spd: 10, xp: 6, gold: 3, draw: 'wolf', small: true},
@@ -5829,7 +5834,7 @@ const ST_QUESTS = [
   'The king is ash. The curse loosens its grip. Wander as you will.',
 ];
 const stVillage = (x, y) => x >= 20 * ST_TILE && x < 27 * ST_TILE && y >= 21 * ST_TILE ? 'Harrowfield' : x > 29 * ST_TILE ? 'Saltmere, the Drowned Harbor' : y > 17 * ST_TILE ? 'Ravenhollow' : 'Thornwake, the Last Lit Village';
-const stNpcShown = (n, d) => (n.id !== 'liora' || !d.flags.liora) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]) && (!n.night || stClock().dark > .25) && (n.id !== 'edda' || !ST.tut);
+const stNpcShown = (n, d) => (n.id !== 'liora' || !(d.companion === 'liora' && d.lv >= ST_COMP_LV)) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]) && (!n.night || stClock().dark > .25) && (n.id !== 'edda' || !ST.tut);
 const stChestShown = (c, d) => !d.chests.includes(c.id) && (!c.need || d.flags[c.need]);
 const ST = {treesBy: {}, on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
 const stData = () => PROF.story;
@@ -6307,7 +6312,7 @@ function stGuildDesk(name) { // the front desk in any guild hall
   if (!g) return stGuildJoin(name);
   const nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], need = ST_RANK_PTS[g.rank];
   stSay([[name, `${g.rank}-Rank. Standing: ${g.pts}${nx ? ` of ${need} for your ${nx}-Rank exam` : ', the highest there is'}. Current edict: ${ST_EDICTS[stEdict()][0]} (${ST_EDICTS[stEdict()][1]}).`]], null,
-    [['Quest board', () => stGuildBoard()]].concat(nx && g.pts >= need ? [[`Sit the ${nx}-Rank exam (level ${ST_BOSS_LV[ST_EXAM[g.rank]]}+)`, () => stBossFight(ST_EXAM[g.rank])]] : [], stRankAtLeast('A') ? [[g.rank === 'S' ? 'Decree an edict' : 'Vote on the next edict', () => stEdictMenu()]] : [], [['Leave', null]]));
+    [['Quest board', () => stGuildBoard()], ['Companions', () => stCompanionHall()]].concat(nx && g.pts >= need ? [[`Sit the ${nx}-Rank exam (level ${ST_BOSS_LV[ST_EXAM[g.rank]]}+)`, () => stBossFight(ST_EXAM[g.rank])]] : [], stRankAtLeast('A') ? [[g.rank === 'S' ? 'Decree an edict' : 'Vote on the next edict', () => stEdictMenu()]] : [], [['Leave', null]]));
 }
 function stEdictMenu() {
   const d = stData();
@@ -6687,8 +6692,28 @@ function stJournal(tab) {
 }
 // ---- online: a shared story world. Everyone in story mode sees each other, can form parties that fight together, and can chat.
 const SW = {room: null, me: null, peers: [], vis: {}, seen: {}, myChat: [], log: [], party: null, inv: null, push: 0, sig: '', muted: {}, mounts: {}, handledInv: {}, last: 0};
-const ST_BADWORDS = /\b(fuck\w*|shit\w*|bitch\w*|cunt\w*|nigg\w*|fag\w*|dick\w*|pussy|asshole\w*|slut\w*|whore\w*|retard\w*|cock\w*|bastard\w*)\b/gi;
-const stCleanChat = t => String(t).replace(/[\u0000-\u001f<>]/g, '').slice(0, 120).replace(ST_BADWORDS, w => w[0] + '*'.repeat(w.length - 1));
+// Chat and name filter. Words are normalized first (leetspeak, symbols, spacing, stretched letters) so disguised spellings are caught too.
+const ST_BAD_ANY = ['fuck', 'fuk', 'fck', 'phuck', 'shit', 'bitch', 'cunt', 'nigg', 'nigr', 'niga', 'faggot', 'fagot', 'asshole', 'whore', 'retard', 'rapist', 'molest', 'pedophil', 'paedophil', 'incest', 'porn', 'dildo', 'jizz', 'kike', 'wetback', 'tranny', 'towelhead', 'raghead', 'motherf', 'cocksuck', 'twat', 'wank', 'skank', 'slut', 'nazi', 'hitler', 'bestial', 'beastial', 'necrophil', 'cuck', 'spick', 'kkk', 'cumdump', 'cumslut', 'chinga', 'puta', 'mierda', 'pendejo'];
+const ST_BAD_SQ = ['fuck', 'shit', 'bitch', 'cunt', 'whore', 'retard', 'rapist', 'molest', 'slut', 'fagot', 'ashole', 'niger', 'niga', 'twat', 'wank', 'porn', 'kike']; // checked after squashing repeated letters
+const ST_BAD_WORD = ['rape', 'raped', 'rapes', 'raping', 'raper', 'cum', 'cumming', 'cumshot', 'tit', 'tits', 'titty', 'titties', 'dick', 'dicks', 'cock', 'cocks', 'pussy', 'pussies', 'penis', 'vagina', 'boob', 'boobs', 'fag', 'fags', 'spic', 'spics', 'coon', 'coons', 'gook', 'gooks', 'chink', 'chinks', 'dyke', 'dykes', 'beaner', 'beaners', 'hoe', 'hoes', 'kys', 'prick', 'bastard', 'sex', 'sexy', 'sexual', 'nude', 'nudes', 'naked', 'horny', 'anal', 'orgasm', 'milf', 'thot', 'pedo', 'pedos', 'groom', 'grooming', 'nigger', 'niggers', 'nigga', 'niggas', 'negro', 'retards', 'slave', 'lynch', 'genocide', 'suicide'];
+const ST_BAD_PHRASE = /\bk+\W*[i1!]+\W*l+\W*l+\W*(y+\W*o+\W*u+\W*r+\W*s+\W*e+\W*l+\W*f+|u+\W*r+\W*s+\W*e+\W*l+\W*f+|y+\W*o+\W*u+\W*r+\W*s+\W*e+\W*l+\W*v+\W*e+\W*s+|y+\W*o+\W*u+|u+)\b|\bgo\W+die\b|\bneck\W+yourself\b|\bhang\W+yourself\b|\bdrink\W+bleach\b/gi;
+const stNormWord = w => w.toLowerCase().replace(/[0]/g, 'o').replace(/[@4]/g, 'a').replace(/[1!|]/g, 'i').replace(/3/g, 'e').replace(/[5$]/g, 's').replace(/7/g, 't').replace(/8/g, 'b').replace(/[^a-z]/g, '');
+const stSquash = w => w.replace(/(.)\1+/g, '$1');
+const ST_SAFE = /therapist|scunthorpe|shiitake|shitake|cockatoo|cockatrice|cocktail|peacock|hancock|grape|drape|scrape|trapeze|skyscrape|penistone|cumul|document|circumst|cucumber|scumble|dickens|sussex|essex|analys|canal|shoe|hoedown|matsushita|wankel/g; // ordinary words that happen to contain a bad root
+const stIsBad = raw => { const w = stNormWord(raw); if (!w || /^nigeri?a?n?s?$/.test(w) && w !== 'nigga' && w !== 'nigas' && !w.includes('gg')) return false; const q = stSquash(w), ws = w.replace(ST_SAFE, '#'), qs = q.replace(ST_SAFE, '#'); return ST_BAD_ANY.some(b => ws.includes(b)) || ST_BAD_SQ.some(b => qs.includes(b)) || ST_BAD_WORD.includes(w) || ST_BAD_WORD.includes(q) || ST_BAD_WORD.includes(w.replace(/s$/, '')); };
+function stCleanChat(t) {
+  t = String(t).replace(/[\u0000-\u001f<>]/g, '').slice(0, 120).replace(ST_BAD_PHRASE, m => '*'.repeat(m.length));
+  const parts = t.split(/(\s+)/), out = parts.slice();
+  for (let i = 0; i < parts.length; i++) { // spelled out letter by letter: "f u c k"
+    if (parts[i].trim().length !== 1) continue; let j = i, word = ''; const idx = [];
+    while (j < parts.length && (parts[j].trim().length === 1 || /^\s+$/.test(parts[j]))) { if (parts[j].trim()) { word += parts[j]; idx.push(j); } j++; }
+    if (idx.length >= 3 && stIsBad(word)) for (const k of idx) out[k] = '*';
+    i = j - 1;
+  }
+  for (let i = 0; i < out.length; i++) if (out[i].trim() && out[i] !== '*' && stIsBad(out[i])) out[i] = out[i][0] + '*'.repeat(Math.max(1, out[i].length - 1));
+  return out.join('');
+}
+const stCleanName = n => stCleanChat(n) === n ? n : 'Adventurer'; // names shown to other players are filtered too
 async function stNetJoin() { // join the shared story world, if this build has online rooms
   if (SW.room || PROF.onlineOff) return;
   const lobby = await netInit(); if (!lobby) { stChatSys('Offline: no online server here. Co-op and chat need the online version of the game.'); return; }
@@ -6703,17 +6728,17 @@ const stPartyOf = p => p.presence.sw.pt;
 const stPartyMembers = () => SW.party ? stOthers().filter(p => stPartyOf(p) === SW.party) : [];
 function stNetPush(force) { // share where you are and what you look like, a few times a second
   if (!SW.room) return; const d = stData(), s = stStats(), M = d.riding && stM(d.mount);
-  const sw = {n: stTitledName(), k: ST_CLASSES[d.cls].look, c: d.color, o: d.outfit || null, lv: d.lv, m: d.map, x: Math.round(d.x), y: Math.round(d.y), f: (ST.face || 0) > 1 ? 1 : 0, mv: ST.moving ? 1 : 0, pt: SW.party, inv: SW.inv,
-    r: M ? {k: M.kind, c: M.color, m: M.mane, f: M.fly ? 1 : 0, g: M.glow || 0} : 0, b: ST.mode === 'battle' ? 1 : 0, at: Math.round(s.atk), hp: s.hp, g: d.guild ? d.guild.rank : ''};
+  const sw = {n: stCleanName(stTitledName()), k: ST_CLASSES[d.cls].look, c: d.color, o: d.outfit || null, lv: d.lv, m: d.map, x: Math.round(d.x), y: Math.round(d.y), f: (ST.face || 0) > 1 ? 1 : 0, mv: ST.moving ? 1 : 0, pt: SW.party, inv: SW.inv,
+    hc: Math.max(0, Math.round(d.hp)), r: M ? {k: M.kind, c: M.color, m: M.mane, f: M.fly ? 1 : 0, g: M.glow || 0} : 0, b: ST.mode === 'battle' ? 1 : 0, at: Math.round(s.atk), hp: s.hp, g: d.guild ? d.guild.rank : ''};
   const sig = JSON.stringify(sw); if (!force && sig === SW.sig && performance.now() - SW.last < 2000) return; SW.sig = sig; SW.last = performance.now();
   SW.room.presence({sw, ch: SW.myChat}).catch(() => {});
 }
 function stNetRead() { // new chat lines and party invites from other players
   for (const p of stOthers()) {
     const P = p.presence, sw = P.sw;
-    for (const m of P.ch || []) { const key = p.peer + ':' + m.i; if (SW.seen[key]) continue; SW.seen[key] = 1; if (m.p && m.p !== SW.party) continue; stChatAdd(sw.n, m.t, p.peer, !!m.p); }
+    for (const m of P.ch || []) { const key = p.peer + ':' + m.i; if (SW.seen[key]) continue; SW.seen[key] = 1; if (m.p && m.p !== SW.party) continue; stChatAdd(stCleanName(String(sw.n || '')), stCleanChat(m.t), p.peer, !!m.p); } // re-filter what others send, in case their game is older
     if (sw.inv && sw.inv.to === SW.me && !SW.handledInv[sw.inv.at] && ST.on) { SW.handledInv[sw.inv.at] = 1; const pid = sw.inv.pid;
-      const go = () => stSay([['', `${sw.n} (level ${sw.lv}) invites you to their party. Party members fight beside each other and earn more XP.`]], null, [['Join the party', () => { SW.party = pid; stChatSys(`You joined ${sw.n}'s party.`); stNetPush(true); }], ['Decline', null]]);
+      const go = () => stSay([['', `${stCleanName(sw.n)} (level ${sw.lv}) invites you to their party. Party members fight beside each other and earn more XP.`]], null, [['Join the party', () => { SW.party = pid; stChatSys(`You joined ${sw.n}'s party.`); stNetPush(true); }], ['Decline', null]]);
       if (ST.mode === 'walk') go(); else setTimeout(go, 1500); }
   }
 }
@@ -6740,6 +6765,10 @@ function stPlayerMenu(p) { // walk up to another player
     [['Wave', () => stChatSend('*waves*')], [`Mute ${sw.n}`, () => { SW.muted[p.peer] = 1; stChatSys(`${sw.n} is muted. You will no longer see them or their messages.`); }], ['Leave', null]]));
 }
 // ---- chat
+function stPartyHudRender() { // small party frames under your HUD
+  const box = $('stPartyHud'); if (!box) return; const M = stPartyMembers(); box.hidden = !M.length; box.innerHTML = '';
+  for (const p of M) { const sw = p.presence.sw, r = el('div', 'pf'), bar = el('div', 'bar hp'), i = el('i'); i.style.width = Math.max(0, Math.min(100, (sw.hc != null ? sw.hc : sw.hp) / (sw.hp || 1) * 100)) + '%'; bar.appendChild(i); r.append(el('b', '', `${sw.n} · Lv ${sw.lv}${sw.b ? ' ⚔' : ''}`), bar); box.appendChild(r); }
+}
 function stChatSys(t) { stChatAdd('', t, null, false, true); }
 function stChatAdd(who, text, peer, party, sys) {
   if (PROF.chatOff && !sys) return; SW.log.push({who, text, peer, party, sys, at: Date.now()}); if (SW.log.length > 40) SW.log.shift();
@@ -6763,6 +6792,31 @@ function stChatSend(raw) {
 }
 function stChatOpen() { if (PROF.chatOff) return stCallout('Chat is off. Turn it on in the menu.', '#c8b89a'); const i = $('stChatIn'); i.hidden = false; $('stChat').classList.add('open'); stChatRender(); setTimeout(() => i.focus(), 0); }
 function stChatClose() { const i = $('stChatIn'); i.value = ''; i.hidden = true; $('stChat').classList.remove('open'); i.blur(); stChatRender(); }
+const ST_COMP_LV = 45;
+const ST_COMPANIONS = { // role decides what they do on their turn; hp and atk scale from your own stats
+  liora:  {name: 'Liora', title: 'Shieldmaiden of Thornwake', look: 'valkyrie', color: '#9fd8ff', role: 'guard', hp: .9, atk: .75, fee: 0, desc: 'Fights beside you, and shields and heals you when you are badly hurt.', lines: ['Stay close!', 'Watch my back.', 'Together, then.']},
+  garm:   {name: 'Garm the Ironwall', title: 'Mercenary of Valdris', look: 'brute', color: '#8a6a4a', role: 'tank', hp: 1.5, atk: .6, fee: 2500, male: true, desc: 'Draws enemy attacks onto himself and shrugs them off.', lines: ['Hit me, not them!', 'Come on, then.']},
+  sylwen: {name: 'Sylwen of the Choir', title: 'Healer of Celestine', look: 'magicgirl', color: '#e8e2ff', role: 'healer', hp: .75, atk: .45, fee: 3000, desc: 'Heals you every turn and closes bleeding wounds.', lines: ['I have you.', 'Light keep us.']},
+  vex:    {name: 'Vex Nightblade', title: 'Assassin of Rougemarais', look: 'rogue', color: '#5a2a4a', role: 'assassin', hp: .7, atk: 1.05, fee: 3000, desc: 'Hits hard, lands frequent criticals and opens bleeding wounds.', lines: ['Quietly now.', 'They never see me.']},
+  orrin:  {name: 'Orrin Stormcaller', title: 'Hedge Mage of Saltmere', look: 'mage', color: '#4a7aff', role: 'mage', hp: .65, atk: .6, fee: 2800, male: true, desc: 'Calls lightning down on every enemy at once.', lines: ['Mind the thunder.', 'Stand back!']},
+  fang:   {name: 'Fang', title: 'Direwolf of the Ironpine', beast: true, color: '#6a6a70', role: 'beast', hp: .95, atk: .55, fee: 2000, male: true, desc: 'A loyal direwolf that bites twice every turn.', lines: []},
+};
+const stCompanion = () => { const d = stData(); const C = d.lv >= ST_COMP_LV && d.companion && (d.companions || []).includes(d.companion) && ST_COMPANIONS[d.companion]; return C ? Object.assign({key: d.companion}, C) : null; };
+function stCompanionHall() {
+  const d = stData(), m = $('stMenu'); d.companions = d.companions || []; if (d.flags.liora && !d.companions.includes('liora')) d.companions.push('liora');
+  ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  m.appendChild(el('h3', '', '🤝 Companions'));
+  m.appendChild(el('p', '', d.lv >= ST_COMP_LV ? `Choose one companion to fight beside you. Active: ${stCompanion() ? stCompanion().name : 'none'}.` : `Companions only fight beside seasoned adventurers. Reach level ${ST_COMP_LV} to take one into battle. You are level ${d.lv}. You can still meet and recruit them now.`));
+  const tbl = el('div', 'trade comp');
+  for (const k in ST_COMPANIONS) { const C = ST_COMPANIONS[k], have = d.companions.includes(k), act = el('span', 'tbtn');
+    const b = (l, fn, dis) => { const x = el('button', '', l); x.disabled = !!dis; x.addEventListener('click', () => { fn(); stCompanionHall(); }); act.appendChild(x); };
+    if (!have) { if (k === 'liora') b('Meet her through Maren', () => {}, true); else b(`Recruit (${C.fee} gold)`, () => { if (d.gold < C.fee) return; d.gold -= C.fee; d.companions.push(k); sfx('levelup'); stCallout(`${C.name} joins you`, '#ffd75e'); }, d.gold < C.fee); }
+    else if (d.companion === k) b('Dismiss', () => { d.companion = null; });
+    else b(d.lv >= ST_COMP_LV ? 'Take into battle' : `Take (level ${ST_COMP_LV})`, () => { d.companion = k; sfx('pet'); stCallout(`${C.name} will fight beside you`, '#ffd75e'); }, d.lv < ST_COMP_LV);
+    tbl.append(el('span', '', `${C.name}${d.companion === k ? ' ★' : ''}`), el('span', 'hint', `${C.title}. ${C.desc}`), act); }
+  m.appendChild(tbl);
+  const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row); stSave();
+}
 function stToggleRide() {
   const d = stData(), own = d.mounts || [];
   if (ST.mode !== 'walk') return;
@@ -6812,22 +6866,32 @@ const ST_HATS = [['', 'Class default'], ['helm', 'Knight\'s helm'], ['heavyhelm'
   ['longhair', 'Long hair'], ['twintails', 'Twin tails'], ['topknot', 'Topknot'], ['spiky', 'Spiky hair'], ['scruffy', 'Scruffy hair']];
 const ST_CLOTH = ['#7d8a9b', '#5d4392', '#3f5a2e', '#6a3f2a', '#8a2a2a', '#2a4a6a', '#c9a24a', '#2a2a2a', '#e8e2d0', '#4a7a8a', '#7a3a6a', '#b85a2a'];
 const ST_SKINS = ['#f1c9a5', '#e8b894', '#d9a07a', '#c98d6a', '#8a5a3a', '#5a3a2a', '#d7e8c8'];
-function stOutfitUI(box, O, onChange) { // headwear, tunic, cloak, cape, scarf and skin
-  box.innerHTML = ''; const set = (k, v) => { if (v === '' || v == null) delete O[k]; else O[k] = v; onChange(); };
-  const sel = el('select'); sel.setAttribute('aria-label', 'Headwear'); for (const [v, n] of ST_HATS) { const o = el('option', '', n); o.value = v; if ((O.hat || '') === v) o.selected = true; sel.appendChild(o); }
+const ST_CLASS_WEAR = { // each class dresses differently
+  warrior: {hats: ['helm', 'heavyhelm', 'winghelm', 'visor', 'crest', 'horns', 'topknot', 'scruffy', 'longhair'], cloth: ['#7d8a9b', '#5a5f6a', '#8a2a2a', '#6a3f2a', '#3a3a42', '#b85a2a', '#c9a24a', '#2a4a6a'], note: 'Steel, leather and war banners'},
+  mage:    {hats: ['pointy', 'brim', 'widehat', 'hood', 'cowl', 'crown', 'feathers', 'longhair', 'twintails'], cloth: ['#5d4392', '#2a4a8a', '#7a3a6a', '#1a1a3a', '#4a7a8a', '#9a3a8a', '#e8e2d0', '#3a2a5a'], note: 'Robes of starlight and spellsilk'},
+  ranger:  {hats: ['hood', 'boonie', 'tricorn', 'feathers', 'cowl', 'mask', 'scruffy', 'longhair', 'topknot'], cloth: ['#3f5a2e', '#5a4a2a', '#6a5a3a', '#2a3a2a', '#7a6a3a', '#4a5a3a', '#8a6a4a', '#3a4a3a'], note: 'Woodland greens and hunter\'s leathers'},
+  rogue:   {hats: ['ninja', 'mask', 'hood', 'cowl', 'tricorn', 'spiky', 'topknot', 'twintails', 'scruffy'], cloth: ['#2a2a2a', '#3a2a3a', '#4a1f1f', '#1a2a3a', '#2a3a3a', '#5a2a4a', '#3a3a3a', '#6a2a2a'], note: 'Shadows, silk and hidden blades'},
+  paladin: {hats: ['helm', 'heavyhelm', 'winghelm', 'crest', 'crown', 'visor', 'longhair', 'topknot', 'hood'], cloth: ['#e8e2d0', '#c9a24a', '#7d8a9b', '#4a6a9a', '#f0e6c8', '#8a2a2a', '#6a6a7a', '#2a4a6a'], note: 'Holy white, gold and blessed steel'},
+  gunner:  {hats: ['helmet', 'boonie', 'visor', 'tricorn', 'spiky', 'scruffy', 'mask', 'topknot', 'widehat'], cloth: ['#6a6a4a', '#4a4a3a', '#5a5f6a', '#7a5a3a', '#3a3a2a', '#8a7a5a', '#2a3a4a', '#6a3a2a'], note: 'Field khaki, brass and gunmetal'},
+};
+function stOutfitUI(box, O, onChange, cls) { // headwear, tunic, cloak, cape, scarf and skin, chosen from what your class wears
+  const W = ST_CLASS_WEAR[cls] || ST_CLASS_WEAR.warrior, HATS = [['', 'Class default']].concat(ST_HATS.filter(([v]) => W.hats.includes(v))), CL = W.cloth;
+  if (O.hat && !W.hats.includes(O.hat)) delete O.hat; for (const k of ['body', 'cloak', 'cape', 'scarf']) if (O[k] && O[k] !== 'none' && !CL.includes(O[k])) delete O[k]; // a new class keeps only what fits it
+  box.innerHTML = ''; box.appendChild(el('small', 'onote', `${ST_CLASSES[cls] ? ST_CLASSES[cls].name : ''} attire: ${W.note}.`)); const set = (k, v) => { if (v === '' || v == null) delete O[k]; else O[k] = v; onChange(); };
+  const sel = el('select'); sel.setAttribute('aria-label', 'Headwear'); for (const [v, n] of HATS) { const o = el('option', '', n); o.value = v; if ((O.hat || '') === v) o.selected = true; sel.appendChild(o); }
   sel.addEventListener('change', () => set('hat', sel.value)); const hr = el('div', 'orow'); hr.append(el('span', 'olab', 'Headwear'), sel); box.appendChild(hr);
   const row = (label, key, list, extra) => { const r = el('div', 'orow'); r.appendChild(el('span', 'olab', label)); const w = el('div', 'oswatches');
-    for (const [v, n] of extra) { const b = el('button', 'chip' + ((O[key] || '') === v ? ' sel' : ''), n); b.addEventListener('click', () => { set(key, v); stOutfitUI(box, O, onChange); }); w.appendChild(b); }
-    for (const c of list) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-label', `${label} ${c}`); b.setAttribute('aria-pressed', O[key] === c); b.addEventListener('click', () => { set(key, c); stOutfitUI(box, O, onChange); }); w.appendChild(b); }
+    for (const [v, n] of extra) { const b = el('button', 'chip' + ((O[key] || '') === v ? ' sel' : ''), n); b.addEventListener('click', () => { set(key, v); stOutfitUI(box, O, onChange, cls); }); w.appendChild(b); }
+    for (const c of list) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-label', `${label} ${c}`); b.setAttribute('aria-pressed', O[key] === c); b.addEventListener('click', () => { set(key, c); stOutfitUI(box, O, onChange, cls); }); w.appendChild(b); }
     r.appendChild(w); box.appendChild(r); };
-  row('Tunic', 'body', ST_CLOTH, [['', 'Default']]); row('Cloak', 'cloak', ST_CLOTH, [['', 'Default']]); row('Cape', 'cape', ST_CLOTH, [['', 'Default'], ['none', 'None']]);
-  row('Scarf', 'scarf', ST_CLOTH, [['', 'Default'], ['none', 'None']]); row('Skin', 'skin', ST_SKINS, [['', 'Default']]);
+  row(cls === 'mage' ? 'Robe' : cls === 'warrior' || cls === 'paladin' ? 'Tabard' : cls === 'rogue' ? 'Jerkin' : cls === 'gunner' ? 'Coat' : 'Tunic', 'body', CL, [['', 'Default']]); row('Cloak', 'cloak', CL, [['', 'Default']]); row(cls === 'paladin' || cls === 'warrior' ? 'Cape' : cls === 'mage' ? 'Mantle' : 'Cape', 'cape', CL, [['', 'Default'], ['none', 'None']]);
+  row(cls === 'rogue' ? 'Face scarf' : cls === 'gunner' ? 'Bandana' : 'Scarf', 'scarf', CL, [['', 'Default'], ['none', 'None']]); row('Skin', 'skin', ST_SKINS, [['', 'Default']]);
 }
 function stWardrobe() { // change your clothes any time, free
   const d = stData(), m = $('stMenu'); d.outfit = d.outfit || {}; ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
   m.appendChild(el('h3', '', '👘 Wardrobe')); const cv = el('canvas'); cv.width = 200; cv.height = 200; cv.className = 'wardCv'; m.appendChild(cv);
   const draw = () => { const g = cv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 200, 200); g.setTransform(1.35, 0, 0, 1.35, 100, 180); drawCharacter(g, {look: ST_CLASSES[d.cls].look, color: d.color, outfit: d.outfit, team: 0, level: d.lv, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, performance.now() / 1000); };
-  const box = el('div', 'outfit'); m.appendChild(box); stOutfitUI(box, d.outfit, () => { draw(); stSave(); stNetPush && stNetPush(true); }); draw();
+  const box = el('div', 'outfit'); m.appendChild(box); stOutfitUI(box, d.outfit, () => { draw(); stSave(); stNetPush && stNetPush(true); }, d.cls); draw();
   const anim = setInterval(() => { if (m.hidden || !m.contains(cv)) return clearInterval(anim); draw(); }, 80);
   const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row);
 }
@@ -6839,10 +6903,10 @@ function openStoryMenu() {
 }
 function renderCreator() {
   const cl = $('crClass'); cl.innerHTML = '';
-  for (const id in ST_CLASSES) { const b = el('button', 'chip' + (crSel.cls === id ? ' sel' : ''), ST_CLASSES[id].name); b.addEventListener('click', () => { crSel.cls = id; crSel.skills = []; renderCreator(); }); cl.appendChild(b); }
+  for (const id in ST_CLASSES) { const b = el('button', 'chip' + (crSel.cls === id ? ' sel' : ''), ST_CLASSES[id].name); b.addEventListener('click', () => { crSel.cls = id; crSel.skills = []; crSel.outfitBuilt = false; renderCreator(); }); /* switching class swaps the wardrobe */ cl.appendChild(b); }
   const co = $('crColor'); co.innerHTML = '';
   for (const c of ST_COLORS) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-pressed', c === crSel.color); b.setAttribute('aria-label', 'Color ' + c); b.addEventListener('click', () => { crSel.color = c; renderCreator(); }); co.appendChild(b); }
-  if (!crSel.outfitBuilt) { crSel.outfitBuilt = true; stOutfitUI($('crOutfit'), crSel.outfit, () => { crSel.outfitBuilt = true; renderCreator(); }); }
+  if (!crSel.outfitBuilt) { crSel.outfitBuilt = true; stOutfitUI($('crOutfit'), crSel.outfit, () => { crSel.outfitBuilt = true; renderCreator(); }, crSel.cls); }
   const vo = $('crVoice'); vo.innerHTML = '';
   for (const [k, label] of [['m', 'Male voice'], ['f', 'Female voice']]) { const b = el('button', 'chip' + (crSel.voice === k ? ' sel' : ''), label); b.addEventListener('click', () => { crSel.voice = k; renderCreator(); stPreviewVoice(k); }); vo.appendChild(b); }
   const hear = el('button', 'chip', 'Hear it ▶'); hear.addEventListener('click', () => stPreviewVoice(crSel.voice)); vo.appendChild(hear);
@@ -7355,7 +7419,7 @@ function stTalkBody(id) {
   if (id === 'elder') {
     if (d.ch === 0) {
       if (d.pelts >= 3) stSay([['Maren the Pale', 'So. You came back. Most do not, and the ones who do come back… wrong.'], ['Maren the Pale', 'The wolves were never the sickness. They were the cough. The Hollow King drinks this land dry from his castle, and two shards keep his gate shut.'],
-        ['Maren the Pale', 'Take Liora. She has buried more friends than she can count, and she is tired of digging. The first shard lies beneath the ruins, in the catacombs.']], () => { d.ch = 1; d.flags.liora = true; d.gold += 50; sfx('levelup'); });
+        ['Maren the Pale', 'Liora will stand with you, when you are ready. She has buried more friends than she can count, and she will not bury one more green recruit. Prove yourself first.'], ['', `Liora is now one of your companions. Companions fight beside adventurers of level ${ST_COMP_LV} and above; recruit and choose them from the Companions menu.`], ['Maren the Pale', 'The first shard lies beneath the ruins, in the catacombs.']], () => { d.ch = 1; d.flags.liora = true; d.gold += 50; sfx('levelup'); });
       else stSay([['Maren the Pale', `Another one with a name and no past. Sit, if you must. The wolves of the Thornwood have gone hollow. Their eyes are empty and they do not stop.`], ['Maren the Pale', `Cull them. ${d.pelts} of 3 packs so far. West, where the road dies.`]]);
     } else if (d.ch < 4) stSay([['Maren the Pale', ['', 'The catacombs eat the careless. Light a shrine before you go down.', 'Cold kills slower than steel, but it kills. The crypt is past the peaks.', 'Go, then. If you fall, at least fall facing him.'][d.ch]]]);
     else stSay([['Maren the Pale', 'The fires are steady for the first time in my life. I do not know what to do with hope. Teach me.']]);
@@ -7568,7 +7632,7 @@ function stWalk(dt) {
   ST.guardCd = Math.max(0, (ST.guardCd || 0) - dt);
   if (!ST.guardCd && stTileAt(d.x, d.y) === 'v' && stRepOf(stTownHere()) <= -60 && !d.crime) { ST.guardCd = 60; d.riding = false; return stSay([['Town Guard', `You. ${ST_TOWN_NAME[stTownHere()]} has had enough of you. Leave, or we'll put you in the ground.`]], null, [['Leave quietly', () => { d.y += 80; }], ['Draw your weapon', () => stStartBattle(['guard', 'guard'], null, 'v')]]); }
   if (d.crime > 0 && !ST.guardCd && stTileAt(d.x, d.y) === 'v') { d.riding = false; return stArrest(d.x > 29 * ST_TILE ? 'Watchman Dorn' : 'Captain Ulric'); }
-  if (d.flags.liora && !d.flags.lioraQuest && stTileAt(d.x, d.y) === 'b') {
+  if (stCompanion() && stCompanion().key === 'liora' && !d.flags.lioraQuest && stTileAt(d.x, d.y) === 'b') {
     d.flags.lioraQuest = true;
     return stSay([['Liora', 'Wait. I know this place. My brother\'s company made its last stand here, when the Hollowing first came.'], ['Liora', 'They never found Aldric\'s body. I always told myself that meant he got away.'], ['Liora', 'He didn\'t, did he. He\'s still out here. Help me give him rest.']]);
   }
@@ -7583,11 +7647,11 @@ function stWalk(dt) {
 // ---- turn-based battles
 function stStartBattle(foes, bossId, tile) {
   const s = stStats(), d = stData();
-  const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06);
+  const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06), CMP = stCompanion(), soloMul = CMP ? 1 : .85; // fighting alone, enemies are a little softer
   ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
-    foes: foes.map((k, i) => { const F = ST_FOES[k], bs = bossId && ST_BOSS_SCALE[k] || [1, 1]; const hp = Math.round(F.hp * (1 + lvl) * bs[0]); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl) * bs[1], xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
-    coop: stPartyMembers().filter(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 8 * ST_TILE).slice(0, 2).map((p, i) => { const sw = p.presence.sw; return {id: 'c' + i, name: sw.n, look: sw.k, color: sw.c, lv: sw.lv, atk: sw.at || 20, hp: sw.hp || 200, maxHp: sw.hp || 200}; }),
-    ally: d.flags.liora ? {name: 'Liora', hp: 80 + 12 * d.lv, maxHp: 80 + 12 * d.lv, atk: 10 + 2 * d.lv + (d.flags.lioraOath ? 6 : 0)} : null};
+    foes: foes.map((k, i) => { const F = ST_FOES[k], bs = bossId && ST_BOSS_SCALE[k] || [1, 1]; const hp = Math.round(F.hp * (1 + lvl) * bs[0] * soloMul); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl) * bs[1], xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
+    coop: stPartyMembers().filter(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 8 * ST_TILE).slice(0, 2).map((p, i) => { const sw = p.presence.sw; return {id: 'c' + i, peer: p.peer, name: sw.n, look: sw.k, color: sw.c, lv: sw.lv, atk: sw.at || 20, hp: sw.hp || 200, maxHp: sw.hp || 200}; }),
+    ally: CMP ? {key: CMP.key, name: CMP.name, role: CMP.role, look: CMP.look, color: CMP.color, beast: CMP.beast, male: CMP.male, hp: Math.round(s.hp * CMP.hp), maxHp: Math.round(s.hp * CMP.hp), atk: Math.max(s.atk, s.mag * .9) * CMP.atk * (CMP.key === 'liora' && d.flags.lioraOath ? 1.1 : 1)} : null};
   ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
   STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
   sfx(bossId ? 'roar' : 'swing'); musicForce(bossId ? SONG_CROWN : SONG_STEEL);
@@ -7598,7 +7662,7 @@ function stStartBattle(foes, bossId, tile) {
   STFX.intro = {t: 0, dur: bossId ? 2.8 : 1.5, boss: !!bossId, title: bossId ? F0.name : ST.battle.foes.length > 1 ? 'AMBUSH' : F0.name, sub: I ? I[0] : ST.battle.foes.map(f => f.name).join(' · '), color: F0.color || '#ff5a3a'};
   ST.battle.turn = 'intro'; stRenderBattle();
   const bv = ST_FOE_SEX[bossId] === 'f' ? 'bossF' : 'boss';
-  if (I) { setTimeout(() => stVoice(I[1], bv), 500); setTimeout(() => { if (ST.battle && !ST.battle.over) stVoice(stLine('boss'), 'p'); }, 4200); } else if (ST.battle.ally && Math.random() < .5) setTimeout(() => stVoice(ST_LIORA_LINES[Math.floor(Math.random() * ST_LIORA_LINES.length)], 'a'), 300);
+  if (I) { setTimeout(() => stVoice(I[1], bv), 500); setTimeout(() => { if (ST.battle && !ST.battle.over) stVoice(stLine('boss'), 'p'); }, 4200); } else if (ST.battle.ally && Math.random() < .5) { const Lc = (ST_COMPANIONS[ST.battle.ally.key] || {}).lines || []; if (Lc.length) setTimeout(() => stVoice(Lc[Math.floor(Math.random() * Lc.length)], ST.battle.ally.male ? 'foe' : 'a'), 300); }
   setTimeout(() => { if (ST.battle && ST.battle.turn === 'intro') { ST.battle.turn = 'player'; stRenderBattle(); } }, STFX.intro.dur * 1000);
 }
 // Battle animation: who is 'p' (you), 'a' (Liora) or a foe index. Positions are refreshed every frame.
@@ -7986,7 +8050,8 @@ function stRenderBattle(picking) {
   row(d.name, d.hp, s.hp, d.mp, s.mp);
   const fx = stStatus('p'); if (fx.length) { const chips = el('div', 'stChips'); for (const x of fx) { const c = el('span', x.good ? 'good' : 'bad', x.label + (x.turns ? ' ' + x.turns : '')); c.title = x.desc; chips.appendChild(c); } party.appendChild(chips); }
   { const r = el('div', 'pm'); r.append(el('b', '', b.buffs.rage ? 'RAGE' : 'Rage')); const bar = el('div', 'bar rage'), i = el('i'), t = el('span', '', b.buffs.rage ? `${b.buffs.rage} turns` : `${Math.round(b.rage || 0)}%`); i.style.width = (b.buffs.rage ? 100 : b.rage || 0) + '%'; bar.append(i, t); r.appendChild(bar); party.appendChild(r); }
-  if (b.ally) row('Liora', b.ally.hp, b.ally.maxHp);
+  for (const c of b.coop || []) { const P = SW.peers.find(p => p.peer === c.peer), sw = P && P.presence && P.presence.sw; row(`${c.name} (party)`, sw && sw.hc != null ? sw.hc : c.hp, sw && sw.hp || c.maxHp); }
+  if (b.ally) row(b.ally.name, b.ally.hp, b.ally.maxHp);
   const act = $('stActions'); act.innerHTML = '';
   if (b.over) return;
   if (b.turn !== 'player') { act.appendChild(el('small', '', b.turn === 'intro' ? '…' : 'Enemy turn…')); return; }
@@ -8029,9 +8094,9 @@ function stPlayerHit(f, base, kind, extra, color) {
     const before = f.hp; ST.curSkill = null;
     if (!sure && Math.random() < stDodgeChance(f.spd, stStats().spd, (f.boss ? -.03 : 0) - (beam ? .04 : 0))) { stDodgeFx(f.id, f.name); ST.sub = null; setTimeout(stEndTurn, 300); return; }
     if (f.hp > 0 && ((SK && SK.twice) || (sk === 'attack' && stData().hr && Math.random() < .3))) setTimeout(() => { // a second blow: Flash Step, or the Restricted body moving faster than sight
-      if (f.hp <= 0) return; const dm2 = stDmg(base * .7, f.def); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
+      if (f.hp <= 0) return; const dm2 = Math.min(f.hp, stDmg(base * .7, f.def)); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
     }, 140);
-    f.hp -= total; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact');
+    const dealt = Math.min(total, Math.max(0, before)); f.hp -= total; if (f.hp < 0) f.hp = 0; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact');
     const fxPow = 1 + rk * .3; stEffect(SK_FX[sk] || (crit ? 'heavyslash' : 'slash'), f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'), fxPow); if (crit) STFX.slow = Math.max(STFX.slow || 0, .12); // a hit-stop on criticals
     stRageAdd(6);
     if (ST.battle.buffs.vamp) { const dd = stData(), heal = Math.round(total * .25); dd.hp = Math.min(stStats().hp, dd.hp + heal); stNum('p', '+' + heal, '#ff6a8a'); } // vampire form drinks from every wound
@@ -8045,10 +8110,10 @@ function stPlayerHit(f, base, kind, extra, color) {
       if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; if (!f.w.maim) stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
       else if (f.hp > 0) { if (ST.battle.buffs.wolf && kind === 'phys') { f.w = f.w || {}; f.w.bleed = 3; } stWound(f.id, f, kind, crit, rk, beam); }
     }
-    stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? total + '!' : total, crit ? '#ffd75e' : '#ffffff', crit);
+    stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? dealt + '!' : dealt, crit ? '#ffd75e' : '#ffffff', crit);
     if (crit) ST.hurt = .2;
     if (extra) extra(f, total);
-    stLog(`${f.name} takes ${total} damage.` + (crit ? ' Critical hit!' : '') + (oblit ? ` ${f.name} is obliterated!` : lethal ? ` A lethal blow! ${f.name} is cut down!` : f.hp <= 0 ? ` ${f.name} is defeated!` : ''));
+    stLog(`${f.name} takes ${dealt} damage.` + (crit ? ' Critical hit!' : '') + (oblit ? ` ${f.name} is obliterated!` : lethal ? ` A lethal blow! ${f.name} is cut down!` : f.hp <= 0 ? ` ${f.name} is defeated!` : ''));
     ST.sub = null; setTimeout(stEndTurn, 250);
   };
   ST.battle.turn = 'anim'; stRenderBattle();
@@ -8075,7 +8140,7 @@ function stUseSkill(id) {
     d.mp -= COST; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
     for (const f of b.foes) if (f.hp > 0) {
       const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def); total += dm; left++;
-      ST.nextShot = SK_SHOT[id]; stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (id === 'lightning') stEffect('chain', f.id, SK_COLOR[id], CPOW, b.foes.filter(x => x.hp > 0).map(x => x.id)); if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } f.hp -= dm; f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff', CPOW); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
+      ST.nextShot = SK_SHOT[id]; stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (id === 'lightning') stEffect('chain', f.id, SK_COLOR[id], CPOW, b.foes.filter(x => x.hp > 0).map(x => x.id)); if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } const dl = Math.min(dm, f.hp); f.hp = Math.max(0, f.hp - dm); f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff', CPOW); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dl); if (--left === 0) setTimeout(stEndTurn, 250); });
     }
     ST.nextShot = null; sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
@@ -8093,20 +8158,25 @@ function stItem(k) {
   sfx('pickup'); stLog(k === 'potion' ? 'You drink a potion. 30% of your health returns.' : 'You drink an ether. 30% of your mana returns.'); ST.sub = null; stEndTurn();
 }
 function stEndTurn() {
-  const b = ST.battle; if (b.foes.every(f => f.hp <= 0)) return stEndBattle('won');
+  const b = ST.battle; if (!b || b.over) return; if (b.foes.every(f => f.hp <= 0)) { b.turn = 'won'; stRenderBattle(); stCallout('VICTORY', '#ffd75e'); return stEndBattle('won'); }
   b.turn = 'enemy'; stRenderBattle();
   setTimeout(stEnemyPhase, 650);
 }
 function stLowLine() { const b = ST.battle, d = stData(); if (b && !b.lowLine && d.hp > 0 && d.hp < stStats().hp * .3) { b.lowLine = true; setTimeout(() => stVoice(stLine('low'), 'p'), 450); } }
 function stEnemyPhase() {
   const b = ST.battle, d = stData(), s = stStats(); if (!b || b.over) return;
-  if (b.ally && b.ally.hp > 0) { // Liora fights by your side
-    const t = b.foes.find(f => f.hp > 0);
-    if (d.hp < s.hp * .35) { const hh = 30 + 4 * d.lv; d.hp = Math.min(s.hp, d.hp + hh); stAnim('a', 'cast'); stBurst('p', '#6be08a', 16); stNum('p', '+' + hh, '#6be08a'); stLog('Liora shields you and heals your wounds.'); }
-    else if (t) { const dm = stDmg(b.ally.atk * 1.2, t.def); stAnim('a', 'lunge'); setTimeout(() => { t.hp -= dm; t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(t.id, 'hurt'); stBurst(t.id, '#9fd8ff', 12); stNum(t.id, dm); sfx('impact'); }, 160); stLog(`Liora strikes ${t.name} for ${dm}.`); }
+  if (b.foes.every(f => f.hp <= 0)) return stEndBattle('won'); // nothing left to fight
+  if (b.ally && b.ally.hp > 0) { // your companion takes their turn
+    const A = b.ally, t = b.foes.find(f => f.hp > 0), alive = b.foes.filter(f => f.hp > 0), hitOne = (tg, mul, col) => { const dm = Math.min(tg.hp, stDmg(A.atk * mul, tg.def)); tg.hp -= dm; tg.flash = .25; if (tg.hp <= 0) tg.deadT = 0; stAnim(tg.id, 'hurt'); stBurst(tg.id, col, 10); stNum(tg.id, dm, col); return dm; };
+    if (A.role === 'healer') { const hh = Math.round(s.hp * .1); d.hp = Math.min(s.hp, d.hp + hh); if (d.wounds) d.wounds.bleed = 0; stAnim('a', 'cast'); stEffect('sparkle', 'p', '#9fffb8'); stNum('p', '+' + hh, '#6be08a'); stLog(`${A.name} heals you for ${hh}.`); if (t && d.hp >= s.hp * .9) { stAnim('a', 'lunge'); hitOne(t, 1, '#e8e2ff'); } }
+    else if (A.role === 'mage' && alive.length) { stAnim('a', 'cast'); let tot = 0; for (const tg of alive) { stEffect('zap', tg.id, '#8fb8ff'); tot += hitOne(tg, .7, '#8fb8ff'); } sfx('zap'); stLog(`${A.name} calls lightning on every enemy for ${tot}.`); }
+    else if (A.role === 'beast' && t) { stAnim('a', 'lunge'); const d1 = hitOne(t, .75, '#cfd8e0'); const t2 = b.foes.find(f => f.hp > 0); const d2 = t2 ? hitOne(t2, .75, '#cfd8e0') : 0; sfx('claw'); stLog(`${A.name} bites twice for ${d1 + d2}.`); }
+    else if (A.role === 'assassin' && t) { stAnim('a', 'lunge'); const cr = Math.random() < .3, dm = hitOne(t, cr ? 2.1 : 1.3, cr ? '#ffd75e' : '#c08aff'); if (t.hp > 0) { t.w = t.w || {}; t.w.bleed = 3; } sfx('impact'); stLog(`${A.name} strikes from the shadows for ${dm}${cr ? '. Critical!' : '.'}`); }
+    else if (A.role === 'guard' && d.hp < s.hp * .35) { const hh = Math.round(s.hp * .12); d.hp = Math.min(s.hp, d.hp + hh); stAnim('a', 'cast'); stBurst('p', '#6be08a', 16); stNum('p', '+' + hh, '#6be08a'); stLog(`${A.name} shields you and heals your wounds.`); }
+    else if (t) { const dm = stDmg(b.ally.atk * 1.2, t.def); stAnim('a', 'lunge'); setTimeout(() => { const dl = Math.min(dm, t.hp); t.hp = Math.max(0, t.hp - dm); t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(t.id, 'hurt'); stBurst(t.id, '#9fd8ff', 12); stNum(t.id, dl); sfx('impact'); }, 160); stLog(`${A.name} strikes ${t.name} for ${dm}.`); }
     if (b.foes.every(f => f.hp <= 0)) return setTimeout(() => stEndBattle('won'), 450);
   }
-  for (const c of b.coop || []) { const t = b.foes.filter(f => f.hp > 0).sort((x, y) => x.hp - y.hp)[0]; if (!t) break; const dm = stDmg(c.atk * 1.15, t.def); t.hp -= dm; t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(c.id, 'lunge'); stAnim(t.id, 'hurt'); stBurst(t.id, '#7fe08a', 10); stNum(t.id, dm, '#7fe08a'); stLog(`${c.name} strikes ${t.name} for ${dm}.`); } // your party fights too
+  for (const c of b.coop || []) { const t = b.foes.filter(f => f.hp > 0).sort((x, y) => x.hp - y.hp)[0]; if (!t) break; const dm = Math.min(t.hp, stDmg(c.atk * 1.15, t.def)); t.hp -= dm; t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(c.id, 'lunge'); stAnim(t.id, 'hurt'); stBurst(t.id, '#7fe08a', 10); stNum(t.id, dm, '#7fe08a'); stLog(`${c.name} strikes ${t.name} for ${dm}.`); } // your party fights too
   if ((b.coop || []).length && b.foes.every(f => f.hp <= 0)) return setTimeout(() => stEndBattle('won'), 450);
   if (d.wounds && d.wounds.bleed) { // your own bleeding
     const bd = Math.max(3, Math.round(s.hp * .04)); d.hp -= bd; d.wounds.bleed--; stNum('p', bd, '#ff4a4a'); stGore('p', 6, false); stLog(`You bleed for ${bd}.`);
@@ -8122,8 +8192,8 @@ function stEnemyPhase() {
     }
     const f = alive[i++];
     if (f.hp <= 0) return next();
-    if (f.w && f.w.bleed) { const bd = Math.max(3, Math.round(f.maxHp * .05)); f.hp -= bd; f.w.bleed--; stNum(f.id, bd, '#ff4a4a'); stGore(f.id, 6, false); if (f.hp <= 0) { f.deadT = 0; stLog(`${f.name} bleeds out.`); if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
-    if (f.burn || f.poison) { const dot = Math.round(f.maxHp * .06); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
+    if (f.w && f.w.bleed) { const bd = Math.min(f.hp, Math.max(3, Math.round(f.maxHp * .05))); f.hp -= bd; f.w.bleed--; stNum(f.id, bd, '#ff4a4a'); stGore(f.id, 6, false); if (f.hp <= 0) { f.deadT = 0; stLog(`${f.name} bleeds out.`); if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
+    if (f.burn || f.poison) { const dot = Math.min(f.hp, Math.round(f.maxHp * .06)); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
     if (f.frozen) { f.frozen = 0; stLog(`${f.name} is frozen solid and can't move!`); return setTimeout(next, 600); }
     const moves = ST_FOE_MOVES[f.key];
     if (moves && Math.random() < (f.boss ? .45 : .5)) { // a named move: called out, then it lands
@@ -8150,7 +8220,7 @@ function stEnemyPhase() {
       }, 650);
       return;
     }
-    const hitAlly = b.ally && b.ally.hp > 0 && Math.random() < .35;
+    const hitAlly = b.ally && b.ally.hp > 0 && Math.random() < (b.ally.role === 'tank' ? .65 : .3); // the Ironwall draws attacks
     const big = f.boss && Math.random() < .3, base = f.atk * (big ? 1.6 : 1);
     stAnim(f.id, 'lunge', big ? .45 : .32);
     const victim = hitAlly ? 'a' : 'p';
@@ -8170,7 +8240,7 @@ function stEnemyPhase() {
   setTimeout(next, b.ally ? 600 : 0);
 }
 function stEndBattle(result) {
-  const b = ST.battle, d = stData(); b.over = true;
+  const b = ST.battle, d = stData(); if (!b || b.ended) return; b.ended = true; b.over = true; // a battle only ends once
   const done = () => { $('stBattle').hidden = true; ST.battle = null; ST.mode = 'walk'; musicForce(stMapSong()); stHud(); stSave(); };
   if (result === 'fled') { if (ST.fighting) { const f = ST.fighting; f.x = f.home[0]; f.y = f.home[1]; ST.fighting = null; } return setTimeout(done, 500); }
   if (result === 'lost') {
@@ -8195,7 +8265,10 @@ function stEndBattle(result) {
   }
   if (!b.bossId && b.tile === 'T' && d.ch === 0 && d.pelts < 3) { d.pelts++; lines.push(['', `Wolf packs driven off: ${d.pelts} of 3.` + (d.pelts >= 3 ? ' Return to Elder Maren.' : '')]); }
   let learn = false;
+  const ranksWas = {}; for (const id of d.skills.concat('attack')) ranksWas[id] = stRank(id);
   while (d.xp >= stXpNeed(d.lv)) { d.xp -= stXpNeed(d.lv); d.lv++; const s = stStats(); d.hp = s.hp; d.mp = s.mp; lines.push(['', `Level up! You are now level ${d.lv}. Health and mana fully restored.`]); if (d.lv % 2 === 1 && d.skills.length < Object.keys(ST_SKILLS).length) learn = true; }
+  for (const id in ranksWas) if (stRank(id) > ranksWas[id]) { lines.push(['', `Your mastery is finally ready: ${ST_EVOLVE[id] ? ST_EVOLVE[id][ranksWas[id]] : stSkName(id)} evolved into ${stSkName(id)}!`]); sfx('evolve'); }
+  if (d.lv >= ST_COMP_LV && !d.flags.compTold) { d.flags.compTold = true; lines.push(['', `You are level ${ST_COMP_LV}. Companions can now fight beside you. Open Companions from the menu or the guild hall.`]); }
   if (b.bossId) {
     d.flags[b.bossId] = true;
     if (ST_INTRO[b.bossId]) setTimeout(() => stVoice({king: 'The dark... is coming.', golem: 'Stone... remembers...', drake: 'So... warm...', stalker: 'At last... a face...', brother: 'Liora... I\'m sorry.', witch: 'Thank you.'}[b.bossId], ST_FOE_SEX[b.bossId] === 'f' ? 'bossF' : 'boss'), 300);
@@ -8290,7 +8363,7 @@ function stOpenMenu() {
   { // sort the sections into tabs: Hero, Quests, Bag, Skills, Guild
     const known = Object.entries(d.bonds || {}).filter(([k, b]) => ST_SOCIAL[k] && b.pts > 0).sort((a, b2) => b2[1].pts - a[1].pts);
     m.append(el('h3', '', 'Bonds'), el('p', '', (d.spouse ? `Married to ${stNpcName(d.spouse)}. ` : d.romance ? `Courting ${stNpcName(d.romance)}. ` : '') + (known.length ? known.map(([k, b]) => `${stNpcName(k)}: ${stBondName(k)} (${Math.round(b.pts)})`).join(' · ') : 'No bonds yet. Talk to people every day, give gifts, and spend time with them. Press ♥ while talking to someone.')));
-    if (d.flags.liora && ST_SOCIAL.liora) { const lb = el('button', '', '♥ Talk with Liora'); lb.addEventListener('click', () => { stCloseMenu(); stBondDaily('liora'); stSocial('liora'); }); m.appendChild(lb); }
+    if (d.flags.liora && ST_SOCIAL.liora && !(d.companion === 'liora' && d.lv >= ST_COMP_LV) && false) { const lb = el('button', '', '♥ Talk with Liora'); lb.addEventListener('click', () => { stCloseMenu(); stBondDaily('liora'); stSocial('liora'); }); m.appendChild(lb); }
     const TAB = {Status: 'Hero', Reputation: 'Quests', Bonds: 'Bonds', Abilities: 'Hero', Wounds: 'Hero', Alignment: 'Hero', Mounts: 'Hero', Gear: 'Hero', 'Crafted gear': 'Hero', Quest: 'Quests', 'Side stories': 'Quests', Contract: 'Quests', Bag: 'Bag', Materials: 'Bag', Cargo: 'Bag', Professions: 'Skills', Guild: 'Guild'};
     const g = d.guild; m.append(el('h3', '', 'Guild'), el('p', '', g ? `${g.rank}-Rank of the Free Guild Compact. Standing ${g.pts}${ST_RANK_PTS[g.rank] ? ` of ${ST_RANK_PTS[g.rank]} for your next exam` : ''}. Edict in force: ${ST_EDICTS[stEdict()][0]} (${ST_EDICTS[stEdict()][1]}). Active quests: ${(g.quests || []).map(a => stGQ(a.id) && stGQ(a.id).name).filter(Boolean).join(', ') || 'none'}.` : 'Not a member. Join at the Guild Hall in Thornwake to travel guild territory and take paid quests.'));
     let cur = 'Hero'; const kids = [...m.children]; for (const k of kids) { if (k.tagName === 'H3' && TAB[k.textContent]) cur = TAB[k.textContent]; k.dataset.tab = cur; }
@@ -8302,7 +8375,7 @@ function stOpenMenu() {
   btn(`Online world: ${PROF.onlineOff ? 'Off' : 'On'}`, () => { PROF.onlineOff = !PROF.onlineOff; saveProfile(); if (PROF.onlineOff) stNetLeave(); else stNetJoin(); stCloseMenu(); stOpenMenu(); });
   btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
-  btn('📖 Journal', () => stJournal()); btn('👘 Wardrobe', () => stWardrobe());
+  btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
 }
@@ -8319,7 +8392,7 @@ $('stPrompt').addEventListener('click', () => { if (ST.mode === 'walk') stIntera
 $('stQuest').addEventListener('click', () => { if (touchUI.on) $('stQuest').classList.toggle('mini'); }); // tap the tracker to fold it away on a phone
 $('stChatBtn').addEventListener('click', () => $('stChatIn').hidden ? stChatOpen() : stChatClose());
 $('stChatIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { stChatSend($('stChatIn').value); $('stChatIn').value = ''; if (device() === 'touch') stChatClose(); } else if (e.key === 'Escape') stChatClose(); });
-setInterval(() => { if (ST.on) stChatRender(); }, 5000);
+setInterval(() => { if (ST.on) stChatRender(); }, 5000); setInterval(() => { if (ST.on) stPartyHudRender(); }, 700);
 $('stJournalBtn').addEventListener('click', () => ST.mode === 'menu' && ST.journal ? stCloseMenu() : (ST.mode === 'walk' || ST.mode === 'menu') && stJournal());
 
 // ---- HUD and drawing
@@ -8372,7 +8445,9 @@ function stDrawWorld(now, dt = 1 / 60) {
     ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n.name, x, y - (n.kid ? 40 : 56)); ctx.textAlign = 'left';
   }
   if (!dun) for (const h of ST_HOUSES) { const x = (h.x + 1) * ST_TILE, y = (h.y + 2) * ST_TILE - 4; ctx.fillStyle = '#2a1a10'; ctx.fillRect(x - 12, y - 30, 24, 30); ctx.fillStyle = '#ffb35a'; ctx.globalAlpha = .5 + Math.sin(now * 2 + h.x) * .15; ctx.fillRect(x - 8, y - 26, 16, 10); ctx.globalAlpha = 1; } // lit doorways
-  if (d.flags.liora) stDrawCh(stUnit('valkyrie', '#9fd8ff', d.x - 36 * (Math.cos(ST.face || 0) || 1), d.y + 4, ST.face || 0, ST.walk || 0, 31, d.lv), now);
+  { const CM = !dun || ST_DUNGEONS[d.map] ? stCompanion() : null; if (CM) { const fx = d.x - 36 * (Math.cos(ST.face || 0) || 1), fy = d.y + 4;
+    if (CM.beast) { const wu = {x: fx, y: fy, face: ST.face || 0, walk: ST.walk || 0, _lw: (ST.walk || 0) - 1, hitFlash: 0, atkT: 0, atkCd: 1, id: 31, team: 0, level: 8, r: 22, fur: CM.color}; ctx.save(); ctx.translate(fx, fy); ctx.scale(ST_CS, ST_CS); ctx.translate(-fx, -fy); drawWolf(ctx, wu, now); ctx.restore(); }
+    else stDrawCh(stUnit(CM.look, CM.color, fx, fy, ST.face || 0, ST.walk || 0, 31, d.lv), now); } }
   const ride = !dun && d.riding && stM(d.mount);
   if (ride) { ctx.save(); ctx.translate(d.x, d.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-d.x, -(d.y + 10)); stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); ctx.restore(); stDrawCh(Object.assign(stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 3 * Math.cos(ST.face || 0), d.y - 21 - (ride.fly ? 21 + Math.sin(now * 4) * 4 : 0), ST.face || 0, 0, 30, d.lv), {outfit: d.outfit}), now); }
   else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); pu.outfit = d.outfit; if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); stDrawCh(pu, now); }
@@ -8432,8 +8507,12 @@ function stDrawBattle(now, dt) {
   if (d.hr && Math.random() < .35) STFX.parts.push({x: px + rand(-22, 22), y: py - rand(0, 80), vx: 0, vy: -rand(40, 90), t: 0, life: .6, color: 'rgba(255,250,230,.55)', r: rand(1.5, 3)}); // the Restricted body steams with power
   stWoundDraw(d.wounds, px + pox, py + poy + bob, k * 1.3, 1, true, now);
   (b.coop || []).forEach((c, i) => { const cx = px - (130 + i * 60) * k, cy = py - (26 - i * 50) * k; STFX.pos[c.id] = [cx, cy]; const [ox, oy] = stFxOffset(c.id), cu = stUnit(c.look, c.color, cx + ox, cy + oy + bob, 0, 0, 300 + i, c.lv); if (STFX.anims.some(a => a.who === c.id && a.kind === 'lunge')) cu.atkT = 1; drawCharacterScaled(cu, now, k * 1.15);
-    ctx.fillStyle = '#7fe08a'; ctx.font = '700 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(c.name, cx, cy - 92 * k); ctx.textAlign = 'left'; });
-  if (b.ally) { const [aox, aoy] = stFxOffset('a'), au = stUnit('valkyrie', '#9fd8ff', px - 70 * k + aox, py + 30 * k + aoy - bob, 0, 0, 31, d.lv); if (STFX.anims.some(a => a.who === 'a' && a.kind === 'lunge')) au.atkT = 1; drawCharacterScaled(au, now, k * 1.2); }
+    const P = SW.peers.find(p => p.peer === c.peer), sw = P && P.presence && P.presence.sw, hc = sw && sw.hc != null ? sw.hc : c.hp, hm = sw && sw.hp || c.maxHp;
+    ctx.fillStyle = '#000a'; ctx.fillRect(cx - 34, cy - 108 * k, 68, 7); ctx.fillStyle = '#5fd47a'; ctx.fillRect(cx - 34, cy - 108 * k, 68 * Math.max(0, Math.min(1, hc / hm)), 7);
+    ctx.fillStyle = '#7fe08a'; ctx.font = '700 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(`${c.name} ${hc}/${hm}`, cx, cy - 112 * k); ctx.textAlign = 'left'; });
+  if (b.ally) { const [aox, aoy] = stFxOffset('a'), ax = px - 70 * k + aox, ay = py + 30 * k + aoy - bob;
+    if (b.ally.beast) { const wu = {x: ax, y: ay, face: 0, walk: now * 20, _lw: 0, hitFlash: 0, atkT: 0, atkCd: 1, id: 31, team: 0, level: 10, r: 30, fur: b.ally.color}; ctx.save(); ctx.translate(ax, ay); ctx.scale(k * 1.3, k * 1.3); ctx.translate(-ax, -ay); drawWolf(ctx, wu, now); ctx.restore(); }
+    else { const au = stUnit(b.ally.look || 'valkyrie', b.ally.color || '#9fd8ff', ax, ay, 0, 0, 31, d.lv); if (STFX.anims.some(a => a.who === 'a' && a.kind === 'lunge')) au.atkT = 1; drawCharacterScaled(au, now, k * 1.2); } }
   b.foes.forEach((f, i) => {
     const n = b.foes.length, fx0 = cw * (.66 + (n > 1 ? (i - (n - 1) / 2) * .12 : 0)), fy0 = ch * (.55 + (i % 2) * .05);
     STFX.pos[f.id] = [fx0, fy0];
