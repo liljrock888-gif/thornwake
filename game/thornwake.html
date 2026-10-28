@@ -5353,7 +5353,7 @@ let last = performance.now();
 const ST_TILE = 64, ST_W = 48, ST_H = 32;
 const ST_CLASSES = {
   warrior: {name: 'Warrior', look: 'knight', hp: 120, mp: 30, atk: 14, mag: 4, def: 8, spd: 6, skills: ['strike', 'guard', 'rally']},
-  mage:    {name: 'Mage', look: 'mage', hp: 80, mp: 70, atk: 6, mag: 16, def: 4, spd: 7, skills: ['fireball', 'frost', 'lightning']},
+  mage:    {name: 'Mage', look: 'mage', hp: 92, mp: 70, atk: 6, mag: 16, def: 5, spd: 7, skills: ['fireball', 'frost', 'lightning']},
   ranger:  {name: 'Ranger', look: 'ranger', hp: 95, mp: 45, atk: 12, mag: 8, def: 5, spd: 10, skills: ['rain', 'venom', 'strike']},
   rogue:   {name: 'Rogue', look: 'rogue', hp: 90, mp: 40, atk: 13, mag: 6, def: 5, spd: 12, skills: ['venom', 'strike', 'drain']},
   paladin: {name: 'Paladin', look: 'paladin', hp: 130, mp: 50, atk: 11, mag: 10, def: 10, spd: 5, skills: ['heal', 'guard', 'strike']},
@@ -5416,28 +5416,28 @@ const ST_FOES = {
   pup:     {name: 'Wolf Pup', hp: 22, atk: 6, def: 1, spd: 10, xp: 6, gold: 3, draw: 'wolf', small: true},
   goblin:  {name: 'Ruin Goblin', hp: 55, atk: 12, def: 4, spd: 7, xp: 18, gold: 10, draw: 'goblin'},
   bandit:  {name: 'Bandit', hp: 70, atk: 14, def: 5, spd: 9, xp: 24, gold: 16, draw: 'hero', look: 'rogue'},
-  frostwolf: {name: 'Frost Wolf', hp: 90, atk: 18, def: 6, spd: 11, xp: 34, gold: 18, draw: 'wolf', fur: '#cfe9ff'},
+  frostwolf: {name: 'Frost Wolf', hp: 90, atk: 15, def: 6, spd: 11, xp: 34, gold: 18, draw: 'wolf', fur: '#cfe9ff'},
   knight:  {name: 'Hollow Knight', hp: 120, atk: 22, def: 10, spd: 8, xp: 48, gold: 26, draw: 'hero', look: 'knight', color: '#5a4a6a'},
   golem:   {name: 'Stone Golem', hp: 300, atk: 20, def: 10, spd: 4, xp: 120, gold: 80, draw: 'golem', boss: true},
   drake:   {name: 'Frost Drake', hp: 440, atk: 26, def: 10, spd: 9, xp: 200, gold: 120, draw: 'drake', boss: true},
   stalker: {name: 'The Gloam Stalker', hp: 340, atk: 24, def: 9, spd: 13, xp: 160, gold: 140, draw: 'hero', look: 'hunter', color: '#2a1f3d', boss: true},
-  brigand:  {name: 'Corvane Brigand', hp: 160, atk: 33, def: 12, spd: 14, xp: 120, gold: 80, draw: 'hero', look: 'rogue', color: '#6a3a2a', lv: 9},
-  direwolf: {name: 'Ironpine Direwolf', hp: 150, atk: 34, def: 12, spd: 16, xp: 120, gold: 60, draw: 'wolf', fur: '#4a4a50'},
-  orcwar:   {name: 'Highland Orc', hp: 190, atk: 36, def: 14, spd: 10, xp: 140, gold: 70, draw: 'goblin'},
-  ironknight:{name: 'Renegade Ironknight', hp: 220, atk: 38, def: 18, spd: 9, xp: 160, gold: 90, draw: 'hero', look: 'knight', color: '#5a5a6a', lv: 12},
-  wyvern:   {name: 'Wyrmspine Wyvern', hp: 240, atk: 42, def: 14, spd: 15, xp: 190, gold: 100, draw: 'drake', species: 'ember', fire: '#ff7a2a'},
-  ignaroth: {name: 'Ignaroth, Tyrant of Wyrmspine', hp: 5200, atk: 150, def: 40, spd: 18, xp: 6000, gold: 2500, draw: 'drake', species: 'ember', fire: '#ff7a2a', boss: true},
-  voidwolf: {name: 'Voidhound', hp: 200, atk: 42, def: 16, spd: 18, xp: 230, gold: 110, draw: 'wolf', fur: '#2a1a4a'},
-  archon:   {name: 'Fallen Archon', hp: 260, atk: 46, def: 20, spd: 15, xp: 270, gold: 130, draw: 'hero', look: 'paladin', color: '#c8c8ff', lv: 15},
-  abyssfiend:{name: 'Abyssal Fiend', hp: 300, atk: 50, def: 20, spd: 12, xp: 300, gold: 150, draw: 'hero', look: 'brute', color: '#3a0a3a', lv: 13, horns: true},
-  starwyrm: {name: 'Starwyrm', hp: 320, atk: 52, def: 18, spd: 17, xp: 330, gold: 160, draw: 'drake', species: 'frost', fire: '#c8b8ff'},
-  unmaker:  {name: 'The Unmaker', hp: 9500, atk: 210, def: 55, spd: 20, xp: 15000, gold: 6000, draw: 'golem', boss: true},
-  examC:    {name: 'Examiner Bram (C-Rank Exam)', hp: 420, atk: 24, def: 9, spd: 10, xp: 200, gold: 0, draw: 'hero', look: 'knight', color: '#b33a3a', lv: 10, boss: true},
-  examB:    {name: 'Examiner Sif (B-Rank Exam)', hp: 1300, atk: 46, def: 16, spd: 14, xp: 900, gold: 0, draw: 'hero', look: 'valkyrie', color: '#4a8ac8', lv: 13, boss: true},
-  examA:    {name: 'Examiner Corvin (A-Rank Exam)', hp: 2600, atk: 78, def: 24, spd: 16, xp: 2400, gold: 0, draw: 'hero', look: 'hunter', color: '#2a6a3a', lv: 15, boss: true},
-  examS:    {name: 'Guildmaster Oskar (S-Rank Exam)', hp: 5200, atk: 120, def: 34, spd: 18, xp: 5000, gold: 0, draw: 'hero', look: 'knight', color: '#b33a3a', lv: 17, boss: true},
-  thrall:   {name: 'Blood Thrall', hp: 130, atk: 24, def: 8, spd: 12, xp: 70, gold: 35, draw: 'hero', look: 'rogue', color: '#5a1a2a', lv: 8},
-  vampire:  {name: 'Noble Vampire', hp: 220, atk: 30, def: 11, spd: 16, xp: 110, gold: 70, draw: 'hero', look: 'warlock', color: '#8a0a2a', lv: 13, unholy: true},
+  brigand:  {name: 'Corvane Brigand', hp: 160, atk: 33, def: 12, spd: 14, xp: 70, gold: 80, draw: 'hero', look: 'rogue', color: '#6a3a2a', lv: 9},
+  direwolf: {name: 'Ironpine Direwolf', hp: 150, atk: 34, def: 12, spd: 16, xp: 70, gold: 60, draw: 'wolf', fur: '#4a4a50'},
+  orcwar:   {name: 'Highland Orc', hp: 190, atk: 36, def: 14, spd: 10, xp: 82, gold: 70, draw: 'goblin'},
+  ironknight:{name: 'Renegade Ironknight', hp: 220, atk: 38, def: 18, spd: 9, xp: 92, gold: 90, draw: 'hero', look: 'knight', color: '#5a5a6a', lv: 12},
+  wyvern:   {name: 'Wyrmspine Wyvern', hp: 240, atk: 42, def: 14, spd: 15, xp: 108, gold: 100, draw: 'drake', species: 'ember', fire: '#ff7a2a'},
+  ignaroth: {name: 'Ignaroth, Tyrant of Wyrmspine', hp: 7000, atk: 150, def: 40, spd: 18, xp: 6000, gold: 2500, draw: 'drake', species: 'ember', fire: '#ff7a2a', boss: true},
+  voidwolf: {name: 'Voidhound', hp: 200, atk: 39, def: 16, spd: 18, xp: 118, gold: 110, draw: 'wolf', fur: '#2a1a4a'},
+  archon:   {name: 'Fallen Archon', hp: 260, atk: 42, def: 20, spd: 15, xp: 136, gold: 130, draw: 'hero', look: 'paladin', color: '#c8c8ff', lv: 15},
+  abyssfiend:{name: 'Abyssal Fiend', hp: 300, atk: 43, def: 20, spd: 12, xp: 150, gold: 150, draw: 'hero', look: 'brute', color: '#3a0a3a', lv: 13, horns: true},
+  starwyrm: {name: 'Starwyrm', hp: 320, atk: 45, def: 18, spd: 17, xp: 160, gold: 160, draw: 'drake', species: 'frost', fire: '#c8b8ff'},
+  unmaker:  {name: 'The Unmaker', hp: 10500, atk: 210, def: 55, spd: 20, xp: 15000, gold: 6000, draw: 'golem', boss: true},
+  examC:    {name: 'Examiner Bram (C-Rank Exam)', hp: 700, atk: 38, def: 9, spd: 10, xp: 200, gold: 0, draw: 'hero', look: 'knight', color: '#b33a3a', lv: 10, boss: true},
+  examB:    {name: 'Examiner Sif (B-Rank Exam)', hp: 1950, atk: 72, def: 16, spd: 14, xp: 900, gold: 0, draw: 'hero', look: 'valkyrie', color: '#4a8ac8', lv: 13, boss: true},
+  examA:    {name: 'Examiner Corvin (A-Rank Exam)', hp: 3900, atk: 105, def: 24, spd: 16, xp: 2400, gold: 0, draw: 'hero', look: 'hunter', color: '#2a6a3a', lv: 15, boss: true},
+  examS:    {name: 'Guildmaster Oskar (S-Rank Exam)', hp: 6500, atk: 170, def: 34, spd: 18, xp: 5000, gold: 0, draw: 'hero', look: 'knight', color: '#b33a3a', lv: 17, boss: true},
+  thrall:   {name: 'Blood Thrall', hp: 130, atk: 24, def: 8, spd: 12, xp: 55, gold: 35, draw: 'hero', look: 'rogue', color: '#5a1a2a', lv: 8},
+  vampire:  {name: 'Noble Vampire', hp: 220, atk: 30, def: 11, spd: 16, xp: 85, gold: 70, draw: 'hero', look: 'warlock', color: '#8a0a2a', lv: 13, unholy: true},
   marquis:  {name: 'Marquis Valcourt, the Crimson Prince', hp: 1100, atk: 40, def: 15, spd: 18, xp: 700, gold: 500, draw: 'hero', look: 'warlock', color: '#c0102a', lv: 18, boss: true, unholy: true},
   countess: {name: 'Countess Isabeau Delacroix-Noir', hp: 1300, atk: 44, def: 16, spd: 18, xp: 900, gold: 400, draw: 'hero', look: 'witch', color: '#6a0a2a', lv: 18, boss: true, unholy: true},
   werewolf: {name: 'Moonborn Werewolf', hp: 170, atk: 25, def: 8, spd: 14, xp: 72, gold: 30, draw: 'wolf', fur: '#5a4a3a'},
@@ -5446,8 +5446,8 @@ const ST_FOES = {
   seraph:   {name: 'Seraph Warden', hp: 150, atk: 23, def: 9, spd: 11, xp: 60, gold: 30, draw: 'hero', look: 'paladin', color: '#fff3c9', lv: 15},
   cherub:   {name: 'Cherub of Judgment', hp: 80, atk: 17, def: 5, spd: 15, xp: 38, gold: 20, draw: 'hero', look: 'magicgirl', color: '#ffd75e', lv: 14},
   seraphiel:{name: 'Seraphiel, the Sixfold Wing', hp: 720, atk: 32, def: 13, spd: 15, xp: 420, gold: 0, draw: 'hero', look: 'valkyrie', color: '#ffe9a8', lv: 18, boss: true},
-  imp:      {name: 'Brimstone Imp', hp: 65, atk: 16, def: 4, spd: 15, xp: 32, gold: 22, draw: 'hero', look: 'rogue', color: '#a01a1a', lv: 11, horns: true},
-  fiend:    {name: 'Horned Fiend', hp: 160, atk: 25, def: 9, spd: 9, xp: 64, gold: 45, draw: 'hero', look: 'brute', color: '#6a0a0a', lv: 12, horns: true},
+  imp:      {name: 'Brimstone Imp', hp: 65, atk: 19, def: 4, spd: 15, xp: 32, gold: 22, draw: 'hero', look: 'rogue', color: '#a01a1a', lv: 11, horns: true},
+  fiend:    {name: 'Horned Fiend', hp: 180, atk: 29, def: 9, spd: 9, xp: 64, gold: 45, draw: 'hero', look: 'brute', color: '#6a0a0a', lv: 12, horns: true},
   reefgob: {name: 'Reef Goblin', hp: 70, atk: 15, def: 5, spd: 9, xp: 30, gold: 18, draw: 'goblin'},
   corsair: {name: 'Corsair Cutthroat', hp: 95, atk: 19, def: 6, spd: 10, xp: 40, gold: 30, draw: 'hero', look: 'pirate', color: '#2a6a8a'},
   mara:    {name: 'Mara, the Corsair Queen', hp: 600, atk: 30, def: 11, spd: 12, xp: 300, gold: 250, draw: 'hero', look: 'pirate', color: '#c0392b', boss: true},
@@ -5798,16 +5798,16 @@ const stNpcShown = (n, d) => (n.id !== 'liora' || !d.flags.liora) && (!n.need ||
 const stChestShown = (c, d) => !d.chests.includes(c.id) && (!c.need || d.flags[c.need]);
 const ST = {treesBy: {}, on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
 const stData = () => PROF.story;
-const stXpNeed = lv => 30 + 25 * lv;
+const stXpNeed = lv => Math.round(30 + 25 * lv + 1.1 * lv * lv); // later levels need more, so the far lands don't fly by
 function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
-  const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (W.hole ? .75 : 1), spd: c.spd + .4 * L};
+  const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
   if (d.guild && stEdict() === 'wall') st.def *= 1.1;
-  { const close = Object.values(d.bonds || {}).filter(b => b.pts >= 80).length, mul = 1 + Math.min(.09, close * .03) + (d.spouse ? .05 : 0) + Math.min(.06, ((d.family && d.family.kids) || []).length * .02); if (mul > 1) { st.atk *= mul; st.def *= mul; st.mag *= mul; st.hp = Math.round(st.hp * mul); } } // friends and family fight beside you in spirit
+  { const close = Object.values(d.bonds || {}).filter(b => b.pts >= 80).length, mul = 1 + Math.min(.06, close * .02) + (d.spouse ? .04 : 0) + Math.min(.045, ((d.family && d.family.kids) || []).length * .015); if (mul > 1) { st.atk *= mul; st.def *= mul; st.mag *= mul; st.hp = Math.round(st.hp * mul); } } // friends and family fight beside you in spirit
   for (const k in d.gear || {}) { const G = ST_GEAR[k]; if (!G || !d.gear[k]) continue; st.atk += G.atk || 0; st.def += G.def || 0; st.mag += G.mag || 0; st.spd += G.spd || 0; }
-  if (d.hr) { st.hp = Math.round(st.hp * 1.35); st.atk = st.atk * 1.5 + 6; st.def += 6; st.spd += 6; st.mag = 0; } // Heavenly Restriction: a perfect body, no magic at all
-  if (d.pact) { st.atk += 6; st.mag += 6; }
+  if (d.hr) { st.hp = Math.round(st.hp * 1.25); st.atk = st.atk * 1.3 + 4; st.def += 5; st.spd += 5; st.mag = 0; st.mp = Math.round(st.mp * .7); } // Heavenly Restriction: a perfect body, no magic at all
+  if (d.pact) { st.atk *= 1.08; st.mag *= 1.08; st.atk += 4; st.mag += 4; }
   const outside = d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].outdoor), C = typeof stClock === 'function' ? stClock() : {dark: 0};
   if (d.were && C.dark > .25) { st.atk *= 1.25; st.spd += 4; } // the moon makes the wolf stronger
   if (d.vamp) { if (C.dark > .25) { st.atk *= 1.2; st.mag *= 1.2; } else if (outside && C.dark < .1) { st.atk *= .85; st.mag *= .85; st.def *= .85; } } // night feeds the blood; the sun burns it
@@ -6130,10 +6130,10 @@ const ST_MARKETS = { // below 1: made here, cheap. Above 1: wanted here.
 };
 function stMarketPrice(mk, g) { // today's price: the market's need, plus a daily swing
   const day = Math.floor(Date.now() / 864e5), i = Object.keys(ST_GOODS).indexOf(g), j = Object.keys(ST_MARKETS).indexOf(mk), h = Math.abs(Math.sin(day * 12.9898 + j * 78.233 + i * 37.719) * 43758.5453) % 1;
-  const buy = Math.max(2, Math.round(ST_GOODS[g][1] * ST_MARKETS[mk].m[g] * (.85 + h * .3)));
-  return {buy, sell: Math.max(1, Math.round(buy * .88))};
+  const buy = Math.max(2, Math.round(ST_GOODS[g][1] * (1 + (ST_MARKETS[mk].m[g] - 1) * .7) * (.88 + h * .24)));
+  return {buy, sell: Math.max(1, Math.round(buy * .82))};
 }
-const stCargoCap = () => 20 + ((stData().mounts || []).length ? 15 : 0);
+const stCargoCap = () => 14 + ((stData().mounts || []).length ? 10 : 0);
 const stCargoUsed = () => Object.values(stData().cargo || {}).reduce((a, b) => a + b, 0);
 function stTrade(mk) {
   if (stRepOf(stTownHere()) <= -60) return stSay([['', 'The stallholders turn their backs on you. Nobody here will trade with you.']]);
@@ -6527,7 +6527,7 @@ function stSocial(id) { // the bond panel: give a gift, spend time, and court th
   m.append(el('h3', '', `♥ ${name}`), el('p', '', `${lvl} · bond ${Math.max(0, Math.round(b.pts))}${next ? ` (${next[0]} for ${next[1]})` : ''}` + (S.romance || b.open ? ' · can be courted' : '')));
   const bar = el('div', 'bar bondbar'), fi = el('i'); fi.style.width = Math.min(100, Math.max(0, b.pts) / 1.3) + '%'; bar.appendChild(fi); m.appendChild(bar);
   const known = b.pts >= 40 || b.likesKnown; m.appendChild(el('p', 'hint', known ? `Loves: ${S.loves.map(k => (ST_MATS[k] || ST_GOODS[k] || [ST_MEALS[k] ? ST_MEALS[k].name : k])[0]).join(', ')}. Likes: ${S.likes.map(k => k === 'fish' ? 'any fish' : (ST_MATS[k] || ST_GOODS[k] || [ST_MEALS[k] ? ST_MEALS[k].name : k])[0]).join(', ')}.` : 'Become friends to learn what they love. Until then, try gifts and watch how they react.'));
-  const perks = [b.pts >= 40 && 'Friend: they share their story', b.pts >= 80 && 'Close Friend: they fight harder for you (+3% to all your stats)', b.pts >= 130 && 'Best Friend: a small gift for you every day'].filter(Boolean);
+  const perks = [b.pts >= 40 && 'Friend: they share their story', b.pts >= 80 && 'Close Friend: they fight harder for you (+2% to all your stats)', b.pts >= 130 && 'Best Friend: a small gift for you every day'].filter(Boolean);
   if (perks.length) m.appendChild(el('p', 'hint', perks.join(' · ')));
   const row = el('div', 'row'), btn = (l, fn, dis) => { const x = el('button', '', l); x.disabled = !!dis; x.addEventListener('click', fn); row.appendChild(x); return x; };
   btn(b.gift === stToday() ? 'Gift given today' : 'Give a gift', () => stGiftMenu(id), b.gift === stToday());
@@ -6553,7 +6553,7 @@ function stSocial(id) { // the bond panel: give a gift, spend time, and court th
   if (d.romance === id && !d.spouse) btn(d.items.ring ? 'Propose with the Moonsilver Ring' : 'Propose (needs a Moonsilver Ring)', () => {
     if (b.pts < 130) return stSay([[name, 'Ask me again when we have been through a little more together.'], ['', `Bond ${Math.round(b.pts)} of 130.`]], () => stSocial(id));
     d.items.ring--; d.spouse = id; d.romance = null; sfx('evolve'); stCallout(`You married ${name}!`, '#ff8aa8'); stCloseMenu();
-    stSay([['', `In the ash-grey light of the shrine, before Maren and half the village, you and ${name} are wed. Someone cries. It might be Old Tam.`], ['', `Beloved's Blessing: +5% to all your stats, and your spouse tends your wounds after every battle.`]], () => stSocial(id));
+    stSay([['', `In the ash-grey light of the shrine, before Maren and half the village, you and ${name} are wed. Someone cries. It might be Old Tam.`], ['', `Beloved's Blessing: +4% to all your stats, and your spouse tends your wounds after every battle.`]], () => stSocial(id));
   }, !d.items.ring);
   if (d.romance === id || d.spouse === id) btn(d.spouse === id ? 'Part ways' : 'End the courtship', () => { stCloseMenu(); stSay([['', `Are you sure? ${name} will not forget it.`]], null, [['Yes, part ways', () => { if (d.spouse === id) d.spouse = null; d.romance = null; stBondAdd(id, -40); }], ['No', () => stSocial(id)]]); });
   btn('Done', stCloseMenu);
@@ -6604,7 +6604,7 @@ const ST_LORE = [
 const ST_GUIDE = [
   ['Controls', 'Move with WASD, the arrows, the left stick or the on-screen pad. E or A interacts. M opens the menu, J this journal, R rides your mount. In battle, pick an action with the buttons.'],
   ['Combat', 'Attack hits one enemy. Skills are stronger and cost MP; they grow stronger and evolve the more you use them. Items heal. Defend halves the damage you take. The faster fighter dodges more. Fill the Rage meter and press RAGE! for a burst of power.'],
-  ['Wounds and death', 'Hard hits can make you bleed, sever a limb or pierce you. Potions stop bleeding; shrines and inns heal everything. Die, and you drop your gold where you fell: walk back to pick it up.'],
+  ['Wounds and death', 'Hard hits can make you bleed or sever a limb. Potions stop bleeding; shrines and inns heal everything. Die, and you drop your gold where you fell: walk back to pick it up.'],
   ['Levels and danger', 'Every region shows its level. Dungeons and bosses will not let you in below their level. The Ashen Vale runs from level 1 to 25, Valdris 26 to 40, and Aetherfall 41 to 55.'],
   ['The Guild', 'Join at the Guild Hall in Thornwake. Take one quest at a time from the board. Earn standing, then sit an exam with the Guildmaster to rise from D to S-Rank. Some lands are guild territory.'],
   ['Travel', 'Coaches run between towns. Ships sail from Saltmere to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Garth sells mounts, and breeds them in pairs.'],
@@ -6867,7 +6867,7 @@ function stDrawDungeonCanvas(key) {
     const px = x * ST_TILE, py = y * ST_TILE;
     g.fillStyle = t === '#' ? D.theme.wall : D.theme.floor; g.fillRect(px, py, ST_TILE, ST_TILE);
     if (t !== '#') { g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 2; g.strokeRect(px + 1, py + 1, 31, 31); g.strokeRect(px + 33, py + 33, 30, 30); if (R() < .15) { g.fillStyle = '#d8d0c0'; g.fillRect(px + R() * 50, py + R() * 50, 8, 3); }
-      if (R() < .12 && !D.home && !D.holy) { g.fillStyle = 'rgba(110,10,14,.7)'; g.beginPath(); g.ellipse(px + 16 + R() * 32, py + 16 + R() * 32, 8 + R() * 14, 5 + R() * 8, R() * 3, 0, 7); g.fill(); for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(px + R() * 64, py + R() * 64, 1.5 + R() * 2, 0, 7); g.fill(); } } }
+      if (R() < .07 && !D.home && !D.holy) { g.fillStyle = 'rgba(110,10,14,.7)'; g.beginPath(); g.ellipse(px + 16 + R() * 32, py + 16 + R() * 32, 8 + R() * 14, 5 + R() * 8, R() * 3, 0, 7); g.fill(); for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(px + R() * 64, py + R() * 64, 1.5 + R() * 2, 0, 7); g.fill(); } } }
     else { g.fillStyle = 'rgba(255,255,255,.04)'; g.fillRect(px, py, ST_TILE, 10); }
     if (t === 'f') { g.fillStyle = '#4a4440'; g.fillRect(px + 4, py + 4, 56, 56); g.fillStyle = '#1a1210'; g.fillRect(px + 14, py + 24, 36, 32); g.fillStyle = '#ff7a2a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 30; g.beginPath(); g.moveTo(px + 20, py + 56); g.lineTo(px + 32, py + 28); g.lineTo(px + 44, py + 56); g.fill(); g.shadowBlur = 0; }
     if (t === 'b') { g.fillStyle = '#4a2a18'; g.fillRect(px + 6, py + 4, 52, 58); g.fillStyle = '#8a2a2a'; g.fillRect(px + 9, py + 22, 46, 38); g.fillStyle = '#e8e0d0'; g.fillRect(px + 12, py + 8, 40, 12); }
@@ -6949,6 +6949,7 @@ function startStory(fresh) {
   const d = stData(); d.map = d.map || 'world'; if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
   if (d.map !== 'world') { const px = d.x, py = d.y; stEnterMap(d.map, 2, 2); d.x = px; d.y = py; }
   ST.cam.x = d.x; ST.cam.y = d.y; musicStart(); musicForce(stMapSong());
+  if (d.wounds && d.wounds.hole) delete d.wounds.hole; // stab holes were removed from the game
   if (d.tut == null) { d.tut = 99; d.flags.tutDone = true; } // stories begun before the tutorial skip it
   if (d.tut > 0 && d.tut < 99 && !fresh) { ST.tut = Object.assign(stTutPos(d.tut), {seg: 0, wait: false}); }
   if (fresh) stSay([
@@ -7443,7 +7444,7 @@ function stStartBattle(foes, bossId, tile) {
   const s = stStats(), d = stData();
   const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06);
   ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
-    foes: foes.map((k, i) => { const F = ST_FOES[k], bs = bossId && ST_BOSS_SCALE[k] || 1; const hp = Math.round(F.hp * (1 + lvl) * bs); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl) * bs, xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
+    foes: foes.map((k, i) => { const F = ST_FOES[k], bs = bossId && ST_BOSS_SCALE[k] || [1, 1]; const hp = Math.round(F.hp * (1 + lvl) * bs[0]); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl) * bs[1], xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
     ally: d.flags.liora ? {name: 'Liora', hp: 80 + 12 * d.lv, maxHp: 80 + 12 * d.lv, atk: 10 + 2 * d.lv + (d.flags.lioraOath ? 6 : 0)} : null};
   ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
   STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
@@ -7565,7 +7566,7 @@ function stWound(who, u, kind, crit, rk, beam) { // u.w: {bleed, maim, hole}; th
     w.maim = true; if (who !== 'p') u.atk *= .7;
     STFX.limbs.push({x: x + side * 14, y: y - 55, vx: -side * rand(120, 220), vy: -rand(220, 320), rot: 0, vr: rand(-12, 12), gy: y + rand(6, 18), color: u.color || '#9a7a6a'});
     stGore(who, 30, true); stNum(who, 'SEVERED', '#ff3a3a', true, 40); sfx('crack');
-  } else if ((beam || crit) && !w.hole) { w.hole = true; if (who !== 'p') u.def *= .6; stGore(who, 24, true); stNum(who, 'PIERCED', '#ff5a3a', true, 40); }
+  } else if (beam || crit) { w.bleed = 4; stGore(who, 14, true); stNum(who, 'DEEP WOUND', '#ff5a3a', true, 40); }
   else { w.bleed = 3; stNum(who, 'Bleeding', '#ff6a6a', false, 40); }
 }
 // Buffs and debuffs: what is on you or on a foe right now, with turns left
@@ -7586,7 +7587,6 @@ function stStatus(who) {
     if (b.defending) add('Braced', 0, true, '#cfd8e0', 'Defending: half damage from the next hits');
     if (w.bleed) add('Bleed', w.bleed, false, '#ff4a4a', 'Losing health every turn. A potion stops it.');
     if (w.maim) add('Severed', 0, false, '#c0392b', 'Arm severed: -20% attack until you rest');
-    if (w.hole) add('Pierced', 0, false, '#e0605a', 'Pierced: -25% defense until you rest');
   } else {
     const f = who, w = f.w || {};
     if (f.guard) add('Guard', f.guard, true, '#ffd75e', 'Takes half damage');
@@ -7596,7 +7596,6 @@ function stStatus(who) {
     if (f.frozen) add('Frozen', f.frozen, false, '#9fe6ff', 'Loses its next turn');
     if (w.bleed) add('Bleed', w.bleed, false, '#ff4a4a', 'Bleeding every turn');
     if (w.maim) add('Severed', 0, false, '#c0392b', '-30% attack');
-    if (w.hole) add('Pierced', 0, false, '#e0605a', '-40% defense, easier to crit');
   }
   return L;
 }
@@ -7616,27 +7615,21 @@ function stBadges(list, x, y, now) { // a row of small pills; buffs have a brigh
 }
 function stWoundDraw(w, x, y, sc, side, tall, now) { // a hole through the chest, a spurting stump, dripping blood
   if (!w) return; const ty = y - (tall ? 31 : 26) * sc;
-  if (w.hole) {
-    const r = 9 * sc, g = ctx.createRadialGradient(x, ty, 1, x, ty, r * 1.7);
-    g.addColorStop(0, '#000'); g.addColorStop(.5, '#14000a'); g.addColorStop(.78, '#8a0a12'); g.addColorStop(1, 'rgba(138,10,18,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, ty, r * 1.6, r * 1.9, 0, 0, 7); ctx.fill();
-    ctx.fillStyle = '#7a0a10'; ctx.fillRect(x - 2, ty + r, 4, (6 + (now * 18) % 16) * sc);
-  }
   if (w.maim) {
     const sx = x + side * 13 * sc, sy = y - (tall ? 44 : 32) * sc;
     ctx.fillStyle = '#5a0008'; ctx.beginPath(); ctx.arc(sx, sy, 6 * sc, 0, 7); ctx.fill(); ctx.fillStyle = '#d8c8b8'; ctx.beginPath(); ctx.arc(sx, sy, 2 * sc, 0, 7); ctx.fill();
-    if (Math.random() < .4) STFX.parts.push({x: sx, y: sy, vx: side * rand(30, 120), vy: -rand(30, 150), t: 0, life: rand(.4, .7), color: '#a3121a', r: rand(1.5, 3.5)});
+    if (Math.random() < .22) STFX.parts.push({x: sx, y: sy, vx: side * rand(30, 120), vy: -rand(30, 150), t: 0, life: rand(.4, .7), color: '#a3121a', r: rand(1.5, 3.5)});
   }
   if (w.bleed) {
     ctx.fillStyle = 'rgba(140,8,14,.75)'; ctx.fillRect(x - 6 * sc, ty - 4 * sc, 3 * sc, 20 * sc); ctx.fillRect(x + 4 * sc, ty + 2 * sc, 2 * sc, 14 * sc);
-    if (Math.random() < .3) STFX.parts.push({x: x + rand(-8, 8) * sc, y: ty + 10 * sc, vx: 0, vy: 20, t: 0, life: .6, color: '#8a0a10', r: 2});
+    if (Math.random() < .18) STFX.parts.push({x: x + rand(-8, 8) * sc, y: ty + 10 * sc, vx: 0, vy: 20, t: 0, life: .6, color: '#8a0a10', r: 2});
   }
 }
 function stBeam(from, to, color, onHit) { STFX.beams.push({from, to, color, t: 0, dur: .6, onHit}); sfx('kiblast'); }
 function stGore(who, n = 10, pool) { // blood spray, and a pool on the ground
-  const [x, y] = stPos(who);
+  const [x, y] = stPos(who); n = Math.round(n * .6); if (pool !== true && Math.random() < .35) pool = false; // toned down: fewer drops, fewer pools
   for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + rand(-1.4, 1.4), v = rand(80, 260); STFX.parts.push({x, y: y - 45, vx: Math.cos(a) * v + (who === 'p' || who === 'a' ? -60 : 60), vy: Math.sin(a) * v, t: 0, life: rand(.5, .9), color: Math.random() < .5 ? '#a3121a' : '#6a0a0f', r: rand(2, 4.5)}); }
-  STFX.pools = STFX.pools || []; if (pool !== false) STFX.pools.push({x: x + rand(-20, 20), y: y + rand(4, 14), r: rand(12, 22) * (pool ? 1.8 : 1), rot: Math.random() * 3});
+  STFX.pools = STFX.pools || []; if (pool !== false) STFX.pools.push({x: x + rand(-20, 20), y: y + rand(4, 14), r: rand(10, 18) * (pool ? 1.45 : 1), rot: Math.random() * 3});
 }
 function stEffectsDraw(dt) {
   const L = STFX.effects || [];
@@ -7758,6 +7751,7 @@ function stCalloutDraw(dt) {
 const SK_FX = {flash: 'slash', crush: 'slash', bloodfeast: 'tendril', strike: 'slash', fireball: 'shards', frost: 'shards', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril'};
 const SK_COLOR = {flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
 function stLog(t) { if (ST.battle) ST.battle.log = t; $('stLog').textContent = t; }
+const stSkCost = S => Math.round(S.mp * (1 + (stData().lv - 1) * .035)); // skills grow pricier with your mana pool
 const stDmg = (base, def) => Math.max(1, Math.round(base * (.9 + Math.random() * .2) - def * .5));
 function stRenderBattle(picking) {
   const b = ST.battle, d = stData(), s = stStats();
@@ -7783,12 +7777,12 @@ function stRenderBattle(picking) {
     btn('Back', () => stRenderBattle());
   } else if (ST.sub === 'skills') {
     act.appendChild(el('small', '', 'Skills'));
-    for (const id of d.skills) { const S = ST_SKILLS[id], sealed = d.hr && (S.kind === 'mag' || S.kind === 'heal'); btn(sealed ? `${stSkName(id)} (sealed)` : `${stSkName(id)} ${'★'.repeat(stRank(id))} · ${S.mp} MP`, () => stUseSkill(id), d.mp < S.mp || sealed).title = `${S.desc} Mastery: ${stMasteryText(id)}.` + (ST_BEAMS[id] ? ' Evolves into a beam that can obliterate.' : ''); }
+    for (const id of d.skills) { const S = ST_SKILLS[id], sealed = d.hr && (S.kind === 'mag' || S.kind === 'heal'); btn(sealed ? `${stSkName(id)} (sealed)` : `${stSkName(id)} ${'★'.repeat(stRank(id))} · ${stSkCost(S)} MP`, () => stUseSkill(id), d.mp < stSkCost(S) || sealed).title = `${S.desc} Mastery: ${stMasteryText(id)}.` + (ST_BEAMS[id] ? ' Evolves into a beam that can obliterate.' : ''); }
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else if (ST.sub === 'items') {
     act.appendChild(el('small', '', 'Items'));
-    btn(`Potion ×${d.items.potion} (+60 HP)`, () => stItem('potion'), !d.items.potion);
-    btn(`Ether ×${d.items.ether} (+30 MP)`, () => stItem('ether'), !d.items.ether);
+    btn(`Potion ×${d.items.potion} (+30% HP)`, () => stItem('potion'), !d.items.potion);
+    btn(`Ether ×${d.items.ether} (+30% MP)`, () => stItem('ether'), !d.items.ether);
     for (const k in ST_MEALS) if (d.items[k]) btn(`${ST_MEALS[k].name} ×${d.items[k]} (${ST_MEALS[k].desc})`, () => stItem(k));
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else {
@@ -7808,7 +7802,7 @@ function stPlayerHit(f, base, kind, extra, color) {
   const sk = ST.curSkill || 'attack', rk = stRank(sk), beam = kind === 'mag' && rk >= 2 && ST_BEAMS[sk];
   base *= 1 + .2 * rk; stMaster(sk);
   const dmg0 = stDmg(base, kind === 'mag' ? f.def * .5 : f.def), dmg = f.guard ? Math.round(dmg0 / 2) : dmg0;
-  const crit = Math.random() < .08 + .06 * rk + (f.w && f.w.hole ? .1 : 0) + (ST.battle.buffs.rage ? .2 : 0), total = crit ? Math.round(dmg * (1.5 + .4 * rk)) : dmg; // grinding a move makes its criticals brutal
+  const crit = Math.random() < .08 + .06 * rk + (ST.battle.buffs.rage ? .2 : 0), total = crit ? Math.round(dmg * (1.5 + .4 * rk)) : dmg; // grinding a move makes its criticals brutal
   const SK = ST_SKILLS[sk], sure = SK && SK.sure;
   const land = () => {
     const before = f.hp; ST.curSkill = null;
@@ -7843,26 +7837,26 @@ function stPlayerHit(f, base, kind, extra, color) {
 }
 function stUseSkill(id) {
   const S = ST_SKILLS[id], d = stData(), s = stStats(), b = ST.battle;
-  if (d.mp < S.mp) return;
+  if (d.mp < stSkCost(S)) return; const COST = stSkCost(S);
   const nm = stSkName(id); stCallout(`${d.name}: "${nm}!"`, SK_COLOR[id] || '#ffe9a8');
   const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag * (b.buffs.vamp ? 1.5 : 1) : s.atk * stAtkMul(b)) * (S.mult || 1) * (S.kind === 'heal' || S.all ? 1 + .2 * stRank(id) : 1);
   if (S.kind === 'heal' || S.kind === 'buff' || S.all) stMaster(id);
   if (S.kind === 'heal') {
-    d.mp -= S.mp; const h = Math.round(power + 10); d.hp = Math.min(s.hp, d.hp + h); if (b.ally) { b.ally.hp = Math.min(b.ally.maxHp, b.ally.hp + h * .7); stNum('a', '+' + Math.round(h * .7), '#6be08a'); stBurst('a', '#6be08a', 12); }
+    d.mp -= COST; const h = Math.round(power + 10); d.hp = Math.min(s.hp, d.hp + h); if (b.ally) { b.ally.hp = Math.min(b.ally.maxHp, b.ally.hp + h * .7); stNum('a', '+' + Math.round(h * .7), '#6be08a'); stBurst('a', '#6be08a', 12); }
     if (d.wounds && stRank(id) >= 2) d.wounds = null; // Sacred Light and Rebirth close wounds
     stAnim('p', 'cast'); stEffect('pillar', 'p', '#fff3c9'); stBurst('p', '#6be08a', 22); stNum('p', '+' + h, '#6be08a', true); sfx('shield'); stLog(`${nm} restores ${h} health.`); ST.sub = null; return setTimeout(stEndTurn, 450);
   }
-  if (S.kind === 'buff') { d.mp -= S.mp; b.buffs[S.buff] = S.buff === 'guard' || S.buff === 'mist' ? 2 : 3; if (S.buff === 'wolf') { stTransformFx('p', '#cfd8e0', 'THE BEAST AWAKENS'); stGrunt('boss', true, 'wolf'); }
+  if (S.kind === 'buff') { d.mp -= COST; b.buffs[S.buff] = S.buff === 'guard' || S.buff === 'mist' ? 2 : 3; if (S.buff === 'wolf') { stTransformFx('p', '#cfd8e0', 'THE BEAST AWAKENS'); stGrunt('boss', true, 'wolf'); }
     if (S.buff === 'vamp') { stTransformFx('p', '#c0102a', 'BLOOD ASCENDANT'); stGrunt(stSex('p'), true, 'vamp'); } if (S.buff === 'mist') stEffect('cloud', 'p', '#c08a9a'); stAnim('p', 'cast'); stEffect('aura', 'p', S.buff === 'guard' ? '#7fd1c7' : '#ff5a1f'); stBurst('p', S.buff === 'guard' ? '#7fd1c7' : '#ff6a4d', 22); stNum('p', S.buff === 'guard' ? 'Defense up' : 'Attack up', '#ffd75e'); sfx('shield'); stLog(S.buff === 'guard' ? 'Your defense doubles!' : 'Your attack surges!'); ST.sub = null; return setTimeout(stEndTurn, 450); }
   if (S.all) {
-    d.mp -= S.mp; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
+    d.mp -= COST; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
     for (const f of b.foes) if (f.hp > 0) {
       const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def); total += dm; left++;
       stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } f.hp -= dm; f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff'); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
     }
     sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
-  stPick(f => { d.mp -= S.mp; ST.curSkill = id; stPlayerHit(f, power, S.kind, (t, dm) => {
+  stPick(f => { d.mp -= COST; ST.curSkill = id; stPlayerHit(f, power, S.kind, (t, dm) => {
     if (S.burn) t.burn = 2; if (S.poison) t.poison = 3; if (S.slow && Math.random() < .5) { t.frozen = 1; stNum(t.id, 'Frozen', '#9fe6ff'); }
     if (S.drain) { d.hp = Math.min(s.hp, d.hp + Math.round(dm / 2)); stNum('p', '+' + Math.round(dm / 2), '#6be08a'); stBurst('p', '#b06bff', 10); }
   }, SK_COLOR[id]); });
@@ -7870,10 +7864,10 @@ function stUseSkill(id) {
 function stItem(k) {
   const d = stData(), s = stStats(); if (!d.items[k]) return;
   d.items[k]--; const ML = ST_MEALS[k];
-  if (ML) { d.hp = Math.min(s.hp, d.hp + ML.hp); if (ML.mp) d.mp = Math.min(s.mp, d.mp + ML.mp); if (ML.cure && d.wounds) d.wounds.bleed = 0; stBurst('p', '#ffb35a', 18); stNum('p', '+' + ML.hp, '#6be08a', true); sfx('pickup'); stLog(`You eat ${ML.name}. ${ML.desc}.`); ST.sub = null; return stEndTurn(); }
-  if (k === 'potion') { d.hp = Math.min(s.hp, d.hp + 60); if (d.wounds) d.wounds.bleed = 0; } else d.mp = Math.min(s.mp, d.mp + 30);
-  stBurst('p', k === 'potion' ? '#e0405a' : '#7aa9ff', 16); stNum('p', k === 'potion' ? '+60' : '+30 MP', k === 'potion' ? '#6be08a' : '#9fc0ff');
-  sfx('pickup'); stLog(k === 'potion' ? 'You drink a potion. +60 HP.' : 'You drink an ether. +30 MP.'); ST.sub = null; stEndTurn();
+  if (ML) { d.hp = Math.min(s.hp, d.hp + Math.max(ML.hp, Math.round(s.hp * ML.hp / 400))); if (ML.mp) d.mp = Math.min(s.mp, d.mp + ML.mp); if (ML.cure && d.wounds) d.wounds.bleed = 0; stBurst('p', '#ffb35a', 18); stNum('p', '+' + ML.hp, '#6be08a', true); sfx('pickup'); stLog(`You eat ${ML.name}. ${ML.desc}.`); ST.sub = null; return stEndTurn(); }
+  if (k === 'potion') { d.hp = Math.min(s.hp, d.hp + Math.max(60, Math.round(s.hp * .3))); if (d.wounds) d.wounds.bleed = 0; } else d.mp = Math.min(s.mp, d.mp + Math.max(30, Math.round(s.mp * .3)));
+  stBurst('p', k === 'potion' ? '#e0405a' : '#7aa9ff', 16); stNum('p', k === 'potion' ? '+' + Math.max(60, Math.round(s.hp * .3)) : '+' + Math.max(30, Math.round(s.mp * .3)) + ' MP', k === 'potion' ? '#6be08a' : '#9fc0ff');
+  sfx('pickup'); stLog(k === 'potion' ? 'You drink a potion. 30% of your health returns.' : 'You drink an ether. 30% of your mana returns.'); ST.sub = null; stEndTurn();
 }
 function stEndTurn() {
   const b = ST.battle; if (b.foes.every(f => f.hp <= 0)) return stEndBattle('won');
@@ -8009,7 +8003,7 @@ function stEndBattle(result) {
 const ST_ZONE_LV = {'.': 1, '=': 1, v: 1, T: 2, F: 1, B: 1, ':': 4, '*': 7, b: 9, g: 11, C: 12, a: 15};
 const ST_MAP_LV = {catacomb: 4, crypt: 7, keep: 12, duskwatch: 15, stair: 18, isles: 10, rouge: 20, vcrypt: 23};
 const ST_BOSS_LV = {golem: 4, drake: 7, brother: 9, stalker: 10, king: 13, mara: 12, ysolde: 14, garrick: 14, witch: 16, seraphiel: 19, marquis: 22, countess: 25, ignaroth: 40, unmaker: 55, examC: 8, examB: 18, examA: 30, examS: 42};
-const ST_BOSS_SCALE = {golem: 1.3, drake: 1.4, brother: 1.5, stalker: 1.6, king: 1.6, mara: 1.5, ysolde: 1.55, garrick: 1.55, witch: 1.6, seraphiel: 1.7, marquis: 1.6, countess: 1.65}; // the old bosses toughened to match their new levels
+const ST_BOSS_SCALE = {golem: [1.4, 1.2], drake: [1.65, 1.15], brother: [2.4, 1.6], stalker: [2.8, 1.85], king: [2.6, 1.6], mara: [2.05, 1.75], ysolde: [2.75, 1.8], garrick: [3.1, 1.95], witch: [4.4, 2.8], seraphiel: [3.4, 2.65], marquis: [2.55, 2.5], countess: [3.9, 2.6]}; // [health, attack] // the old bosses toughened to match their new levels
 const stZoneAt = (x, y) => { const D = ST_DUNGEONS[stData().map]; if (!D || !D.zones) return null; const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE); return D.zones.find(z => tx >= z.r[0] && tx <= z.r[2] && ty >= z.r[1] && ty <= z.r[3]) || D.zones[D.zones.length - 1]; };
 const stZoneLv = () => { const d = stData(), z = stZoneAt(d.x, d.y); return z ? z.lv : d.map === 'world' ? ST_ZONE_LV[stTileAt(d.x, d.y)] || 1 : ST_MAP_LV[d.map] || 1; };
 const stZoneKey = () => { const d = stData(), z = stZoneAt(d.x, d.y); return d.map === 'world' ? 'world:' + stTileAt(d.x, d.y) : z ? d.map + ':' + z.name : d.map; };
@@ -8031,7 +8025,7 @@ function stTrialChoice() { // the Heavenly Restriction: trade every spark of mag
 function stLearnSkill() {
   const d = stData(), opts = Object.keys(ST_SKILLS).filter(k => !d.skills.includes(k) && !ST_SKILLS[k].gift).slice(0, 3);
   if (!opts.length) return;
-  stSay([['', 'You feel new power stir. Choose an ability to learn.']], null, opts.map(k => [`${ST_SKILLS[k].name} (${ST_SKILLS[k].mp} MP)`, () => { d.skills.push(k); }]));
+  stSay([['', 'You feel new power stir. Choose an ability to learn.']], null, opts.map(k => [`${ST_SKILLS[k].name} (${stSkCost(ST_SKILLS[k])} MP)`, () => { d.skills.push(k); }]));
 }
 
 // ---- pause menu
@@ -8040,8 +8034,8 @@ function stOpenMenu() {
   const d = stData(), s = stStats(), m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
   m.append(el('h3', '', `${d.name} · Level ${d.lv} ${ST_CLASSES[d.cls].name}`),
     el('p', '', `HP ${Math.round(d.hp)}/${s.hp} · MP ${Math.round(d.mp)}/${s.mp} · Attack ${Math.round(s.atk)} · Magic ${Math.round(s.mag)} · Defense ${Math.round(s.def)} · XP ${d.xp}/${stXpNeed(d.lv)} · ${d.gold} gold`),
-    el('h3', '', 'Abilities'), el('p', '', ['attack'].concat(d.skills).map(k => `${stSkName(k)}${k === 'attack' ? '' : ` (${ST_SKILLS[k].mp} MP)`}: ${stMasteryText(k)}`).join(' · ') + '. Use a move to master it. Mastered moves crit harder, open worse wounds, and fire magic as beams that can obliterate.'),
-    ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed (-20% attack)', d.wounds.hole && 'Pierced (-25% defense)'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
+    el('h3', '', 'Abilities'), el('p', '', ['attack'].concat(d.skills).map(k => `${stSkName(k)}${k === 'attack' ? '' : ` (${stSkCost(ST_SKILLS[k])} MP)`}: ${stMasteryText(k)}`).join(' · ') + '. Use a move to master it. Mastered moves crit harder, open worse wounds, and fire magic as beams that can obliterate.'),
+    ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed (-20% attack)'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
     el('h3', '', 'Bag'), el('p', '', `${d.items.potion} potions · ${d.items.ether} ethers` + (d.items.blade ? ' · Royal Blade' : '')),
     el('h3', '', 'Professions'), el('p', '', ['fishing', 'mining', 'crafting', 'farming'].map(k => { const P = (d.prof || {})[k] || {lv: 1, xp: 0}; return `${ST_PROF_NAME[k]} ${P.lv} (${stProfTitle(P.lv)}, ${P.xp}/${20 + P.lv * 25} xp)`; }).join(' · ') + `. ${d.rod ? '' : 'Buy a fishing rod from Dunn in Saltmere. '}${d.pickaxe ? '' : 'Buy a pickaxe from Brann in Saltmere. '}Forge gear at Brann's, cook at any inn.`),
     el('h3', '', 'Materials'), el('p', '', Object.entries(d.mats || {}).filter(([, n]) => n).map(([k, n]) => `${n} ${ST_MATS[k][0]}`).join(' · ') || 'None yet. Fish and mine to gather them.'),
