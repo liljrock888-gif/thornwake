@@ -210,6 +210,25 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
 .rankbar{width:min(320px,80vw);margin:0 0 8px}
 .pline .tierdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
 
+#startScreen{position:fixed;inset:0;z-index:60;background:#05030a;overflow:hidden;transition:opacity .7s ease}
+#startScreen.gone{opacity:0;pointer-events:none}
+#posterCv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#startUi,#loadUi{position:absolute;left:0;right:0;bottom:max(7vh,calc(24px + env(safe-area-inset-bottom,0px)));display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 16px;text-align:center}
+#startUi{top:7vh;bottom:auto}
+.posterTitle{margin:0;font-family:var(--display);font-size:clamp(52px,13vw,132px);letter-spacing:.06em;line-height:1;background:linear-gradient(#fff3c9,#e8b04a 55%,#8a5a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 18px rgba(255,140,60,.45)) drop-shadow(0 2px 2px #000)}
+.posterSub{margin:0;font-family:var(--display);font-size:clamp(15px,2.6vw,24px);color:#f0d8b0;letter-spacing:.3em;text-transform:uppercase;text-shadow:0 2px 8px #000}
+.startPrompt{position:fixed;left:50%;bottom:max(12vh,calc(48px + env(safe-area-inset-bottom,0px)));transform:translateX(-50%);background:none;border:0;color:#fff3e0;font-family:var(--display);font-size:clamp(20px,4vw,32px);letter-spacing:.35em;text-transform:uppercase;cursor:pointer;text-shadow:0 0 18px rgba(255,170,80,.9),0 2px 4px #000;animation:startBlink 1.4s ease-in-out infinite}
+.startPrompt:focus-visible{outline:2px solid #ffd75e;outline-offset:8px}
+@keyframes startBlink{50%{opacity:.25}}
+.posterFoot{position:fixed;left:0;right:0;bottom:max(4vh,calc(16px + env(safe-area-inset-bottom,0px)));margin:0;font-size:13px;letter-spacing:.12em;color:rgba(240,216,176,.7);text-shadow:0 1px 3px #000}
+.sigil{width:64px;height:64px;border-radius:50%;border:3px solid rgba(255,200,120,.25);border-top-color:#ffb35a;animation:sigilSpin 1s linear infinite;box-shadow:0 0 30px rgba(255,140,60,.35)}
+@keyframes sigilSpin{to{transform:rotate(360deg)}}
+.lbar{width:min(440px,82vw);height:10px;border-radius:6px;background:rgba(0,0,0,.6);border:1px solid rgba(255,220,160,.3);overflow:hidden}
+.lbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8a3a10,#ffb35a,#fff3c9);box-shadow:0 0 12px #ffb35a}
+#loadPct{margin:0;color:#fff3e0;font-family:var(--display);letter-spacing:.2em;font-size:15px}
+#loadTip{margin:0;max-width:min(560px,90vw);color:#e0d0b8;font-size:14px;min-height:2.6em;text-shadow:0 1px 3px #000}
+.menuLogo{margin:0;font-family:var(--display);font-size:clamp(36px,8vw,58px);letter-spacing:.05em;background:linear-gradient(#fff3c9,#e8b04a 60%,#8a5a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 10px rgba(255,140,60,.35));text-align:center}
+.menuTag{margin:-2px 0 10px;text-align:center;font-family:var(--display);letter-spacing:.25em;text-transform:uppercase;font-size:13px;color:#d8c8a8}
 #card h1.bigtitle{font-size:clamp(44px,11vw,86px);padding:0 4px}
 .playbtn{font-size:30px;padding:14px 72px;margin-top:6px}
 .vol{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:15px;font-weight:600;padding:6px 4px}
@@ -407,6 +426,11 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
     <div class="lfoot"><p class="ltip" id="loadTip"></p><div class="lbar"><i id="loadFill"></i></div><p class="lpct" id="loadPct">0%</p></div>
   </div>
 
+  <div id="startScreen">
+    <canvas id="posterCv" aria-hidden="true"></canvas>
+    <div id="startUi"><h1 class="posterTitle">Thornwake</h1><p class="posterSub">Legends of the Ashen Vale</p><button id="startBtn" class="startPrompt">Press Start</button><p class="posterFoot">Arena battles · A dark story RPG · Mythic heroes</p></div>
+    <div id="loadUi" hidden><div class="sigil" aria-hidden="true"></div><div class="lbar"><i id="lbarFill"></i></div><p id="loadPct">Loading 0%</p><p id="loadTip"></p></div>
+  </div>
   <div id="overlay">
     <div id="card">
       <section class="screen" id="scr-title">
@@ -417,7 +441,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
       </section>
 
       <section class="screen" id="scr-main" hidden>
-        <h2>Main Menu</h2>
+        <h1 class="menuLogo">Thornwake</h1><p class="menuTag">Choose your path</p>
         <div class="menu">
           <button class="mbtn primary" id="m-new">New Game</button>
           <button class="mbtn" id="m-story">Story</button>
@@ -7507,6 +7531,63 @@ function frame(now) {
   if (G.started) drawPortrait(now / 1000);
   requestAnimationFrame(frame);
 }
+// ---------- start screen: an animated poster, Press Start, a loading page, then the main menu ----------
+const POSTER = {on: true, t0: performance.now(), embers: [], loading: false};
+const LOAD_TIPS = ['Grind a move to evolve it. Mastered magic fires as beams that can obliterate.', 'Rest at an Ashen Shrine to heal your wounds, even a severed arm.', 'Buy goods where they are made and sell them where they are wanted.', 'Some doors only open at night. Some only open for blood.', 'The faster fighter dodges more blows.', 'Rougemarais never sees the sun. Do not go there before level 12.', 'Fill your Rage meter, then unleash it.'];
+function drawPoster(now) { // original key art: a hero on a cliff under a blood moon, a castle, a cathedral, a dragon and a howling wolf
+  const c = $('posterCv'), W = innerWidth, H = innerHeight, r = Math.min(2, devicePixelRatio || 1);
+  if (c.width !== Math.round(W * r)) { c.width = Math.round(W * r); c.height = Math.round(H * r); }
+  const g = c.getContext('2d'), t = (now - POSTER.t0) / 1000, M = Math.min(W, H); g.setTransform(r, 0, 0, r, 0, 0);
+  const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#08051a'); sky.addColorStop(.42, '#3a0f32'); sky.addColorStop(.66, '#c4502a'); sky.addColorStop(.8, '#4a1418'); sky.addColorStop(1, '#0a0508'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 70; i++) { g.fillStyle = `rgba(255,250,235,${(.3 + Math.sin(t * 1.5 + i) * .25) * (1 - (i * 61 % 100) / 140)})`; g.fillRect((i * 197.3) % W, (i * 83.1) % (H * .4), 1.6, 1.6); } // stars
+  const mx = W * .5, my = H * .38, mr = M * .24, glow = g.createRadialGradient(mx, my, mr * .6, mx, my, mr * 2.4); glow.addColorStop(0, 'rgba(255,190,140,.5)'); glow.addColorStop(1, 'rgba(255,120,80,0)'); g.fillStyle = glow; g.fillRect(0, 0, W, H);
+  const mg = g.createRadialGradient(mx - mr * .3, my - mr * .3, mr * .1, mx, my, mr); mg.addColorStop(0, '#fff1dc'); mg.addColorStop(1, '#e8a07a'); g.fillStyle = mg; g.beginPath(); g.arc(mx, my, mr, 0, 7); g.fill();
+  g.fillStyle = 'rgba(160,80,70,.25)'; for (const [a, b, rr] of [[-.3, -.2, .16], [.25, .1, .2], [-.1, .35, .12], [.4, -.35, .09]]) { g.beginPath(); g.arc(mx + a * mr, my + b * mr, rr * mr, 0, 7); g.fill(); } // craters
+  for (let i = 0; i < 4; i++) { const cx = ((t * (14 + i * 6) + i * W * .4) % (W + 600)) - 300, cy = my + (i - 1.5) * mr * .45; g.fillStyle = `rgba(30,10,30,${.55 - i * .08})`; g.beginPath(); g.ellipse(cx, cy, 220 + i * 40, 18 + i * 4, 0, 0, 7); g.fill(); } // clouds over the moon
+  const dk = Math.sin(t * .25) * .5 + .5, dx = W * (.2 + .6 * ((t * .04) % 1)), dy = H * .2 + Math.sin(t * .5) * 30, ds = M / 900, fl = Math.sin(t * 6) * .5; // a dragon on the wind
+  g.save(); g.translate(dx, dy); g.scale(ds, ds); g.fillStyle = 'rgba(10,4,12,.85)'; g.beginPath(); g.ellipse(0, 0, 60, 14, 0, 0, 7); g.fill(); g.beginPath(); g.moveTo(50, -4); g.quadraticCurveTo(80, -20, 96, -12); g.lineTo(80, 2); g.fill(); g.beginPath(); g.moveTo(-50, 0); g.quadraticCurveTo(-100, 10, -130, -10); g.lineTo(-56, 6); g.fill();
+  for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(-10, 0); g.quadraticCurveTo(-30, -90 * (sd > 0 ? 1 : .6) * (1 + fl * sd), -90, -60 * (1 + fl * sd)); g.lineTo(-40, -10); g.lineTo(20, -6); g.closePath(); g.fill(); } g.restore();
+  const far = H * .66; g.fillStyle = '#1c0a1a'; g.beginPath(); g.moveTo(0, H); for (let x = 0; x <= W; x += 24) g.lineTo(x, far - Math.abs(Math.sin(x * .006 + 1)) * H * .12 - Math.sin(x * .021) * 14); g.lineTo(W, H); g.fill(); // mountains
+  const cxL = W * .14, cyL = far - H * .04; g.fillStyle = '#100610'; // the Hollow Castle on its crag
+  g.beginPath(); g.moveTo(cxL - W * .14, H); g.lineTo(cxL - W * .08, cyL); g.lineTo(cxL + W * .1, cyL); g.lineTo(cxL + W * .16, H); g.fill();
+  for (const [ox, w, h] of [[-.06, .03, .16], [-.02, .05, .1], [.03, .03, .2], [.07, .025, .13]]) { const tx = cxL + ox * W, tw = w * W, th = h * H; g.fillRect(tx, cyL - th, tw, th); g.beginPath(); g.moveTo(tx - tw * .15, cyL - th); g.lineTo(tx + tw / 2, cyL - th - tw * 1.4); g.lineTo(tx + tw * 1.15, cyL - th); g.fill(); g.fillStyle = `rgba(176,107,255,${.6 + Math.sin(t * 2 + ox * 40) * .3})`; g.fillRect(tx + tw * .4, cyL - th * .7, tw * .2, th * .12); g.fillStyle = '#100610'; }
+  const cxR = W * .86, cyR = far - H * .02; g.fillStyle = '#12060c'; // Rougemarais' cathedral and rooftops
+  g.fillRect(cxR - W * .14, cyR - H * .05, W * .3, H); for (let i = 0; i < 7; i++) { const bx = cxR - W * .14 + i * W * .045, bh = H * (.05 + (i * 37 % 5) * .012); g.fillRect(bx, cyR - H * .05 - bh, W * .04, bh); g.fillStyle = `rgba(255,${90 + (i % 2) * 60},60,.7)`; g.fillRect(bx + W * .012, cyR - H * .05 - bh * .6, W * .008, H * .012); g.fillStyle = '#12060c'; }
+  for (const ox of [-.03, .03]) { g.fillRect(cxR + ox * W - W * .012, cyR - H * .26, W * .024, H * .22); g.beginPath(); g.moveTo(cxR + ox * W - W * .016, cyR - H * .26); g.lineTo(cxR + ox * W, cyR - H * .36); g.lineTo(cxR + ox * W + W * .016, cyR - H * .26); g.fill(); }
+  g.fillStyle = `rgba(192,16,42,${.7 + Math.sin(t * 1.3) * .2})`; g.beginPath(); g.arc(cxR, cyR - H * .14, W * .014, 0, 7); g.fill();
+  const rx = W * .67, ry = H * .72; g.fillStyle = '#0a0406'; g.beginPath(); g.moveTo(rx - W * .06, H); g.lineTo(rx - W * .02, ry); g.lineTo(rx + W * .04, ry + H * .02); g.lineTo(rx + W * .08, H); g.fill(); // a wolf howls from a rock
+  const ws = M / 520, wx = rx + W * .005, wy = ry; g.save(); g.translate(wx, wy); g.scale(ws, ws); g.fillStyle = '#0a0406'; g.beginPath(); g.ellipse(0, -16, 26, 12, -.2, 0, 7); g.fill(); g.beginPath(); g.moveTo(14, -24); g.lineTo(30, -58); g.lineTo(40, -60); g.lineTo(34, -50); g.lineTo(22, -18); g.fill(); g.beginPath(); g.moveTo(28, -56); g.lineTo(30, -66); g.lineTo(34, -58); g.fill(); g.fillRect(-20, -8, 5, 10); g.fillRect(12, -8, 5, 10); g.beginPath(); g.moveTo(-24, -18); g.quadraticCurveTo(-44, -14, -50, 0); g.lineTo(-24, -10); g.fill(); g.restore();
+  const hx = W * .5, hy = H * .78; g.fillStyle = '#07030a'; g.beginPath(); g.moveTo(W * .26, H); g.lineTo(W * .4, hy + H * .015); g.lineTo(W * .46, hy - H * .005); g.lineTo(W * .56, hy); g.lineTo(W * .62, hy + H * .03); g.lineTo(W * .78, H); g.fill(); // the hero's cliff
+  const beam = g.createLinearGradient(hx, 0, hx, hy); beam.addColorStop(0, 'rgba(255,240,200,0)'); beam.addColorStop(1, `rgba(255,230,180,${.16 + Math.sin(t * 1.2) * .05})`); g.fillStyle = beam; g.beginPath(); g.moveTo(hx - M * .05, 0); g.lineTo(hx + M * .05, 0); g.lineTo(hx + M * .16, hy); g.lineTo(hx - M * .16, hy); g.fill();
+  const hs = M / 330; g.save(); g.translate(hx, hy - 16 * hs); g.scale(hs, hs); g.translate(-hx, -(hy - 16 * hs)); drawCharacter(g, {look: 'knight', color: '#c9a24a', team: 0, level: 16, face: 0, x: hx, y: hy - 16 * hs, walk: 0, _lw: -1, atkT: 0, atkCd: 1, hitFlash: 0, id: 7}, t); g.restore();
+  if (POSTER.embers.length < 90) POSTER.embers.push({x: Math.random() * W, y: H + 10, v: 20 + Math.random() * 50, r: 1 + Math.random() * 2.2, ph: Math.random() * 6});
+  for (const e of POSTER.embers) { e.y -= e.v / 60; e.x += Math.sin(t + e.ph) * .4; g.fillStyle = `rgba(255,${140 + (e.ph * 20 | 0)},60,${Math.min(1, (e.y / H) * 1.4)})`; g.beginPath(); g.arc(e.x, e.y, e.r, 0, 7); g.fill(); }
+  POSTER.embers = POSTER.embers.filter(e => e.y > -10);
+  const vg = g.createRadialGradient(W / 2, H * .5, M * .3, W / 2, H * .5, Math.max(W, H) * .75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.7)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+}
+function posterLoop(now) {
+  if (!POSTER.on) return;
+  drawPoster(now);
+  if (!POSTER.loading) { const gp = readPad(); if (gp && gp.buttons[0] && gp.buttons[0].pressed && !POSTER.padHeld) pressStart(); POSTER.padHeld = !!(gp && gp.buttons[0] && gp.buttons[0].pressed); }
+  requestAnimationFrame(posterLoop);
+}
+function pressStart() { // Press Start: play a sound, show the loading page, then fade into the main menu
+  if (POSTER.loading) return; POSTER.loading = true; musicStart(); sfx('levelup');
+  $('startUi').hidden = true; $('loadUi').hidden = false;
+  let tip = Math.floor(Math.random() * LOAD_TIPS.length); $('loadTip').textContent = 'Tip: ' + LOAD_TIPS[tip];
+  const t0 = performance.now(), dur = 2200, fonts = document.fonts ? document.fonts.ready : Promise.resolve(); let fontsOk = false; fonts.then(() => { fontsOk = true; });
+  const step = () => {
+    const k = Math.min(1, (performance.now() - t0) / dur), p = fontsOk ? k : Math.min(k, .9); $('lbarFill').style.width = (p * 100) + '%'; $('loadPct').textContent = `Loading ${Math.round(p * 100)}%`;
+    if (k > .5 && tip >= 0) { tip = -1; $('loadTip').textContent = 'Tip: ' + LOAD_TIPS[(Math.floor(Math.random() * LOAD_TIPS.length))]; }
+    if (p < 1) return requestAnimationFrame(step);
+    show('scr-main'); $('startScreen').classList.add('gone'); setTimeout(() => { POSTER.on = false; $('startScreen').hidden = true; }, 750);
+  };
+  requestAnimationFrame(step);
+}
+$('startBtn').addEventListener('click', e => { e.stopPropagation(); pressStart(); });
+$('startScreen').addEventListener('pointerdown', () => { if (!POSTER.loading) pressStart(); });
+window.addEventListener('keydown', e => { if (!POSTER.on || POSTER.loading) return; if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); pressStart(); } }, true);
 reset(0); resize(); show('scr-title'); requestAnimationFrame(frame);
+if (location.hash === '#trailer') { POSTER.on = false; $('startScreen').hidden = true; } else { setTimeout(() => $('startBtn').focus({preventScroll: true}), 50); requestAnimationFrame(posterLoop); }
 })();
 </script>
