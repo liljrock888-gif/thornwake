@@ -310,6 +310,9 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stParty,#stActions{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 #stParty .pm{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:center;font-size:13px}
 #stParty .pm .bar{height:12px}
+.bar.rage i{background:linear-gradient(90deg,#8a1010,#ff3a2a)!important}.rageBtn{background:linear-gradient(#ff5a3a,#a01010)!important;color:#fff!important;font-weight:800;animation:ragePulse .6s infinite alternate}@keyframes ragePulse{to{box-shadow:0 0 18px #ff3a2a}}
+#stMenu .trade{display:grid;grid-template-columns:1.5fr .5fr .6fr .6fr 1fr auto;gap:4px 8px;align-items:center;font-size:13px;margin:6px 0;max-height:52vh;overflow:auto}#stMenu .trade .tbtn{display:flex;gap:3px}#stMenu .trade .tbtn button{padding:3px 7px;font-size:12px}#stMenu .trade .cheap{color:#8fe08a}#stMenu .trade .wanted{color:#ffb35a}#stMenu .trade .hint{color:#b8b0a0;font-size:12px}
+@media (max-width:600px){#stMenu .trade{grid-template-columns:1.3fr .4fr .5fr .5fr;}#stMenu .trade .hint,#stMenu .trade>b:nth-child(5){display:none}#stMenu .trade .tbtn{grid-column:1/-1}#stMenu .trade>b:nth-child(6){display:none}}
 .stChips{display:flex;flex-wrap:wrap;gap:4px}.stChips span{padding:1px 8px;border-radius:9px;font-size:12px;font-weight:700;background:rgba(10,8,12,.7);border:1px solid}.stChips .good{color:#7fe0c7;border-color:#7fe0c7}.stChips .bad{color:#ff7a6a;border-color:#ff7a6a}
 #stActions .row{display:flex;flex-wrap:wrap;gap:6px}
 #stActions button,#stMenu button,#stChoices button{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
@@ -2512,7 +2515,8 @@ function drawCharacter(c, u, now) {
   const blink = (now + u.id * .37) % 3.7 < .12, look = !A.moving && Math.sin(now * .7 + u.id) > .85 ? -2.5 : 0; // blinks and glances around
   c.fillStyle = eye; if (blink) c.fillRect(4 + look, -56.5, 4, 1.2); else { c.beginPath(); c.arc(6 + look, -56, 1.9, 0, 7); c.fill(); } c.shadowBlur = 0;
   drawHat(c, L, u, now, eye);
-  if (lv >= 14) {
+  if (u.horns) { c.fillStyle = '#1a0806'; for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(1 + sd * 4, -62); c.quadraticCurveTo(1 + sd * 14, -68, 1 + sd * 11, -82); c.lineTo(1 + sd * 8, -66); c.closePath(); c.fill(); } } // devil horns
+  if (lv >= 14 && !u.noHalo) {
     c.strokeStyle = '#ffe9a8'; c.shadowColor = '#ffe9a8'; c.shadowBlur = lv >= 17 ? 16 : 8; c.lineWidth = 2.5;
     c.beginPath(); c.ellipse(-1, -93, lv >= 17 ? 13 : 10, 3.5, 0, 0, 7); c.stroke(); c.shadowBlur = 0;
   }
@@ -5075,8 +5079,21 @@ function scheduleCrown(start) {
   });
   return start + ROOTS.length * bar;
 }
-const SONGS = [scheduleHiphop, scheduleMarch, scheduleEmber, scheduleDragonfire, scheduleVale, scheduleSteel, scheduleCrown];
-const SONG_VALE = 4, SONG_STEEL = 5, SONG_CROWN = 6;
+// Rougemarais: Bayou Noir, a slow swung blues with walking bass, brushed drums and a muted horn in G minor, 84 bpm.
+function scheduleBayou(start) {
+  const beat = 60 / 84, bar = beat * 4, sw = beat * .66, ROOTS = [43, 43, 48, 48, 43, 43, 50, 48], HORN = [[0, 70], [1, 72], [1.66, 73], [2, 74], [3, 77], [3.66, 74]];
+  ROOTS.forEach((root, b) => {
+    const bt = start + b * bar;
+    [0, 3, 5, 7].forEach((iv, i) => tone(bt + i * beat, root + iv, beat * .85, 'triangle', .06, 700)); // walking bass
+    kick(bt, .3); kick(bt + 2 * beat, .22);
+    for (const q of [1, 3]) { noiseHit(bt + q * beat, .1, .22, 'bandpass', 3200); for (const iv of [12, 15, 19, 22]) tone(bt + q * beat, root + iv, beat * .4, 'sine', .012, 1500); }
+    for (let q = 0; q < 4; q++) { noiseHit(bt + q * beat, .035, .12, 'highpass', 8000); noiseHit(bt + q * beat + sw, .025, .08, 'highpass', 8000); } // swung ride
+    if (b % 2 === 0) for (const [q, m] of HORN) tone(bt + q * beat, m - (b >= 4 ? 5 : 0), beat * .7, 'sawtooth', .028, 1400, true);
+  });
+  return start + ROOTS.length * bar;
+}
+const SONGS = [scheduleHiphop, scheduleMarch, scheduleEmber, scheduleDragonfire, scheduleVale, scheduleSteel, scheduleCrown, scheduleBayou];
+const SONG_VALE = 4, SONG_STEEL = 5, SONG_CROWN = 6, SONG_BAYOU = 7;
 // Sound can only start after the first click, which is usually Play, so the main menu keeps the title song too.
 const onTitle = () => !overlay.hidden && (currentScreen === 'scr-title' || currentScreen === 'scr-main');
 // The title screen and main menu loop the main theme; elsewhere each other song plays three times through, then the next one starts.
@@ -5313,10 +5330,24 @@ const ST_SKILLS = {
   heal:      {name: 'Heal', mp: 8, kind: 'heal', mult: 2.4, desc: 'Restores health to you and your ally.'},
   guard:     {name: 'Guard Up', mp: 5, kind: 'buff', buff: 'guard', desc: 'Double defense for 2 turns.'},
   rally:     {name: 'War Cry', mp: 6, kind: 'buff', buff: 'rally', desc: '+50% attack for 3 turns.'},
+  flash:     {name: 'Flash Step', mp: 4, kind: 'phys', mult: .95, twice: true, sure: true, gift: true, desc: 'Two blows too fast to dodge.'},
+  crush:     {name: 'Heaven\'s Crush', mp: 10, kind: 'phys', mult: 2.6, gift: true, desc: 'One perfect strike.'},
+  wolfform:  {name: 'Wolf Form', mp: 8, kind: 'buff', buff: 'wolf', gift: true, desc: 'Become the beast for 3 turns: +80% attack, claws that make enemies bleed.'},
+  howl:      {name: 'Blood Moon Howl', mp: 6, kind: 'buff', buff: 'rally', gift: true, desc: '+50% attack for 3 turns.'},
+  bloodfeast:{name: 'Blood Feast', mp: 9, kind: 'phys', mult: 1.6, drain: true, gift: true, desc: 'Bite deep and drink. Heals you for half the damage.'},
+  vampform:  {name: 'Blood Ascension', mp: 10, kind: 'buff', buff: 'vamp', gift: true, desc: 'Take your true form for 3 turns: +50% attack and magic, every blow heals you.'},
+  mist:      {name: 'Mist Form', mp: 7, kind: 'buff', buff: 'mist', gift: true, desc: 'Turn to mist for 2 turns: most attacks pass through you.'},
 };
 // Mastery: every use of a move counts. At 8, 20 and 40 uses it evolves: more damage, more criticals, worse wounds.
 const ST_RANK_AT = [0, 8, 20, 40];
 const ST_EVOLVE = {
+  flash:     ['Flash Step', 'Afterimage', 'Thousand Steps', 'Godspeed'],
+  crush:     ['Heaven\'s Crush', 'Sky Breaker', 'Heavenfall', 'Restriction Unbound'],
+  wolfform:  ['Wolf Form', 'Dire Form', 'Moonborn', 'Alpha of the Blood Moon'],
+  howl:      ['Blood Moon Howl', 'Pack Howl', 'Moon-Splitting Howl', 'Call of the Wild Hunt'],
+  bloodfeast:['Blood Feast', 'Crimson Feast', 'Sanguine Rapture', 'Feast of the Elder Blood'],
+  vampform:  ['Blood Ascension', 'Crimson Ascension', 'Night Sovereign', 'Elder Blood Unbound'],
+  mist:      ['Mist Form', 'Red Fog', 'Shroud of Nights', 'Thousand Bats'],
   attack:    ['Strike', 'Honed Strike', 'Butcher\'s Cut', 'Executioner\'s Edge'],
   strike:    ['Power Strike', 'Crushing Blow', 'Bonebreaker', 'Worldsplitter'],
   fireball:  ['Fireball', 'Greater Fireball', 'Inferno Beam', 'Sunfire Annihilation'],
@@ -5348,6 +5379,18 @@ const ST_FOES = {
   golem:   {name: 'Stone Golem', hp: 300, atk: 20, def: 10, spd: 4, xp: 120, gold: 80, draw: 'golem', boss: true},
   drake:   {name: 'Frost Drake', hp: 440, atk: 26, def: 10, spd: 9, xp: 200, gold: 120, draw: 'drake', boss: true},
   stalker: {name: 'The Gloam Stalker', hp: 340, atk: 24, def: 9, spd: 13, xp: 160, gold: 140, draw: 'hero', look: 'hunter', color: '#2a1f3d', boss: true},
+  thrall:   {name: 'Blood Thrall', hp: 130, atk: 24, def: 8, spd: 12, xp: 70, gold: 35, draw: 'hero', look: 'rogue', color: '#5a1a2a', lv: 8},
+  vampire:  {name: 'Noble Vampire', hp: 220, atk: 30, def: 11, spd: 16, xp: 110, gold: 70, draw: 'hero', look: 'warlock', color: '#8a0a2a', lv: 13, unholy: true},
+  marquis:  {name: 'Marquis Valcourt, the Crimson Prince', hp: 1100, atk: 40, def: 15, spd: 18, xp: 700, gold: 500, draw: 'hero', look: 'warlock', color: '#c0102a', lv: 18, boss: true, unholy: true},
+  countess: {name: 'Countess Isabeau Delacroix-Noir', hp: 1300, atk: 44, def: 16, spd: 18, xp: 900, gold: 400, draw: 'hero', look: 'witch', color: '#6a0a2a', lv: 18, boss: true, unholy: true},
+  werewolf: {name: 'Moonborn Werewolf', hp: 170, atk: 25, def: 8, spd: 14, xp: 72, gold: 30, draw: 'wolf', fur: '#5a4a3a'},
+  ysolde:   {name: 'Ysolde, Mother of the Pack', hp: 680, atk: 31, def: 10, spd: 16, xp: 380, gold: 120, draw: 'wolf', fur: '#9a9aa0', boss: true},
+  garrick:  {name: 'Garrick the Silver', hp: 620, atk: 30, def: 12, spd: 13, xp: 360, gold: 200, draw: 'hero', look: 'hunter', color: '#c8c8d0', lv: 12, boss: true},
+  seraph:   {name: 'Seraph Warden', hp: 150, atk: 23, def: 9, spd: 11, xp: 60, gold: 30, draw: 'hero', look: 'paladin', color: '#fff3c9', lv: 15},
+  cherub:   {name: 'Cherub of Judgment', hp: 80, atk: 17, def: 5, spd: 15, xp: 38, gold: 20, draw: 'hero', look: 'magicgirl', color: '#ffd75e', lv: 14},
+  seraphiel:{name: 'Seraphiel, the Sixfold Wing', hp: 720, atk: 32, def: 13, spd: 15, xp: 420, gold: 0, draw: 'hero', look: 'valkyrie', color: '#ffe9a8', lv: 18, boss: true},
+  imp:      {name: 'Brimstone Imp', hp: 65, atk: 16, def: 4, spd: 15, xp: 32, gold: 22, draw: 'hero', look: 'rogue', color: '#a01a1a', lv: 11, horns: true},
+  fiend:    {name: 'Horned Fiend', hp: 160, atk: 25, def: 9, spd: 9, xp: 64, gold: 45, draw: 'hero', look: 'brute', color: '#6a0a0a', lv: 12, horns: true},
   reefgob: {name: 'Reef Goblin', hp: 70, atk: 15, def: 5, spd: 9, xp: 30, gold: 18, draw: 'goblin'},
   corsair: {name: 'Corsair Cutthroat', hp: 95, atk: 19, def: 6, spd: 10, xp: 40, gold: 30, draw: 'hero', look: 'pirate', color: '#2a6a8a'},
   mara:    {name: 'Mara, the Corsair Queen', hp: 600, atk: 30, def: 11, spd: 12, xp: 300, gold: 250, draw: 'hero', look: 'pirate', color: '#c0392b', boss: true},
@@ -5357,10 +5400,11 @@ const ST_FOES = {
   brother: {name: 'Aldric, Liora\'s Brother', hp: 380, atk: 25, def: 11, spd: 9, xp: 170, gold: 60, draw: 'hero', look: 'valkyrie', color: '#4a5a6a', boss: true},
   king:    {name: 'The Hollow King', hp: 700, atk: 32, def: 14, spd: 10, xp: 400, gold: 300, draw: 'hero', look: 'warlock', color: '#7a1fff', boss: true},
 };
-const ST_ENCOUNTERS = {b: [['knight'], ['bandit', 'bandit'], ['cultist', 'bandit']], a: [['goblin', 'bandit'], ['cultist'], ['frostwolf', 'cultist']], g: [['bandit'], ['bandit', 'wolf'], ['frostwolf', 'bandit']], T: [['wolf'], ['wolf', 'pup'], ['pup', 'pup']], ':': [['goblin'], ['goblin', 'goblin'], ['bandit']], '*': [['frostwolf'], ['frostwolf', 'wolf']], C: [['knight'], ['knight', 'bandit']]};
-const ST_REGION = {b: 'The Bone Marsh', a: 'The Ashfall Dunes', g: 'The Gloamwood', T: 'The Thornwood', ':': 'Sunken Ruins', '*': 'Frost Peaks', C: 'Hollow Castle', v: 'Thornwake, the Last Lit Village', '.': 'The Ashen Vale', '=': 'The Ashen Vale', B: 'River Bridge', S: 'Ashen Shrine', D: 'Dungeon Entrance'};
-const ST_BLOCKED = new Set(['~', '^', 'H', 'h', 'I', 'U', 'K', '#', 'W', 'Q', 'L', 'M']);
-// Teleport crystals: touch one to attune it, then travel between any you've attuned
+const ST_ENCOUNTERS = {b: [['knight'], ['bandit', 'bandit'], ['cultist', 'bandit']], a: [['goblin', 'bandit'], ['cultist'], ['imp', 'imp'], ['fiend']], g: [['werewolf'], ['bandit'], ['bandit', 'wolf'], ['frostwolf', 'bandit']], T: [['wolf'], ['wolf', 'pup'], ['pup', 'pup']], ':': [['goblin'], ['goblin', 'goblin'], ['bandit']], '*': [['frostwolf'], ['frostwolf', 'wolf']], C: [['knight'], ['knight', 'bandit']]};
+const ST_REGION = {F: 'Farmland', O: 'Coach Post', b: 'The Bone Marsh', a: 'The Ashfall Dunes', g: 'The Gloamwood', T: 'The Thornwood', ':': 'Sunken Ruins', '*': 'Frost Peaks', C: 'Hollow Castle', v: 'Thornwake, the Last Lit Village', '.': 'The Ashen Vale', '=': 'The Ashen Vale', B: 'River Bridge', S: 'Ashen Shrine', D: 'Dungeon Entrance'};
+const ST_BLOCKED = new Set(['~', '^', 'H', 'h', 'I', 'U', 'K', '#', 'W', 'Q', 'L', 'M', 'O']);
+// Coach posts: pay a driver to ride between towns along the roads
+const ST_COACHES = [{id: 'thornwake', name: 'Thornwake', x: 17, y: 11}, {id: 'ravenhollow', name: 'Ravenhollow', x: 12, y: 22}, {id: 'saltmere', name: 'Saltmere', x: 31, y: 12}, {id: 'harrow', name: 'Harrowfield', x: 27, y: 23}, {id: 'dunes', name: 'Ashfall Waystation', x: 43, y: 15}];
 const ST_CRYSTALS = [
   {id: 'thornwake', name: 'Thornwake', x: 17, y: 11}, {id: 'ravenhollow', name: 'Ravenhollow', x: 12, y: 22}, {id: 'saltmere', name: 'Saltmere', x: 31, y: 12},
   {id: 'peaks', name: 'Frost Peaks', x: 11, y: 5}, {id: 'ruins', name: 'Sunken Ruins', x: 19, y: 13}, {id: 'marsh', name: 'Bone Marsh', x: 9, y: 28},
@@ -5392,8 +5436,11 @@ function stBuildMap() {
   for (let x = 0; x < ST_W; x++) { m[0][x] = '^'; m[ST_H - 1][x] = '^'; } for (let y = 0; y < ST_H; y++) { m[y][0] = '^'; m[y][ST_W - 1] = '^'; }
   for (const [x, y] of [[4, 16], [5, 16], [4, 17], [5, 17], [6, 17]]) m[y][x] = '~'; // pond
   for (const [x, y] of [[12, 11], [9, 12], [21, 14], [9, 4], [24, 8], [8, 21], [34, 11], [32, 20]]) m[y][x] = 'S'; // Ashen Shrines
-  m[16][24] = 'D'; m[2][4] = 'D'; m[9][44] = 'D'; // entrances: the catacombs, the ice crypt and Duskwatch Castle
-  for (const c of ST_CRYSTALS) m[c.y][c.x] = 'Q'; // teleport crystals
+  m[16][24] = 'D'; m[2][4] = 'D'; m[9][44] = 'D'; m[2][10] = 'D'; // entrances: the catacombs, the ice crypt and Duskwatch Castle
+  for (const c of ST_COACHES) m[c.y][c.x] = 'O'; // coach posts
+  fill(20, 21, 26, 25, 'v'); bld(21, 21, 'H'); bld(24, 21, 'H'); fill(20, 24, 26, 25, 'F'); // Harrowfield and its fields
+  for (let y = 22; y <= 23; y++) m[y][14] = '='; for (let x = 15; x <= 19; x++) m[23][x] = '='; m[23][27] = 'O';
+  fill(15, 15, 17, 17, 'F'); fill(6, 24, 8, 24, 'F'); // Thornwake's and Ravenhollow's fields
   for (let y = 14; y <= 17; y++) for (let x = 38; x <= 39; x++) m[y][x] = '~'; // Saltmere harbor
   m[16][37] = 'P'; m[13][39] = 'L'; m[19][12] = 'M'; // the pier, the lighthouse and Ravenhollow's windmill
   return m;
@@ -5444,7 +5491,7 @@ const ST_DUNGEONS = {
     '#..X..#..........#...#',
     '#.....#..........#...#',
     '######################']},
-  duskwatch: {name: 'Duskwatch Castle', boss: 'witch', lit: true, pool: [['cultist'], ['cultist', 'bandit'], ['knight', 'cultist']], theme: {floor: '#4a3a2c', wall: '#1e1610', glow: '#ff5a1f'}, exit: [44, 9], rows: [
+  duskwatch: {name: 'Duskwatch Castle', boss: 'witch', lit: true, pool: [['cultist'], ['imp', 'cultist'], ['fiend'], ['knight', 'imp']], theme: {floor: '#4a3a2c', wall: '#1e1610', glow: '#ff5a1f'}, exit: [44, 9], rows: [
     '######################',
     '#E.......#.......X..c#',
     '#........#..........##',
@@ -5490,9 +5537,54 @@ function stBuildIsles() { // two islands joined by a sandbar; Port Halcyon on th
   return m.map(r => r.join(''));
 }
 ST_DUNGEONS.isles = {name: 'The Brightwater Isles', outdoor: true, lit: true, boss: 'mara', pool: [['reefgob', 'reefgob'], ['corsair'], ['corsair', 'reefgob']], theme: {floor: '#5a8a3a', wall: '#1f6a8a', glow: '#ffe9a8'}, exit: [37, 15], rows: stBuildIsles()};
-const stMapSong = () => stData() && stData().map === 'isles' ? 2 : SONG_VALE;
-const ST_DOOR_AT = {'24,16': 'catacomb', '4,2': 'crypt', '44,9': 'duskwatch'};
-const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0, mara: 0};
+function stBuildRouge() { // townhouses with iron balconies, a cathedral, a cemetery and the bayou
+  const W = 40, H = 26, m = Array.from({length: H}, () => Array(W).fill('.'));
+  const fill = (x0, y0, x1, y1, c) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) m[y][x] = c; };
+  fill(0, 0, 1, H - 1, '#');
+  for (let x = 0; x < W; x++) { const y = 21 + Math.round(Math.sin(x * .35) * 1.2); for (let yy = y; yy < H; yy++) m[yy][x] = '#'; }
+  for (const [x0, y0, x1, y1] of [[4, 2, 9, 3], [12, 2, 17, 3], [28, 2, 33, 3], [4, 7, 9, 8], [12, 7, 17, 8], [28, 7, 35, 8], [4, 14, 9, 15], [12, 14, 17, 15]]) fill(x0, y0, x1, y1, 'H');
+  m[8][9] = 'I'; // the Velvet Lantern
+  fill(20, 2, 23, 4, 'a'); m[2][20] = 'A'; // the cathedral of Saint-Ombre
+  fill(35, 2, 38, 5, ','); for (const [x, y] of [[36, 3], [38, 4], [35, 5]]) m[y][x] = 'T';
+  fill(26, 13, 37, 19, ','); for (let x = 26; x <= 37; x++) { m[13][x] = 'W'; m[19][x] = 'W'; } for (let y = 13; y <= 19; y++) { m[y][26] = 'W'; m[y][37] = 'W'; } m[13][31] = '.'; m[13][32] = '.';
+  for (let y = 15; y <= 17; y += 2) for (let x = 28; x <= 35; x += 2) m[y][x] = 'Y';
+  m[18][36] = 'D'; // a crypt bearing a family crest
+  for (const x of [3, 7, 11, 16, 22, 27, 33, 38]) { const y = 20 + Math.round(Math.sin(x * .35) * 1.2) - 1; if (m[y] && m[y][x] === '.') m[y][x] = 'T'; }
+  for (const x of [3, 11, 19, 27, 35]) { m[5][x] = 'L'; m[11][x] = 'L'; } m[17][11] = 'L'; m[17][19] = 'L';
+  m[12][1] = 'E'; m[11][14] = 'S';
+  for (const [x, y] of [[24, 10], [30, 10], [20, 17], [6, 18], [14, 18], [33, 15], [29, 17], [38, 9]]) m[y][x] = 'X';
+  m[3][37] = 'c'; m[17][27] = 'c'; m[18][5] = 'c'; m[6][21] = 'B';
+  return m.map(r => r.join(''));
+}
+ST_DUNGEONS.rouge = {name: 'Rougemarais, City of the Long Night', outdoor: true, city: true, lit: true, boss: 'marquis', pool: [['thrall', 'thrall'], ['vampire'], ['thrall', 'vampire']], theme: {floor: '#4a4448', wall: '#1a2e28', glow: '#c0102a'}, exit: [37, 15], rows: stBuildRouge()};
+ST_DUNGEONS.vcrypt = {name: 'The Delacroix-Noir Crypt', lit: false, pool: [['thrall', 'thrall'], ['vampire'], ['vampire', 'thrall']], theme: {floor: '#2a1a1e', wall: '#0e0608', glow: '#c0102a'}, exit: [35, 17], exitMap: 'rouge', rows: [
+  '##################',
+  '#E.....#.........#',
+  '#......#...X.....#',
+  '#..X...#.........#',
+  '#......####.######',
+  '#................#',
+  '######.#####.....#',
+  '#.X..........X...#',
+  '#.......c........#',
+  '##################']};
+const ST_PORTS = {world: {name: 'Saltmere', at: [37, 16]}, isles: {name: 'the Brightwater Isles', at: [2, 10]}, rouge: {name: 'Rougemarais', at: [2, 12], lv: 12}};
+const stMapSong = () => { const m = stData() && stData().map; return m === 'isles' ? 2 : m === 'rouge' ? SONG_BAYOU : SONG_VALE; };
+ST_DUNGEONS.stair = {name: 'The Celestial Stair', lit: true, holy: true, boss: 'seraphiel', pool: [['seraph'], ['cherub', 'cherub'], ['seraph', 'cherub']], theme: {floor: '#d8d0bc', wall: '#8a8070', glow: '#ffe9a8'}, exit: [10, 2], rows: [
+  '######################',
+  '#E....#.......#.....c#',
+  '#..X..#...X...#..X...#',
+  '#.....#.......#......#',
+  '###.#####.###.####.###',
+  '#.......#.....#......#',
+  '#..X....#..X..#...X..#',
+  '#.......#.....#......#',
+  '#####.#######.####.###',
+  '#c...................#',
+  '#.........B..........#',
+  '######################']};
+const ST_DOOR_AT = {'24,16': 'catacomb', '4,2': 'crypt', '44,9': 'duskwatch', '10,2': 'stair', 'rouge:36,18': 'vcrypt'};
+const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0, mara: 0, seraphiel: 0, marquis: 0};
 const ST_MAP = stBuildMap();
 const stGrid = () => { const d = stData(); return d && d.map !== 'world' && ST_DUNGEONS[d.map] ? ST_DUNGEONS[d.map].rows : ST_MAP; };
 const ST_NPCS = [
@@ -5514,6 +5606,16 @@ const ST_NPCS = [
   {id: 'brann', name: 'Brann the Smith', x: 35, y: 10, look: 'brute', color: '#d98a2a'},
   {id: 'dunn', name: 'Dunn the Fisher', x: 32, y: 13, look: 'pirate', color: '#3a6a8a'},
   {id: 'pilgrim', name: 'The Pale Pilgrim', x: 35, y: 14, look: 'hunter', color: '#dfe8ff'},
+  {id: 'malphas', name: 'Malphas the Smiling', x: 27, y: 12, look: 'warlock', color: '#8a0a0a', horns: true, night: true},
+  {id: 'odo', name: 'Farmer Odo', x: 23, y: 23, look: 'heavy', color: '#8a7a3a'},
+  {id: 'garrick', name: 'Garrick the Silver', x: 5, y: 21, look: 'hunter', color: '#c8c8d0', hideIf: 'garrick'},
+  {id: 'ysolde', name: 'Ysolde of the Pack', x: 31, y: 22, look: 'witch', color: '#9a9aa0', need: 'wolfQuest', hideIf: 'ysoldeDone', night: true},
+  {id: 'sabine', name: 'Dockmaster Sabine', map: 'rouge', x: 3, y: 10, look: 'pirate', color: '#6a4a6a'},
+  {id: 'remy', name: 'Old Remy', map: 'rouge', x: 12, y: 11, look: 'heavy', color: '#7a5a3a'},
+  {id: 'odile', name: 'Madame Odile', map: 'rouge', x: 10, y: 9, look: 'witch', color: '#a01a3a'},
+  {id: 'lucien', name: 'Pere Lucien', map: 'rouge', x: 19, y: 7, look: 'paladin', color: '#e8e2d0'},
+  {id: 'silas', name: 'Silas the Gravekeeper', map: 'rouge', x: 31, y: 14, look: 'hunter', color: '#5a5a5a'},
+  {id: 'countessNpc', name: 'The Countess', map: 'vcrypt', x: 15, y: 2, look: 'witch', color: '#6a0a2a', lv: 18, hideIf: 'countessDone'},
   {id: 'garth', name: 'Garth the Stablemaster', x: 14, y: 8, look: 'hunter', color: '#8a5a2a'},
   {id: 'ulric', name: 'Captain Ulric', x: 13, y: 12, look: 'knight', color: '#4a6a9a'},
   {id: 'dorn', name: 'Watchman Dorn', x: 33, y: 12, look: 'knight', color: '#3a5a7a'},
@@ -5558,8 +5660,8 @@ const ST_QUESTS = [
   'Carry both shards to the Hollow Castle (north-east). End the Hollow King, or be ended.',
   'The king is ash. The curse loosens its grip. Wander as you will.',
 ];
-const stVillage = (x, y) => x > 29 * ST_TILE ? 'Saltmere, the Drowned Harbor' : y > 17 * ST_TILE ? 'Ravenhollow' : 'Thornwake, the Last Lit Village';
-const stNpcShown = (n, d) => (n.id !== 'liora' || !d.flags.liora) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]);
+const stVillage = (x, y) => x >= 20 * ST_TILE && x < 27 * ST_TILE && y >= 21 * ST_TILE ? 'Harrowfield' : x > 29 * ST_TILE ? 'Saltmere, the Drowned Harbor' : y > 17 * ST_TILE ? 'Ravenhollow' : 'Thornwake, the Last Lit Village';
+const stNpcShown = (n, d) => (n.id !== 'liora' || !d.flags.liora) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]) && (!n.night || stClock().dark > .25);
 const stChestShown = (c, d) => !d.chests.includes(c.id) && (!c.need || d.flags[c.need]);
 const ST = {treesBy: {}, on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
 const stData = () => PROF.story;
@@ -5567,7 +5669,13 @@ const stXpNeed = lv => 30 + 25 * lv;
 function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
-  return {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0)) * (W.hole ? .75 : 1), spd: c.spd + .4 * L};
+  const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (W.hole ? .75 : 1), spd: c.spd + .4 * L};
+  if (d.hr) { st.hp = Math.round(st.hp * 1.35); st.atk = st.atk * 1.5 + 6; st.def += 6; st.spd += 6; st.mag = 0; } // Heavenly Restriction: a perfect body, no magic at all
+  if (d.pact) { st.atk += 6; st.mag += 6; }
+  const outside = d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].outdoor), C = typeof stClock === 'function' ? stClock() : {dark: 0};
+  if (d.were && C.dark > .25) { st.atk *= 1.25; st.spd += 4; } // the moon makes the wolf stronger
+  if (d.vamp) { if (C.dark > .25) { st.atk *= 1.2; st.mag *= 1.2; } else if (outside && C.dark < .1) { st.atk *= .85; st.mag *= .85; st.def *= .85; } } // night feeds the blood; the sun burns it
+  return st;
 }
 function stSave() { saveProfile(); }
 // Alignment: -10 (Ashen) to +10 (Light). Light makes shops cheaper and toughens you; Ashen makes you hit harder.
@@ -5598,11 +5706,28 @@ function stJail() {
   stEnterMap('jail', 1, 2);
   stSay([['', 'Iron. Straw. The smell of everyone who sat here before you.'], ['', `Three days pass in the Thornwake cells. Your skills dull from disuse (you lose ${lostXp} XP). Then the bars swing open.`], ['Warden Holt', 'Your debt to Thornwake is paid. Walk out the door, and don\'t make me see you again.']]);
 }
-function stSail(key, tx, ty) { const d = stData(); d.riding = false; ST.mode = 'sail'; ST.sail = {t: 0, dur: 4.5, to: [key, tx, ty], home: key === 'world'}; $('stPrompt').hidden = true; sfx('blink'); }
+function stSail(key, tx, ty, opt = {}) { const d = stData(), dest = key === 'world' ? 'Saltmere' : ST_DUNGEONS[key].name; d.riding = false; ST.mode = 'sail'; ST.sail = {t: 0, dur: opt.land ? 3.4 : 4.5, to: [key, tx, ty], home: key === 'world', land: opt.land, dark: key === 'rouge', label: opt.label || `Sailing to ${dest}`, arrive: opt.arrive || (key === 'world' ? 'Saltmere, the Drowned Harbor' : dest)}; $('stPrompt').hidden = true; sfx('blink'); }
+function stDrawRoad(now, dt) { // the coach ride: hills scroll past, the horse gallops, wheels spin
+  const S = ST.sail; S.t += dt; const k = Math.min(1, S.t / S.dur), C = stClock();
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const sk = ctx.createLinearGradient(0, 0, 0, ch * .7); sk.addColorStop(0, C.dark > .3 ? '#141a34' : '#7a98c0'); sk.addColorStop(1, C.dark > .3 ? '#3a3a58' : '#e0c8a0'); ctx.fillStyle = sk; ctx.fillRect(0, 0, cw, ch);
+  for (let L = 0; L < 3; L++) { const y0 = ch * (.45 + L * .1), sp = (20 + L * 40); ctx.fillStyle = C.dark > .3 ? ['#1a2230', '#141c24', '#0e141a'][L] : ['#5a7a5a', '#3a5a3a', '#2a4a2a'][L]; ctx.beginPath(); ctx.moveTo(0, ch);
+    for (let x = 0; x <= cw; x += 20) ctx.lineTo(x, y0 - Math.sin((x + now * sp) * (.006 + L * .003) + L) * (30 - L * 6)); ctx.lineTo(cw, ch); ctx.fill();
+    if (L === 2) for (let i = 0; i < 8; i++) { const tx = ((i * 180 - now * 140) % (cw + 200) + cw + 200) % (cw + 200) - 100; ctx.fillStyle = '#1a2a1a'; ctx.beginPath(); ctx.arc(tx, y0 - 30, 22, 0, 7); ctx.fill(); ctx.fillRect(tx - 3, y0 - 12, 6, 16); } }
+  const ry = ch * .76; ctx.fillStyle = '#6a5a3e'; ctx.fillRect(0, ry - 14, cw, 34); ctx.fillStyle = 'rgba(0,0,0,.2)'; for (let i = 0; i < 20; i++) ctx.fillRect(((i * 90 - now * 300) % cw + cw) % cw, ry + 2, 30, 3);
+  const x = cw * (.2 + .55 * k), sc = Math.min(1.6, cw / 600); ctx.save(); ctx.translate(x, ry); ctx.scale(sc, sc);
+  ctx.fillStyle = '#3a2414'; ctx.fillRect(-120, -64 + Math.sin(now * 20) * 1.5, 70, 46); ctx.fillStyle = '#ffd08a'; ctx.fillRect(-110, -56, 18, 14); ctx.fillRect(-80, -56, 18, 14); ctx.fillStyle = '#2a1a0e'; ctx.fillRect(-126, -70, 82, 7);
+  ctx.strokeStyle = '#1a1006'; ctx.lineWidth = 3; for (const wx of [-106, -62]) { ctx.beginPath(); ctx.arc(wx, -10, 11, 0, 7); ctx.stroke(); const a = now * 12; ctx.beginPath(); ctx.moveTo(wx + Math.cos(a) * 11, -10 + Math.sin(a) * 11); ctx.lineTo(wx - Math.cos(a) * 11, -10 - Math.sin(a) * 11); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(-50, -30); ctx.lineTo(-20, -34); ctx.stroke(); ctx.restore();
+  stDrawMount(ctx, 'mare', x + 10 * sc, ry, 0, now * 500, now, true);
+  ctx.textAlign = 'center'; ctx.fillStyle = '#fff3e0'; ctx.shadowColor = '#000'; ctx.shadowBlur = 12; ctx.font = `${Math.round(Math.min(cw / 20, 36))}px "Marcellus SC", Georgia, serif`; ctx.fillText(S.label, cw / 2, ch * .1 + 20); ctx.shadowBlur = 0; ctx.textAlign = 'left';
+  if (S.t >= S.dur) { ST.mode = 'walk'; ST.sail = null; stEnterMap(...S.to); musicForce(stMapSong()); stCallout(S.arrive, '#ffe9a8'); }
+}
 function stDrawSail(now, dt) { // the voyage: waves, a ship crossing the screen, gulls, and the days passing
+  if (ST.sail.land) return stDrawRoad(now, dt);
   const S = ST.sail; S.t += dt; const k = Math.min(1, S.t / S.dur);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const sk = ctx.createLinearGradient(0, 0, 0, ch * .6); sk.addColorStop(0, S.home ? '#3a3a5a' : '#f4b87a'); sk.addColorStop(1, S.home ? '#8a8aa0' : '#7aa8d0'); ctx.fillStyle = sk; ctx.fillRect(0, 0, cw, ch);
+  const sk = ctx.createLinearGradient(0, 0, 0, ch * .6); sk.addColorStop(0, S.dark ? '#1a0a1e' : S.home ? '#3a3a5a' : '#f4b87a'); sk.addColorStop(1, S.dark ? '#6a2a3a' : S.home ? '#8a8aa0' : '#7aa8d0'); ctx.fillStyle = sk; ctx.fillRect(0, 0, cw, ch);
   ctx.fillStyle = S.home ? '#d8d8e8' : '#fff2c0'; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(cw * .78, ch * .2, 34, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
   for (let L = 0; L < 4; L++) {
     const y0 = ch * (.56 + L * .11); ctx.fillStyle = ['#3a7a9a', '#2a6a8a', '#1a5070', '#0e3a52'][L]; ctx.beginPath(); ctx.moveTo(0, ch);
@@ -5622,22 +5747,22 @@ function stDrawSail(now, dt) { // the voyage: waves, a ship crossing the screen,
   }
   ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 2; for (let i = 0; i < 5; i++) { const gx = (cw * .2 + i * 70 + now * 40) % (cw + 80) - 40, gy = ch * .18 + Math.sin(i * 2 + now) * 20, f = Math.sin(now * 8 + i) * 6; ctx.beginPath(); ctx.moveTo(gx - 10, gy - f); ctx.lineTo(gx, gy); ctx.lineTo(gx + 10, gy - f); ctx.stroke(); }
   ctx.textAlign = 'center'; ctx.fillStyle = '#fff3e0'; ctx.shadowColor = '#000'; ctx.shadowBlur = 12;
-  ctx.font = `${Math.round(Math.min(cw / 20, 38))}px "Marcellus SC", Georgia, serif`; ctx.fillText(S.home ? 'Sailing home to Saltmere' : 'Sailing to the Brightwater Isles', cw / 2, ch * .1 + 20);
+  ctx.font = `${Math.round(Math.min(cw / 20, 38))}px "Marcellus SC", Georgia, serif`; ctx.fillText(S.label, cw / 2, ch * .1 + 20);
   ctx.font = '600 18px "Barlow Semi Condensed", sans-serif'; ctx.fillText(`Day ${Math.min(3, 1 + Math.floor(k * 3))} of 3`, cw / 2, ch * .1 + 48); ctx.shadowBlur = 0; ctx.textAlign = 'left';
-  if (S.t >= S.dur) { ST.mode = 'walk'; ST.sail = null; stEnterMap(...S.to); musicForce(stMapSong()); stCallout(S.home ? 'Saltmere, the Drowned Harbor' : 'The Brightwater Isles', '#ffe9a8'); }
+  if (S.t >= S.dur) { ST.mode = 'walk'; ST.sail = null; stEnterMap(...S.to); musicForce(stMapSong()); stCallout(S.arrive, '#ffe9a8'); }
 }
 // Weather drifts between clear skies, rain, storms, fog and wind. Rain falls as snow on the peaks and sand in the dunes.
 function stWeatherTick(dt) {
-  const W = ST.wx || (ST.wx = {kind: 'clear', t: 0, next: 30, k: 0, flash: 0, wind: .3, p: []});
+  const W = ST.wx || (ST.wx = {kind: 'clear', t: 0, next: 70, k: 0, flash: 0, wind: .3, p: []});
   W.t += dt;
-  if (W.t > W.next) { W.t = 0; W.next = rand(50, 110); const r = Math.random(); W.kind = r < .32 ? 'clear' : r < .58 ? 'rain' : r < .76 ? 'storm' : r < .9 ? 'fog' : 'wind'; }
+  if (W.t > W.next) { W.t = 0; W.next = rand(50, 110); const r = Math.random(); W.kind = r < .55 ? 'clear' : r < .72 ? 'rain' : r < .82 ? 'storm' : r < .92 ? 'fog' : 'wind'; }
   W.k += ((W.kind === 'clear' ? 0 : 1) - W.k) * Math.min(1, dt * .35);
   W.wind = .3 + (W.kind === 'storm' || W.kind === 'wind' ? 1.3 : W.kind === 'rain' ? .5 : 0) * W.k;
-  if (W.kind === 'storm' && W.k > .6 && Math.random() < dt * .18) { W.flash = 1; W.bolt = Math.random() * cw; setTimeout(() => sfx('boom'), rand(250, 1400)); }
+  if (W.kind === 'storm' && W.k > .6 && Math.random() < dt * .08) { W.flash = 1; W.bolt = Math.random() * cw; setTimeout(() => sfx('boom'), rand(250, 1400)); }
   W.flash = Math.max(0, W.flash - dt * 2.5);
 }
 // Day and night follow the real clock on your device.
-function stClock() { const n = new Date(), h = ST.clockOverride != null ? ST.clockOverride : n.getHours() + n.getMinutes() / 60; const sun = Math.sin((h - 6) / 12 * Math.PI); return {h, sun, dark: clamp(.12 - sun, 0, .72), warm: Math.max(0, .4 - Math.abs(sun)) * (h < 12 ? .8 : 1)}; }
+function stClock() { const n = new Date(), h = ST.clockOverride != null ? ST.clockOverride : n.getHours() + n.getMinutes() / 60; const sun = Math.sin((h - 6) / 12 * Math.PI), m = stData() && stData().map, night = m === 'rouge' || m === 'vcrypt'; return {h, sun, dark: Math.max(night ? .5 : 0, clamp(.12 - sun, 0, .72)), warm: night ? .1 : Math.max(0, .4 - Math.abs(sun)) * (h < 12 ? .8 : 1)}; } // Rougemarais never sees full day
 const stTimeName = h => h < 5 ? 'Night' : h < 7 ? 'Dawn' : h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 19.5 ? 'Dusk' : h < 21 ? 'Evening' : 'Night';
 const stTimeText = h => { const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 60); return `${(hh % 12) || 12}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'}`; };
 function stNightDraw(Zs, d, dun, isles) { // darkness with holes burned out by every light nearby
@@ -5656,24 +5781,35 @@ function stNightDraw(Zs, d, dun, isles) { // darkness with holes burned out by e
   ctx.globalCompositeOperation = 'source-over';
   if (C.dark > .3) for (let i = 0; i < 40; i++) { const x = (i * 197.3 + 13) % cw, y = (i * 83.7) % (ch * .35); ctx.fillStyle = `rgba(255,255,240,${(.3 + Math.sin(performance.now() * .002 + i) * .25) * C.dark})`; ctx.fillRect(x, y, 1.5, 1.5); } // stars
 }
+function stSunDraw(k, now, Zs) { // warm light, sun shafts from the upper left, cloud shadows sliding over the land
+  ctx.save(); ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = `rgba(255,236,190,${.45 * k})`; ctx.fillRect(0, 0, cw, ch); ctx.globalCompositeOperation = 'source-over';
+  const sg = ctx.createLinearGradient(0, 0, 0, ch); sg.addColorStop(0, `rgba(150,200,255,${.12 * k})`); sg.addColorStop(.5, 'rgba(150,200,255,0)'); ctx.fillStyle = sg; ctx.fillRect(0, 0, cw, ch); // a hint of blue sky at the top
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 5; i++) { const x0 = cw * (-.1 + i * .24) + Math.sin(now * .15 + i) * 30, w = 40 + (i % 3) * 30, a = (.05 + Math.sin(now * .4 + i * 1.7) * .025) * k; const gr = ctx.createLinearGradient(x0, 0, x0 + ch * .6, ch); gr.addColorStop(0, `rgba(255,240,200,${a})`); gr.addColorStop(1, 'rgba(255,240,200,0)'); ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + w, 0); ctx.lineTo(x0 + w + ch * .6, ch); ctx.lineTo(x0 + ch * .6, ch); ctx.closePath(); ctx.fill(); }
+  ctx.globalCompositeOperation = 'source-over';
+  const gl = ctx.createRadialGradient(cw * .08, -ch * .05, 10, cw * .08, -ch * .05, ch * .7); gl.addColorStop(0, `rgba(255,245,210,${.35 * k})`); gl.addColorStop(1, 'rgba(255,245,210,0)'); ctx.fillStyle = gl; ctx.fillRect(0, 0, cw, ch); // the sun just off screen
+  for (let i = 0; i < 3; i++) { const cx = ((i * 900 + now * 25 - ST.cam.x * Zs * .2) % (cw + 900) + cw + 900) % (cw + 900) - 450, cy = ch * (.25 + i * .28) - ST.cam.y * Zs * .05 % ch; const cg = ctx.createRadialGradient(cx, cy, 20, cx, cy, 260); cg.addColorStop(0, `rgba(20,30,40,${.13 * k})`); cg.addColorStop(1, 'rgba(20,30,40,0)'); ctx.fillStyle = cg; ctx.fillRect(cx - 260, cy - 260, 520, 520); } // cloud shadows
+  ctx.restore();
+}
 const ST_WX_NAME = {clear: '', rain: 'Rain', storm: 'Thunderstorm', fog: 'Fog', wind: 'High winds'};
 function stWeatherDraw(dt, tile, isles) {
   const W = ST.wx; if (!W) return;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const wet = W.kind === 'rain' || W.kind === 'storm', snow = tile === '*', sand = tile === 'a' && (W.kind === 'wind' || W.kind === 'storm'), P = W.p;
-  let n = wet ? (W.kind === 'storm' ? 9 : 4) * W.k : 0;
-  const spawn = (o) => { if (P.length < 500) P.push(o); };
+  let n = wet ? (W.kind === 'storm' ? 3.5 : 1.6) * W.k : 0;
+  const spawn = (o) => { if (P.length < 220) P.push(o); };
   for (let i = 0; i < n; i++) spawn(snow ? {k: 'snow', x: rand(-100, cw + 100), y: -10, vx: W.wind * 40, vy: rand(60, 120), r: rand(1.5, 3.2)} : sand ? {k: 'sand', x: -20, y: rand(0, ch), vx: rand(500, 900), vy: rand(-20, 20)} : {k: 'rain', x: rand(-100, cw + 100), y: -20, vx: -W.wind * 220, vy: rand(800, 1000)});
-  if (snow && Math.random() < .5) spawn({k: 'snow', x: rand(0, cw), y: -10, vx: W.wind * 30, vy: rand(40, 80), r: rand(1, 2.4)});
-  if (sand) for (let i = 0; i < 3; i++) spawn({k: 'sand', x: -20, y: rand(0, ch), vx: rand(500, 900), vy: rand(-20, 20)});
+  if (snow && Math.random() < .25) spawn({k: 'snow', x: rand(0, cw), y: -10, vx: W.wind * 30, vy: rand(40, 80), r: rand(1, 2.4)});
+  if (sand) for (let i = 0; i < 1; i++) spawn({k: 'sand', x: -20, y: rand(0, ch), vx: rand(500, 900), vy: rand(-20, 20)});
   if (Math.random() < .25) { // region life: leaves, fireflies, ash, sun motes
     const kind = isles ? 'mote' : tile === 'T' ? 'leaf' : tile === 'g' || tile === 'b' ? 'fly' : tile === '*' || tile === 'a' ? null : 'ash';
     if (kind) spawn({k: kind, x: rand(0, cw), y: kind === 'fly' || kind === 'mote' ? rand(ch * .3, ch) : -10, vx: kind === 'leaf' ? W.wind * 90 : rand(-10, 10), vy: kind === 'leaf' ? rand(30, 60) : kind === 'ash' ? rand(15, 35) : rand(-8, 8), r: rand(1.5, 3), t: 0, life: rand(4, 8), ph: Math.random() * 6});
   }
-  if (wet && W.k > .1) { ctx.fillStyle = `rgba(10,14,24,${(W.kind === 'storm' ? .32 : .16) * W.k})`; ctx.fillRect(0, 0, cw, ch); }
+  if (!wet && !snow && W.kind === 'clear' && Math.random() < .15 && !isles && tile !== 'a') spawn({k: 'mote', x: rand(0, cw), y: rand(ch * .2, ch), vx: rand(-6, 6), vy: rand(-10, -3), r: rand(1, 2.2), t: 0, life: rand(3, 6), ph: Math.random() * 6}); // pollen drifting in the sun
+  if (wet && W.k > .1) { ctx.fillStyle = `rgba(10,14,24,${(W.kind === 'storm' ? .16 : .07) * W.k})`; ctx.fillRect(0, 0, cw, ch); }
   for (const q of P) {
     q.t = (q.t || 0) + dt; q.x += q.vx * dt; q.y += q.vy * dt;
-    if (q.k === 'rain') { ctx.strokeStyle = 'rgba(170,200,230,.55)'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(q.x + q.vx * .025, q.y + q.vy * .025); ctx.stroke(); if (q.y > ch * rand(.5, 1.1)) { q.dead = true; ctx.strokeStyle = 'rgba(190,220,250,.4)'; ctx.beginPath(); ctx.ellipse(q.x, q.y, 5, 2, 0, 0, 7); ctx.stroke(); } }
+    if (q.k === 'rain') { ctx.strokeStyle = 'rgba(170,200,230,.3)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(q.x + q.vx * .025, q.y + q.vy * .025); ctx.stroke(); if (q.y > ch * rand(.5, 1.1)) { q.dead = true; ctx.strokeStyle = 'rgba(190,220,250,.4)'; ctx.beginPath(); ctx.ellipse(q.x, q.y, 5, 2, 0, 0, 7); ctx.stroke(); } }
     else if (q.k === 'snow') { q.x += Math.sin(q.t * 2 + q.r) * .6; ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, 7); ctx.fill(); }
     else if (q.k === 'sand') { ctx.strokeStyle = 'rgba(216,184,138,.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(q.x - 30, q.y); ctx.stroke(); }
     else if (q.k === 'leaf') { q.x += Math.sin(q.t * 3 + q.ph) * 1.2; ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.t * 3 + q.ph); ctx.fillStyle = q.ph > 3 ? '#8a6a2a' : '#4a7a3a'; ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.5, 0, 0, 7); ctx.fill(); ctx.restore(); }
@@ -5681,21 +5817,25 @@ function stWeatherDraw(dt, tile, isles) {
     if (q.y > ch + 20 || q.x > cw + 120 || q.x < -140) q.dead = true;
   }
   W.p = P.filter(q => !q.dead);
-  if (W.kind === 'fog' && W.k > .05) for (let i = 0; i < 5; i++) { const fx = ((i * 311 + performance.now() * .01 * (1 + i * .2)) % (cw + 600)) - 300, fy = ch * (.2 + i * .17), gr = ctx.createRadialGradient(fx, fy, 10, fx, fy, 320); gr.addColorStop(0, `rgba(200,205,215,${.32 * W.k})`); gr.addColorStop(1, 'rgba(200,205,215,0)'); ctx.fillStyle = gr; ctx.fillRect(fx - 320, fy - 320, 640, 640); }
+  if (W.kind === 'fog' && W.k > .05) for (let i = 0; i < 5; i++) { const fx = ((i * 311 + performance.now() * .01 * (1 + i * .2)) % (cw + 600)) - 300, fy = ch * (.2 + i * .17), gr = ctx.createRadialGradient(fx, fy, 10, fx, fy, 320); gr.addColorStop(0, `rgba(200,205,215,${.16 * W.k})`); gr.addColorStop(1, 'rgba(200,205,215,0)'); ctx.fillStyle = gr; ctx.fillRect(fx - 320, fy - 320, 640, 640); }
   if (W.flash > 0) {
-    ctx.fillStyle = `rgba(230,235,255,${W.flash * .6})`; ctx.fillRect(0, 0, cw, ch);
+    ctx.fillStyle = `rgba(230,235,255,${W.flash * .3})`; ctx.fillRect(0, 0, cw, ch);
     if (W.flash > .7) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.shadowColor = '#bcd'; ctx.shadowBlur = 20; ctx.beginPath(); let bx = W.bolt, by = 0; ctx.moveTo(bx, by); while (by < ch * .6) { by += rand(20, 50); bx += rand(-30, 30); ctx.lineTo(bx, by); } ctx.stroke(); ctx.shadowBlur = 0; }
   }
 }
 
 // ---- life in the world: swaying trees, travelers and a cart, farm and wild animals, birds, fish, smoke, campfires, a windmill and a lighthouse
-const ST_ROUTES = [[[17.5, 11.5], [31, 11.5]], [[14.5, 15], [14.5, 21.5], [12.5, 21.5]], [[14.5, 7.5], [24.5, 7.5]], [[31, 11.5], [40, 11.5]]].map(r => r.map(([x, y]) => [x * ST_TILE, y * ST_TILE]));
+const ST_ROUTES = [[[14.5, 21.5], [14.5, 23.5], [22, 23.5]], [[17.5, 11.5], [31, 11.5]], [[14.5, 15], [14.5, 21.5], [12.5, 21.5]], [[14.5, 7.5], [24.5, 7.5]], [[31, 11.5], [40, 11.5]]].map(r => r.map(([x, y]) => [x * ST_TILE, y * ST_TILE]));
 const ST_PEN = {x0: 7 * ST_TILE + 12, y0: 15 * ST_TILE + 12, x1: 11 * ST_TILE - 12, y1: 18 * ST_TILE - 12};
 const ST_CAMPS = [[28, 9], [39, 20], [17, 24]];
 function stDrawTree(t, now, wind) {
   const sw = Math.sin(now * (1.2 + wind) + t.ph + t.x * .01) * (2 + wind * 7) * t.s, s = t.s;
   ctx.save(); ctx.translate(t.x, t.y);
-  if (t.palm) { // a curved trunk and drooping fronds
+  if (t.cypress) { // a tall bald cypress hung with moss
+    ctx.fillStyle = '#2a1e16'; ctx.beginPath(); ctx.moveTo(-9 * s, 0); ctx.lineTo(9 * s, 0); ctx.lineTo(3 * s + sw * .4, -60 * s); ctx.lineTo(-3 * s + sw * .4, -60 * s); ctx.fill();
+    for (let i = 0; i < 3; i++) { ctx.fillStyle = ['#18241a', '#1e2e20', '#26382a'][i]; ctx.beginPath(); ctx.ellipse(sw * (.5 + i * .2), -66 * s - i * 16 * s, (26 - i * 6) * s, 14 * s, 0, 0, 7); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(140,150,110,.75)'; ctx.lineWidth = 2; for (let i = 0; i < 6; i++) { const mx = (-20 + i * 8) * s + sw * .6, my = -60 * s; ctx.beginPath(); ctx.moveTo(mx, my); ctx.quadraticCurveTo(mx + Math.sin(now * 1.5 + i) * 4 * (1 + wind), my + 14 * s, mx + Math.sin(now * 1.5 + i + 1) * 6 * (1 + wind), my + (22 + (i % 3) * 6) * s); ctx.stroke(); }
+  } else if (t.palm) { // a curved trunk and drooping fronds
     ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 7 * s; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(6 * s + sw * .3, -40 * s, 4 * s + sw, -78 * s); ctx.stroke();
     ctx.strokeStyle = '#3a8a3a'; ctx.lineWidth = 6 * s; for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + Math.sin(now * 1.5 + i) * .08 * (1 + wind); ctx.beginPath(); ctx.moveTo(4 * s + sw, -78 * s); ctx.quadraticCurveTo(4 * s + sw + Math.cos(a) * 26 * s, -88 * s + Math.sin(a) * 10 * s, 4 * s + sw * 1.3 + Math.cos(a) * 40 * s, -66 * s + Math.abs(Math.sin(a)) * 8 * s); ctx.stroke(); }
   } else {
@@ -5722,7 +5862,7 @@ function stAmbient(dt, now, Zs, d, dun, isles) {
   const wind = ST.wx ? ST.wx.wind : .3, grid = stGrid(), tileAt = (x, y) => (grid[Math.floor(y / ST_TILE)] || '')[Math.floor(x / ST_TILE)] || '#';
   ST.lights = [];
   if (dun && !isles) return;
-  grid.forEach((row, y) => { if (Math.abs(y * ST_TILE - ST.cam.y) > vh + 300) return; [...row].forEach((t, x) => { if (Math.abs(x * ST_TILE - ST.cam.x) > vw + 300) return; if ('HIUK'.includes(t)) ST.lights.push(isles ? [x * ST_TILE + 32, y * ST_TILE + 30, 120] : [x * ST_TILE + 64, y * ST_TILE + 80, 170]); else if (t === 'Q') ST.lights.push([x * ST_TILE + 32, y * ST_TILE + 30, 110]); else if (t === 'S') ST.lights.push([x * ST_TILE + 32, y * ST_TILE + 40, 70]); }); });
+  grid.forEach((row, y) => { if (Math.abs(y * ST_TILE - ST.cam.y) > vh + 300) return; [...row].forEach((t, x) => { if (Math.abs(x * ST_TILE - ST.cam.x) > vw + 300) return; const city = ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].city; if (city && t === 'L') ST.lights.push([x * ST_TILE + 32, y * ST_TILE - 10, 190]); else if (city && t === 'A') ST.lights.push([x * ST_TILE + 128, y * ST_TILE + 40, 220]); else if (city && (t === 'H' || t === 'I')) ST.lights.push([x * ST_TILE + 32, y * ST_TILE - 30, 90]); else if ('HIUK'.includes(t)) ST.lights.push(isles ? [x * ST_TILE + 32, y * ST_TILE + 30, 120] : [x * ST_TILE + 64, y * ST_TILE + 80, 170]); else if (t === 'Q' || t === 'O') ST.lights.push([x * ST_TILE + 44, y * ST_TILE + 36, 110]); else if (t === 'S') ST.lights.push([x * ST_TILE + 32, y * ST_TILE + 40, 70]); }); });
   if (!isles) { for (const [cx0, cy0] of ST_CAMPS) ST.lights.push([cx0 * ST_TILE + 32, cy0 * ST_TILE + 30, 230]); ST.lights.push([39.5 * ST_TILE, 14 * ST_TILE - 190, 260]); }
   // fish leap from the water now and then
   A.fishT -= dt; if (A.fishT <= 0) { A.fishT = rand(.6, 2); for (let k = 0; k < 8; k++) { const x = ST.cam.x + rand(-vw, vw), y = ST.cam.y + rand(-vh, vh), t = tileAt(x, y); if (t === '~' || (isles && t === '#')) { A.fish.push({x, y, t: 0, dir: Math.random() < .5 ? -1 : 1}); break; } } }
@@ -5736,7 +5876,7 @@ function stAmbient(dt, now, Zs, d, dun, isles) {
     const bx = 18 * ST_TILE + 32 + Math.sin(now) * 6, by = A.boatY; if (inView(bx, by)) { ctx.fillStyle = '#5a3a1a'; ctx.beginPath(); ctx.ellipse(bx, by, 9, 22, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#3a2614'; ctx.fillRect(bx - 7, by - 3, 14, 4); ctx.fillStyle = '#8a7a5a'; ctx.beginPath(); ctx.arc(bx, by + 8, 6, 0, 7); ctx.fill(); ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 2; const oar = Math.sin(now * 3) * 6; ctx.beginPath(); ctx.moveTo(bx - 18, by + 6 + oar); ctx.lineTo(bx + 18, by + 6 - oar); ctx.stroke(); }
   }
   { // a ship at anchor: in Saltmere harbor, or beside the Port Halcyon pier
-    const hx = isles ? .45 * ST_TILE : 38.9 * ST_TILE, hy = (isles ? 10.5 : 16) * ST_TILE + Math.sin(now * 1.4) * 3; if (inView(hx, hy)) { ctx.save(); ctx.translate(hx, hy); ctx.rotate(Math.sin(now * 1.1) * .03); ctx.fillStyle = '#4a2a14'; ctx.beginPath(); ctx.moveTo(-26, -60); ctx.lineTo(26, -60); ctx.lineTo(20, 60); ctx.lineTo(-20, 60); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#c9a24a'; ctx.fillRect(-24, -60, 48, 4); ctx.fillStyle = '#2a1a0a'; ctx.fillRect(-3, -40, 6, 80); ctx.fillStyle = '#efe6d2'; ctx.fillRect(-30 - wind * 4, -24, 60, 12); ctx.fillRect(-24 - wind * 4, 10, 48, 10); ctx.fillStyle = '#b33a3a'; ctx.beginPath(); ctx.moveTo(0, -44); ctx.lineTo(16 + Math.sin(now * 6) * 3, -40); ctx.lineTo(0, -36); ctx.fill(); ctx.restore(); }
+    const hx = isles ? .45 * ST_TILE : 38.9 * ST_TILE, hy = (d.map === 'rouge' ? 12.5 : isles ? 10.5 : 16) * ST_TILE + Math.sin(now * 1.4) * 3; if (inView(hx, hy)) { ctx.save(); ctx.translate(hx, hy); ctx.rotate(Math.sin(now * 1.1) * .03); ctx.fillStyle = '#4a2a14'; ctx.beginPath(); ctx.moveTo(-26, -60); ctx.lineTo(26, -60); ctx.lineTo(20, 60); ctx.lineTo(-20, 60); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#c9a24a'; ctx.fillRect(-24, -60, 48, 4); ctx.fillStyle = '#2a1a0a'; ctx.fillRect(-3, -40, 6, 80); ctx.fillStyle = '#efe6d2'; ctx.fillRect(-30 - wind * 4, -24, 60, 12); ctx.fillRect(-24 - wind * 4, 10, 48, 10); ctx.fillStyle = '#b33a3a'; ctx.beginPath(); ctx.moveTo(0, -44); ctx.lineTo(16 + Math.sin(now * 6) * 3, -40); ctx.lineTo(0, -36); ctx.fill(); ctx.restore(); }
   }
   if (!dun) {
     // the lighthouse and the windmill
@@ -5764,7 +5904,10 @@ function stAmbient(dt, now, Zs, d, dun, isles) {
       if (a.moving) { a.x += a.vx * dt; a.y += a.vy * dt; } if (a.home) { a.x = clamp(a.x, a.home[0] - 70, a.home[0] + 70); a.y = clamp(a.y, a.home[1] - 30, a.home[1] + 30); } else { a.x = clamp(a.x, ST_PEN.x0 + 20, ST_PEN.x1 - 24); a.y = clamp(a.y, ST_PEN.y0 + 24, ST_PEN.y1 - 6); }
       if (inView(a.x, a.y)) stAnimal(a, now); }
     // travelers and a cart on the roads
-    if (!A.walkers) A.walkers = [[0, 'hunter', '#6a6a5a'], [0, 'cart'], [1, 'witch', '#7a5a6a'], [2, 'paladin', '#8a8a8a'], [3, 'pirate', '#5a6a7a'], [1, 'heavy', '#6a5a4a']].map(([r, look, color], i) => ({r, look, color, seg: 0, k: (i * .37) % 1, fwd: i % 2 === 0, walk: 0}));
+    if (!A.walkers) A.walkers = [[0, 'heavy', '#7a6a4a'], [1, 'hunter', '#6a6a5a'], [1, 'cart'], [1, 'witch', '#7a5a6a'], [2, 'paladin', '#8a8a8a'], [3, 'pirate', '#5a6a7a'], [1, 'heavy', '#6a5a4a']].map(([r, look, color], i) => ({r, look, color, seg: 0, k: (i * .37) % 1, fwd: i % 2 === 0, walk: 0}));
+    for (const c of ST_COACHES) { const x = (c.x + 1) * ST_TILE + 30, y = (c.y + 1) * ST_TILE - 6; if (!inView(x, y)) continue; // a coach waits at every post
+      ctx.fillStyle = '#3a2414'; ctx.fillRect(x - 90, y - 46, 56, 36); ctx.fillStyle = '#ffd08a'; ctx.fillRect(x - 82, y - 40, 14, 12); ctx.fillRect(x - 60, y - 40, 14, 12); ctx.fillStyle = '#2a1a0e'; ctx.fillRect(x - 94, y - 50, 64, 6);
+      ctx.strokeStyle = '#1a1006'; ctx.lineWidth = 3; for (const wx of [-80, -44]) { ctx.beginPath(); ctx.arc(x + wx, y - 6, 9, 0, 7); ctx.stroke(); } stDrawMount(ctx, 'mare', x, y, 0, 0, now, false); }
     for (const w of A.walkers) {
       const R = ST_ROUTES[w.r], a = R[w.seg], b = R[w.seg + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]), sp = (w.look === 'cart' ? 60 : 45) * dt / len;
       w.k += w.fwd ? sp : -sp; if (w.k > 1) { if (w.seg < R.length - 2) { w.seg++; w.k = 0; } else { w.k = 1; w.fwd = false; } } if (w.k < 0) { if (w.seg > 0) { w.seg--; w.k = 1; } else { w.k = 0; w.fwd = true; } }
@@ -5783,15 +5926,52 @@ function stAmbient(dt, now, Zs, d, dun, isles) {
     A.crit = A.crit.filter(a => !a.gone);
   }
   // chimney smoke from every house, inn and hut nearby
-  A.smokeT -= dt; if (A.smokeT <= 0) { A.smokeT = .12; grid.forEach((row, y) => { if (Math.abs(y * ST_TILE - ST.cam.y) > vh + 200) return; [...row].forEach((t, x) => { if ('HIUK'.includes(t) && Math.abs(x * ST_TILE - ST.cam.x) < vw + 200 && Math.random() < .5) A.smoke.push(isles ? {x: x * ST_TILE + 32, y: y * ST_TILE - 46, t: 0, r: 3} : {x: x * ST_TILE + 100, y: y * ST_TILE - 70, t: 0, r: 4}); }); }); }
+  A.smokeT -= dt; if (A.smokeT <= 0) { A.smokeT = .12; grid.forEach((row, y) => { if (Math.abs(y * ST_TILE - ST.cam.y) > vh + 200) return; [...row].forEach((t, x) => { if ('HIUK'.includes(t) && Math.abs(x * ST_TILE - ST.cam.x) < vw + 200 && Math.random() < .5) A.smoke.push(ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].city ? {x: x * ST_TILE + 48, y: y * ST_TILE - 110, t: 0, r: 3} : isles ? {x: x * ST_TILE + 32, y: y * ST_TILE - 46, t: 0, r: 3} : {x: x * ST_TILE + 100, y: y * ST_TILE - 70, t: 0, r: 4}); }); }); }
 }
 function stAmbientOver(dt, now) { // smoke, embers and birds pass over everything
   const A = ST.amb; if (!A) return; const wind = ST.wx ? ST.wx.wind : .3;
   for (const q of A.smoke) { q.t += dt; q.x += (12 + wind * 40) * dt; q.y -= (q.ember ? 50 : 28) * dt; q.r += dt * (q.ember ? 0 : 8); ctx.fillStyle = q.ember ? `rgba(255,170,80,${Math.max(0, 1 - q.t)})` : `rgba(150,140,135,${Math.max(0, .45 - q.t * .12)})`; ctx.beginPath(); ctx.arc(q.x, q.y, q.ember ? 1.8 : q.r, 0, 7); ctx.fill(); }
   A.smoke = A.smoke.filter(q => q.t < (q.ember ? 1 : 3.6));
-  A.birdT -= dt; if (A.birdT <= 0) { A.birdT = rand(5, 12); const fl = ST.cam.x - 900, y = ST.cam.y + rand(-300, 200), n = 3 + Math.floor(Math.random() * 5); for (let i = 0; i < n; i++) A.birds.push({x: fl - i * 30 - Math.random() * 20, y: y + (i % 2) * 18 + i * 6, ph: Math.random() * 6, t: 0, gull: stData().map === 'isles'}); }
-  for (const b of A.birds) { b.t += dt; b.x += (140 + wind * 60) * dt; b.y += Math.sin(b.t * 2 + b.ph) * .4; const f = Math.sin(b.t * 10 + b.ph) * 6; ctx.strokeStyle = b.gull ? '#f4f4f4' : '#141414'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(b.x - 9, b.y - f); ctx.lineTo(b.x, b.y); ctx.lineTo(b.x + 9, b.y - f); ctx.stroke(); ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(b.x - 30, b.y + 160, 6, 2, 0, 0, 7); ctx.fill(); }
+  A.birdT -= dt; if (A.birdT <= 0) { A.birdT = rand(5, 12); const fl = ST.cam.x - 900, y = ST.cam.y + rand(-300, 200), n = 3 + Math.floor(Math.random() * 5); for (let i = 0; i < n; i++) A.birds.push({bat: stData().map === 'rouge', x: fl - i * 30 - Math.random() * 20, y: y + (i % 2) * 18 + i * 6, ph: Math.random() * 6, t: 0, gull: stData().map === 'isles'}); }
+  for (const b of A.birds) { b.t += dt; b.x += (140 + wind * 60) * dt; b.y += Math.sin(b.t * 2 + b.ph) * .4; const f = Math.sin(b.t * 10 + b.ph) * 6; if (b.bat) { b.y += Math.sin(b.t * 9 + b.ph) * 1.6; } ctx.strokeStyle = b.gull ? '#f4f4f4' : b.bat ? '#0a0406' : '#141414'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(b.x - 9, b.y - f); ctx.lineTo(b.x, b.y); ctx.lineTo(b.x + 9, b.y - f); ctx.stroke(); ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(b.x - 30, b.y + 160, 6, 2, 0, 0, 7); ctx.fill(); }
   A.birds = A.birds.filter(b => b.t < 14);
+}
+const ST_GOODS = {grain: ['Grain', 8], wool: ['Wool', 14], fish: ['Salted Fish', 12], iron: ['Iron Ore', 20], furs: ['Furs', 26], relic: ['Old Relics', 45], spice: ['Island Spice', 34], rum: ['Brightwater Rum', 30], silk: ['Rouge Silk', 55], wine: ['Blood Wine', 60]};
+const ST_MARKETS = { // below 1: made here, cheap. Above 1: wanted here.
+  thornwake:   {name: 'Thornwake', m: {grain: .7, wool: .7, fish: 1.1, iron: 1.2, furs: 1, relic: 1.1, spice: 1.5, rum: 1.3, silk: 1.4, wine: 1.3}},
+  ravenhollow: {name: 'Ravenhollow', m: {grain: .9, wool: .9, fish: 1.3, iron: 1.1, furs: .6, relic: .8, spice: 1.6, rum: 1.4, silk: 1.5, wine: 1.4}},
+  saltmere:    {name: 'Saltmere', m: {grain: 1.2, wool: 1.2, fish: .5, iron: .7, furs: 1.3, relic: 1, spice: 1.2, rum: 1.1, silk: 1.3, wine: 1.2}},
+  harrow:      {name: 'Harrowfield', m: {grain: .45, wool: .6, fish: 1.3, iron: 1.3, furs: 1.2, relic: 1.2, spice: 1.7, rum: 1.5, silk: 1.6, wine: 1.5}},
+  isles:       {name: 'Port Halcyon', m: {grain: 1.5, wool: 1.6, fish: .7, iron: 1.6, furs: 1.8, relic: 1.4, spice: .5, rum: .55, silk: 1.2, wine: 1.3}},
+  rouge:       {name: 'Rougemarais', m: {grain: 1.4, wool: 1.4, fish: 1.2, iron: 1.3, furs: 1.6, relic: .8, spice: 1.4, rum: 1.5, silk: .55, wine: .6}},
+};
+function stMarketPrice(mk, g) { // today's price: the market's need, plus a daily swing
+  const day = Math.floor(Date.now() / 864e5), i = Object.keys(ST_GOODS).indexOf(g), j = Object.keys(ST_MARKETS).indexOf(mk), h = Math.abs(Math.sin(day * 12.9898 + j * 78.233 + i * 37.719) * 43758.5453) % 1;
+  const buy = Math.max(2, Math.round(ST_GOODS[g][1] * ST_MARKETS[mk].m[g] * (.85 + h * .3)));
+  return {buy, sell: Math.max(1, Math.round(buy * .88))};
+}
+const stCargoCap = () => 20 + ((stData().mounts || []).length ? 15 : 0);
+const stCargoUsed = () => Object.values(stData().cargo || {}).reduce((a, b) => a + b, 0);
+function stTrade(mk) {
+  const d = stData(), M = ST_MARKETS[mk], m = $('stMenu'); d.cargo = d.cargo || {}; d.seen = d.seen || {}; d.trade = d.trade || {spent: 0, earned: 0};
+  ST.mode = 'menu'; m.hidden = false; m.innerHTML = ''; d.seen[mk] = {};
+  for (const g in ST_GOODS) d.seen[mk][g] = stMarketPrice(mk, g).sell;
+  const net = d.trade.earned - d.trade.spent;
+  m.append(el('h3', '', `${M.name} market`), el('p', '', `${d.gold} gold · cargo ${stCargoUsed()}/${stCargoCap()} · trade profit ${net >= 0 ? '+' : ''}${net} gold. Buy where goods are made, sell where they're wanted. Prices change every day.`));
+  const tbl = el('div', 'trade'); tbl.append(el('b', '', 'Good'), el('b', '', 'Have'), el('b', '', 'Buy'), el('b', '', 'Sell'), el('b', '', 'Best seen'), el('b', '', ''));
+  for (const g in ST_GOODS) {
+    const P = stMarketPrice(mk, g), have = d.cargo[g] || 0;
+    let best = null; for (const o in d.seen) if (o !== mk && d.seen[o][g] && (!best || d.seen[o][g] > best[1])) best = [o, d.seen[o][g]];
+    const act = el('span', 'tbtn'), b = (label, fn, dis) => { const x = el('button', '', label); x.disabled = !!dis; x.addEventListener('click', () => { fn(); sfx('pickup'); stTrade(mk); }); act.appendChild(x); };
+    b('Buy', () => { d.gold -= P.buy; d.cargo[g] = have + 1; d.trade.spent += P.buy; }, d.gold < P.buy || stCargoUsed() >= stCargoCap());
+    b('×5', () => { const n = Math.min(5, Math.floor(d.gold / P.buy), stCargoCap() - stCargoUsed()); d.gold -= P.buy * n; d.cargo[g] = have + n; d.trade.spent += P.buy * n; }, d.gold < P.buy || stCargoUsed() >= stCargoCap());
+    b('Sell', () => { d.gold += P.sell; d.cargo[g] = have - 1; d.trade.earned += P.sell; }, !have);
+    b('All', () => { d.gold += P.sell * have; d.cargo[g] = 0; d.trade.earned += P.sell * have; }, !have);
+    const cheap = ST_MARKETS[mk].m[g] < .8, wanted = ST_MARKETS[mk].m[g] > 1.35;
+    tbl.append(el('span', cheap ? 'cheap' : wanted ? 'wanted' : '', ST_GOODS[g][0] + (cheap ? ' (local)' : wanted ? ' (wanted)' : '')), el('span', '', String(have)), el('span', '', P.buy + 'g'), el('span', '', P.sell + 'g'), el('span', 'hint', best ? `${best[1]}g ${ST_MARKETS[best[0]].name}` : '?'), act);
+  }
+  m.appendChild(tbl);
+  const row = el('div', 'row'), done = el('button', '', 'Done trading'); done.addEventListener('click', stCloseMenu); row.appendChild(done); m.appendChild(row); setTimeout(() => done.focus({preventScroll: true}), 0);
 }
 function stToggleRide() {
   const d = stData(), own = d.mounts || [];
@@ -5853,7 +6033,7 @@ function renderCreator() {
   const sk = $('crSkills'); sk.innerHTML = '';
   const rec = ST_CLASSES[crSel.cls].skills;
   for (const id in ST_SKILLS) {
-    const S = ST_SKILLS[id], on = crSel.skills.includes(id);
+    const S = ST_SKILLS[id], on = crSel.skills.includes(id); if (S.gift) continue;
     const b = el('button', 'chip' + (on ? ' sel' : ''), S.name + (rec.includes(id) ? ' ★' : '')); b.title = `${S.desc} Costs ${S.mp} MP.`;
     b.addEventListener('click', () => { if (on) crSel.skills = crSel.skills.filter(x => x !== id); else if (crSel.skills.length < 3) crSel.skills.push(id); renderCreator(); });
     sk.appendChild(b);
@@ -5885,7 +6065,49 @@ $('crStart').addEventListener('click', () => {
 });
 
 // ---- entering and leaving the story
+function stDrawCityCanvas(key) { // cobblestones, townhouses with iron balconies, gas lamps, tombs and a gothic cathedral
+  const D = ST_DUNGEONS[key], rows = D.rows, c = document.createElement('canvas'); c.width = rows[0].length * ST_TILE; c.height = rows.length * ST_TILE;
+  const g = c.getContext('2d'), R = mulberry(77), trees = ST.treesBy[key] = [], at = (x, y) => (rows[y] && rows[y][x]) || '#';
+  const FAC = ['#7a4a4a', '#4a5a7a', '#7a6a3a', '#4a6a5a', '#6a4a6a', '#8a6a5a'];
+  rows.forEach((row, y) => [...row].forEach((t, x) => {
+    const px = x * ST_TILE, py = y * ST_TILE, shore = t === '#' && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => at(x + a, y + b) !== '#');
+    g.fillStyle = t === '#' || t === 'E' ? (shore ? '#2a4038' : '#1a2e28') : ',TYWD'.includes(t) ? '#2a3424' : '#4a4448'; g.fillRect(px, py, ST_TILE, ST_TILE);
+    if (t === '#') { g.strokeStyle = 'rgba(120,160,120,.2)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 6, py + 24 + R() * 16); g.quadraticCurveTo(px + 32, py + 16 + R() * 16, px + 58, py + 26 + R() * 16); g.stroke(); if (R() < .2) { g.fillStyle = '#3a5a2a'; g.beginPath(); g.ellipse(px + R() * 50 + 7, py + R() * 50 + 7, 7, 4, 0, 0, 7); g.fill(); } } // lily pads
+    else if (',TYWD'.includes(t)) { g.fillStyle = 'rgba(20,30,15,.5)'; for (let i = 0; i < 5; i++) g.fillRect(px + R() * 60, py + R() * 60, 2, 5); }
+    else if (t !== 'E') { g.strokeStyle = 'rgba(0,0,0,.3)'; g.lineWidth = 1.5; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) g.strokeRect(px + j * 16 + (i % 2) * 8, py + i * 16, 16, 16); }
+    if (t === 'E') { g.fillStyle = '#5a4430'; for (let i = 0; i < 4; i++) g.fillRect(px + 2, py + 4 + i * 15, 60, 11); }
+    if (t === 'T') { trees.push({x: px + 32, y: py + 50, s: 1 + R() * .3, cypress: true, ph: R() * 6}); g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(px + 32, py + 54, 16, 5, 0, 0, 7); g.fill(); }
+    if (t === 'Y') { g.fillStyle = '#7a7a80'; g.fillRect(px + 12, py + 6, 40, 50); g.fillStyle = '#5a5a60'; g.fillRect(px + 8, py + 2, 48, 8); g.fillStyle = '#9a9aa0'; g.fillRect(px + 29, py - 16, 6, 22); g.fillRect(px + 22, py - 10, 20, 5); g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(px + 22, py + 24, 20, 3); }
+    if (t === 'W') { g.fillStyle = '#141414'; for (let i = 0; i < 6; i++) { g.fillRect(px + 2 + i * 11, py + 8, 3, 46); g.beginPath(); g.moveTo(px + 1 + i * 11, py + 8); g.lineTo(px + 3.5 + i * 11, py); g.lineTo(px + 6 + i * 11, py + 8); g.fill(); } g.fillRect(px, py + 14, 64, 3); g.fillRect(px, py + 44, 64, 3); }
+    if (t === 'D') { g.fillStyle = '#5a5a62'; g.fillRect(px + 2, py - 30, 60, 92); g.fillStyle = '#3a3a42'; g.beginPath(); g.moveTo(px - 4, py - 28); g.lineTo(px + 32, py - 56); g.lineTo(px + 68, py - 28); g.fill(); g.fillStyle = '#0a0406'; g.fillRect(px + 20, py + 20, 24, 42); g.fillStyle = '#c0102a'; g.beginPath(); g.arc(px + 32, py - 8, 7, 0, 7); g.fill(); }
+    if (t === 'S') { g.fillStyle = '#3a3330'; g.beginPath(); g.ellipse(px + 32, py + 48, 20, 8, 0, 0, 7); g.fill(); g.strokeStyle = '#c9c0b0'; g.lineWidth = 4; g.beginPath(); g.moveTo(px + 32, py + 48); g.lineTo(px + 36, py + 14); g.stroke(); }
+    if (t === 'L') { g.fillStyle = '#141414'; g.fillRect(px + 30, py - 10, 4, 66); g.fillRect(px + 22, py + 54, 20, 6); g.fillStyle = '#1a1a1a'; g.fillRect(px + 24, py - 24, 16, 16); g.fillStyle = '#ffd08a'; g.shadowColor = '#ffb35a'; g.shadowBlur = 24; g.fillRect(px + 27, py - 21, 10, 10); g.shadowBlur = 0; }
+    if (t === 'H' || t === 'I') { // a three-storey townhouse with balconies
+      const fc = FAC[(x * 7 + y * 3) % FAC.length], top = py - 96;
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(px, py + 54, 64, 10);
+      g.fillStyle = fc; g.fillRect(px + 1, top, 62, py + 60 - top); g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(px + 1, top, 4, py + 60 - top);
+      g.fillStyle = '#2a2026'; g.fillRect(px - 2, top - 8, 68, 10); // cornice
+      for (let f = 0; f < 3; f++) for (const wx of [12, 38]) { const wy = top + 12 + f * 50; const lit = R() < .55; g.fillStyle = lit ? '#ffc870' : '#1a1418'; g.globalAlpha = lit ? .85 : 1; g.fillRect(px + wx, wy, 14, 22); g.globalAlpha = 1; g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(px + wx - 3, wy, 3, 22); g.fillRect(px + wx + 14, wy, 3, 22); } // windows and shutters
+      g.fillStyle = '#111'; for (const by of [top + 38, top + 88]) { g.fillRect(px + 2, by, 60, 3); for (let i = 0; i < 8; i++) g.fillRect(px + 4 + i * 8, by - 14, 2, 14); g.fillRect(px + 2, by - 15, 60, 2); } // wrought-iron balconies
+      g.fillStyle = '#1a1210'; g.fillRect(px + 24, py + 30, 16, 30); g.fillStyle = '#c9a24a'; g.fillRect(px + 36, py + 44, 2, 3);
+      if (t === 'I') { g.fillStyle = '#3a2a1a'; g.fillRect(px + 50, py + 4, 4, 24); g.fillStyle = '#6a0a1a'; g.fillRect(px + 26, py + 10, 30, 16); g.fillStyle = '#ffd08a'; g.font = '700 9px sans-serif'; g.textAlign = 'center'; g.fillText('VELVET', px + 41, py + 17); g.fillText('LANTERN', px + 41, py + 25); g.textAlign = 'left'; g.fillStyle = '#ff3a3a'; g.shadowColor = '#ff3a3a'; g.shadowBlur = 16; g.beginPath(); g.arc(px + 14, py + 22, 5, 0, 7); g.fill(); g.shadowBlur = 0; }
+    }
+  }));
+  rows.forEach((row, y) => [...row].forEach((t, x) => { // the cathedral of Saint-Ombre, drawn over its tiles
+    if (t !== 'A') return; const px = x * ST_TILE, py = y * ST_TILE, W4 = ST_TILE * 4, H3 = ST_TILE * 3;
+    g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(px, py + H3 - 10, W4, 16);
+    g.fillStyle = '#5a5a64'; g.fillRect(px + 10, py - 40, W4 - 20, H3 + 40);
+    for (const sx of [px + 4, px + W4 - 52]) { g.fillStyle = '#4a4a54'; g.fillRect(sx, py - 120, 48, H3 + 120); g.fillStyle = '#3a3a44'; g.beginPath(); g.moveTo(sx - 6, py - 120); g.lineTo(sx + 24, py - 210); g.lineTo(sx + 54, py - 120); g.fill(); g.fillStyle = '#9a9aa0'; g.fillRect(sx + 22, py - 236, 4, 30); g.fillRect(sx + 14, py - 226, 20, 4); g.fillStyle = '#c0102a'; g.globalAlpha = .7; g.fillRect(sx + 16, py - 80, 16, 34); g.globalAlpha = 1; }
+    g.fillStyle = '#3a3a44'; g.beginPath(); g.moveTo(px + 50, py - 40); g.lineTo(px + W4 / 2, py - 110); g.lineTo(px + W4 - 50, py - 40); g.fill();
+    const rx = px + W4 / 2, ry = py + 20; g.fillStyle = '#2a0a1a'; g.beginPath(); g.arc(rx, ry, 34, 0, 7); g.fill(); g.shadowColor = '#c0102a'; g.shadowBlur = 30;
+    for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#c0102a' : '#7a2aa0'; g.beginPath(); g.moveTo(rx, ry); g.arc(rx, ry, 30, i * Math.PI / 4, (i + 1) * Math.PI / 4); g.fill(); } g.shadowBlur = 0; g.fillStyle = '#ffd08a'; g.beginPath(); g.arc(rx, ry, 8, 0, 7); g.fill(); // rose window
+    g.fillStyle = '#140a0e'; g.beginPath(); g.moveTo(rx - 26, py + H3); g.lineTo(rx - 26, py + H3 - 60); g.quadraticCurveTo(rx, py + H3 - 100, rx + 26, py + H3 - 60); g.lineTo(rx + 26, py + H3); g.fill(); // arched doors
+    g.fillStyle = '#6a6a72'; for (let i = 0; i < 3; i++) g.fillRect(px + 40 - i * 10, py + H3 + i * 10, W4 - 80 + i * 20, 10); // steps
+  }));
+  ST.dunC[key] = c;
+}
 function stDrawOutdoorCanvas(key) { // sea, sand, grass, huts, a pier; palms are drawn live so they sway
+  if (ST_DUNGEONS[key].city) return stDrawCityCanvas(key);
   const D = ST_DUNGEONS[key], rows = D.rows, c = document.createElement('canvas'); c.width = rows[0].length * ST_TILE; c.height = rows.length * ST_TILE;
   const g = c.getContext('2d'), R = mulberry(41), trees = ST.treesBy[key] = [], at = (x, y) => (rows[y] && rows[y][x]) || '#';
   rows.forEach((row, y) => [...row].forEach((t, x) => {
@@ -5915,14 +6137,14 @@ function stDrawDungeonCanvas(key) {
     if (D.lit && t === '#' && rows[y + 1] && rows[y + 1][x] !== '#' && R() < .45) { // castle walls facing a hall
       const px = x * ST_TILE, py = y * ST_TILE; g.fillStyle = D.theme.wall; g.fillRect(px, py, ST_TILE, ST_TILE);
       if (D.home) { if (R() < .6) { g.fillStyle = '#1a2a3a'; g.fillRect(px + 16, py + 18, 32, 30); g.fillStyle = 'rgba(160,190,220,.35)'; g.fillRect(px + 18, py + 20, 28, 26); g.fillStyle = D.theme.wall; g.fillRect(px + 31, py + 18, 3, 30); g.fillRect(px + 16, py + 32, 32, 3); } else { g.fillStyle = '#6a8a3a'; for (let i = 0; i < 4; i++) g.fillRect(px + 14 + i * 10, py + 22, 4, 18 + (i % 2) * 6); g.fillStyle = '#3a2a1a'; g.fillRect(px + 10, py + 18, 44, 4); } }
-      else if (R() < .5) { g.fillStyle = key === 'keep' ? '#5a1fa0' : '#8a2a1a'; g.fillRect(px + 20, py + 20, 24, 40); g.beginPath(); g.moveTo(px + 20, py + 60); g.lineTo(px + 32, py + 50); g.lineTo(px + 44, py + 60); g.fill(); g.fillStyle = '#c9a24a'; g.fillRect(px + 18, py + 18, 28, 4); }
+      else if (R() < .5) { g.fillStyle = key === 'keep' ? '#5a1fa0' : D.holy ? '#e8dcb0' : '#8a2a1a'; g.fillRect(px + 20, py + 20, 24, 40); g.beginPath(); g.moveTo(px + 20, py + 60); g.lineTo(px + 32, py + 50); g.lineTo(px + 44, py + 60); g.fill(); g.fillStyle = '#c9a24a'; g.fillRect(px + 18, py + 18, 28, 4); }
       else { g.fillStyle = '#ffb35a'; g.shadowColor = '#ffb35a'; g.shadowBlur = 24; g.beginPath(); g.arc(px + 32, py + 40, 6, 0, 7); g.fill(); g.shadowBlur = 0; g.fillStyle = '#3a2a1a'; g.fillRect(px + 29, py + 44, 6, 14); }
       return;
     }
     const px = x * ST_TILE, py = y * ST_TILE;
     g.fillStyle = t === '#' ? D.theme.wall : D.theme.floor; g.fillRect(px, py, ST_TILE, ST_TILE);
     if (t !== '#') { g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 2; g.strokeRect(px + 1, py + 1, 31, 31); g.strokeRect(px + 33, py + 33, 30, 30); if (R() < .15) { g.fillStyle = '#d8d0c0'; g.fillRect(px + R() * 50, py + R() * 50, 8, 3); }
-      if (R() < .12 && !D.home) { g.fillStyle = 'rgba(110,10,14,.7)'; g.beginPath(); g.ellipse(px + 16 + R() * 32, py + 16 + R() * 32, 8 + R() * 14, 5 + R() * 8, R() * 3, 0, 7); g.fill(); for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(px + R() * 64, py + R() * 64, 1.5 + R() * 2, 0, 7); g.fill(); } } }
+      if (R() < .12 && !D.home && !D.holy) { g.fillStyle = 'rgba(110,10,14,.7)'; g.beginPath(); g.ellipse(px + 16 + R() * 32, py + 16 + R() * 32, 8 + R() * 14, 5 + R() * 8, R() * 3, 0, 7); g.fill(); for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(px + R() * 64, py + R() * 64, 1.5 + R() * 2, 0, 7); g.fill(); } } }
     else { g.fillStyle = 'rgba(255,255,255,.04)'; g.fillRect(px, py, ST_TILE, 10); }
     if (t === 'f') { g.fillStyle = '#4a4440'; g.fillRect(px + 4, py + 4, 56, 56); g.fillStyle = '#1a1210'; g.fillRect(px + 14, py + 24, 36, 32); g.fillStyle = '#ff7a2a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 30; g.beginPath(); g.moveTo(px + 20, py + 56); g.lineTo(px + 32, py + 28); g.lineTo(px + 44, py + 56); g.fill(); g.shadowBlur = 0; }
     if (t === 'b') { g.fillStyle = '#4a2a18'; g.fillRect(px + 6, py + 4, 52, 58); g.fillStyle = '#8a2a2a'; g.fillRect(px + 9, py + 22, 46, 38); g.fillStyle = '#e8e0d0'; g.fillRect(px + 12, py + 8, 40, 12); }
@@ -5939,7 +6161,7 @@ function stDrawDungeonCanvas(key) {
 function stDrawMapCanvas() {
   const c = document.createElement('canvas'); c.width = ST_W * ST_TILE; c.height = ST_H * ST_TILE;
   const g = c.getContext('2d'), R = mulberry(11);
-  const col = {b: '#26281c', a: '#6a5844', Q: '#34452f', g: '#1a2620', '.': '#34452f', T: '#1f3322', '~': '#173f52', '^': '#4a4d52', '=': '#6a6048', v: '#5e5440', H: '#5a3226', ':': '#435a55', '#': '#626e6a', '*': '#b8c4cc', C: '#2a2433', W: '#1a1622', B: '#6a5230', G: '#5a14c0', S: '#34452f', D: '#1a1a1a', P: '#173f52', L: '#5e5440', M: '#5e5440'};
+  const col = {b: '#26281c', a: '#6a5844', Q: '#34452f', g: '#1a2620', '.': '#34452f', T: '#1f3322', '~': '#173f52', '^': '#4a4d52', '=': '#6a6048', v: '#5e5440', H: '#5a3226', ':': '#435a55', '#': '#626e6a', '*': '#b8c4cc', C: '#2a2433', W: '#1a1622', B: '#6a5230', G: '#5a14c0', S: '#34452f', D: '#1a1a1a', P: '#173f52', L: '#5e5440', M: '#5e5440', O: '#5e5440', F: '#4a3a24'};
   for (let y = 0; y < ST_H; y++) for (let x = 0; x < ST_W; x++) {
     const t = ST_MAP[y][x], px = x * ST_TILE, py = y * ST_TILE;
     g.fillStyle = col[t] || '#3f6b3a'; g.fillRect(px, py, ST_TILE, ST_TILE);
@@ -5947,6 +6169,8 @@ function stDrawMapCanvas() {
     if (t === 'b') { if (R() < .35) { g.fillStyle = '#d8d0b8'; g.fillRect(px + R() * 50, py + R() * 50, 12, 3); g.fillRect(px + R() * 50, py + R() * 50, 3, 9); } if (R() < .3) { g.fillStyle = 'rgba(80,90,40,.5)'; g.beginPath(); g.ellipse(px + 32, py + 40, 22, 9, 0, 0, 7); g.fill(); } }
     if (t === 'a') { g.strokeStyle = 'rgba(40,30,20,.35)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px, py + 20 + R() * 20); g.quadraticCurveTo(px + 32, py + 10 + R() * 30, px + 64, py + 24 + R() * 20); g.stroke(); }
     if (t === 'g' || t === 'T') for (let i = 0; i < 2; i++) { const tx = px + 14 + R() * 36, ty = py + 20 + R() * 36; g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(tx, ty + 4, 16, 6, 0, 0, 7); g.fill(); (ST.treesBy.world = ST.treesBy.world || []).push({x: tx, y: ty, s: .8 + R() * .5, dark: t === 'g', ph: R() * 6}); }
+    if (t === 'F') { for (let i = 0; i < 4; i++) { g.fillStyle = '#3a2a18'; g.fillRect(px, py + 4 + i * 16, 64, 5); g.fillStyle = (x + y) % 3 ? '#6a8a3a' : '#c9a24a'; for (let j = 0; j < 8; j++) g.fillRect(px + 3 + j * 8, py + 1 + i * 16, 3, 6); } }
+    if (t === 'O') { g.fillStyle = '#4a3020'; g.fillRect(px + 28, py + 10, 8, 50); g.fillStyle = '#8a6a3a'; g.fillRect(px + 10, py + 12, 44, 16); g.fillStyle = '#1a1206'; g.font = '700 11px sans-serif'; g.textAlign = 'center'; g.fillText('COACH', px + 32, py + 24); g.textAlign = 'left'; g.fillStyle = '#ffb35a'; g.beginPath(); g.arc(px + 44, py + 36, 4, 0, 7); g.fill(); }
     if (t === 'P') { g.fillStyle = '#6a4a2a'; for (let i = 0; i < 4; i++) g.fillRect(px + 2, py + 4 + i * 15, 60, 11); g.fillStyle = '#3a2a1a'; g.fillRect(px + 4, py + 56, 6, 8); g.fillRect(px + 54, py + 56, 6, 8); }
     if (t === '^') { g.fillStyle = '#7a8088'; g.beginPath(); g.moveTo(px + 6, py + 58); g.lineTo(px + 32, py + 8); g.lineTo(px + 58, py + 58); g.fill(); g.fillStyle = '#e8eef4'; g.beginPath(); g.moveTo(px + 24, py + 22); g.lineTo(px + 32, py + 8); g.lineTo(px + 40, py + 22); g.fill(); }
     if (t === '~') { g.strokeStyle = 'rgba(180,230,255,.25)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 8, py + 24 + R() * 16); g.lineTo(px + 30, py + 20 + R() * 16); g.stroke(); }
@@ -6032,7 +6256,7 @@ function stShowLine() {
 
 // ---- the world: movement, interaction and random encounters
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
-const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (dun) return '#fbtkjH'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
+const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYW'.includes(t) : '#fbtkjH'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
   const d = stData(); if (key !== 'world') d.riding = false; d.map = key; d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
@@ -6059,8 +6283,8 @@ function stNearby() {
   for (let y = 0; y < grid.length; y++) for (let x = 0; x < grid[y].length; x++) {
     const t = grid[y][x]; if (!near(x, y)) continue;
     if (t === 'S') return {kind: 'shrine'};
-    if (t === 'Q') return {kind: 'crystal', c: ST_CRYSTALS.find(c => c.x === x && c.y === y)};
-    if (t === 'D') return {kind: 'door', key: ST_DOOR_AT[x + ',' + y] || 'crypt'};
+    if (t === 'O' && d.map === 'world') return {kind: 'coach', c: ST_COACHES.find(c => c.x === x && c.y === y)};
+    if (t === 'D') return {kind: 'door', key: ST_DOOR_AT[(d.map === 'world' ? '' : d.map + ':') + x + ',' + y] || 'crypt'};
     if (t === 'P') return {kind: 'ship'};
     if (d.map === 'world') continue; // the rest only exist in dungeons ('B' is a bridge up top)
     if (t === 'E') return {kind: ST_DUNGEONS[d.map].outdoor ? 'ship' : 'exit'};
@@ -6081,14 +6305,24 @@ function stInteract(pre) {
     if (L.gold) { d.gold += L.gold; got.push(L.gold + ' gold'); }
     if (L.blade) { d.items.blade = 1; got.push('the Royal Blade (+6 attack)'); }
     if (L.item) { d.flags[L.item] = true; got.push(L.label); }
+    const lt = ST_LETTERS[it.c.id]; if (lt && !d.flags['vletter' + lt]) { d.flags['vletter' + lt] = true; got.push('a letter sealed in red wax'); setTimeout(() => stSay([['', ['Letter I: "...the child must never learn the name Delacroix-Noir. Drown it in the Vale. Let the ash have it..."', 'Letter II, in Sister Vey\'s hand: "...I nursed the Countess\'s child for a year before they took it. I still dream of its eyes..."', 'Letter III: "...the gravedigger knows where they buried the nurse. Paid him to forget. The crypt in Rougemarais will open for the blood. Only the blood..."'][lt - 1]], ['', `Bloodline letters found: ${stLetters()} of 3.` + (stLetters() >= 3 ? ' Somewhere in Rougemarais, a crypt will open for you.' : '')]]), 50); }
     sfx('pickup'); stSay([['', 'You open the chest and find ' + got.join(' and ') + '.']]);
   } else if (it.kind === 'gate' && d.ch >= 3) stSay([['', 'The seal shatters as the shards draw near. The gate of the Hollow Keep groans open onto a hall of cold torches.']], null, [['Enter the keep', () => stEnterMap('keep', 2, 2)], ['Not yet', null]]);
   else if (it.kind === 'gate') stSay([['', 'A seal of violet light bars the gate. It hums like a held breath. Two shards would break it. You carry ' + Math.max(0, d.ch - 1) + '.']]);
   else if (it.kind === 'shrine') stRest();
   else if (it.kind === 'ship') {
-    if (d.map === 'world') stSay([['Captain Isolde', 'The Gull\'s Promise. Fastest hull in the Drowned Harbor, because she\'s the only one left.'], ['Captain Isolde', `Three days east lie the Brightwater Isles, where the Hollowing never reached. ${stPrice(30)} gold for passage.`]], null,
-      [[`Sail to the Brightwater Isles (${stPrice(30)} gold)`, () => { if (d.gold < stPrice(30)) return stSay([['Captain Isolde', 'No coin, no passage. The sea doesn\'t take favors.']]); d.gold -= stPrice(30); stSail('isles', 2, 10); }], ['Not today', null]]);
-    else stSay([['Captain Isolde', 'Back to the grey, then? Climb aboard. The return trip is on me.']], null, [['Sail home to Saltmere', () => stSail('world', 37, 16)], ['Stay a while', null]]);
+    const fare = k => stPrice((d.map === 'rouge' || k === 'rouge') ? 60 : 30);
+    stSay([['Captain Isolde', d.map === 'world' ? 'The Gull\'s Promise. Fastest hull in the Drowned Harbor, because she\'s the only one left. East to the sunny Brightwater Isles, or south through the bayou to Rougemarais, if you\'re tired of living.' : d.map === 'rouge' ? 'Keep your collar up until we\'re clear of the bayou. Things here drink.' : 'Where to, wanderer?'],
+      ['Captain Isolde', `You have ${d.gold} gold.`]], null,
+      Object.keys(ST_PORTS).filter(k => k !== d.map).map(k => { const P = ST_PORTS[k]; return [`Sail to ${P.name} (${fare(k)} gold)${P.lv ? `, level ${P.lv}+` : ''}`, () => {
+        if (P.lv && d.lv < P.lv) return stSay([['Captain Isolde', `Rougemarais? At your level? No. I don\'t ferry corpses. Come back when you\'re level ${P.lv}. (You are level ${d.lv}.)`]]);
+        if (d.gold < fare(k)) return stSay([['Captain Isolde', 'No coin, no passage. The sea doesn\'t take favors.']]);
+        d.gold -= fare(k); stSail(k, P.at[0], P.at[1]); }]; }).concat([['Not today', null]]));
+  }
+  else if (it.kind === 'coach' && it.c) {
+    const here = it.c, cost = c => stPrice(Math.max(8, Math.round(Math.hypot(c.x - here.x, c.y - here.y) * .9)));
+    stSay([['Coach Driver', `Coach leaves on the hour, ash or no ash. Where to? You have ${d.gold} gold.`]], null,
+      ST_COACHES.filter(c => c !== here).map(c => [`${c.name} (${cost(c)} gold)`, () => { if (d.gold < cost(c)) return stSay([['Coach Driver', 'Fare first. The horses don\'t eat promises.']]); d.gold -= cost(c); stSail('world', c.x, c.y + 1, {land: true, label: `Riding the coach to ${c.name}`, arrive: c.name}); }]).concat([['Not today', null]]));
   }
   else if (it.kind === 'crystal') {
     d.crystals = d.crystals || [];
@@ -6097,16 +6331,27 @@ function stInteract(pre) {
     stSay([['', fresh ? `The crystal hums at your touch and remembers you. ${it.c.name} is attuned. (${d.crystals.length} of ${ST_CRYSTALS.length})` : 'The crystal hums. Through it you can feel the others you have touched, like candles in a dark house.']], null,
       dests.map(c => [`Travel to ${c.name}`, () => { sfx('blink'); stEnterMap('world', c.x, c.y + 1); }]).concat([['Stay', null]]));
   }
+  else if (it.kind === 'door' && it.key === 'vcrypt') {
+    if (stLetters() >= 3 && d.lv < 14) stSay([['', `The crest stirs, then goes still. Something inside is very old and very strong. Required level: 14. You are level ${d.lv}.`]]);
+    else if (stLetters() < 3) stSay([['', 'A crypt with a red crest: a bat holding a crown. The door has no handle and no lock. It is waiting for something.']]);
+    else stSay([['', 'The crest bleeds a single drop as you approach, and the door swings inward. It knows you.']], null, [['Enter the crypt', () => stEnterMap('vcrypt', 2, 2)], ['Not yet', null]]);
+  }
+  else if (it.kind === 'door' && it.key === 'stair') {
+    if (d.flags.hrQuest && d.lv < 10) stSay([['', `The stair holds you for a step, then fades. The heavens test only the strong. Required level: 10. You are level ${d.lv}.`]]);
+    else if (!d.flags.hrQuest) stSay([['', 'A stair of pale light climbs from the snow into the clouds. When you set your foot on it, it will not hold your weight.']]);
+    else stSay([['', 'The stair of light holds you now. Far above, something with too many wings is waiting.']], null, [['Climb', () => stEnterMap('stair', 2, 2)], ['Not yet', null]]);
+  }
   else if (it.kind === 'door') {
-    const D = ST_DUNGEONS[it.key];
+    const D = ST_DUNGEONS[it.key], need = ST_MAP_LV[it.key] || 1;
+    if (d.lv < need) return stSay([['', `${D.name}. Required level: ${need}. You are level ${d.lv}. Whatever waits in there would make short work of you. Grow stronger first.`]]);
     stSay([['', D.lit ? `The iron-bound doors of ${D.name} stand ajar. Firelight inside, and the smell of black candles.` : `Stairs fall away into the dark. A smell of old stone and older death. This is ${D.name}.`]], null,
       [[D.lit ? 'Enter' : 'Descend', () => stEnterMap(it.key, 2, 2)], ['Turn back', null]]);
-  } else if (it.kind === 'exit') { const D = ST_DUNGEONS[d.map]; if (D.home) { stEnterMap('world', D.exit[0], D.exit[1] + 1); return; } stSay([['', 'Grey light above. The surface.']], null, [['Climb out', () => stEnterMap('world', D.exit[0], D.exit[1] + 1)], ['Stay', null]]); }
+  } else if (it.kind === 'exit') { const D = ST_DUNGEONS[d.map]; if (D.home) { stEnterMap('world', D.exit[0], D.exit[1] + 1); return; } stSay([['', 'Grey light above. The surface.']], null, [['Climb out', () => stEnterMap(D.exitMap || 'world', D.exit[0], D.exit[1] + 1)], ['Stay', null]]); }
   else if (it.kind === 'boss') {
     const b = it.b;
     if (b.side ? !d.flags[b.side] : d.ch < b.ch) stSay([['', b.side ? 'A shape watches you from between the trees, then is simply not there. Something here is waiting for a reason to show itself.' : b.id === 'king' ? 'A voice like dry leaves: "Not yet, little candle. Bring me what they stole."' : 'Something vast sleeps here. Your hands will not stop shaking. Not yet.']]);
-    else stSay([['', b.id === 'mara' ? 'A woman in a red coat lounges on a throne of lashed driftwood, a cutlass across her knees. "Oh good," she says. "Entertainment."' : b.id === 'witch' ? 'A woman sits among a ring of candles that burn black. "Another pilgrim," she sighs. "I always hope it will be someone new. It is always the same ash."' : b.id === 'brother' ? 'A knight kneels in the mud, sword planted, waiting. When he lifts his head, he has Liora\'s eyes, and nothing behind them.' : b.id === 'stalker' ? 'It steps out of the gloom wearing a hunter\'s coat and no face. It has been hunting Corin\'s family for three generations.' : b.id === 'golem' ? 'Bones crunch beneath a shape of fused stone. It was a guardian once. Now it only remembers how to crush. The Ember Shard burns in its chest.' : b.id === 'drake' ? 'Frozen corpses line the hall like offerings. Wings of rime unfold. The drake has not tasted warm blood in a century.' : 'The Hollow King does not rise. He unfolds. "Another candle," he whispers, "come to gutter in my hall."'],
-      ['', 'There is no turning back once you draw steel.']], null, [['Draw steel', () => stStartBattle([b.id], b.id)], ['Not yet', null]]);
+    else stSay([['', b.id === 'marquis' ? 'On the cathedral steps, a man in a red coat rises from a chair made of bones. "You may kneel," he says, "or you may bleed. I enjoy both."' : b.id === 'seraphiel' ? 'At the top of the stair, a figure of white fire unfolds six wings. "The Restriction is not given. It is earned. Show me the body you would perfect."' : b.id === 'mara' ? 'A woman in a red coat lounges on a throne of lashed driftwood, a cutlass across her knees. "Oh good," she says. "Entertainment."' : b.id === 'witch' ? 'A woman sits among a ring of candles that burn black. "Another pilgrim," she sighs. "I always hope it will be someone new. It is always the same ash."' : b.id === 'brother' ? 'A knight kneels in the mud, sword planted, waiting. When he lifts his head, he has Liora\'s eyes, and nothing behind them.' : b.id === 'stalker' ? 'It steps out of the gloom wearing a hunter\'s coat and no face. It has been hunting Corin\'s family for three generations.' : b.id === 'golem' ? 'Bones crunch beneath a shape of fused stone. It was a guardian once. Now it only remembers how to crush. The Ember Shard burns in its chest.' : b.id === 'drake' ? 'Frozen corpses line the hall like offerings. Wings of rime unfold. The drake has not tasted warm blood in a century.' : 'The Hollow King does not rise. He unfolds. "Another candle," he whispers, "come to gutter in my hall."'],
+      ['', `There is no turning back once you draw steel. Required level: ${ST_BOSS_LV[b.id] || 1}. You are level ${d.lv}.`]], null, [['Draw steel', () => stBossFight(b.id)], ['Not yet', null]]);
   } else if (it.kind === 'npc') stTalk(it.n.id);
 }
 function stTalk(id) {
@@ -6119,7 +6364,7 @@ function stTalk(id) {
     } else if (d.ch < 4) stSay([['Maren the Pale', ['', 'The catacombs eat the careless. Light a shrine before you go down.', 'Cold kills slower than steel, but it kills. The crypt is past the peaks.', 'Go, then. If you fall, at least fall facing him.'][d.ch]]]);
     else stSay([['Maren the Pale', 'The fires are steady for the first time in my life. I do not know what to do with hope. Teach me.']]);
   } else if (id === 'merchant') stSay([['Pell the Merchant', `Coin is coin, even at the end of the world. Potions are ${stPrice(15)}, ethers ${stPrice(25)}.${stAlign() >= 3 ? ' A friend\'s price.' : stAlign() <= -3 ? ' Price goes up for your kind.' : ''} You have ${d.gold}. Don't die with it.`]], null,
-    [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Steal a potion', () => stPickpocket('Pell the Merchant')], ['Leave', null]]);
+    [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('thornwake')], ['Steal a potion', () => stPickpocket('Pell the Merchant')], ['Leave', null]]);
   else if (id === 'inn') stSay([['Innkeeper Bree', 'A bed, a bowl of something hot, and a locked door. 10 gold. You will wake. Probably.']], null,
     [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
   else if (id === 'guild') {
@@ -6145,6 +6390,9 @@ function stTalk(id) {
   else if (id === 'hessaHome') stSay([['Hessa', 'Every morning I wake up and I still know her name. Every morning, that is a gift. Thank you.']]);
   else if (id === 'hask' || id === 'mira') stSay([[id === 'hask' ? 'Innkeeper Hask' : 'Innkeeper Mira', id === 'hask' ? 'Ravenhollow\'s only bed. The ravens are the only thing that sleeps sound here. 10 gold.' : 'Salt in the air keeps the dead away. Mostly. A room is 10 gold, and the stew is free if you don\'t ask what\'s in it.']], null,
     [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
+  else if (id === 'ansel' && d.pact) stSay([['Brother Ansel', 'Gods above. You let one of THEM touch your soul. I can scrub it clean, but it will cost you, in gold and in pain. 100 gold.']], null, [['Cleanse the pact (100 gold)', () => { if (d.gold < 100) return; d.gold -= 100; d.pact = false; stShift(2); sfx('shield'); stSay([['', 'It feels like a fishhook pulled out of your chest. Something far below howls in disappointment.']]); }], ['Keep it', null]]);
+  else if (id === 'ansel' && d.ch >= 1 && !d.flags.hrQuest) stSay([['Brother Ansel', 'You fight like someone who has already died once. Listen. There is an old rite, older than the shrines. The Heavenly Restriction.'],
+    ['Brother Ansel', 'The heavens take every spark of magic from you, forever, and in return they make your body perfect. Stronger. Faster. Hard to kill.'], ['Brother Ansel', 'Above the Frost Peaks, north of the ice crypt, a Celestial Stair climbs into the clouds. It only holds those who have been told of it. Now you have been told.']], () => { d.flags.hrQuest = true; });
   else if (id === 'ansel') stSay([['Brother Ansel', d.blessed ? 'The blessing holds. Go, before I lose my nerve and ask you to stay.' : 'The old gods are dead or sleeping. I pray anyway. For 40 gold, I will pray for you. It helps. I think.']], null,
     d.blessed ? null : [['Receive a blessing (40 gold, +3 magic)', () => { if (d.gold >= 40) { d.gold -= 40; d.blessed = true; sfx('shield'); } }], ['Leave', null]]);
   else if (id === 'corin') {
@@ -6155,7 +6403,7 @@ function stTalk(id) {
       [['I\'ll hunt it', () => { d.flags.corinQuest = true; stShift(1); }], ['Not my problem', () => stShift(-1)]]);
   }
   else if (id === 'sela') stSay([['Sela the Peddler', `Potions ${stPrice(15)}, ethers ${stPrice(25)}. Same as Pell, but I smile more. You have ${d.gold}.`]], null,
-    [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Steal a potion', () => stPickpocket('Sela the Peddler')], ['Leave', null]]);
+    [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('ravenhollow')], ['Steal a potion', () => stPickpocket('Sela the Peddler')], ['Leave', null]]);
   else if (id === 'brann') {
     const w = d.weapon || 0, next = ST_WEAPONS[w + 1];
     stSay([['Brann the Smith', next ? `You're carrying ${ST_WEAPONS[w].name}. I can make you ${next.name} (+${next.atk} attack) for ${next.price} gold. You have ${d.gold}.` : 'That blade is the best I\'ll ever make. Don\'t waste it on wolves.']], null,
@@ -6164,7 +6412,7 @@ function stTalk(id) {
   else if (id === 'dunn' && d.flags.bell && !d.flags.bellDone) stSay([['Dunn the Fisher', 'The Drowned Bell. Gods. My father rang that bell every dusk so the boats could find the harbor.'], ['Dunn the Fisher', 'Maybe the boats will come home now. Maybe nothing will. Either way, take this. It\'s all I have.']], () => { d.flags.bellDone = true; d.gold += 150; d.items.ether++; sfx('levelup'); });
   else if (id === 'dunn' && !d.flags.bellQuest) stSay([['Dunn the Fisher', 'The harbor bell sank when the marsh swallowed the old chapel. Without it, nobody\'s boat comes home.'], ['Dunn the Fisher', 'It\'s in the Bone Marsh, south of Ravenhollow, under the green water. Bring it back and I\'ll make it worth your while.']], null,
     [['I\'ll find the bell', () => { d.flags.bellQuest = true; stShift(1); }], ['Not now', null]]);
-  else if (id === 'dunn') stSay([['Dunn the Fisher', ['Nets come up with bones lately. Old bones. Crowned ones, once.', 'The Gloamwood used to be orchards. My grandmother picked apples there. Now nothing picks anything there. It gets picked.', 'If you\'re going east, go at noon. The dark there has opinions.'][(d.lv + (d.bounties || 0)) % 3]]]);
+  else if (id === 'dunn') stSay([['Dunn the Fisher', ['Nets come up with bones lately. Old bones. Crowned ones, once.', 'The Gloamwood used to be orchards. My grandmother picked apples there. Now nothing picks anything there. It gets picked.', 'If you\'re going east, go at noon. The dark there has opinions.'][(d.lv + (d.bounties || 0)) % 3]], ['Dunn the Fisher', 'Salted fish and ore from Brann\'s mine are cheap here. Want to trade?']], null, [['Trade goods', () => stTrade('saltmere')], ['Leave', null]]);
   else if (id === 'pilgrim') stSay([['The Pale Pilgrim', 'You died, and the ash gave you back. Do you know how few it chooses?'], ['The Pale Pilgrim', 'The King did not make the Hollowing. He held it back, the way a dam holds a river. When he falls, the water goes somewhere.'],
     ['The Pale Pilgrim', d.ch >= 4 ? 'And so it did. Into you, I think. I can teach you to drink it, the way he did. Or you can carry it like a stone until it drowns you.' : 'Kill him anyway. Some dams deserve to break.']], null,
     d.ch >= 4 && !d.flags.pilgrimChoice ? [['Drink the Hollow (+5 magic, Ashen)', () => { d.flags.pilgrimChoice = true; d.hollowPower = true; stShift(-4); stSay([['', 'It tastes of ash and old kings. Your shadow stretches a little longer than it should.']]); }],
@@ -6220,13 +6468,49 @@ function stTalk(id) {
     d.flags.maudCoin ? null : [['Leave her 20 gold for bread', () => { if (d.gold < 20) return; d.gold -= 20; d.flags.maudCoin = true; stShift(1); }], ['Leave', null]]);
   else if (id === 'vesk') stSay([['Vesk the Thief', d.jailed > 1 ? 'Back again? We should get matching cells.' : 'First time in? I\'m here for stealing bread. Fourth time. The bread is better in here.'], ['Vesk the Thief', stAlign() <= -3 ? 'You\'ve the eyes of a real one. Rob the rich, and the watch\'ll find you. Rob the poor, and only the gods will. Choose your marks.' : 'Word of advice: guards come for you in any village. Pay the fine if you can. The cells are cheaper, but they cost you in other ways.']]);
   else if (id === 'holt') stSay([['Warden Holt', d.crime > 0 ? 'Stealing from the WARDEN\'S chest? In the WARDEN\'S jail? Get out. I can\'t afford to feed you twice.' : 'Your sentence is served. The door\'s there. Use it.']]);
+  else if (id === 'garrick') {
+    if (d.were && !d.flags.garrick) stSay([['Garrick the Silver', 'Stop right there. The eyes. The smell of wet fur and old blood. You went to them.'], ['Garrick the Silver', 'I warned you. Silver doesn\'t care who you were.']], null, [['Fight him', () => stBossFight('garrick')], ['Back away', null]]);
+    else if (d.flags.ysolde && !d.flags.garrickPaid) stSay([['Garrick the Silver', 'Her head. Gods, she was old. Older than Ravenhollow.'], ['Garrick the Silver', 'Take this. A silver edge. It bites anything the moon made.']], () => { d.flags.garrickPaid = true; d.silver = true; d.gold += 200; sfx('levelup'); stCallout('Silver Blade · +5 attack · +200 gold', '#e8e8f0'); });
+    else if (d.flags.garrickPaid) stSay([['Garrick the Silver', 'Quiet nights since. The sheep sleep. So do I, almost.']]);
+    else if (d.flags.wolfQuest) stSay([['Garrick the Silver', 'The pack mother walks the Gloamwood. Only at night. Bring silver, or bring friends, or bring a prayer.']]);
+    else if (d.ch < 2 || d.lv < 8) stSay([['Garrick the Silver', 'Something hunts the Gloamwood at night. Not wolves. Worse.'], ['Garrick the Silver', `Come back when you have a shard in your pocket and some steel in your spine. (Requires chapter 3 and level 8. You are level ${d.lv}.)`]]);
+    else stSay([['Garrick the Silver', 'The sheep are gone. Then a shepherd. Werewolves. A pack of them, led by a she-wolf older than this village.'], ['Garrick the Silver', 'She walks the Gloamwood when the moon is up. Find her. End her. I pay in silver.']], null, [['I\'ll hunt the pack', () => { d.flags.wolfQuest = true; stShift(1); }], ['Not my fight', null]]);
+  }
+  else if (id === 'ysolde') stSay([['Ysolde of the Pack', 'You came at night, alone, to the Gloamwood. Either very brave, or the hunter\'s dog.'], ['Ysolde of the Pack', 'We take only what the cruel would waste. Garrick hunts us for the bounty on our pelts. Ask him how many children he has skinned.'],
+    ['Ysolde of the Pack', 'Or. Kneel, and I will give you the bite. You will be one of us: strong under the moon, a beast in battle. Forever.']], null, [
+    ['Join the pack', () => { if (d.vamp || d.hr) return stSay([['Ysolde of the Pack', d.vamp ? 'Ugh. Dead blood. The bite would rot in you. Go away, leech.' : 'The heavens have bound you. There is no room in you for the moon.']]); d.were = true; d.flags.ysoldeDone = true; for (const k of ['wolfform', 'howl']) if (!d.skills.includes(k)) d.skills.push(k); stShift(-1); sfx('roar'); stCallout('YOU ARE OF THE PACK', '#cfd8e0');
+      stSay([['', 'Her teeth are gentle, which is the worst part. Then the moon pours into you like cold water.'], ['', 'New abilities: Wolf Form and Blood Moon Howl. At night you are stronger and faster. Garrick will know.']]); }],
+    ['Fight her', () => stBossFight('ysolde')], ['Leave', null]]);
+  else if (id === 'sabine') stSay([['Dockmaster Sabine', 'Welcome to Rougemarais. Sun hasn\'t risen here in a hundred years. The vampires prefer it that way, and they own the city.'], ['Dockmaster Sabine', 'Mind the streets. Thralls hunt anyone without a crest. The ship leaves from my pier whenever you\'re tired of being prey.']]);
+  else if (id === 'remy') stSay([['Old Remy', 'Silk and blood wine, cheapest you\'ll find anywhere. The nobles make it. Don\'t ask what\'s in the wine.']], null, [['Trade goods', () => stTrade('rouge')], ['Leave', null]]);
+  else if (id === 'odile') stSay([['Madame Odile', d.vamp ? 'Ah, one of the family. Your room is ready, darling. No windows.' : 'The Velvet Lantern. Doors locked at dusk, which is always. 20 gold, and I\'ll keep the teeth from your throat till morning.']], null,
+    [[`Rest (${stPrice(20)} gold)`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
+  else if (id === 'lucien') {
+    if (d.vamp) stSay([['Pere Lucien', 'Your eyes. Gods forgive me, I can see it in your eyes. Leave, creature, before I remember my vows.']]);
+    else if (d.flags.marquis && !d.flags.lucienPaid) stSay([['Pere Lucien', 'The Marquis is ash on the cathedral steps. For the first time in a century, I hear the bells.'], ['Pere Lucien', 'Take this, with the church\'s thanks. And light a candle for me.']], () => { d.flags.lucienPaid = true; d.gold += 400; PROF.crowns += 150; stShift(2); sfx('levelup'); stCallout('+400 gold · +150 Crowns', '#ffd75e'); });
+    else if (d.flags.marquis) stSay([['Pere Lucien', 'The city is still theirs. But it is a little less theirs, because of you.']]);
+    else stSay([['Pere Lucien', 'I am the last priest in a city of the dead. Marquis Valcourt holds court on the steps of my cathedral and feeds on whoever wanders by.'], ['Pere Lucien', 'He is old and terribly strong. Level 14 at least, or he will drink you like a glass of wine. If you can, end him.']]);
+  }
+  else if (id === 'silas') { const n = stLetters(); stSay([['Silas the Gravekeeper', n >= 3 ? 'You have all three letters. I can see it on you. The Delacroix-Noir crypt will open for its own blood.' : n ? `You found one of the old letters. ${n} of 3. The others went where the family went: to a witch's castle in the dunes, and a gravedigger's coffer up north.` : 'Every tomb here has a name but one. The crypt with the red crest. It opens only for the family. And the family is all dead. Mostly.']]); }
+  else if (id === 'countessNpc') stSay([['The Countess', 'So. The lost child comes home. You do not remember me. You should not. They took you from the crib and drowned you in the Ashen Vale, and the ash gave you back.'], ['The Countess', 'You are Delacroix-Noir. My blood. Awaken it, and you will be what you were born to be: strong at night, undying, hungry.']], null, [
+    ['Awaken the blood', () => { if (d.were || d.hr) return stSay([['The Countess', d.were ? 'You smell of wet dog. The wolf has your blood already. A pity.' : 'The heavens have bound you. Even I cannot unbind that.']]); d.vamp = true; d.flags.countessDone = true; for (const k of ['bloodfeast', 'mist', 'vampform']) if (!d.skills.includes(k)) d.skills.push(k); stShift(-2); sfx('drain'); stCallout('THE BLOOD AWAKENS', '#c0102a');
+      stSay([['', 'She cuts her palm and you drink. It tastes like coming home.'], ['', 'You are a vampire of the Delacroix-Noir line. New abilities: Blood Feast, Mist Form and Blood Ascension. You are stronger at night. Sunlight weakens you.']]); }],
+    ['Refuse your blood', () => { d.flags.countessDone = true; d.signet = true; stShift(2); stSay([['The Countess', 'Then take the signet, at least. Wear it, and remember what you threw away.'], ['', 'Delacroix-Noir Signet: +3 magic, +3 defense.']]); }],
+    ['Destroy her', () => stBossFight('countess')]]);
+  else if (id === 'odo') stSay([['Farmer Odo', 'Harrowfield grows the grain that feeds three villages, and nobody remembers our name. Grain and wool, cheap as dirt. Cheaper, some years.']], null, [['Trade goods', () => stTrade('harrow')], ['Leave', null]]);
+  else if (id === 'malphas') {
+    if (d.hr) stSay([['Malphas the Smiling', 'The heavens bound you up like a parcel. How dull. Run along, little saint.']]);
+    else if (d.pact) stSay([['Malphas the Smiling', 'Enjoying the fire? Of course you are. Everyone does, at first.']]);
+    else stSay([['Malphas the Smiling', 'Only at night, only at the crossroads. Old rules. I do love old rules.'], ['Malphas the Smiling', 'A small thing, a pact. A little of your soul, and I give you strength and sorcery both. The heavens will never touch you after. That is the only catch.']], null,
+      [['Sign the pact (+6 attack, +6 magic, Ashen)', () => { d.pact = true; stShift(-5); sfx('flame'); stCallout('INFERNAL PACT', '#ff3a1a'); stSay([['', 'You sign in something that is not ink. It does not hurt. That is the worst part.']]); }], ['Refuse him', () => { stShift(1); stSay([['Malphas the Smiling', 'Hm. I will be here. I am always here.']]); }]]);
+  }
   else if (id === 'oona') {
     if (d.flags.mara && !d.flags.oonaPaid) stSay([['Harbormaster Oona', 'Mara\'s flag is on the bottom of the bay where it belongs. The nets come up full for the first time in a year.'], ['Harbormaster Oona', 'The harbor owes you. 200 gold, and every captain in Halcyon will drink to your name.']], () => { d.flags.oonaPaid = true; d.gold += 200; PROF.crowns += 100; stShift(1); sfx('levelup'); stCallout('+200 gold · +100 Crowns', '#ffd75e'); });
     else if (d.flags.mara) stSay([['Harbormaster Oona', 'Sun on the water, fish in the nets. You did that. Rest here as long as you like.']]);
     else stSay([['Harbormaster Oona', 'Welcome to Port Halcyon. The Hollowing never crossed the sea. Here the sun still means something.'], ['Harbormaster Oona', 'But Mara the Corsair Queen holds the east isle. She takes our catch, and sometimes our children. Bring down her flag and the harbor will pay.']]);
   }
   else if (id === 'kesh') stSay([['Kesh the Trader', `Island goods! Potions ${stPrice(12)}, ethers ${stPrice(20)}. Cheaper than the mainland, because nobody here is dying.`]], null,
-    [[`Buy potion (${stPrice(12)})`, () => { if (d.gold >= stPrice(12)) { d.gold -= stPrice(12); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(20)})`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.items.ether++; sfx('pickup'); } }], ['Steal a potion', () => stPickpocket('Kesh the Trader')], ['Leave', null]]);
+    [[`Buy potion (${stPrice(12)})`, () => { if (d.gold >= stPrice(12)) { d.gold -= stPrice(12); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(20)})`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('isles')], ['Steal a potion', () => stPickpocket('Kesh the Trader')], ['Leave', null]]);
   else if (id === 'liora') stSay([['Liora', 'I watched the last stranger walk into the Thornwood. I found his sword a week later. Prove you are worth following.']]);
 }
 function stHunters(dt) { // dungeon enemies wander home, and charge when they see you
@@ -6235,7 +6519,7 @@ function stHunters(dt) { // dungeon enemies wander home, and charge when they se
     if (!f.alive) continue;
     const dist = Math.hypot(d.x - f.x, d.y - f.y), tx = dist < 300 ? d.x : f.home[0], ty = dist < 300 ? d.y : f.home[1], a = Math.atan2(ty - f.y, tx - f.x);
     if (Math.hypot(tx - f.x, ty - f.y) > 4) { const nx = f.x + Math.cos(a) * 95 * dt, ny = f.y + Math.sin(a) * 95 * dt; if (!stBlocked(nx, f.y)) f.x = nx; if (!stBlocked(f.x, ny)) f.y = ny; f.walk = (f.walk || 0) + 3; f.face = Math.cos(a) < 0 ? Math.PI : 0; }
-    if (dist < 44 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : d.map === 'keep' ? 'C' : d.map === 'duskwatch' ? 'a' : d.map === 'isles' ? ',' : ':'); return; }
+    if (dist < 44 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : d.map === 'keep' ? 'C' : d.map === 'duskwatch' ? 'a' : d.map === 'isles' ? ',' : d.map === 'stair' ? 'L' : d.map === 'rouge' || d.map === 'vcrypt' ? 'R' : ':'); return; }
   }
 }
 function stWalk(dt) {
@@ -6251,6 +6535,8 @@ function stWalk(dt) {
   ST.face = dx < 0 ? Math.PI : dx > 0 ? 0 : ST.face || 0; ST.walk = (ST.walk || 0) + sp * m;
   ST.walkDist += sp * m;
   if (d.lost && d.lost.map === d.map && Math.hypot(d.x - d.lost.x, d.y - d.lost.y) < 50) { d.gold += d.lost.gold; stSay([['', `You gather up your Lost Embers: ${d.lost.gold} gold, still warm.`]]); d.lost = null; sfx('pickup'); }
+  const zl = stZoneLv(), zk = d.map + (d.map === 'world' ? stTileAt(d.x, d.y) : '');
+  if (zk !== ST.lastZone) { ST.lastZone = zk; if (zl > d.lv) stCallout(`Danger: level ${zl} area. You are level ${d.lv}.`, '#ff6a4d'); }
   if (d.map !== 'world') return; // dungeons have hunters instead of random encounters
   ST.guardCd = Math.max(0, (ST.guardCd || 0) - dt);
   if (d.crime > 0 && !ST.guardCd && stTileAt(d.x, d.y) === 'v') { d.riding = false; return stArrest(d.x > 29 * ST_TILE ? 'Watchman Dorn' : 'Captain Ulric'); }
@@ -6269,9 +6555,9 @@ function stWalk(dt) {
 // ---- turn-based battles
 function stStartBattle(foes, bossId, tile) {
   const s = stStats(), d = stData();
-  const lvl = Math.max(0, d.lv - 1) * (bossId ? 0 : .06);
+  const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06);
   ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
-    foes: foes.map((k, i) => { const F = ST_FOES[k]; const hp = Math.round(F.hp * (1 + lvl)); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl), id: i}); }),
+    foes: foes.map((k, i) => { const F = ST_FOES[k]; const hp = Math.round(F.hp * (1 + lvl)); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl), xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
     ally: d.flags.liora ? {name: 'Liora', hp: 80 + 12 * d.lv, maxHp: 80 + 12 * d.lv, atk: 10 + 2 * d.lv + (d.flags.lioraOath ? 6 : 0)} : null};
   ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
   STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
@@ -6305,6 +6591,7 @@ function stFxOffset(who) { // lunges toward the other side and back, hurt shakes
     if (a.kind === 'lunge') ox += (who === 'p' || who === 'a' ? 1 : -1) * 70 * k;
     else if (a.kind === 'hurt') ox += Math.sin(a.t * 70) * 7 * (1 - a.t / a.dur);
     else if (a.kind === 'cast') oy -= 14 * k;
+    else if (a.kind === 'dodge') { ox += (who === 'p' || who === 'a' ? -1 : 1) * 54 * k; oy -= 12 * k; }
   }
   return [ox, oy];
 }
@@ -6359,6 +6646,30 @@ function stFxDraw(dt) {
 }
 // big per-move effects: slash arcs, falling lightning, arrow rain, poison clouds, light pillars, shield bubbles
 function stEffect(kind, who, color) { STFX.effects = STFX.effects || []; STFX.effects.push({kind, who, color, t: 0, dur: kind === 'pillar' || kind === 'aura' ? .7 : .45}); }
+// Dodging: the faster fighter slips more blows. Heavenly Restriction and Mist Form make you hard to touch.
+const stDodgeChance = (defSpd, atkSpd, bonus = 0) => clamp(.05 + (defSpd - atkSpd) * .012 + bonus, .02, .45);
+function stPlayerEvade() { const d = stData(), b = ST.battle; return (d.hr ? .15 : 0) + (b && b.buffs.mist ? .6 : 0) + (b && b.buffs.wolf ? .08 : 0); }
+function stTransformFx(who, color, text) {
+  STFX.trans = STFX.trans || []; STFX.trans.push({who, color, t: 0}); ST.hurt = .4; STFX.slow = .45; sfx('ult');
+  if (text) stCallout(text, color);
+  const [x, y] = stPos(who); for (let i = 0; i < 46; i++) { const a = Math.random() * 6.283, v = rand(120, 420); STFX.parts.push({x, y: y - 50, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, t: 0, life: rand(.5, 1), color: i % 3 ? color : '#fff', r: rand(2, 5)}); }
+}
+function stTransformDraw(dt) {
+  for (const T of STFX.trans || []) { T.t += dt; const k = T.t / .8, [x, y] = stPos(T.who);
+    ctx.save(); ctx.globalAlpha = Math.max(0, 1 - k); ctx.strokeStyle = T.color; ctx.lineWidth = 10 * (1 - k) + 2; ctx.shadowColor = T.color; ctx.shadowBlur = 30;
+    ctx.beginPath(); ctx.ellipse(x, y - 40, 40 + k * 200, 20 + k * 90, 0, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.ellipse(x, y - 40, 20 + k * 110, 10 + k * 50, 0, 0, 7); ctx.stroke();
+    const gl = ctx.createRadialGradient(x, y - 50, 4, x, y - 50, 150); gl.addColorStop(0, '#ffffff'); gl.addColorStop(.3, T.color); gl.addColorStop(1, 'rgba(0,0,0,0)'); ctx.globalAlpha = Math.max(0, .9 - k * 1.4); ctx.fillStyle = gl; ctx.fillRect(x - 150, y - 200, 300, 300);
+    ctx.restore(); }
+  STFX.trans = (STFX.trans || []).filter(T => T.t < .8);
+}
+// Rage: taking and dealing damage fills the meter; at full, unleash it
+const stAtkMul = b => (b.buffs.rally ? 1.5 : 1) * (b.buffs.wolf ? 1.8 : 1) * (b.buffs.vamp ? 1.5 : 1) * (b.buffs.rage ? 1.6 : 1);
+function stRageAdd(n) { const b = ST.battle; if (!b || b.buffs.rage) return; const was = b.rage || 0; b.rage = Math.min(100, was + n); if (was < 100 && b.rage >= 100) { stCallout('RAGE READY', '#ff3a2a'); stGrunt(stSex('p'), true, 'rage'); } }
+function stDodgeFx(who, name) {
+  STFX.anims.push({who, kind: 'dodge', t: 0, dur: .38}); stNum(who, 'DODGE', '#cfefff', true); sfx('swing');
+  const [x, y] = stPos(who); for (let i = 0; i < 3; i++) STFX.parts.push({x: x + (who === 'p' || who === 'a' ? 1 : -1) * i * 14, y: y - 40, vx: 0, vy: 0, t: 0, life: .3, color: 'rgba(200,230,255,.5)', r: 14 - i * 3});
+  stLog(`${name} dodges!`);
+}
 function stWound(who, u, kind, crit, rk, beam) { // u.w: {bleed, maim, hole}; the player's wounds live in the save
   const w = u.w || (u.w = {}), chance = beam ? .55 : kind === 'mag' ? (crit ? .3 : .05) : .14 + .1 * rk + (crit ? .4 : 0);
   if (Math.random() > chance) return;
@@ -6374,7 +6685,15 @@ function stWound(who, u, kind, crit, rk, beam) { // u.w: {bleed, maim, hole}; th
 function stStatus(who) {
   const b = ST.battle, L = [], add = (label, turns, good, color, desc) => L.push({label, turns, good, color, desc});
   if (who === 'p') {
-    const d = stData(), w = d.wounds || {};
+    const d = stData(), w = d.wounds || {}, C = stClock(), out = d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].outdoor);
+    if (b.buffs.wolf) add('Wolf Form', b.buffs.wolf, true, '#cfd8e0', '+80% attack, claws cause bleeding');
+    if (b.buffs.vamp) add('Vampire Form', b.buffs.vamp, true, '#c0102a', '+50% attack and magic, every blow heals you');
+    if (b.buffs.rage) add('RAGE', b.buffs.rage, true, '#ff3a2a', '+60% attack, +20% critical chance');
+    if (b.buffs.mist) add('Mist', b.buffs.mist, true, '#c08a9a', 'Most attacks pass through you');
+    if (d.hr) add('Restricted', 0, true, '#fff3c9', 'Heavenly Restriction: perfect body, magic sealed');
+    if (d.were && C.dark > .25) add('Moon', 0, true, '#cfd8e0', 'Night: +25% attack, faster');
+    if (d.vamp && C.dark > .25) add('Night Blood', 0, true, '#c0102a', 'Night: +20% attack and magic');
+    if (d.vamp && out && C.dark < .1) add('Sunlight', 0, false, '#ffd75e', 'Daylight burns: -15% to everything');
     if (b.buffs.guard) add('DEF ↑', b.buffs.guard, true, '#7fd1c7', 'Guard Up: double defense');
     if (b.buffs.rally) add('ATK ↑', b.buffs.rally, true, '#ff8a4a', 'War Cry: +50% attack');
     if (b.defending) add('Braced', 0, true, '#cfd8e0', 'Defending: half damage from the next hits');
@@ -6384,6 +6703,7 @@ function stStatus(who) {
   } else {
     const f = who, w = f.w || {};
     if (f.guard) add('Guard', f.guard, true, '#ffd75e', 'Takes half damage');
+    if (f.enraged) add('Enraged', 0, true, '#ff2a2a', '+30% attack');
     if (f.burn) add('Burn', f.burn, false, '#ff9a4a', 'Burning every turn');
     if (f.poison) add('Poison', f.poison, false, '#9cff3a', 'Poisoned every turn');
     if (f.frozen) add('Frozen', f.frozen, false, '#9fe6ff', 'Loses its next turn');
@@ -6489,7 +6809,7 @@ function stGrunt(sex, big, key) {
   if (!music.noise) return; const n = a.createBufferSource(), nf = a.createBiquadFilter(), ng = a.createGain(); n.buffer = music.noise; nf.type = 'bandpass'; nf.frequency.value = 1600 * fs; nf.Q.value = 1.2;
   ng.gain.setValueAtTime(.08, t); ng.gain.exponentialRampToValueAtTime(.001, t + dur * .8); n.connect(nf); nf.connect(ng); ng.connect(music.out); n.start(t, Math.random() * .5); n.stop(t + dur);
 }
-const ST_FOE_SEX = {witch: 'f', mara: 'f', king: 'boss', brother: 'boss', stalker: 'boss', bandit: 'm', knight: 'm', guard: 'm', cultist: 'm', corsair: 'm'};
+const ST_FOE_SEX = {marquis: 'boss', countess: 'f', ysolde: 'f', garrick: 'boss', vampire: 'm', thrall: 'm', seraphiel: 'f', seraph: 'm', fiend: 'boss', imp: 'm', witch: 'f', mara: 'f', king: 'boss', brother: 'boss', stalker: 'boss', bandit: 'm', knight: 'm', guard: 'm', cultist: 'm', corsair: 'm'};
 // Threatened, bloodied, facing a boss: your hero speaks
 const ST_HERO_LINES = {
   boss: ['Then come and take it.', 'I have died before. I am not afraid of you.', 'This ends here.', 'Stand aside, or fall.'],
@@ -6502,6 +6822,11 @@ const ST_INTRO = { // boss title cards and their opening words
   drake: ['Wyrm of the Frozen Heart', 'Your warmth. I will drink it.'],
   stalker: ['The Nameless Hunter', 'I know your name. I wore it once.'],
   brother: ['The Last of the Old Company', 'Sister. Forgive me. I cannot stop.'],
+  marquis: ['The Crimson Prince of Rougemarais', 'Ah, a guest. How rude of you to arrive alive.'],
+  countess: ['Matriarch of the Delacroix-Noir', 'So. You would kill your own blood. How very like your mother.'],
+  ysolde: ['Mother of the Moon Pack', 'The moon sees you, little hunter. So do I.'],
+  garrick: ['The Silver Hunter', 'I knew it. I can smell the beast on you.'],
+  seraphiel: ['Keeper of the Heavenly Restriction', 'You would trade your fire for a perfect body? Then show me the body is worthy.'],
   mara: ['Queen of the Brightwater Sea', 'Another hero come to drown? Lovely. The sharks are hungry.'],
   witch: ['The Ashen Witch of Duskwatch', 'Burn with me, pilgrim. It is warmer than it looks.'],
 };
@@ -6517,6 +6842,14 @@ const ST_FOE_MOVES = {
   cultist: [['Hex Bolt', 'zap', 1.4, '#b06bff'], ['Drink the Light', 'tendril', 1.2, '#7a1fff']],
   mara: [['Broadside', 'shards', 1.6, '#ffb35a', 'all'], ['Cutlass Flurry', 'slash', 1.9, '#ffffff'], ['Rum and Thunder', 'aura', 0, '#ffd75e', 'guard']],
   corsair: [['Powder Shot', 'zap', 1.4, '#ffb35a']],
+  marquis: [['Crimson Waltz', 'slash', 1.8, '#c0102a'], ['Sanguine Feast', 'tendril', 1.4, '#a0001a'], ['Night Veil', 'cloud', 1.2, '#3a0a1a', 'all']],
+  countess: [['Blood Moon Requiem', 'pillar', 1.7, '#c0102a', 'all'], ['Kiss of the Elder', 'tendril', 1.9, '#a0001a'], ['Eternal Night', 'aura', 0, '#6a0a2a', 'guard']],
+  vampire: [['Blood Bolt', 'zap', 1.4, '#c0102a']], thrall: [['Frenzied Bite', 'slash', 1.3, '#a0001a']],
+  ysolde: [['Moon Howl', 'aura', 0, '#cfd8e0', 'guard'], ['Rending Maul', 'slash', 2.0, '#cfd8e0'], ['Call the Pack', 'shards', 1.3, '#9a9aa0', 'all']], werewolf: [['Savage Lunge', 'slash', 1.5, '#cfd8e0']],
+  garrick: [['Silver Volley', 'shards', 1.6, '#e8e8f0', 'all'], ['Silver Stake', 'zap', 2.0, '#ffffff']],
+  seraphiel: [['Judgment of Six Wings', 'pillar', 1.7, '#fff3c9', 'all'], ['Halo Lance', 'zap', 2.0, '#ffe9a8'], ['Grace Eternal', 'pillar', 0, '#ffe9a8', 'heal']],
+  seraph: [['Holy Smite', 'pillar', 1.5, '#fff3c9']], cherub: [['Arrow of Judgment', 'zap', 1.3, '#ffd75e']],
+  fiend: [['Hellfire', 'shards', 1.5, '#ff3a1a'], ['Rend Soul', 'tendril', 1.3, '#a01a1a']], imp: [['Brimstone Spit', 'zap', 1.3, '#ff5a1a']],
 };
 function stCallout(text, color) { STFX.callout = {text, color, t: 0}; }
 function stCalloutDraw(dt) {
@@ -6527,8 +6860,8 @@ function stCalloutDraw(dt) {
   ctx.font = `${Math.round(Math.min(cw / 18, 40))}px "Marcellus SC", Georgia, serif`; ctx.shadowColor = c.color; ctx.shadowBlur = 24; ctx.fillStyle = '#fff3e0'; ctx.fillText(c.text, 0, 4);
   ctx.restore();
 }
-const SK_FX = {strike: 'slash', fireball: 'shards', frost: 'shards', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril'};
-const SK_COLOR = {fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
+const SK_FX = {flash: 'slash', crush: 'slash', bloodfeast: 'tendril', strike: 'slash', fireball: 'shards', frost: 'shards', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril'};
+const SK_COLOR = {flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
 function stLog(t) { if (ST.battle) ST.battle.log = t; $('stLog').textContent = t; }
 const stDmg = (base, def) => Math.max(1, Math.round(base * (.9 + Math.random() * .2) - def * .5));
 function stRenderBattle(picking) {
@@ -6542,6 +6875,7 @@ function stRenderBattle(picking) {
   };
   row(d.name, d.hp, s.hp, d.mp, s.mp);
   const fx = stStatus('p'); if (fx.length) { const chips = el('div', 'stChips'); for (const x of fx) { const c = el('span', x.good ? 'good' : 'bad', x.label + (x.turns ? ' ' + x.turns : '')); c.title = x.desc; chips.appendChild(c); } party.appendChild(chips); }
+  { const r = el('div', 'pm'); r.append(el('b', '', b.buffs.rage ? 'RAGE' : 'Rage')); const bar = el('div', 'bar rage'), i = el('i'), t = el('span', '', b.buffs.rage ? `${b.buffs.rage} turns` : `${Math.round(b.rage || 0)}%`); i.style.width = (b.buffs.rage ? 100 : b.rage || 0) + '%'; bar.append(i, t); r.appendChild(bar); party.appendChild(r); }
   if (b.ally) row('Liora', b.ally.hp, b.ally.maxHp);
   const act = $('stActions'); act.innerHTML = '';
   if (b.over) return;
@@ -6554,7 +6888,7 @@ function stRenderBattle(picking) {
     btn('Back', () => stRenderBattle());
   } else if (ST.sub === 'skills') {
     act.appendChild(el('small', '', 'Skills'));
-    for (const id of d.skills) { const S = ST_SKILLS[id]; btn(`${stSkName(id)} ${'★'.repeat(stRank(id))} · ${S.mp} MP`, () => stUseSkill(id), d.mp < S.mp).title = `${S.desc} Mastery: ${stMasteryText(id)}.` + (ST_BEAMS[id] ? ' Evolves into a beam that can obliterate.' : ''); }
+    for (const id of d.skills) { const S = ST_SKILLS[id], sealed = d.hr && (S.kind === 'mag' || S.kind === 'heal'); btn(sealed ? `${stSkName(id)} (sealed)` : `${stSkName(id)} ${'★'.repeat(stRank(id))} · ${S.mp} MP`, () => stUseSkill(id), d.mp < S.mp || sealed).title = `${S.desc} Mastery: ${stMasteryText(id)}.` + (ST_BEAMS[id] ? ' Evolves into a beam that can obliterate.' : ''); }
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else if (ST.sub === 'items') {
     act.appendChild(el('small', '', 'Items'));
@@ -6562,7 +6896,8 @@ function stRenderBattle(picking) {
     btn(`Ether ×${d.items.ether} (+30 MP)`, () => stItem('ether'), !d.items.ether);
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else {
-    btn(`${stSkName('attack')} ${'★'.repeat(stRank('attack'))}`, () => stPick(f => stPlayerHit(f, s.atk * (b.buffs.rally ? 1.5 : 1), 'phys'))).title = 'Basic attack. Mastery: ' + stMasteryText('attack');
+    btn(b.buffs.wolf ? 'Claw' : b.buffs.vamp ? 'Rend' : `${stSkName('attack')} ${'★'.repeat(stRank('attack'))}`, () => stPick(f => stPlayerHit(f, s.atk * stAtkMul(b), 'phys'))).title = 'Basic attack. Mastery: ' + stMasteryText('attack');
+    if ((b.rage || 0) >= 100 && !b.buffs.rage) btn('RAGE!', () => { b.rage = 0; b.buffs.rage = 3; stAnim('p', 'cast', .5); stTransformFx('p', '#ff3a2a', `${d.name} flies into a RAGE!`); stGrunt(stSex('p'), true, 'rage2'); stLog('Rage! +60% attack and more criticals for 3 turns.'); stEndTurn(); }).classList.add('rageBtn');
     btn('Skills', () => { ST.sub = 'skills'; stRenderBattle(); });
     btn('Items', () => { ST.sub = 'items'; stRenderBattle(); });
     btn('Defend', () => { b.defending = true; stLog(`${d.name} braces for the next attack.`); stEndTurn(); });
@@ -6576,11 +6911,19 @@ function stPlayerHit(f, base, kind, extra, color) {
   const sk = ST.curSkill || 'attack', rk = stRank(sk), beam = kind === 'mag' && rk >= 2 && ST_BEAMS[sk];
   base *= 1 + .2 * rk; stMaster(sk);
   const dmg0 = stDmg(base, kind === 'mag' ? f.def * .5 : f.def), dmg = f.guard ? Math.round(dmg0 / 2) : dmg0;
-  const crit = Math.random() < .08 + .06 * rk + (f.w && f.w.hole ? .1 : 0), total = crit ? Math.round(dmg * (1.5 + .4 * rk)) : dmg; // grinding a move makes its criticals brutal
+  const crit = Math.random() < .08 + .06 * rk + (f.w && f.w.hole ? .1 : 0) + (ST.battle.buffs.rage ? .2 : 0), total = crit ? Math.round(dmg * (1.5 + .4 * rk)) : dmg; // grinding a move makes its criticals brutal
+  const SK = ST_SKILLS[sk], sure = SK && SK.sure;
   const land = () => {
     const before = f.hp; ST.curSkill = null;
+    if (!sure && Math.random() < stDodgeChance(f.spd, stStats().spd, (f.boss ? -.03 : 0) - (beam ? .04 : 0))) { stDodgeFx(f.id, f.name); ST.sub = null; setTimeout(stEndTurn, 300); return; }
+    if (f.hp > 0 && ((SK && SK.twice) || (sk === 'attack' && stData().hr && Math.random() < .3))) setTimeout(() => { // a second blow: Flash Step, or the Restricted body moving faster than sight
+      if (f.hp <= 0) return; const dm2 = stDmg(base * .7, f.def); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
+    }, 140);
     f.hp -= total; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact');
     stEffect(SK_FX[sk] || 'slash', f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'));
+    stRageAdd(6);
+    if (ST.battle.buffs.vamp) { const dd = stData(), heal = Math.round(total * .25); dd.hp = Math.min(stStats().hp, dd.hp + heal); stNum('p', '+' + heal, '#ff6a8a'); } // vampire form drinks from every wound
+    if (f.boss && !f.enraged && f.hp > 0 && f.hp < f.maxHp * .3) { f.enraged = true; f.atk *= 1.3; setTimeout(() => { stTransformFx(f.id, '#ff2a2a', `${f.name.split(',')[0]} is ENRAGED!`); stGrunt(ST_FOE_SEX[f.key] || 'boss', true, 'enr'); }, 300); } // bosses near death fly into a fury
     const oblit = beam && f.hp <= 0 && (total >= before + f.maxHp * .25 || total >= f.maxHp * .55);
     const lethal = !oblit && f.hp <= 0 && (crit || total >= before + f.maxHp * .3);
     if (oblit) { f.oblit = true; stCallout('OBLITERATED', color || '#fff3c9'); STFX.pools.push({x: stPos(f.id)[0], y: stPos(f.id)[1] + 8, r: 40, rot: 0, scorch: true}); STFX.slow = .5; }
@@ -6588,7 +6931,7 @@ function stPlayerHit(f, base, kind, extra, color) {
       if (kind !== 'mag' || sk === 'drain') stGore(f.id, crit ? 22 : 12, f.hp <= 0 ? true : undefined);
       if (f.hp <= 0) stGore(f.id, 30, true);
       if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; if (!f.w.maim) stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
-      else if (f.hp > 0) stWound(f.id, f, kind, crit, rk, beam);
+      else if (f.hp > 0) { if (ST.battle.buffs.wolf && kind === 'phys') { f.w = f.w || {}; f.w.bleed = 3; } stWound(f.id, f, kind, crit, rk, beam); }
     }
     stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? total + '!' : total, crit ? '#ffd75e' : '#ffffff', crit);
     if (crit) ST.hurt = .2;
@@ -6605,19 +6948,20 @@ function stUseSkill(id) {
   const S = ST_SKILLS[id], d = stData(), s = stStats(), b = ST.battle;
   if (d.mp < S.mp) return;
   const nm = stSkName(id); stCallout(`${d.name}: "${nm}!"`, SK_COLOR[id] || '#ffe9a8');
-  const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag : s.atk * (b.buffs.rally ? 1.5 : 1)) * (S.mult || 1) * (S.kind === 'heal' || S.all ? 1 + .2 * stRank(id) : 1);
+  const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag * (b.buffs.vamp ? 1.5 : 1) : s.atk * stAtkMul(b)) * (S.mult || 1) * (S.kind === 'heal' || S.all ? 1 + .2 * stRank(id) : 1);
   if (S.kind === 'heal' || S.kind === 'buff' || S.all) stMaster(id);
   if (S.kind === 'heal') {
     d.mp -= S.mp; const h = Math.round(power + 10); d.hp = Math.min(s.hp, d.hp + h); if (b.ally) { b.ally.hp = Math.min(b.ally.maxHp, b.ally.hp + h * .7); stNum('a', '+' + Math.round(h * .7), '#6be08a'); stBurst('a', '#6be08a', 12); }
     if (d.wounds && stRank(id) >= 2) d.wounds = null; // Sacred Light and Rebirth close wounds
     stAnim('p', 'cast'); stEffect('pillar', 'p', '#fff3c9'); stBurst('p', '#6be08a', 22); stNum('p', '+' + h, '#6be08a', true); sfx('shield'); stLog(`${nm} restores ${h} health.`); ST.sub = null; return setTimeout(stEndTurn, 450);
   }
-  if (S.kind === 'buff') { d.mp -= S.mp; b.buffs[S.buff] = S.buff === 'guard' ? 2 : 3; stAnim('p', 'cast'); stEffect('aura', 'p', S.buff === 'guard' ? '#7fd1c7' : '#ff5a1f'); stBurst('p', S.buff === 'guard' ? '#7fd1c7' : '#ff6a4d', 22); stNum('p', S.buff === 'guard' ? 'Defense up' : 'Attack up', '#ffd75e'); sfx('shield'); stLog(S.buff === 'guard' ? 'Your defense doubles!' : 'Your attack surges!'); ST.sub = null; return setTimeout(stEndTurn, 450); }
+  if (S.kind === 'buff') { d.mp -= S.mp; b.buffs[S.buff] = S.buff === 'guard' || S.buff === 'mist' ? 2 : 3; if (S.buff === 'wolf') { stTransformFx('p', '#cfd8e0', 'THE BEAST AWAKENS'); stGrunt('boss', true, 'wolf'); }
+    if (S.buff === 'vamp') { stTransformFx('p', '#c0102a', 'BLOOD ASCENDANT'); stGrunt(stSex('p'), true, 'vamp'); } if (S.buff === 'mist') stEffect('cloud', 'p', '#c08a9a'); stAnim('p', 'cast'); stEffect('aura', 'p', S.buff === 'guard' ? '#7fd1c7' : '#ff5a1f'); stBurst('p', S.buff === 'guard' ? '#7fd1c7' : '#ff6a4d', 22); stNum('p', S.buff === 'guard' ? 'Defense up' : 'Attack up', '#ffd75e'); sfx('shield'); stLog(S.buff === 'guard' ? 'Your defense doubles!' : 'Your attack surges!'); ST.sub = null; return setTimeout(stEndTurn, 450); }
   if (S.all) {
     d.mp -= S.mp; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
     for (const f of b.foes) if (f.hp > 0) {
       const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def); total += dm; left++;
-      stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { f.hp -= dm; f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff'); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
+      stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } f.hp -= dm; f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff'); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
     }
     sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
@@ -6654,7 +6998,7 @@ function stEnemyPhase() {
   const next = () => {
     if (!ST.battle || b.over) return;
     if (i >= alive.length) {
-      for (const k of ['guard', 'rally']) if (b.buffs[k]) b.buffs[k]--;
+      for (const k of ['guard', 'rally', 'wolf', 'mist', 'vamp', 'rage']) if (b.buffs[k]) b.buffs[k]--;
       for (const x of b.foes) if (x.guard) x.guard--;
       b.defending = false; b.turn = 'player'; stRenderBattle(); stLowLine(); return;
     }
@@ -6674,8 +7018,9 @@ function stEnemyPhase() {
         else {
           for (const v of extra === 'all' ? ['p', 'a'] : [b.ally && b.ally.hp > 0 && Math.random() < .3 ? 'a' : 'p']) {
             if (v === 'a' && !(b.ally && b.ally.hp > 0)) continue;
+            if (v === 'p' ? Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade() - .03) : Math.random() < .1) { stDodgeFx(v, v === 'p' ? d.name : 'Liora'); continue; }
             let dm = stDmg(f.atk * mult, v === 'p' ? s.def * (b.buffs.guard ? 2 : 1) : 6); if (v === 'p' && b.defending) dm = Math.round(dm / 2);
-            if (v === 'p') d.hp -= dm; else b.ally.hp -= dm;
+            if (v === 'p') { d.hp -= dm; stRageAdd(dm / s.hp * 140); } else b.ally.hp -= dm;
             stEffect(fx, v, col); stAnim(v, 'hurt', .4); stNum(v, dm, '#ff7a66', true); stGore(v, 14, true);
             if (v === 'p' && Math.random() < .2) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
             if (extra === 'slow' && v === 'p') b.buffs.guard = 0;
@@ -6691,9 +7036,10 @@ function stEnemyPhase() {
     const big = f.boss && Math.random() < .3, base = f.atk * (big ? 1.6 : 1);
     stAnim(f.id, 'lunge', big ? .45 : .32);
     const victim = hitAlly ? 'a' : 'p';
+    if (hitAlly ? Math.random() < .1 : Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade())) { stDodgeFx(victim, hitAlly ? 'Liora' : d.name); stRenderBattle(); return setTimeout(next, 600); }
     if (hitAlly) { const dm = stDmg(base, 6); b.ally.hp -= dm; stNum('a', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack on' : 'hits'} Liora for ${dm}.`); }
     else {
-      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); d.hp -= dm; stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
+      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); d.hp -= dm; stRageAdd(dm / s.hp * 140); stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
       stLog(`${f.name} ${fcrit ? 'lands a brutal critical! You take' : big ? 'unleashes a fierce attack! You take' : 'hits you for'} ${dm}${big || fcrit ? ' damage' : ''}.`);
       if (d.hp <= 0 && fcrit) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore('p', 50, true); STFX.slow = .7; }
       else if (fcrit || (big && Math.random() < .4)) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
@@ -6735,6 +7081,10 @@ function stEndBattle(result) {
     if (b.bossId === 'witch') { d.mounts = d.mounts || []; if (!d.mounts.includes('nightmare')) d.mounts.push('nightmare'); lines.push(['', 'Her black mare, the Cinder Nightmare, steps out of the smoke and kneels to you. Its mane is still burning. (New mount!)']); }
     if (b.bossId === 'witch') lines.push(['Sister Vey', '"Thank you… I was so tired of burning…"'], ['', 'The black candles go out one by one. Among her things you find a hundred years of letters, all addressed to a daughter, none ever sent.']);
     if (b.bossId === 'brother') { d.flags.lioraOath = true; lines.push(['Liora', 'Aldric. You waited for me. Of course you did. You always did.'], ['', 'She closes his eyes with two fingers and stands for a long time in the rain. When she turns back to you, something in her has hardened, and something has healed.'], ['Liora', 'I swore an oath to bring him rest. It is done. My sword is yours until the end.'], ['', 'Liora fights harder now (+6 attack).']); }
+    if (b.bossId === 'ysolde') { d.flags.ysoldeDone = true; lines.push(['Ysolde', '"The moon... will remember... you..."'], ['', 'The great grey wolf shrinks into an old woman, and then into nothing but fur. Garrick will want to hear.']); }
+    if (b.bossId === 'garrick') lines.push(['Garrick', '"Should have... brought more silver..."'], ['', 'The hunter lies in the mud. Somewhere in the Gloamwood, the pack howls your name.']);
+    if (b.bossId === 'marquis') lines.push(['Marquis Valcourt', '"A century... of nights... and you end it... with no manners at all..."'], ['', 'He crumbles into red ash on the cathedral steps. Somewhere above, a bell rings for the first time in living memory. Pere Lucien will want to know.']);
+    if (b.bossId === 'countess') { d.flags.countessDone = true; lines.push(['The Countess', '"My child... my own child..."'], ['', 'She smiles at the end, which is worse than anything she could have said. The last of the Delacroix-Noir is you.']); }
     if (b.bossId === 'mara') lines.push(['Mara', '"Ha… not bad… for a landlubber…"'], ['', 'Her crew scatters into the surf. Her red flag comes down. Harbormaster Oona will want to hear of this.']);
     if (b.bossId === 'stalker') lines.push(['', 'The coat collapses, empty. Inside the lining, a tin locket with a painted face. Corin will want this.']);
     if (b.bossId === 'golem') { d.ch = 2; lines.push(['', 'The stone splits along old seams. Inside, the Ember Shard pulses like a second heart.'], ['Liora', 'It was a man once. I can see the shape of him in the rock. Let\'s not end up like that. The crypt next.']); }
@@ -6745,10 +7095,31 @@ function stEndBattle(result) {
       if (!d.rewarded) { d.rewarded = true; PROF.crowns += 300; lines.push(['', 'Story complete. You earned 300 Crowns.']); }
     }
   }
-  setTimeout(() => { done(); stSay(lines, learn ? stLearnSkill : null); }, 600);
+  if (b.bossId === 'seraphiel') lines.push(['Seraphiel', 'Enough. The body is worthy. Now hear the terms.']);
+  setTimeout(() => { done(); stSay(lines, b.bossId === 'seraphiel' ? stTrialChoice : learn ? stLearnSkill : null); }, 600);
+}
+// Level structure. Regions warn you, dungeons and bosses require their level. Enemies are scaled to at least their region's level.
+const ST_ZONE_LV = {'.': 1, '=': 1, v: 1, T: 1, F: 1, B: 1, ':': 2, '*': 4, b: 5, g: 6, C: 7, a: 8};
+const ST_MAP_LV = {catacomb: 2, crypt: 4, keep: 7, duskwatch: 9, stair: 10, isles: 7, rouge: 12, vcrypt: 14};
+const ST_BOSS_LV = {golem: 3, drake: 5, brother: 6, stalker: 6, king: 8, mara: 8, ysolde: 9, garrick: 9, witch: 10, seraphiel: 11, marquis: 14, countess: 15};
+const stZoneLv = () => { const d = stData(); return d.map === 'world' ? ST_ZONE_LV[stTileAt(d.x, d.y)] || 1 : ST_MAP_LV[d.map] || 1; };
+const ST_LETTERS = (() => { const L = {}, first = (k, n) => { const R = ST_DUNGEONS[k].rows; for (let y = 0; y < R.length; y++) { const x = R[y].indexOf('c'); if (x >= 0) { L[k + x + '_' + y] = n; return; } } }; first('rouge', 1); first('duskwatch', 2); first('grave', 3); return L; })();
+const stLetters = () => [1, 2, 3].filter(n => stData().flags['vletter' + n]).length;
+function stBossFight(id) { // bosses have a level requirement, and the game tells you
+  const d = stData(), need = ST_BOSS_LV[id] || 1;
+  if (d.lv < need) return stSay([['', `${ST_FOES[id].name} is far beyond you. You must be at least level ${need} to fight them. You are level ${d.lv}.`]]);
+  stStartBattle([id], id);
+}
+function stTrialChoice() { // the Heavenly Restriction: trade every spark of magic for a perfected body
+  const d = stData();
+  if (d.pact || d.were || d.vamp) return stSay([['Seraphiel', d.pact ? 'You reek of brimstone. A soul already sold cannot be bound.' : 'There is a curse in your blood already. The heavens will not bind what is already bound.'], ['', 'She folds her wings and is gone. The stair grows faint under your feet.']]);
+  stSay([['Seraphiel', 'Your magic will be sealed, forever. Not one spark, not one prayer answered. In exchange, your body will be made perfect: stronger, faster and harder to kill than any mortal frame.'], ['Seraphiel', 'Choose.']], null, [
+    ['Accept the Heavenly Restriction', () => { d.hr = true; d.flags.hrDone = true; for (const k of ['flash', 'crush']) if (!d.skills.includes(k)) d.skills.push(k); stShift(1); sfx('evolve'); stCallout('HEAVENLY RESTRICTION', '#fff3c9'); const s = stStats(); d.hp = s.hp; d.mp = s.mp;
+      stSay([['', 'Light pours into you, and with it goes every spark of magic you ever had. What is left is a body like a drawn bow.'], ['', 'New techniques: Flash Step and Heaven\'s Crush. Your magic is sealed. You are much stronger, faster and tougher, and you will dodge more blows.']]); }],
+    ['Refuse, and keep your magic', () => { d.flags.hrDone = true; d.seraphBless = true; stShift(2); stSay([['Seraphiel', 'Wise, or afraid. The heavens cannot tell the difference either. Take my blessing instead.'], ['', 'Seraph\'s Blessing: +5 defense.']]); }]]);
 }
 function stLearnSkill() {
-  const d = stData(), opts = Object.keys(ST_SKILLS).filter(k => !d.skills.includes(k)).slice(0, 3);
+  const d = stData(), opts = Object.keys(ST_SKILLS).filter(k => !d.skills.includes(k) && !ST_SKILLS[k].gift).slice(0, 3);
   if (!opts.length) return;
   stSay([['', 'You feel new power stir. Choose an ability to learn.']], null, opts.map(k => [`${ST_SKILLS[k].name} (${ST_SKILLS[k].mp} MP)`, () => { d.skills.push(k); }]));
 }
@@ -6762,12 +7133,17 @@ function stOpenMenu() {
     el('h3', '', 'Abilities'), el('p', '', ['attack'].concat(d.skills).map(k => `${stSkName(k)}${k === 'attack' ? '' : ` (${ST_SKILLS[k].mp} MP)`}: ${stMasteryText(k)}`).join(' · ') + '. Use a move to master it. Mastered moves crit harder, open worse wounds, and fire magic as beams that can obliterate.'),
     ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed (-20% attack)', d.wounds.hole && 'Pierced (-25% defense)'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
     el('h3', '', 'Bag'), el('p', '', `${d.items.potion} potions · ${d.items.ether} ethers` + (d.items.blade ? ' · Royal Blade' : '')),
+    el('h3', '', 'Cargo'), el('p', '', (Object.entries(d.cargo || {}).filter(([, n]) => n).map(([g, n]) => `${n} ${ST_GOODS[g][0]}`).join(' · ') || 'Empty') + ` (${stCargoUsed()}/${stCargoCap()}). Trade with merchants in every town; buy cheap where goods are made.`),
     el('h3', '', 'Quest'), el('p', '', ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)),
     el('h3', '', 'Side stories'), el('p', '', [
       d.flags.bellQuest && !d.flags.bellDone ? (d.flags.bell ? 'The Drowned Bell: bring it to Dunn in Saltmere.' : 'The Drowned Bell: search the Bone Marsh, south of Ravenhollow.') : '',
       d.flags.wrenQuest && !d.flags.hessaDone ? 'Wren\'s Mother: search the Ashfall Dunes, far east.' : '',
       d.flags.corinQuest && !d.flags.stalker ? 'Corin\'s Hunter: find what stalks the Gloamwood.' : d.flags.stalker && !d.charm ? 'Corin\'s Hunter: bring the locket to Corin in Ravenhollow.' : '',
       d.flags.lioraQuest && !d.flags.brother ? 'Liora\'s Oath: find her brother in the Bone Marsh.' : '',
+      d.flags.hrQuest && !d.flags.hrDone ? 'The Heavenly Restriction: climb the Celestial Stair above the Frost Peaks (level 10+).' : '',
+      d.flags.wolfQuest && !d.flags.ysoldeDone ? 'The Moon Pack: find Ysolde in the Gloamwood at night (level 9+). Hunt her, or join her.' : d.flags.ysolde && !d.flags.garrickPaid ? 'The Moon Pack: return to Garrick in Ravenhollow.' : '',
+      d.map === 'rouge' && !d.flags.marquis ? 'The Crimson Prince: end Marquis Valcourt on the cathedral steps (level 14+).' : d.flags.marquis && !d.flags.lucienPaid ? 'The Crimson Prince: tell Pere Lucien.' : '',
+      stLetters() && !d.flags.countessDone ? `???: bloodline letters ${stLetters()} of 3.` + (stLetters() >= 3 ? ' A crypt in Rougemarais waits for you.' : '') : '',
     ].filter(Boolean).join(' · ') || 'None right now. Talk to people; everyone here has lost something.'),
     el('h3', '', 'Contract'), el('p', '', d.bounty ? (B => `${B.name}: ${B.text}, ${d.bounty.prog}/${B.need}.`)(ST_BOUNTIES.find(x => x.id === d.bounty.id)) : 'None. Visit the guild in Thornwake.'),
     el('h3', '', 'Alignment'), el('p', '', `${stAlignName()} (${stAlign() > 0 ? '+' : ''}${stAlign()}). ${stAlign() >= 3 ? 'Light: shops are 20% cheaper, +3 defense.' : stAlign() <= -3 ? 'Ashen: shops charge 25% more, +3 attack.' : 'Your choices will tip you toward Light or Ash.'}` + (d.crime ? ` Bounty: ${d.crime} gold. Guards will stop you in any village.` : '') + (d.jailed ? ` Jailed ${d.jailed} time${d.jailed > 1 ? 's' : ''}.` : '')),
@@ -6791,7 +7167,7 @@ function stHud() {
   $('stHp').style.width = Math.max(0, d.hp / s.hp * 100) + '%'; $('stHpT').textContent = `${Math.max(0, Math.round(d.hp))}/${s.hp}`;
   $('stMp').style.width = d.mp / s.mp * 100 + '%'; $('stMpT').textContent = `${Math.round(d.mp)}/${s.mp}`;
   $('stGold').textContent = `${d.gold} gold · ${d.items.potion} potions` + (d.crime ? ` · Bounty ${d.crime}` : '');
-  const tl = stTileAt(d.x, d.y), where = d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale';
+  const tl = stTileAt(d.x, d.y), zl = stZoneLv(), where = (d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale') + (zl > 1 ? ` (Lv ${zl}${zl > d.lv ? ', dangerous' : ''})` : '');
   const outside = d.map === 'world' || d.map === 'isles', C = stClock(), wx = [outside ? `${stTimeName(C.h)} ${stTimeText(C.h)}` : '', ST.wx && ST.wx.k > .5 && outside ? ST_WX_NAME[ST.wx.kind] : ''].filter(Boolean).join(' · ');
   $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', `Chapter ${Math.min(4, d.ch + 1)} · ${where}` + (wx ? ` · ${wx}` : '')), document.createTextNode(ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts) + (d.lost ? ` Your Lost Embers (${d.lost.gold} gold) wait where you fell.` : '')));
 }
@@ -6799,7 +7175,7 @@ const stUnit = (look, color, x, y, face, walk, id, level = 3) => ({look, color, 
 function stDrawWorld(now, dt = 1 / 60) {
   const d = stData(), Zs = Math.max(.7, Math.min(1.2, Math.min(cw, ch) / 700));
   ST.cam.x += (d.x - ST.cam.x) * .12; ST.cam.y += (d.y - ST.cam.y) * .12;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = d.map === 'isles' ? '#1f6a8a' : '#0c1411'; ctx.fillRect(0, 0, cw, ch);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = d.map === 'isles' ? '#1f6a8a' : d.map === 'rouge' ? '#1a2e28' : '#0c1411'; ctx.fillRect(0, 0, cw, ch);
   ctx.setTransform(dpr * Zs, 0, 0, dpr * Zs, dpr * (cw / 2 - ST.cam.x * Zs), dpr * (ch / 2 - ST.cam.y * Zs));
   const dun = d.map !== 'world';
   ctx.drawImage(dun ? ST.dunC[d.map] : ST.mapC, 0, 0);
@@ -6813,7 +7189,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   if (!dun) for (const c of ST_CHESTS) if (stChestShown(c, d)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
   if (!dun) for (const b of ST_BOSSES) if (!d.flags[b.id]) { const x = b.x * ST_TILE + 32, y = b.y * ST_TILE + 32; ctx.strokeStyle = '#ff6a4d'; ctx.globalAlpha = .5 + Math.sin(now * 3) * .3; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 34, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; stDrawFoe(b.id, x, y + 10, now, .7, Math.PI); }
   for (const n of ST_NPCS) if ((n.map || 'world') === d.map && stNpcShown(n, d)) {
-    const x = n.x * ST_TILE + 32, y = n.y * ST_TILE + 30, u = stUnit(n.look, n.color, x, y, Math.PI, 0, 20 + n.x);
+    const x = n.x * ST_TILE + 32, y = n.y * ST_TILE + 30, u = stUnit(n.look, n.color, x, y, Math.PI, 0, 20 + n.x); if (n.horns) { u.horns = true; u.level = 12; } if (n.lv) { u.level = n.lv; u.noHalo = true; }
     if (n.kid) drawCharacterScaled(u, now, .65); else drawCharacter(ctx, u, now);
     ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n.name, x, y - (n.kid ? 50 : 74)); ctx.textAlign = 'left';
   }
@@ -6826,31 +7202,33 @@ function stDrawWorld(now, dt = 1 / 60) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   // light: a torch circle in dungeons, a heavy vignette above ground
   const lit = dun && ST_DUNGEONS[d.map].lit, sx = cw / 2 + (d.x - ST.cam.x) * Zs, sy = ch / 2 + (d.y - ST.cam.y) * Zs - 20, rad = (dun && !lit ? 230 : 520) * Zs;
+  const Ck = stClock(), sunny = (!dun || isles) && d.map !== 'rouge' && Ck.sun > .15 && !(ST.wx && ST.wx.k > .4 && ST.wx.kind !== 'wind') ? Math.min(1, (Ck.sun - .15) * 2.2) * (1 - (ST.wx ? ST.wx.k * .6 : 0)) : 0;
   const dark = ctx.createRadialGradient(sx, sy, rad * .35, sx, sy, rad);
-  dark.addColorStop(0, 'rgba(0,0,0,0)'); dark.addColorStop(1, dun && !lit ? 'rgba(0,0,0,.96)' : isles ? 'rgba(8,6,12,.22)' : 'rgba(8,6,12,.55)');
+  dark.addColorStop(0, 'rgba(0,0,0,0)'); dark.addColorStop(1, dun && !lit ? 'rgba(0,0,0,.96)' : isles ? 'rgba(8,6,12,.18)' : `rgba(8,6,12,${.55 - sunny * .35})`);
   ctx.fillStyle = dark; ctx.fillRect(0, 0, cw, ch);
-  if (!dun) { ctx.fillStyle = 'rgba(40,30,60,.12)'; ctx.fillRect(0, 0, cw, ch); }
+  if (!dun) { ctx.fillStyle = `rgba(40,30,60,${.12 * (1 - sunny)})`; ctx.fillRect(0, 0, cw, ch); }
+  if (sunny > .02) stSunDraw(sunny, now, Zs);
   stNightDraw(Zs, d, dun, isles);
   if (!dun || isles) stWeatherDraw(dt, stTileAt(d.x, d.y), isles);
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: near.key && ST_DUNGEONS[near.key].lit ? 'Enter the castle' : 'Enter the dungeon', exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out', boss: 'Approach'}[near.kind]);
+  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
   $('stRide').hidden = dun || !(d.mounts || []).length; $('stRide').textContent = d.riding ? 'Dismount' : 'Ride';
 }
 function stDrawFoe(key, x, y, now, scale, face, flash) {
   const F = ST_FOES[key] || ST_FOES.wolf, u = {x, y, face, walk: now * 30, _lw: 0, hitFlash: flash || 0, atkT: 0, atkCd: 1, id: 5, team: 1, level: 8};
   ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.translate(-x, -y);
-  if (F.draw === 'wolf') { u.r = F.small ? 20 : 30; u.fur = F.fur; drawWolf(ctx, u, now); }
+  if (F.draw === 'wolf') { u.r = F.small ? 20 : F.boss ? 40 : 30; u.fur = F.fur; drawWolf(ctx, u, now); }
   else if (F.draw === 'golem') { u.r = 46; drawGolem(ctx, u, now); }
   else if (F.draw === 'drake') { u.species = 'frost'; u.fire = '#9fe3ff'; u.sc = .9; u.r = 52; drawDragon(ctx, u, now); }
   else if (F.draw === 'goblin') { u.type = 'melee'; u.tier = 2; u.big = 1.3; drawMinion(ctx, u, now); }
-  else { u.look = F.look; u.color = F.color || '#b33a3a'; u.level = F.boss ? 18 : 6; drawCharacter(ctx, u, now); }
+  else { u.look = F.look; u.color = F.color || '#b33a3a'; u.level = F.lv || (F.boss ? 18 : 6); u.horns = F.horns; u.noHalo = F.horns || F.unholy; drawCharacter(ctx, u, now); }
   ctx.restore();
 }
 function stDrawBattle(now, dt) {
-  const b = ST.battle, d = stData(), tile = b.tile || (b.bossId === 'golem' ? 'K' : b.bossId === 'drake' ? '*' : b.bossId === 'king' ? 'C' : '.');
-  const sky = {',': ['#6ab0d8', '#1a4a5a'], v: ['#2a2a3a', '#0a0a12'], a: ['#4a3626', '#120a06'], b: ['#22261a', '#070806'], g: ['#10180f', '#030603'], T: ['#152a1c', '#05100a'], ':': ['#1e332e', '#070f0d'], K: ['#2a1a14', '#080403'], '*': ['#5a7486', '#1a2630'], C: ['#22182f', '#05030a'], '.': ['#2a3a26', '#0a120c']}[tile] || ['#2a3a26', '#0a120c'];
+  const b = ST.battle, d = stData(), tile = b.tile || (b.bossId === 'golem' ? 'K' : b.bossId === 'drake' ? '*' : b.bossId === 'king' ? 'C' : b.bossId === 'seraphiel' ? 'L' : '.');
+  const sky = {R: ['#2a0a1a', '#0a0206'], L: ['#e8eef8', '#8a9ab8'], ',': ['#6ab0d8', '#1a4a5a'], v: ['#2a2a3a', '#0a0a12'], a: ['#4a3626', '#120a06'], b: ['#22261a', '#070806'], g: ['#10180f', '#030603'], T: ['#152a1c', '#05100a'], ':': ['#1e332e', '#070f0d'], K: ['#2a1a14', '#080403'], '*': ['#5a7486', '#1a2630'], C: ['#22182f', '#05030a'], '.': ['#2a3a26', '#0a120c']}[tile] || ['#2a3a26', '#0a120c'];
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const g = ctx.createLinearGradient(0, 0, 0, ch); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]); ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
   if (d.map === 'world' || d.map === 'isles') { const C = stClock(); if (C.dark > .02) { ctx.fillStyle = `rgba(6,10,32,${C.dark * .6})`; ctx.fillRect(0, 0, cw, ch); } if (C.warm > .02) { ctx.fillStyle = `rgba(255,130,80,${C.warm * .3})`; ctx.fillRect(0, 0, cw, ch); } }
@@ -6864,7 +7242,15 @@ function stDrawBattle(now, dt) {
   const [pox, poy] = stFxOffset('p'), atkP = STFX.anims.some(a => a.who === 'p' && a.kind === 'lunge');
   const pu = stUnit(ST_CLASSES[d.cls].look, d.color, px + pox, py + poy + bob, 0, 0, 30, d.lv); if (atkP) pu.atkT = 1;
   stBadges(stStatus('p'), px, py - 132 * k, now);
-  drawCharacterScaled(pu, now, k * 1.3); stWoundDraw(d.wounds, px + pox, py + poy + bob, k * 1.3, 1, true, now);
+  if (b.buffs.rage) { const ra = ctx.createRadialGradient(px, py - 50, 10, px, py - 50, 110 * k); ra.addColorStop(0, 'rgba(255,60,30,.55)'); ra.addColorStop(1, 'rgba(255,60,30,0)'); ctx.fillStyle = ra; ctx.fillRect(px - 120 * k, py - 170 * k, 240 * k, 240 * k);
+    for (let i = 0; i < 3; i++) STFX.parts.push({x: px + rand(-28, 28) * k, y: py - rand(0, 30), vx: rand(-15, 15), vy: -rand(120, 220), t: 0, life: rand(.3, .6), color: Math.random() < .5 ? '#ff5a1f' : '#ffb35a', r: rand(2, 5)}); } // flames pour off you
+  if (b.buffs.vamp) { pu.color = '#7a0a1a'; pu.level = Math.max(pu.level, 13); const va = ctx.createRadialGradient(px, py - 50, 10, px, py - 50, 120 * k); va.addColorStop(0, 'rgba(160,0,30,.5)'); va.addColorStop(1, 'rgba(60,0,10,0)'); ctx.fillStyle = va; ctx.fillRect(px - 130 * k, py - 180 * k, 260 * k, 260 * k);
+    for (let i = 0; i < 3; i++) { const a = now * 3 + i * 2.1, bx = px + Math.cos(a) * 70 * k, by = py - 70 * k + Math.sin(a * 1.3) * 30 * k, f = Math.sin(now * 18 + i) * 5; ctx.strokeStyle = '#1a0006'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(bx - 9, by - f); ctx.lineTo(bx, by); ctx.lineTo(bx + 9, by - f); ctx.stroke(); } } // bats circle you
+  if (b.buffs.wolf) { const wu = {x: px + pox, y: py + poy + bob, face: 0, walk: now * 20, _lw: 0, hitFlash: 0, atkT: atkP ? 1 : 0, atkCd: 1, id: 30, team: 0, level: 12, r: 34, fur: '#6a5a4a'}; ctx.save(); ctx.translate(wu.x, wu.y); ctx.scale(k * 1.5, k * 1.5); ctx.translate(-wu.x, -wu.y); drawWolf(ctx, wu, now); ctx.restore(); }
+  else if (b.buffs.mist) { ctx.globalAlpha = .35 + Math.sin(now * 6) * .1; drawCharacterScaled(pu, now, k * 1.3); ctx.globalAlpha = 1; if (Math.random() < .5) STFX.parts.push({x: px + rand(-30, 30), y: py - rand(10, 90), vx: rand(-20, 20), vy: -rand(10, 40), t: 0, life: .8, color: 'rgba(200,140,160,.4)', r: rand(6, 12)}); }
+  else drawCharacterScaled(pu, now, k * 1.3);
+  if (d.hr && Math.random() < .35) STFX.parts.push({x: px + rand(-22, 22), y: py - rand(0, 80), vx: 0, vy: -rand(40, 90), t: 0, life: .6, color: 'rgba(255,250,230,.55)', r: rand(1.5, 3)}); // the Restricted body steams with power
+  stWoundDraw(d.wounds, px + pox, py + poy + bob, k * 1.3, 1, true, now);
   if (b.ally) { const [aox, aoy] = stFxOffset('a'), au = stUnit('valkyrie', '#9fd8ff', px - 70 * k + aox, py + 30 * k + aoy - bob, 0, 0, 31, d.lv); if (STFX.anims.some(a => a.who === 'a' && a.kind === 'lunge')) au.atkT = 1; drawCharacterScaled(au, now, k * 1.2); }
   b.foes.forEach((f, i) => {
     const n = b.foes.length, fx0 = cw * (.66 + (n > 1 ? (i - (n - 1) / 2) * .12 : 0)), fy0 = ch * (.55 + (i % 2) * .05);
@@ -6882,12 +7268,14 @@ function stDrawBattle(now, dt) {
     }
     f.flash = Math.max(0, f.flash - dt);
     const [fox, foy] = stFxOffset(f.id), fx = fx0 + fox, fy = fy0 + foy + Math.sin(now * 2.5 + i) * 2;
+    if (f.enraged) { const ea = ctx.createRadialGradient(fx, fy - 60, 10, fx, fy - 60, 140 * k); ea.addColorStop(0, `rgba(255,40,20,${.45 + Math.sin(now * 8) * .15})`); ea.addColorStop(1, 'rgba(255,40,20,0)'); ctx.fillStyle = ea; ctx.fillRect(fx - 150 * k, fy - 210 * k, 300 * k, 300 * k); if (Math.random() < .6) STFX.parts.push({x: fx + rand(-30, 30) * k, y: fy - rand(0, 40), vx: 0, vy: -rand(100, 200), t: 0, life: .5, color: '#ff3a1a', r: rand(2, 4)}); }
     stDrawFoe(f.key, fx, fy, now, k * (f.boss ? 1.5 : 1.3), Math.PI, f.flash); stWoundDraw(f.w, fx, fy, k * (f.boss ? 1.5 : 1.3), -1, ST_FOES[f.key].draw === 'hero', now);
     stBadges(stStatus(f), fx, fy - 112 * k, now);
     ctx.fillStyle = '#000a'; ctx.fillRect(fx - 40, fy - 120 * k, 80, 8); ctx.fillStyle = '#e0405a'; ctx.fillRect(fx - 40, fy - 120 * k, 80 * Math.max(0, f.hp / f.maxHp), 8);
     ctx.fillStyle = '#fff'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(f.name, fx, fy - 126 * k); ctx.textAlign = 'left';
   });
-  stEffectsDraw(dt); stFxDraw(dt);
+  stEffectsDraw(dt); stFxDraw(dt); stTransformDraw(dt);
+  if (b.buffs.rage) { const v = ctx.createRadialGradient(cw / 2, ch / 2, Math.min(cw, ch) * .3, cw / 2, ch / 2, Math.max(cw, ch) * .7); v.addColorStop(0, 'rgba(160,0,0,0)'); v.addColorStop(1, `rgba(160,0,0,${.35 + Math.sin(now * 6) * .1})`); ctx.fillStyle = v; ctx.fillRect(0, 0, cw, ch); } // the edges of your vision go red
   if (d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].outdoor)) stWeatherDraw(dt, b.tile, d.map === 'isles');
   stCalloutDraw(dt); stIntroDraw(dt);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
