@@ -568,6 +568,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
         <h2>Create your hero</h2>
         <canvas id="crCv" width="220" height="220" aria-hidden="true"></canvas>
         <input id="crName" maxlength="14" placeholder="Your name" aria-label="Hero name" autocomplete="off" spellcheck="false">
+        <p class="status">Race</p><div class="row" id="crRace"></div><small class="hint" id="crRaceNote"></small>
         <p class="status">Class</p><div class="row" id="crClass"></div>
         <p class="status">Color</p><div class="row" id="crColor"></div>
         <p class="status">Voice</p><div class="row" id="crVoice"></div>
@@ -2518,6 +2519,8 @@ function drawCharacter(c, u, now) {
   c.scale(A.dir * sc, sc);
   c.rotate(A.moving ? .07 : Math.sin(now * 1.1 + u.id) * .015); // lean into a run, sway a little when idle
   if (u.hitFlash > 0) c.filter = 'brightness(2.2)';
+  const RC = O && O.race && ST_RACES[O.race]; if (RC && !O.skin && RC.skin) L.skin = RC.skin;
+  if (RC && RC.tail) { const sw = Math.sin(now * 3 + u.id) * 4; c.strokeStyle = RC.tail; c.lineCap = 'round'; c.lineWidth = RC.snout ? 7 : 4; c.beginPath(); c.moveTo(-6, -20 - bob); c.quadraticCurveTo(-22, -18 + sw, -26 + sw, RC.snout ? -6 : -34); c.stroke(); c.lineCap = 'butt'; } // tails sway behind
   if (lv >= 16) {
     const g = c.createRadialGradient(0, -42, 6, 0, -42, 56 + Math.sin(now * 5) * 4);
     g.addColorStop(0, u.color + '66'); g.addColorStop(1, u.color + '00');
@@ -2595,7 +2598,15 @@ function drawCharacter(c, u, now) {
   if (lv >= 4) { c.shadowColor = eye; c.shadowBlur = 8; }
   const blink = (now + u.id * .37) % 3.7 < .12, look = !A.moving && Math.sin(now * .7 + u.id) > .85 ? -2.5 : 0; // blinks and glances around
   c.fillStyle = eye; if (blink) c.fillRect(4 + look, -56.5, 4, 1.2); else { c.beginPath(); c.arc(6 + look, -56, 1.9, 0, 7); c.fill(); } c.shadowBlur = 0;
+  if (RC) { // racial features: ears, tusks, beards, snouts
+    if (RC.ears) { c.fillStyle = L.skin; c.beginPath(); c.moveTo(-3, -58); c.lineTo(-15, -67); c.lineTo(-4, -51); c.closePath(); c.fill(); }
+    if (RC.tusks) { c.fillStyle = '#f2ead6'; for (const tx of [3, 8]) { c.beginPath(); c.moveTo(tx - 1.5, -48); c.lineTo(tx, -53); c.lineTo(tx + 1.5, -48); c.closePath(); c.fill(); } }
+    if (RC.beard) { c.fillStyle = shade(u.color, -.35); c.beginPath(); c.moveTo(-5, -52); c.quadraticCurveTo(2, -30, 11, -50); c.quadraticCurveTo(4, -46, -5, -52); c.fill(); }
+    if (RC.snout) { c.fillStyle = L.skin; c.beginPath(); c.ellipse(9, -52, 6, 3.6, 0, 0, 7); c.fill(); c.fillStyle = shade(L.skin, -.3); for (const sx of [-4, 0, 4]) { c.beginPath(); c.moveTo(sx - 2, -63); c.lineTo(sx, -68); c.lineTo(sx + 2, -63); c.closePath(); c.fill(); } }
+    if (RC.cat) { c.strokeStyle = '#3a2a1a'; c.lineWidth = .8; c.beginPath(); for (const wy of [-53, -51]) { c.moveTo(7, wy); c.lineTo(14, wy - 1 + (wy + 52)); } c.stroke(); }
+  }
   drawHat(c, L, u, now, eye);
+  if (RC && RC.cat) { c.fillStyle = L.skin; for (const ex of [-6, 5]) { c.beginPath(); c.moveTo(ex - 4, -62); c.lineTo(ex, -73); c.lineTo(ex + 4, -62); c.closePath(); c.fill(); } c.fillStyle = '#e8a0a0'; for (const ex of [-6, 5]) { c.beginPath(); c.moveTo(ex - 2, -63); c.lineTo(ex, -69); c.lineTo(ex + 2, -63); c.closePath(); c.fill(); } }
   if (u.horns) { c.fillStyle = '#1a0806'; for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(1 + sd * 4, -62); c.quadraticCurveTo(1 + sd * 14, -68, 1 + sd * 11, -82); c.lineTo(1 + sd * 8, -66); c.closePath(); c.fill(); } } // devil horns
   if (lv >= 14 && !u.noHalo) {
     c.strokeStyle = '#ffe9a8'; c.shadowColor = '#ffe9a8'; c.shadowBlur = lv >= 17 ? 16 : 8; c.lineWidth = 2.5;
@@ -5397,7 +5408,24 @@ const ST_CLASSES = {
   rogue:   {name: 'Rogue', look: 'rogue', hp: 90, mp: 40, atk: 13, mag: 6, def: 5, spd: 12, skills: ['venom', 'strike', 'drain']},
   paladin: {name: 'Paladin', look: 'paladin', hp: 130, mp: 50, atk: 11, mag: 10, def: 10, spd: 5, skills: ['heal', 'guard', 'strike']},
   gunner:  {name: 'Gunner', look: 'soldier', hp: 100, mp: 35, atk: 15, mag: 3, def: 6, spd: 8, skills: ['rain', 'strike', 'rally']},
+  necromancer: {name: 'Necromancer', look: 'warlock', hp: 88, mp: 75, atk: 5, mag: 17, def: 4, spd: 7, skills: ['bonespear', 'drain', 'wither']},
+  monk:    {name: 'Monk', look: 'kifighter', hp: 110, mp: 40, atk: 14, mag: 7, def: 6, spd: 11, skills: ['flurry', 'guard', 'heal']},
+  druid:   {name: 'Druid', look: 'shaman', hp: 105, mp: 60, atk: 8, mag: 13, def: 7, spd: 7, skills: ['thornlash', 'heal', 'quake']},
+  berserker: {name: 'Berserker', look: 'brute', hp: 140, mp: 25, atk: 17, mag: 2, def: 5, spd: 7, skills: ['quake', 'rally', 'strike']},
+  blademaster: {name: 'Blademaster', look: 'samurai', hp: 100, mp: 40, atk: 15, mag: 5, def: 6, spd: 10, skills: ['flurry', 'strike', 'guard']},
 };
+// Races: each has passive traits and one racial power usable once per battle.
+const ST_RACES = {
+  human:    {name: 'Valeborn', kind: 'Human', desc: 'Adaptable folk of the Ashen Vale.', trait: '+10% XP and gold from battles.', power: 'Second Wind', pdesc: 'Heal 35% of your health and stop bleeding.', col: '#ffd75e'},
+  elarin:   {name: 'Elarin', kind: 'High elf', skin: '#f6e2c8', ears: 1, desc: 'Long-lived spellwrights from the cliffs of Aetherfall.', trait: '+40% mana, +8% magic.', power: 'Arcane Surge', pdesc: 'Restore all your mana at once.', col: '#9fd8ff', mp: .4, mag: .08},
+  woodwyn:  {name: 'Woodwyn', kind: 'Wood elf', skin: '#d9b48a', ears: 1, desc: 'Hunters of the deep Ironpine who speak with beasts.', trait: '+3 speed, +5% dodge.', power: 'Rootsnare', pdesc: 'Roots burst up and hold every enemy for a turn.', col: '#6be08a', spd: 3, evade: .05},
+  ashkin:   {name: 'Ashkin', kind: 'Ash elf', skin: '#8a96a8', ears: 1, desc: 'Grey-skinned exiles, born in the shadow of the old volcano.', trait: 'Your hits may set enemies burning.', power: 'Ancestor\'s Pyre', pdesc: 'Ancestral fire sweeps every enemy and leaves them burning.', col: '#ff7a2a', atk: .03, mag: .03},
+  tuskborn: {name: 'Tuskborn', kind: 'Orc', skin: '#8aa86a', tusks: 1, desc: 'Proud mountain clans who settle debts in blood.', trait: '+12% health, +6% attack, +15% attack when badly hurt.', power: 'Blood Fury', pdesc: 'Fly into a rage: +60% attack and more criticals for 3 turns.', col: '#ff3a2a', hp: .12, atk: .06},
+  stonekin: {name: 'Stonekin', kind: 'Dwarf', beard: 1, desc: 'Stout miners and smiths from under the Frost Peaks.', trait: '+12% defense. Bleeding cannot take hold.', power: 'Stoneskin', pdesc: 'Your skin turns to stone: take no damage until your next turn.', col: '#c9ced6', def: .12},
+  felari:   {name: 'Felari', kind: 'Catfolk', skin: '#d9a868', cat: 1, tail: '#b8884a', desc: 'Sly, quick wanderers from the southern caravans.', trait: '+3 speed, +10% critical chance.', power: 'Shadowpounce', pdesc: 'Pounce on one enemy for a brutal 230% blow.', col: '#ffd75e', spd: 3, crit: .1},
+  scalekin: {name: 'Scalekin', kind: 'Lizardfolk', skin: '#6a9a6a', snout: 1, tail: '#5a8a5a', desc: 'Marsh dwellers whose wounds knit shut on their own.', trait: 'Regain 4% health every turn.', power: 'Shed Skin', pdesc: 'Slough off your wounds: heal 45% and close every injury.', col: '#9fffb8'},
+};
+const stRace = () => ST_RACES[stData().race] || ST_RACES.human;
 const ST_COLORS = ['#f2c14e', '#7fd1c7', '#e0405a', '#8f7bd8', '#7fe08a', '#ff8a4a', '#8fd4ff', '#ff9ccf'];
 // kind: phys uses attack, mag uses magic; all hits every enemy
 const ST_SKILLS = {
@@ -5411,6 +5439,11 @@ const ST_SKILLS = {
   heal:      {name: 'Heal', mp: 8, kind: 'heal', mult: 2.4, desc: 'Restores health to you and your ally.'},
   guard:     {name: 'Guard Up', mp: 5, kind: 'buff', buff: 'guard', desc: 'Double defense for 2 turns.'},
   rally:     {name: 'War Cry', mp: 6, kind: 'buff', buff: 'rally', desc: '+50% attack for 3 turns.'},
+  bonespear: {name: 'Bone Spear', mp: 8, kind: 'mag', mult: 1.7, desc: 'A lance of grave-bone that pierces armor.'},
+  wither:    {name: 'Wither', mp: 10, kind: 'mag', mult: .8, all: true, poison: true, desc: 'Rots every enemy, poisoning them for 3 turns.'},
+  flurry:    {name: 'Hundred Fists', mp: 7, kind: 'phys', mult: 1.3, twice: true, desc: 'A blur of blows that strikes twice.'},
+  thornlash: {name: 'Thornlash', mp: 7, kind: 'mag', mult: 1.4, poison: true, desc: 'Barbed vines that poison for 3 turns.'},
+  quake:     {name: 'Earthshatter', mp: 11, kind: 'phys', mult: .95, all: true, slow: true, desc: 'Splits the ground under every enemy; some are stunned.'},
   flash:     {name: 'Flash Step', mp: 4, kind: 'phys', mult: .95, twice: true, sure: true, gift: true, desc: 'Two blows too fast to dodge.'},
   crush:     {name: 'Heaven\'s Crush', mp: 10, kind: 'phys', mult: 2.6, gift: true, desc: 'One perfect strike.'},
   wolfform:  {name: 'Wolf Form', mp: 8, kind: 'buff', buff: 'wolf', gift: true, desc: 'Become the beast for 3 turns: +80% attack, claws that make enemies bleed.'},
@@ -5441,6 +5474,11 @@ const ST_EVOLVE = {
   heal:      ['Heal', 'Greater Heal', 'Sacred Light', 'Rebirth'],
   guard:     ['Guard Up', 'Iron Wall', 'Bastion', 'Unbreakable'],
   rally:     ['War Cry', 'Battle Roar', 'Warlord\'s Howl', 'Cry of the Ashborn'],
+  bonespear: ['Bone Spear', 'Marrow Lance', 'Ossuary Pike', 'Spear of the Last Grave'],
+  wither:    ['Wither', 'Blight', 'Grave Rot', 'The Long Decay'],
+  flurry:    ['Hundred Fists', 'Thousand Palms', 'Storm of Fists', 'Heaven-Shaking Palm'],
+  thornlash: ['Thornlash', 'Briar Whip', 'Wildwood Scourge', 'Wrath of the Old Grove'],
+  quake:     ['Earthshatter', 'Faultline', 'Worldquake', 'Sundering of the Vale'],
 };
 const ST_BEAMS = {fireball: 1, frost: 1, drain: 1}; // from rank 2 these fire as beams, which can obliterate
 const stUses = id => ((stData().mastery || {})[id]) || 0;
@@ -5844,6 +5882,8 @@ function stStats() { // base class stats grown by level, plus gear and alignment
   const W = d.wounds || {};
   const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
   if (d.guild && stEdict() === 'wall') st.def *= 1.1;
+  { const R = ST_RACES[d.race] || ST_RACES.human; st.hp = Math.round(st.hp * (1 + (R.hp || 0))); st.mp = Math.round(st.mp * (1 + (R.mp || 0))); st.atk *= 1 + (R.atk || 0); st.mag *= 1 + (R.mag || 0); st.def *= 1 + (R.def || 0); st.spd += R.spd || 0;
+    if (d.race === 'tuskborn' && d.hp < st.hp * .3) st.atk *= 1.15; } // racial traits
   { const close = Object.values(d.bonds || {}).filter(b => b.pts >= 80).length, mul = 1 + Math.min(.06, close * .02) + (d.spouse ? .04 : 0) + Math.min(.045, ((d.family && d.family.kids) || []).length * .015); if (mul > 1) { st.atk *= mul; st.def *= mul; st.mag *= mul; st.hp = Math.round(st.hp * mul); } } // friends and family fight beside you in spirit
   for (const k in d.gear || {}) { const G = ST_GEAR[k]; if (!G || !d.gear[k]) continue; st.atk += G.atk || 0; st.def += G.def || 0; st.mag += G.mag || 0; st.spd += G.spd || 0; }
   if (d.hr) { st.hp = Math.round(st.hp * 1.25); st.atk = st.atk * 1.3 + 4; st.def += 5; st.spd += 5; st.mag = 0; st.mp = Math.round(st.mp * .7); } // Heavenly Restriction: a perfect body, no magic at all
@@ -6042,12 +6082,12 @@ const ST_ROUTES = [[[14.5, 21.5], [14.5, 23.5], [22, 23.5]], [[17.5, 11.5], [31,
 const ST_PEN = {x0: 7 * ST_TILE + 12, y0: 15 * ST_TILE + 12, x1: 11 * ST_TILE - 12, y1: 18 * ST_TILE - 12};
 const ST_CAMPS = [[28, 9], [39, 20], [17, 24]];
 function stDrawTree(t, now, wind) {
-  const sw = Math.sin(now * (1.2 + wind) + t.ph + t.x * .01) * (2 + wind * 7) * t.s, s = t.s;
+  const sw = Math.sin(now * (.45 + wind * .35) + t.ph + t.x * .01) * (1.2 + wind * 3.5) * t.s, s = t.s; // a slow, gentle sway
   ctx.save(); ctx.translate(t.x, t.y);
   if (t.cypress) { // a tall bald cypress hung with moss
     ctx.fillStyle = '#2a1e16'; ctx.beginPath(); ctx.moveTo(-9 * s, 0); ctx.lineTo(9 * s, 0); ctx.lineTo(3 * s + sw * .4, -60 * s); ctx.lineTo(-3 * s + sw * .4, -60 * s); ctx.fill();
     for (let i = 0; i < 3; i++) { ctx.fillStyle = ['#18241a', '#1e2e20', '#26382a'][i]; ctx.beginPath(); ctx.ellipse(sw * (.5 + i * .2), -66 * s - i * 16 * s, (26 - i * 6) * s, 14 * s, 0, 0, 7); ctx.fill(); }
-    ctx.strokeStyle = 'rgba(140,150,110,.75)'; ctx.lineWidth = 2; for (let i = 0; i < 6; i++) { const mx = (-20 + i * 8) * s + sw * .6, my = -60 * s; ctx.beginPath(); ctx.moveTo(mx, my); ctx.quadraticCurveTo(mx + Math.sin(now * 1.5 + i) * 4 * (1 + wind), my + 14 * s, mx + Math.sin(now * 1.5 + i + 1) * 6 * (1 + wind), my + (22 + (i % 3) * 6) * s); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(140,150,110,.75)'; ctx.lineWidth = 2; for (let i = 0; i < 6; i++) { const mx = (-20 + i * 8) * s + sw * .6, my = -60 * s; ctx.beginPath(); ctx.moveTo(mx, my); ctx.quadraticCurveTo(mx + Math.sin(now * .6 + i) * 4 * (1 + wind), my + 14 * s, mx + Math.sin(now * .6 + i + 1) * 6 * (1 + wind), my + (22 + (i % 3) * 6) * s); ctx.stroke(); }
   } else if (t.pine) { // a tall dark pine
     ctx.fillStyle = '#3a2a1a'; ctx.fillRect(-3 * s, -18 * s, 6 * s, 18 * s);
     for (let i = 0; i < 3; i++) { ctx.fillStyle = ['#1a3a24', '#22482c', '#2a5634'][i]; const w = (26 - i * 6) * s, yb = -14 * s - i * 16 * s; ctx.beginPath(); ctx.moveTo(-w + sw * (.3 + i * .2), yb); ctx.lineTo(sw * (.6 + i * .3), yb - 28 * s); ctx.lineTo(w + sw * (.3 + i * .2), yb); ctx.closePath(); ctx.fill(); }
@@ -6057,7 +6097,7 @@ function stDrawTree(t, now, wind) {
     ctx.shadowBlur = 0;
   } else if (t.palm) { // a curved trunk and drooping fronds
     ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 7 * s; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(6 * s + sw * .3, -40 * s, 4 * s + sw, -78 * s); ctx.stroke();
-    ctx.strokeStyle = '#3a8a3a'; ctx.lineWidth = 6 * s; for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + Math.sin(now * 1.5 + i) * .08 * (1 + wind); ctx.beginPath(); ctx.moveTo(4 * s + sw, -78 * s); ctx.quadraticCurveTo(4 * s + sw + Math.cos(a) * 26 * s, -88 * s + Math.sin(a) * 10 * s, 4 * s + sw * 1.3 + Math.cos(a) * 40 * s, -66 * s + Math.abs(Math.sin(a)) * 8 * s); ctx.stroke(); }
+    ctx.strokeStyle = '#3a8a3a'; ctx.lineWidth = 6 * s; for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + Math.sin(now * .6 + i) * .08 * (1 + wind); ctx.beginPath(); ctx.moveTo(4 * s + sw, -78 * s); ctx.quadraticCurveTo(4 * s + sw + Math.cos(a) * 26 * s, -88 * s + Math.sin(a) * 10 * s, 4 * s + sw * 1.3 + Math.cos(a) * 40 * s, -66 * s + Math.abs(Math.sin(a)) * 8 * s); ctx.stroke(); }
   } else {
     ctx.fillStyle = t.dark ? '#1a120c' : '#3a2a1a'; ctx.beginPath(); ctx.moveTo(-4 * s, 0); ctx.lineTo(4 * s, 0); ctx.lineTo(2 * s + sw * .3, -26 * s); ctx.lineTo(-2 * s + sw * .3, -26 * s); ctx.fill();
     const cols = t.dark ? ['#0a120d', '#121c15', '#1a2a1e'] : ['#173020', '#24472a', '#356a3a'];
@@ -6802,6 +6842,14 @@ const ST_COMPANIONS = { // role decides what they do on their turn; hp and atk s
   fang:   {name: 'Fang', title: 'Direwolf of the Ironpine', beast: true, color: '#6a6a70', role: 'beast', hp: .95, atk: .55, fee: 2000, male: true, desc: 'A loyal direwolf that bites twice every turn.', lines: []},
 };
 const stCompanion = () => { const d = stData(); const C = d.lv >= ST_COMP_LV && d.companion && (d.companions || []).includes(d.companion) && ST_COMPANIONS[d.companion]; return C ? Object.assign({key: d.companion}, C) : null; };
+function stChooseRace() { // for heroes made before races existed: a one-time choice
+  const d = stData(), m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  m.appendChild(el('h3', '', '🧬 Your bloodline')); m.appendChild(el('p', '', 'Who were you before the Vale? You can choose only once.'));
+  const tbl = el('div', 'trade comp');
+  for (const id in ST_RACES) { const R = ST_RACES[id], act = el('span', 'tbtn'), x = el('button', '', 'Choose'); x.addEventListener('click', () => { d.race = id; d.outfit = d.outfit || {}; d.outfit.race = id; sfx('evolve'); stCallout(`${R.name} blood awakens`, R.col); stSave(); stCloseMenu(); }); act.appendChild(x);
+    tbl.append(el('span', '', `${R.name} (${R.kind})`), el('span', 'hint', `${R.trait} Power: ${R.power}, ${R.pdesc}`), act); }
+  m.appendChild(tbl); const row = el('div', 'row'), c = el('button', '', 'Later'); c.addEventListener('click', stCloseMenu); row.appendChild(c); m.appendChild(row);
+}
 function stCompanionHall() {
   const d = stData(), m = $('stMenu'); d.companions = d.companions || []; if (d.flags.liora && !d.companions.includes('liora')) d.companions.push('liora');
   ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
@@ -6860,7 +6908,7 @@ function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // draw
 }
 
 // ---- story menu and character creator
-let crSel = {cls: 'warrior', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {}};
+let crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}};
 const ST_HATS = [['', 'Class default'], ['helm', 'Knight\'s helm'], ['heavyhelm', 'Great helm'], ['winghelm', 'Winged helm'], ['visor', 'Visor'], ['crest', 'Crested helm'], ['hood', 'Hood'], ['cowl', 'Cowl'], ['ninja', 'Shinobi wrap'], ['mask', 'Mask'],
   ['pointy', 'Wizard hat'], ['brim', 'Witch\'s brim'], ['widehat', 'Wide hat'], ['tricorn', 'Tricorn'], ['boonie', 'Ranger\'s cap'], ['helmet', 'Soldier\'s helmet'], ['crown', 'Crown'], ['feathers', 'Feathers'], ['horns', 'Horns'],
   ['longhair', 'Long hair'], ['twintails', 'Twin tails'], ['topknot', 'Topknot'], ['spiky', 'Spiky hair'], ['scruffy', 'Scruffy hair']];
@@ -6874,6 +6922,13 @@ const ST_CLASS_WEAR = { // each class dresses differently
   paladin: {hats: ['helm', 'heavyhelm', 'winghelm', 'crest', 'crown', 'visor', 'longhair', 'topknot', 'hood'], cloth: ['#e8e2d0', '#c9a24a', '#7d8a9b', '#4a6a9a', '#f0e6c8', '#8a2a2a', '#6a6a7a', '#2a4a6a'], note: 'Holy white, gold and blessed steel'},
   gunner:  {hats: ['helmet', 'boonie', 'visor', 'tricorn', 'spiky', 'scruffy', 'mask', 'topknot', 'widehat'], cloth: ['#6a6a4a', '#4a4a3a', '#5a5f6a', '#7a5a3a', '#3a3a2a', '#8a7a5a', '#2a3a4a', '#6a3a2a'], note: 'Field khaki, brass and gunmetal'},
 };
+Object.assign(ST_CLASS_WEAR, {
+  necromancer: {hats: ['hood', 'cowl', 'horns', 'crown', 'mask', 'longhair', 'pointy', 'brim'], cloth: ['#1a1a22', '#3a1f3a', '#2a3a2a', '#4a1f1f', '#5a5a6a', '#e8e2d0', '#2a2a4a', '#3a3a2a'], note: 'Grave silk and bone charms'},
+  monk:    {hats: ['spiky', 'topknot', 'scruffy', 'longhair', 'hood', 'twintails', 'crest'], cloth: ['#e8742a', '#c9a24a', '#8a2a2a', '#e8e2d0', '#3a4a6a', '#5a3a2a', '#2a5a4a', '#1a1a1a'], note: 'Simple gi and prayer wraps'},
+  druid:   {hats: ['feathers', 'hood', 'horns', 'longhair', 'cowl', 'boonie', 'twintails'], cloth: ['#3e5a4a', '#5a7a3a', '#6a5a3a', '#3a4a2a', '#8a6a3a', '#2a3a3a', '#7a8a5a', '#4a3a2a'], note: 'Bark, moss and antler'},
+  berserker: {hats: ['horns', 'heavyhelm', 'scruffy', 'longhair', 'helm', 'topknot', 'mask'], cloth: ['#6a3f2a', '#8a2a2a', '#3a3a3a', '#5a4a3a', '#7a6a5a', '#2a2a2a', '#a85a2a', '#4a2a1a'], note: 'Furs, war paint and chain'},
+  blademaster: {hats: ['topknot', 'longhair', 'ninja', 'widehat', 'helm', 'crest', 'scruffy'], cloth: ['#3a4a6a', '#1a1a2a', '#8a2a2a', '#e8e2d0', '#4a3a5a', '#2a4a3a', '#6a6a7a', '#c9a24a'], note: 'Lacquered plate and silk'},
+});
 function stOutfitUI(box, O, onChange, cls) { // headwear, tunic, cloak, cape, scarf and skin, chosen from what your class wears
   const W = ST_CLASS_WEAR[cls] || ST_CLASS_WEAR.warrior, HATS = [['', 'Class default']].concat(ST_HATS.filter(([v]) => W.hats.includes(v))), CL = W.cloth;
   if (O.hat && !W.hats.includes(O.hat)) delete O.hat; for (const k of ['body', 'cloak', 'cape', 'scarf']) if (O[k] && O[k] !== 'none' && !CL.includes(O[k])) delete O[k]; // a new class keeps only what fits it
@@ -6903,6 +6958,8 @@ function openStoryMenu() {
 }
 function renderCreator() {
   const cl = $('crClass'); cl.innerHTML = '';
+  { const rr = $('crRace'); rr.innerHTML = ''; for (const id in ST_RACES) { const R = ST_RACES[id], b = el('button', 'chip' + (crSel.race === id ? ' sel' : ''), R.name); b.title = R.kind; b.addEventListener('click', () => { crSel.race = id; crSel.outfit.race = id; renderCreator(); }); rr.appendChild(b); }
+    const R = ST_RACES[crSel.race]; $('crRaceNote').textContent = `${R.kind}. ${R.desc} Trait: ${R.trait} Racial power (once per battle), ${R.power}: ${R.pdesc}`; }
   for (const id in ST_CLASSES) { const b = el('button', 'chip' + (crSel.cls === id ? ' sel' : ''), ST_CLASSES[id].name); b.addEventListener('click', () => { crSel.cls = id; crSel.skills = []; crSel.outfitBuilt = false; renderCreator(); }); /* switching class swaps the wardrobe */ cl.appendChild(b); }
   const co = $('crColor'); co.innerHTML = '';
   for (const c of ST_COLORS) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-pressed', c === crSel.color); b.setAttribute('aria-label', 'Color ' + c); b.addEventListener('click', () => { crSel.color = c; renderCreator(); }); co.appendChild(b); }
@@ -6933,12 +6990,12 @@ $('stBack').addEventListener('click', () => show('scr-main'));
 $('stContinue').addEventListener('click', () => startStory());
 $('stNew').addEventListener('click', () => {
   if (stData() && !confirm('Start a new story? Your current story progress will be replaced.')) return;
-  crSel = {cls: 'warrior', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {}}; $('crName').value = ''; renderCreator(); show('scr-create');
+  crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}}; $('crName').value = ''; renderCreator(); show('scr-create');
 });
 $('crBack').addEventListener('click', openStoryMenu);
 $('crStart').addEventListener('click', () => {
   const name = ($('crName').value.trim() || 'Wanderer').slice(0, 14), c = ST_CLASSES[crSel.cls];
-  PROF.story = {name, cls: crSel.cls, color: crSel.color, voice: crSel.voice, outfit: Object.assign({}, crSel.outfit), skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
+  PROF.story = {name, cls: crSel.cls, race: crSel.race, color: crSel.color, voice: crSel.voice, outfit: Object.assign({}, crSel.outfit), skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
     items: {potion: 3, ether: 1}, x: 11 * ST_TILE, y: 11 * ST_TILE + 32, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false, tut: 1,
     map: 'world', shrine: {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64}, lost: null};
   stSave(); startStory(true);
@@ -7214,6 +7271,26 @@ function stTutDraw(now) {
 }
 
 // ---- objectives: what to do next, and where. Drives the tracker, the minimap star and the gold arrow.
+// Acts II and III: the Hollow Crown was made of five shards, and something beyond the sky wants it whole.
+const ST_SHARD_ACT = {
+  mara: {ch: 5, title: 'Chapter 5 complete', crowns: 100, lines: [['', 'In Mara\'s cabin, nailed to the mast, a sea-green shard drips water that never runs dry. The Tide Shard.'], ['', 'Beside it, a ledger. One line is underlined twice: "Map to the Wyrm Shard sold to M. Valcourt, Rougemarais. Paid in blood, not gold."'], ['', 'Three shards. Maren should see this ledger.']]},
+  marquis: {ch: 6, title: 'Chapter 6 complete', crowns: 150, lines: [['Marquis Valcourt', '"You think I wanted it for myself? Fool… I was only the courier… the Wyrm keeps what it is given…"'], ['', 'Inside his coat, a shard the color of a wound. The Blood Shard. And a letter sealed with wax pressed by a dragon\'s claw: "Bring the map to Wyrmspine. Bring the Shardbearer, if you can."'], ['', 'Four shards… no. Four of five. The letter means Valdris, across the sea, where the guilds rule and the Wyrm-tyrant Ignaroth sleeps on a mountain of crowns.']]},
+  ignaroth: {ch: 7, title: 'Chapter 7 complete', crowns: 250, lines: [['Ignaroth', '"Little Shardbearer… you have done its work for it… every shard you carry… it can feel…"'], ['', 'In the cooling ashes lies the Wyrm Shard, swallowed a thousand years ago. You hold five now. They pull toward each other like lodestones.'], ['', 'And toward the sky. Above Valdris, where the clouds should be, there is a crack. Through it you see broken islands drifting in a sea of light. Aetherfall, the Shattered Heavens.'], ['', 'The Crown had a heart once. Whatever wears it now is waiting for you up there.']]},
+  unmaker: {ch: 8, title: 'THE HOLLOW CROWN, the story complete', crowns: 1000, lines: [['The Unmaker', '"I was the crown\'s heart… the silence it was forged to hold… and you carried me home…"'], ['', 'You do not give it the shards. You break them, one by one, on the bones of the thing that wanted them. Each one is a scream, then a song, then nothing.'], ['', 'The crack in the sky closes like an eye. Far below, in Thornwake, every lantern in the square lights itself at once.'], ['Maren the Pale', '(Her voice, somehow, in the wind.) "There. That is what hope sounds like. I told you I would need teaching."'], ['', 'The dark the Hollow King held at bay is gone, not held. Gone. They will sing of the Shardbreaker for as long as there are songs.']]},
+};
+function stActSkip() { // a hero who already beat a later boss before Act II existed moves past that chapter
+  const d = stData(); let moved = false;
+  for (let g = 0; g < 6; g++) { const k = Object.keys(ST_SHARD_ACT).find(k => ST_SHARD_ACT[k].ch === d.ch); if (!k || !d.flags[k]) break; d.ch++; moved = true; }
+  return moved;
+}
+const ST_ACT_TALK = { // what Maren says at each step of the shard quest
+  4: [['Maren the Pale', 'So he spoke, at the end. "The last thing holding the dark at bay." I hoped he was lying. Kings always lie.'], ['Maren the Pale', 'Listen. The Hollow Crown was forged from five shards. Ember and Frost you carry. The other three were scattered when the crown broke, so no one could ever make it whole.'], ['Maren the Pale', 'Something has been gathering them. The Tide Shard went down with a merchant ship thirty years ago, and the corsairs of the Brightwater Isles have been diving that wreck ever since.'], ['Maren the Pale', 'Their queen, Mara, wears it. Take a ship from Saltmere. Take the shard before whoever is buying them does.']],
+  5: [['Maren the Pale', 'The Tide Shard is in the Brightwater Isles, around the Corsair Queen\'s neck. Saltmere\'s harbor will carry you.']],
+  6: [['Maren the Pale', 'Valcourt. The Crimson Prince. Of course it was a vampire; they are the only ones patient enough for a thousand-year errand.'], ['Maren the Pale', 'Rougemarais lies across the water, a city where the sun never quite rises. Be at least level 20 before you dock there. End him and take back the map.']],
+  7: [['Maren the Pale', 'Valdris. Ignaroth. I had hoped I would be dead before anyone said those two words to me in the same breath.'], ['Maren the Pale', 'The guilds of Valdris do not let just anyone ashore. Reach C rank in the Adventurers\' Guild and level 26, then sail from Saltmere. The Wyrm is far beyond that. Grow strong in Valdris before you climb the Wyrmspine.']],
+  8: [['Maren the Pale', 'Aetherfall. I used to watch the crack in the sky as a girl and think it was a star that had fallen asleep.'], ['Maren the Pale', 'Whatever waits there was the crown\'s heart. Do not let it have the shards. Do not let it have you.']],
+  9: [['Maren the Pale', 'The fires are steady for the first time in my life. The sky is whole. I do not know what to do with hope, Shardbreaker. Teach me.']],
+};
 function stObjective() {
   const d = stData(), T = (x, y, map = 'world') => ({x: x * ST_TILE + 32, y: y * ST_TILE + 32, map});
   if (ST.tut && d.map === 'world') return Object.assign({text: 'Follow Warden Edda through Thornwake', x: ST.tut.x, y: ST.tut.y, map: 'world'});
@@ -7223,6 +7300,11 @@ function stObjective() {
   if (d.ch === 1) return Object.assign({text: 'Enter the Sunken Catacombs (level 4) and take the Ember Shard'}, T(24, 16));
   if (d.ch === 2) return Object.assign({text: 'Climb the Frost Peaks to the Ice Crypt (level 7) for the Frost Shard'}, T(4, 2));
   if (d.ch === 3) return Object.assign({text: 'Break the seal of the Hollow Castle and face the Hollow King (level 13)'}, T(24, 6));
+  if (d.ch === 4) return Object.assign({text: 'Act II: Tell Maren the Pale what the Hollow King said'}, T(14, 10));
+  if (d.ch === 5) return Object.assign({text: 'Sail from Saltmere to the Brightwater Isles and take the Tide Shard from Mara, the Corsair Queen (level 12)'}, T(37, 16));
+  if (d.ch === 6) return Object.assign({text: 'Sail to Rougemarais (level 20) and stop Marquis Valcourt, the Crimson Prince (level 22)'}, T(37, 16));
+  if (d.ch === 7) return Object.assign({text: !d.guild ? 'Join the Adventurers\' Guild in Thornwake: only guild members may sail to Valdris' : stRankAtLeast('C') && d.lv >= 26 ? 'Act III: Sail to Valdris and slay Ignaroth, Tyrant of the Wyrmspine (level 40)' : 'Reach guild rank C and level 26 to sail for Valdris and the Wyrm Shard'}, !d.guild || !(stRankAtLeast('C') && d.lv >= 26) ? T(17, 15) : T(37, 16));
+  if (d.ch === 8) return Object.assign({text: 'Sail to Aetherfall, the Shattered Heavens, and end the Unmaker (level 55)'}, T(37, 16));
   if (!d.guild) return Object.assign({text: 'Join the Adventurers\' Guild in Thornwake'}, T(17, 15));
   const a = (d.guild.quests || []).map(a => stGQ(a.id)).find(Boolean);
   if (a) return Object.assign({text: `Guild quest: ${a.name}. ${a.text}`}, T(17, 15));
@@ -7422,7 +7504,7 @@ function stTalkBody(id) {
         ['Maren the Pale', 'Liora will stand with you, when you are ready. She has buried more friends than she can count, and she will not bury one more green recruit. Prove yourself first.'], ['', `Liora is now one of your companions. Companions fight beside adventurers of level ${ST_COMP_LV} and above; recruit and choose them from the Companions menu.`], ['Maren the Pale', 'The first shard lies beneath the ruins, in the catacombs.']], () => { d.ch = 1; d.flags.liora = true; d.gold += 50; sfx('levelup'); });
       else stSay([['Maren the Pale', `Another one with a name and no past. Sit, if you must. The wolves of the Thornwood have gone hollow. Their eyes are empty and they do not stop.`], ['Maren the Pale', `Cull them. ${d.pelts} of 3 packs so far. West, where the road dies.`]]);
     } else if (d.ch < 4) stSay([['Maren the Pale', ['', 'The catacombs eat the careless. Light a shrine before you go down.', 'Cold kills slower than steel, but it kills. The crypt is past the peaks.', 'Go, then. If you fall, at least fall facing him.'][d.ch]]]);
-    else stSay([['Maren the Pale', 'The fires are steady for the first time in my life. I do not know what to do with hope. Teach me.']]);
+    else stSay(ST_ACT_TALK[Math.min(9, d.ch)] || ST_ACT_TALK[9], () => { if (d.ch === 4) { d.ch = 5; stActSkip(); sfx('levelup'); stCallout('Act II: The Five Shards', '#ffd75e'); stSave(); } });
   } else if (id === 'merchant') stSay([['Pell the Merchant', `Coin is coin, even at the end of the world. Potions are ${stPrice(15)}, ethers ${stPrice(25)}.${stAlign() >= 3 ? ' A friend\'s price.' : stAlign() <= -3 ? ' Price goes up for your kind.' : ''} You have ${d.gold}. Don't die with it.`]], null,
     [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('thornwake')], ['Steal a potion', () => stPickpocket('Pell the Merchant')], ['Leave', null]]);
   else if (id === 'inn') stSay([['Innkeeper Bree', 'A bed, a bowl of something hot, and a locked door. 10 gold. You will wake. Probably.']], null,
@@ -7835,7 +7917,7 @@ function stEffectsDraw(dt) {
 }
 // Dodging: the faster fighter slips more blows. Heavenly Restriction and Mist Form make you hard to touch.
 const stDodgeChance = (defSpd, atkSpd, bonus = 0) => clamp(.05 + (defSpd - atkSpd) * .012 + bonus, .02, .45);
-function stPlayerEvade() { const d = stData(), b = ST.battle; return (d.gear && d.gear.moonCharm ? .05 : 0) + (d.hr ? .15 : 0) + (b && b.buffs.mist ? .6 : 0) + (b && b.buffs.wolf ? .08 : 0); }
+function stPlayerEvade() { const d = stData(), b = ST.battle; return (stRace().evade || 0) + (d.gear && d.gear.moonCharm ? .05 : 0) + (d.hr ? .15 : 0) + (b && b.buffs.mist ? .6 : 0) + (b && b.buffs.wolf ? .08 : 0); }
 function stTransformFx(who, color, text) {
   STFX.trans = STFX.trans || []; STFX.trans.push({who, color, t: 0}); ST.hurt = .4; STFX.slow = .45; sfx('ult');
   if (text) stCallout(text, color);
@@ -8032,9 +8114,9 @@ function stCalloutDraw(dt) {
   ctx.shadowColor = c.color; ctx.shadowBlur = 24; ctx.fillStyle = '#fff3e0'; ctx.fillText(c.text, 0, 4);
   ctx.restore();
 }
-const SK_SHOT = {fireball: 'fire', frost: 'ice', venom: 'venom', drain: 'dark', rain: 'arrow', lightning: 'holy'};
+const SK_SHOT = {fireball: 'fire', frost: 'ice', venom: 'venom', drain: 'dark', rain: 'arrow', lightning: 'holy', bonespear: 'dark', thornlash: 'venom'};
 const SK_FX = {flash: 'afterimage', crush: 'hammer', bloodfeast: 'bite', fireball: 'explode', frost: 'shatter', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril', strike: 'heavyslash'};
-const SK_COLOR = {flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
+const SK_COLOR = {bonespear: '#e8e2d0', wither: '#8ac34a', flurry: '#ffd75e', thornlash: '#6be08a', quake: '#c9a26a', flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
 function stLog(t) { if (ST.battle) ST.battle.log = t; $('stLog').textContent = t; }
 const stSkCost = S => Math.round(S.mp * (1 + (stData().lv - 1) * .035)); // skills grow pricier with your mana pool
 const stDmg = (base, def) => Math.max(1, Math.round(base * (.9 + Math.random() * .2) - def * .5));
@@ -8075,6 +8157,7 @@ function stRenderBattle(picking) {
     btn('⚔ ' + (b.buffs.wolf ? 'Claw' : b.buffs.vamp ? 'Rend' : `${stSkName('attack')} ${'★'.repeat(stRank('attack'))}`), () => stPick(f => stPlayerHit(f, s.atk * stAtkMul(b), 'phys'))).title = 'Basic attack. Mastery: ' + stMasteryText('attack');
     if ((b.rage || 0) >= 100 && !b.buffs.rage) btn('RAGE!', () => { b.rage = 0; b.buffs.rage = 3; stAnim('p', 'cast', .5); stTransformFx('p', '#ff3a2a', `${d.name} flies into a RAGE!`); stGrunt(stSex('p'), true, 'rage2'); stLog('Rage! +60% attack and more criticals for 3 turns.'); stEndTurn(); }).classList.add('rageBtn');
     btn('✦ Skills', () => { ST.sub = 'skills'; stRenderBattle(); }).title = 'Special moves. They cost MP.';
+    { const R = stRace(); btn(`✧ ${R.power}`, () => stRacePower(), !!b.racial).title = `${R.name} racial power, once per battle: ${R.pdesc}`; }
     btn('◆ Items', () => { ST.sub = 'items'; stRenderBattle(); }).title = 'Potions, ethers and cooked meals.';
     btn('⛨ Defend', () => { b.defending = true; stLog(`${d.name} braces for the next attack.`); stEndTurn(); });
     btn('➜ Flee', () => { if (Math.random() < .6) { stLog('You got away!'); stEndBattle('fled'); } else { stLog('You could not escape!'); stEndTurn(); } }, !!b.bossId);
@@ -8088,7 +8171,7 @@ function stPlayerHit(f, base, kind, extra, color) {
   const sk = ST.curSkill || 'attack', rk = stRank(sk), beam = kind === 'mag' && rk >= 2 && ST_BEAMS[sk];
   base *= 1 + .2 * rk; stMaster(sk);
   const dmg0 = stDmg(base, kind === 'mag' ? f.def * .5 : f.def), dmg = f.guard ? Math.round(dmg0 / 2) : dmg0;
-  const crit = Math.random() < .08 + .06 * rk + (ST.battle.buffs.rage ? .2 : 0), total = crit ? Math.round(dmg * (1.5 + .4 * rk)) : dmg; // grinding a move makes its criticals brutal
+  const crit = Math.random() < .08 + .06 * rk + (ST.battle.buffs.rage ? .2 : 0) + (stRace().crit || 0) + (ST.battle.pounce ? 1 : 0), total = crit ? Math.round(dmg * (1.5 + .4 * rk)) : dmg; // grinding a move makes its criticals brutal
   const SK = ST_SKILLS[sk], sure = SK && SK.sure;
   const land = () => {
     const before = f.hp; ST.curSkill = null;
@@ -8096,7 +8179,8 @@ function stPlayerHit(f, base, kind, extra, color) {
     if (f.hp > 0 && ((SK && SK.twice) || (sk === 'attack' && stData().hr && Math.random() < .3))) setTimeout(() => { // a second blow: Flash Step, or the Restricted body moving faster than sight
       if (f.hp <= 0) return; const dm2 = Math.min(f.hp, stDmg(base * .7, f.def)); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
     }, 140);
-    const dealt = Math.min(total, Math.max(0, before)); f.hp -= total; if (f.hp < 0) f.hp = 0; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact');
+    const dealt = Math.min(total, Math.max(0, before)); f.hp -= total; if (f.hp < 0) f.hp = 0; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact'); ST.battle.pounce = false;
+    if (stData().race === 'ashkin' && f.hp > 0 && Math.random() < .15) { f.burn = 2; stNum(f.id, 'Burning', '#ff9a4a'); } // ash-elf blood smoulders
     const fxPow = 1 + rk * .3; stEffect(SK_FX[sk] || (crit ? 'heavyslash' : 'slash'), f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'), fxPow); if (crit) STFX.slow = Math.max(STFX.slow || 0, .12); // a hit-stop on criticals
     stRageAdd(6);
     if (ST.battle.buffs.vamp) { const dd = stData(), heal = Math.round(total * .25); dd.hp = Math.min(stStats().hp, dd.hp + heal); stNum('p', '+' + heal, '#ff6a8a'); } // vampire form drinks from every wound
@@ -8157,6 +8241,20 @@ function stItem(k) {
   stBurst('p', k === 'potion' ? '#e0405a' : '#7aa9ff', 16); stNum('p', k === 'potion' ? '+' + Math.max(60, Math.round(s.hp * .3)) : '+' + Math.max(30, Math.round(s.mp * .3)) + ' MP', k === 'potion' ? '#6be08a' : '#9fc0ff');
   sfx('pickup'); stLog(k === 'potion' ? 'You drink a potion. 30% of your health returns.' : 'You drink an ether. 30% of your mana returns.'); ST.sub = null; stEndTurn();
 }
+function stRacePower() {
+  const b = ST.battle, d = stData(), s = stStats(), R = stRace(), key = d.race || 'human'; if (!b || b.racial) return; b.racial = true;
+  stCallout(R.power, R.col); stAnim('p', 'cast', .5); sfx('ult'); stLog(`${d.name} calls on ${R.name} blood: ${R.power}!`);
+  const alive = b.foes.filter(f => f.hp > 0);
+  if (key === 'human') { const h = Math.round(s.hp * .35); d.hp = Math.min(s.hp, d.hp + h); if (d.wounds) d.wounds.bleed = 0; stEffect('sparkle', 'p', '#ffd75e'); stNum('p', '+' + h, '#6be08a'); }
+  else if (key === 'elarin') { const m = s.mp - d.mp; d.mp = s.mp; stEffect('runes', 'p', '#9fd8ff', 1.4); stNum('p', '+' + m + ' MP', '#8fb8ff'); }
+  else if (key === 'woodwyn') { for (const f of alive) { f.frozen = 1; stEffect('cloud', f.id, '#6be08a'); stNum(f.id, 'Rooted', '#6be08a'); } }
+  else if (key === 'ashkin') { for (const f of alive) { const dm = Math.min(f.hp, stDmg(s.mag * 1.2 + s.atk * .5, f.def * .5)); f.hp -= dm; f.burn = 3; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stEffect('explode', f.id, '#ff7a2a'); stNum(f.id, dm, '#ff9a4a'); } sfx('flame'); }
+  else if (key === 'tuskborn') { b.buffs.rage = 3; stTransformFx('p', '#ff3a2a', `${d.name} roars with Blood Fury!`); stGrunt(stSex('p'), true, 'rage2'); }
+  else if (key === 'stonekin') { b.buffs.stone = 1; stEffect('aura', 'p', '#c9ced6', 1.4); sfx('shield'); }
+  else if (key === 'felari') { b.pounce = true; return stPick(f => stPlayerHit(f, s.atk * stAtkMul(b) * 2.3, 'phys', null, '#ffd75e')); }
+  else if (key === 'scalekin') { const h = Math.round(s.hp * .45); d.hp = Math.min(s.hp, d.hp + h); d.wounds = null; stEffect('sparkle', 'p', '#9fffb8'); stNum('p', '+' + h, '#6be08a'); }
+  stRenderBattle(); setTimeout(stEndTurn, 500);
+}
 function stEndTurn() {
   const b = ST.battle; if (!b || b.over) return; if (b.foes.every(f => f.hp <= 0)) { b.turn = 'won'; stRenderBattle(); stCallout('VICTORY', '#ffd75e'); return stEndBattle('won'); }
   b.turn = 'enemy'; stRenderBattle();
@@ -8186,7 +8284,9 @@ function stEnemyPhase() {
   const next = () => {
     if (!ST.battle || b.over) return;
     if (i >= alive.length) {
-      for (const k of ['guard', 'rally', 'wolf', 'mist', 'vamp', 'rage']) if (b.buffs[k]) b.buffs[k]--;
+      for (const k of ['guard', 'rally', 'wolf', 'mist', 'vamp', 'rage', 'stone']) if (b.buffs[k]) b.buffs[k]--;
+      if (d.race === 'scalekin' && d.hp > 0) { const rg = Math.round(s.hp * .04); if (d.hp < s.hp) { d.hp = Math.min(s.hp, d.hp + rg); stNum('p', '+' + rg, '#9fffb8'); } }
+      if (d.race === 'stonekin' && d.wounds && d.wounds.bleed) d.wounds.bleed = 0;
       for (const x of b.foes) if (x.guard) x.guard--;
       b.defending = false; b.turn = 'player'; stRenderBattle(); stLowLine(); return;
     }
@@ -8224,10 +8324,10 @@ function stEnemyPhase() {
     const big = f.boss && Math.random() < .3, base = f.atk * (big ? 1.6 : 1);
     stAnim(f.id, 'lunge', big ? .45 : .32);
     const victim = hitAlly ? 'a' : 'p';
-    if (hitAlly ? Math.random() < .1 : Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade())) { stDodgeFx(victim, hitAlly ? 'Liora' : d.name); stRenderBattle(); return setTimeout(next, 600); }
-    if (hitAlly) { const dm = stDmg(base, 6); b.ally.hp -= dm; stNum('a', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack on' : 'hits'} Liora for ${dm}.`); }
+    if (hitAlly ? Math.random() < .1 : Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade())) { stDodgeFx(victim, hitAlly ? b.ally.name : d.name); stRenderBattle(); return setTimeout(next, 600); }
+    if (hitAlly) { const dm = stDmg(base, 6); b.ally.hp -= dm; stNum('a', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack on' : 'hits'} ${b.ally.name} for ${dm}.`); }
     else {
-      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); d.hp -= dm; stRageAdd(dm / s.hp * 140); stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
+      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); if (b.buffs.stone) { dm = 0; stEffect('aura', 'p', '#c9ced6'); } d.hp -= dm; stRageAdd(dm / s.hp * 140); stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
       stLog(`${f.name} ${fcrit ? 'lands a brutal critical! You take' : big ? 'unleashes a fierce attack! You take' : 'hits you for'} ${dm}${big || fcrit ? ' damage' : ''}.`);
       if (d.hp <= 0 && fcrit) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore('p', 50, true); STFX.slow = .7; }
       else if (fcrit || (big && Math.random() < .4)) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
@@ -8254,7 +8354,7 @@ function stEndBattle(result) {
   if (ST.fighting) { ST.fighting.alive = false; ST.fighting = null; }
   if (d.spouse) { const s0 = stStats(); d.hp = Math.min(s0.hp, d.hp + Math.round(s0.hp * .1)); } // your spouse tends your wounds
   d.kills = d.kills || {}; for (const f of b.foes) d.kills[f.key] = (d.kills[f.key] || 0) + 1;
-  const xp = b.foes.reduce((a, f) => a + f.xp, 0), gold = b.foes.reduce((a, f) => a + f.gold, 0);
+  const rb = d.race === 'human' || !d.race ? 1.1 : 1, xp = Math.round(b.foes.reduce((a, f) => a + f.xp, 0) * rb), gold = Math.round(b.foes.reduce((a, f) => a + f.gold, 0) * rb);
   const coopN = (b.coop || []).length, xpB = Math.round(xp * .15 * coopN); if (coopN) { d.xp += xpB; }
   d.xp += xp; d.gold += gold; sfx('levelup');
   const lines = [['', `Victory! You earn ${xp} XP and ${gold} gold.` + (coopN ? ` Party bonus: +${xpB} XP.` : '')]];
@@ -8284,14 +8384,15 @@ function stEndBattle(result) {
     if (b.bossId === 'countess') { d.flags.countessDone = true; lines.push(['The Countess', '"My child... my own child..."'], ['', 'She smiles at the end, which is worse than anything she could have said. The last of the Delacroix-Noir is you.']); }
     if (b.bossId === 'mara') lines.push(['Mara', '"Ha… not bad… for a landlubber…"'], ['', 'Her crew scatters into the surf. Her red flag comes down. Harbormaster Oona will want to hear of this.']);
     if (b.bossId === 'stalker') lines.push(['', 'The coat collapses, empty. Inside the lining, a tin locket with a painted face. Corin will want this.']);
-    if (b.bossId === 'golem') { d.ch = 2; lines.push(['', 'The stone splits along old seams. Inside, the Ember Shard pulses like a second heart.'], ['Liora', 'It was a man once. I can see the shape of him in the rock. Let\'s not end up like that. The crypt next.']); }
-    if (b.bossId === 'drake') { d.ch = 3; lines.push(['', 'The drake breaks apart like a frozen lake in spring. The Frost Shard is so cold it burns.'], ['Liora', 'Two shards. The gate will open. I hope you are ready, because I am not.']); }
+    if (b.bossId === 'golem') { d.ch = 2; lines.push(['', 'The stone splits along old seams. Inside, the Ember Shard pulses like a second heart.'], ['', 'It was a man once. You can see the shape of him in the rock. The Ice Crypt waits in the Frost Peaks.']); }
+    if (b.bossId === 'drake') { d.ch = 3; lines.push(['', 'The drake breaks apart like a frozen lake in spring. The Frost Shard is so cold it burns.'], ['', 'Two shards. Somewhere in the north, the seal on the Hollow Castle cracks like old ice.']); }
     if (b.bossId === 'king') {
       d.ch = 4; lines.push(['The Hollow King', '"You think… you have saved them? I was… the last thing… holding the dark… at bay…"'], ['', 'His crown falls and does not land. It simply stops being. For a long moment, there is only silence. Then, impossibly, a bird.'],
         ['', `Whether the dark returns is a question for another age. For now, ${d.name}, the fire is yours.`]);
-      if (!d.rewarded) { d.rewarded = true; PROF.crowns += 300; lines.push(['', 'Story complete. You earned 300 Crowns.']); }
+      if (!d.rewarded) { d.rewarded = true; PROF.crowns += 300; lines.push(['', 'Act I complete. You earned 300 Crowns. Maren the Pale will want to hear what the King said.']); }
     }
   }
+  { const SC = ST_SHARD_ACT[b.bossId]; if (SC && d.ch === SC.ch) { d.ch = SC.ch + 1; stActSkip(); lines.push(...SC.lines); if (SC.crowns) { PROF.crowns += SC.crowns; lines.push(['', `${SC.title}. You earned ${SC.crowns} Crowns.`]); } } }
   if (b.bossId === 'seraphiel') lines.push(['Seraphiel', 'Enough. The body is worthy. Now hear the terms.']);
   if (/^exam/.test(b.bossId || '')) { const g = d.guild, nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], pay = {C: [150, 0], B: [300, 50], A: [600, 100], S: [1000, 500]}[nx]; g.rank = nx; d.gold += pay[0]; PROF.crowns += pay[1]; lines.push(['', `PROMOTED TO ${nx}-RANK. ${pay[0]} gold${pay[1] ? ` and ${pay[1]} Crowns` : ''}. ` + {C: 'Ships to Valdris will now carry you.', B: 'The B-Rank wilds of Valdris are open to you.', A: 'You may vote on the Council\'s edicts, and sail to Aetherfall.', S: 'You hold a seat on the Council of the Free Compact. Your word is law on the roads.'}[nx]]); setTimeout(() => stCallout(`${nx}-RANK ADVENTURER`, '#ffd75e'), 800); delete d.flags[b.bossId]; }
   const after = b.bossId === 'seraphiel' ? stTrialChoice : learn ? stLearnSkill : null;
@@ -8375,6 +8476,7 @@ function stOpenMenu() {
   btn(`Online world: ${PROF.onlineOff ? 'Off' : 'On'}`, () => { PROF.onlineOff = !PROF.onlineOff; saveProfile(); if (PROF.onlineOff) stNetLeave(); else stNetJoin(); stCloseMenu(); stOpenMenu(); });
   btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
+  if (!stData().race) btn('🧬 Choose race', () => stChooseRace());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
