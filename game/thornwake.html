@@ -5406,10 +5406,10 @@ let last = performance.now();
 const ST_TILE = 64, ST_W = 48, ST_H = 32;
 const ST_CLASSES = {
   warrior: {name: 'Warrior', look: 'knight', hp: 120, mp: 30, atk: 14, mag: 4, def: 8, spd: 6, skills: ['strike', 'guard', 'rally']},
-  mage:    {name: 'Mage', look: 'mage', hp: 92, mp: 70, atk: 6, mag: 16, def: 5, spd: 7, skills: ['fireball', 'frost', 'lightning']},
+  mage:    {name: 'Mage', look: 'mage', hp: 92, mp: 70, atk: 6, mag: 16, def: 5, spd: 7, skills: ['fireball', 'frost', 'lightning', 'ward']},
   ranger:  {name: 'Ranger', look: 'ranger', hp: 95, mp: 45, atk: 12, mag: 8, def: 5, spd: 10, skills: ['rain', 'venom', 'strike']},
   rogue:   {name: 'Rogue', look: 'rogue', hp: 90, mp: 40, atk: 13, mag: 6, def: 5, spd: 12, skills: ['venom', 'strike', 'drain']},
-  paladin: {name: 'Paladin', look: 'paladin', hp: 130, mp: 50, atk: 11, mag: 10, def: 10, spd: 5, skills: ['heal', 'guard', 'strike']},
+  paladin: {name: 'Paladin', look: 'paladin', hp: 130, mp: 50, atk: 11, mag: 10, def: 10, spd: 5, skills: ['heal', 'guard', 'strike', 'ward']},
   gunner:  {name: 'Gunner', look: 'soldier', hp: 100, mp: 35, atk: 15, mag: 3, def: 6, spd: 8, skills: ['rain', 'strike', 'rally']},
   necromancer: {name: 'Necromancer', look: 'warlock', hp: 88, mp: 75, atk: 5, mag: 17, def: 4, spd: 7, skills: ['bonespear', 'drain', 'wither']},
   monk:    {name: 'Monk', look: 'kifighter', hp: 110, mp: 40, atk: 14, mag: 7, def: 6, spd: 11, skills: ['flurry', 'guard', 'heal']},
@@ -5442,6 +5442,7 @@ const ST_SKILLS = {
   heal:      {name: 'Heal', mp: 8, kind: 'heal', mult: 2.4, desc: 'Restores health to you and your ally.'},
   guard:     {name: 'Guard Up', mp: 5, kind: 'buff', buff: 'guard', desc: 'Double defense for 2 turns.'},
   rally:     {name: 'War Cry', mp: 6, kind: 'buff', buff: 'rally', desc: '+50% attack for 3 turns.'},
+  ward:      {name: 'Arcane Shield', mp: 9, kind: 'buff', buff: 'ward', desc: 'A shield of light that blocks 75% of all damage for 2 turns.'},
   bonespear: {name: 'Bone Spear', mp: 8, kind: 'mag', mult: 1.7, desc: 'A lance of grave-bone that pierces armor.'},
   wither:    {name: 'Wither', mp: 10, kind: 'mag', mult: .8, all: true, poison: true, desc: 'Rots every enemy, poisoning them for 3 turns.'},
   flurry:    {name: 'Hundred Fists', mp: 7, kind: 'phys', mult: 1.3, twice: true, desc: 'A blur of blows that strikes twice.'},
@@ -5477,6 +5478,7 @@ const ST_EVOLVE = {
   heal:      ['Heal', 'Greater Heal', 'Sacred Light', 'Rebirth'],
   guard:     ['Guard Up', 'Iron Wall', 'Bastion', 'Unbreakable'],
   rally:     ['War Cry', 'Battle Roar', 'Warlord\'s Howl', 'Cry of the Ashborn'],
+  ward:      ['Arcane Shield', 'Aegis Veil', 'Sanctum Barrier', 'Wall of Eternity'],
   bonespear: ['Bone Spear', 'Marrow Lance', 'Ossuary Pike', 'Spear of the Last Grave'],
   wither:    ['Wither', 'Blight', 'Grave Rot', 'The Long Decay'],
   flurry:    ['Hundred Fists', 'Thousand Palms', 'Storm of Fists', 'Heaven-Shaking Palm'],
@@ -7371,7 +7373,7 @@ const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor
 const stRockAt = (x, y) => ST_ROCKS.find(r => r.x === Math.floor(x / ST_TILE) && r.y === Math.floor(y / ST_TILE));
 const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && stM(d.mount) && stM(d.mount).fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && stM(d.mount) && stM(d.mount).fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
-  const d = stData(); if (key !== 'world') d.riding = false; d.map = key; d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
+  const d = stData(); if (key !== 'world') d.riding = false; d.map = key; if (ST_PORTS[key]) { d.ports = d.ports || {}; d.ports[key] = true; } // remembered for Scrolls of Return d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
   if (key !== 'world') {
     if (!ST.dunC[key]) stDrawDungeonCanvas(key);
@@ -7509,7 +7511,7 @@ function stTalkBody(id) {
     } else if (d.ch < 4) stSay([['Maren the Pale', ['', 'The catacombs eat the careless. Light a shrine before you go down.', 'Cold kills slower than steel, but it kills. The crypt is past the peaks.', 'Go, then. If you fall, at least fall facing him.'][d.ch]]]);
     else stSay(ST_ACT_TALK[Math.min(9, d.ch)] || ST_ACT_TALK[9], () => { if (d.ch === 4) { d.ch = 5; stActSkip(); sfx('levelup'); stCallout('Act II: The Five Shards', '#ffd75e'); stSave(); } });
   } else if (id === 'merchant') stSay([['Pell the Merchant', `Coin is coin, even at the end of the world. Potions are ${stPrice(15)}, ethers ${stPrice(25)}.${stAlign() >= 3 ? ' A friend\'s price.' : stAlign() <= -3 ? ' Price goes up for your kind.' : ''} You have ${d.gold}. Don't die with it.`]], null,
-    [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('thornwake')], ['Steal a potion', () => stPickpocket('Pell the Merchant')], ['Leave', null]]);
+    [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Magic scrolls', () => stScrollShop('Pell the Merchant')], ['Trade goods', () => stTrade('thornwake')], ['Steal a potion', () => stPickpocket('Pell the Merchant')], ['Leave', null]]);
   else if (id === 'inn') stSay([['Innkeeper Bree', 'A bed, a bowl of something hot, and a locked door. 10 gold. You will wake. Probably.']], null,
     [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['Cook a meal', () => stCraft('meal')], ['No thanks', null]]);
   else if (id === 'lyra' || id === 'imra' || id === 'sol') stGuildDesk({lyra: 'Clerk Lyra', imra: 'Clerk Imra', sol: 'Archivist Sol'}[id]);
@@ -7556,7 +7558,7 @@ function stTalkBody(id) {
       [['I\'ll hunt it', () => { d.flags.corinQuest = true; stShift(1); }], ['Not my problem', () => stShift(-1)]]);
   }
   else if (id === 'sela') stSay([['Sela the Peddler', `Potions ${stPrice(15)}, ethers ${stPrice(25)}. Same as Pell, but I smile more. You have ${d.gold}.`]], null,
-    [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('ravenhollow')], ['Steal a potion', () => stPickpocket('Sela the Peddler')], ['Leave', null]]);
+    [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Magic scrolls', () => stScrollShop('The shopkeeper')], ['Trade goods', () => stTrade('ravenhollow')], ['Steal a potion', () => stPickpocket('Sela the Peddler')], ['Leave', null]]);
   else if (id === 'brann') {
     const w = d.weapon || 0, next = ST_WEAPONS[w + 1];
     stSay([['Brann the Smith', next ? `You're carrying ${ST_WEAPONS[w].name}. I can make you ${next.name} (+${next.atk} attack) for ${next.price} gold. You have ${d.gold}.` : 'That blade is the best I\'ll ever make. Don\'t waste it on wolves.']], null,
@@ -7680,7 +7682,7 @@ function stTalkBody(id) {
     else stSay([['Harbormaster Oona', 'Welcome to Port Halcyon. The Hollowing never crossed the sea. Here the sun still means something.'], ['Harbormaster Oona', 'But Mara the Corsair Queen holds the east isle. She takes our catch, and sometimes our children. Bring down her flag and the harbor will pay.']]);
   }
   else if (id === 'kesh') stSay([['Kesh the Trader', `Island goods! Potions ${stPrice(12)}, ethers ${stPrice(20)}. Cheaper than the mainland, because nobody here is dying.`]], null,
-    [[`Buy potion (${stPrice(12)})`, () => { if (d.gold >= stPrice(12)) { d.gold -= stPrice(12); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(20)})`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('isles')]].concat(d.rod ? [] : [[`Buy a fishing rod (${stPrice(20)} gold)`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.rod = true; sfx('pickup'); } }]], [['Steal a potion', () => stPickpocket('Kesh the Trader')], ['Leave', null]]));
+    [[`Buy potion (${stPrice(12)})`, () => { if (d.gold >= stPrice(12)) { d.gold -= stPrice(12); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(20)})`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.items.ether++; sfx('pickup'); } }], ['Magic scrolls', () => stScrollShop('The shopkeeper')], ['Trade goods', () => stTrade('isles')]].concat(d.rod ? [] : [[`Buy a fishing rod (${stPrice(20)} gold)`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.rod = true; sfx('pickup'); } }]], [['Steal a potion', () => stPickpocket('Kesh the Trader')], ['Leave', null]]));
   else if (id === 'liora') stSay([['Liora', 'I watched the last stranger walk into the Thornwood. I found his sword a week later. Prove you are worth following.']]);
 }
 function stHunters(dt) { // dungeon enemies wander home, and charge when they see you
@@ -8119,7 +8121,7 @@ function stCalloutDraw(dt) {
 }
 const SK_SHOT = {fireball: 'fire', frost: 'ice', venom: 'venom', drain: 'dark', rain: 'arrow', lightning: 'holy', bonespear: 'dark', thornlash: 'venom'};
 const SK_FX = {flash: 'afterimage', crush: 'hammer', bloodfeast: 'bite', fireball: 'explode', frost: 'shatter', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril', strike: 'heavyslash'};
-const SK_COLOR = {bonespear: '#e8e2d0', wither: '#8ac34a', flurry: '#ffd75e', thornlash: '#6be08a', quake: '#c9a26a', flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
+const SK_COLOR = {ward: '#8fd4ff', bonespear: '#e8e2d0', wither: '#8ac34a', flurry: '#ffd75e', thornlash: '#6be08a', quake: '#c9a26a', flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
 function stLog(t) { if (ST.battle) ST.battle.log = t; $('stLog').textContent = t; }
 const stSkCost = S => Math.round(S.mp * (1 + (stData().lv - 1) * .035)); // skills grow pricier with your mana pool
 const stDmg = (base, def) => Math.max(1, Math.round(base * (.9 + Math.random() * .2) - def * .5));
@@ -8155,6 +8157,7 @@ function stRenderBattle(picking) {
     btn(`Potion ×${d.items.potion} (+30% HP)`, () => stItem('potion'), !d.items.potion);
     btn(`Ether ×${d.items.ether} (+30% MP)`, () => stItem('ether'), !d.items.ether);
     for (const k in ST_MEALS) if (d.items[k]) btn(`${ST_MEALS[k].name} ×${d.items[k]} (${ST_MEALS[k].desc})`, () => stItem(k));
+    for (const k in ST_SCROLLS) if (d.items[k] && !ST_SCROLLS[k].field) btn(`📜 ${ST_SCROLLS[k].name} ×${d.items[k]}`, () => stReadScroll(k)).title = ST_SCROLLS[k].desc;
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else {
     btn('⚔ ' + (b.buffs.wolf ? 'Claw' : b.buffs.vamp ? 'Rend' : `${stSkName('attack')} ${'★'.repeat(stRank('attack'))}`), () => stPick(f => stPlayerHit(f, s.atk * stAtkMul(b), 'phys'))).title = 'Basic attack. Mastery: ' + stMasteryText('attack');
@@ -8221,8 +8224,8 @@ function stUseSkill(id) {
     stAnim('p', 'cast'); stEffect('pillar', 'p', '#fff3c9', CPOW); stEffect('sparkle', 'p', '#9fffb8', CPOW); if (b.ally) stEffect('sparkle', 'a', '#9fffb8'); stBurst('p', '#6be08a', 22); stNum('p', '+' + h, '#6be08a', true); sfx('shield'); stLog(`${nm} restores ${h} health.`); ST.sub = null; return setTimeout(stEndTurn, 450);
   }
   if (S.kind === 'buff') { stEffect({guard: 'dome', rally: 'warcry', wolf: 'moon', mist: 'bats', vamp: 'bats'}[S.buff] || 'aura', 'p', {guard: '#7fd1c7', rally: '#ff5a1f', wolf: '#cfd8e0', mist: '#c08a9a', vamp: '#c0102a'}[S.buff] || '#ffd75e', CPOW);
-    d.mp -= COST; b.buffs[S.buff] = S.buff === 'guard' || S.buff === 'mist' ? 2 : 3; if (S.buff === 'wolf') { stTransformFx('p', '#cfd8e0', 'THE BEAST AWAKENS'); stGrunt('boss', true, 'wolf'); }
-    if (S.buff === 'vamp') { stTransformFx('p', '#c0102a', 'BLOOD ASCENDANT'); stGrunt(stSex('p'), true, 'vamp'); } if (S.buff === 'mist') stEffect('cloud', 'p', '#c08a9a'); stAnim('p', 'cast'); stEffect('aura', 'p', S.buff === 'guard' ? '#7fd1c7' : '#ff5a1f'); stBurst('p', S.buff === 'guard' ? '#7fd1c7' : '#ff6a4d', 22); stNum('p', S.buff === 'guard' ? 'Defense up' : 'Attack up', '#ffd75e'); sfx('shield'); stLog(S.buff === 'guard' ? 'Your defense doubles!' : 'Your attack surges!'); ST.sub = null; return setTimeout(stEndTurn, 450); }
+    d.mp -= COST; b.buffs[S.buff] = S.buff === 'guard' || S.buff === 'mist' || S.buff === 'ward' ? 2 + (S.buff === 'ward' && stRank(id) >= 3 ? 1 : 0) : 3; if (S.buff === 'wolf') { stTransformFx('p', '#cfd8e0', 'THE BEAST AWAKENS'); stGrunt('boss', true, 'wolf'); }
+    if (S.buff === 'vamp') { stTransformFx('p', '#c0102a', 'BLOOD ASCENDANT'); stGrunt(stSex('p'), true, 'vamp'); } if (S.buff === 'mist') stEffect('cloud', 'p', '#c08a9a'); stAnim('p', 'cast'); stEffect('aura', 'p', S.buff === 'guard' ? '#7fd1c7' : '#ff5a1f'); stBurst('p', S.buff === 'guard' ? '#7fd1c7' : '#ff6a4d', 22); stNum('p', S.buff === 'guard' ? 'Defense up' : S.buff === 'ward' ? 'Shield up' : 'Attack up', '#ffd75e'); sfx('shield'); stLog(S.buff === 'guard' ? 'Your defense doubles!' : 'Your attack surges!'); ST.sub = null; return setTimeout(stEndTurn, 450); }
   if (S.all) {
     d.mp -= COST; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
     for (const f of b.foes) if (f.hp > 0) {
@@ -8235,6 +8238,48 @@ function stUseSkill(id) {
     if (S.burn) t.burn = 2; if (S.poison) t.poison = 3; if (S.slow && Math.random() < .5) { t.frozen = 1; stNum(t.id, 'Frozen', '#9fe6ff'); }
     if (S.drain) { d.hp = Math.min(s.hp, d.hp + Math.round(dm / 2)); stNum('p', '+' + Math.round(dm / 2), '#6be08a'); stBurst('p', '#b06bff', 10); }
   }, SK_COLOR[id]); });
+}
+const ST_SCROLLS = { // read in battle from Items, except Return which you read on the road
+  sc_return: {name: 'Scroll of Return', price: 40, field: true, desc: 'Teleport to any town or land you have reached.'},
+  sc_fire:   {name: 'Scroll of Flames', price: 35, desc: 'Fire hits every enemy and leaves them burning.'},
+  sc_ice:    {name: 'Scroll of the Ice Prison', price: 35, desc: 'Freezes one enemy solid for a turn and hurts it.'},
+  sc_storm:  {name: 'Scroll of Thunder', price: 45, desc: 'Calls down one huge lightning bolt.'},
+  sc_mend:   {name: 'Scroll of Mending', price: 40, desc: 'Heal half your health and close your wounds.'},
+  sc_ward:   {name: 'Scroll of Warding', price: 45, desc: 'A shield that blocks 75% of all damage for 2 turns.'},
+  sc_drain:  {name: 'Scroll of Siphoning', price: 40, desc: 'Steal life from one enemy, healing you for what you take.'},
+};
+const ST_TELE = () => { const d = stData(), out = [['Thornwake', 'world', 12, 11], ['Saltmere harbor', 'world', 36, 16]]; d.ports = d.ports || {};
+  for (const k in ST_PORTS) if (k !== 'world' && d.ports[k]) out.push([ST_PORTS[k].name.replace(/^the /, 'The '), k, ST_PORTS[k].at[0], ST_PORTS[k].at[1]]);
+  if (d.shrine && d.shrine.map !== 'world' && (d.ports[d.shrine.map] || !ST_DUNGEONS[d.shrine.map] || !ST_DUNGEONS[d.shrine.map].land)) out.push(['Your last shrine', d.shrine.map, Math.floor(d.shrine.x / ST_TILE), Math.floor(d.shrine.y / ST_TILE)]); return out; };
+function stTeleport() {
+  const d = stData(); if (!d.items.sc_return) return;
+  if (ST.battle) return;
+  const m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = ''; m.appendChild(el('h3', '', '📜 Scroll of Return')); m.appendChild(el('p', '', `Where do you want to go? You have ${d.items.sc_return} scroll${d.items.sc_return > 1 ? 's' : ''}.`));
+  const row = el('div', 'row');
+  for (const [name, map, x, y] of ST_TELE()) { const bt = el('button', '', name); bt.addEventListener('click', () => { d.items.sc_return--; stCloseMenu(); sfx('blink'); stEnterMap(map, x, y); stCallout(`Teleported to ${name}`, '#8fd4ff'); stSave(); }); row.appendChild(bt); }
+  const c = el('button', '', 'Cancel'); c.addEventListener('click', stCloseMenu); row.appendChild(c); m.appendChild(row);
+}
+function stScrollShop(who) { // every shopkeeper keeps a few scrolls under the counter
+  const d = stData(), m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  m.appendChild(el('h3', '', '📜 Magic scrolls')); m.appendChild(el('p', '', `${who}: "One use each, and worth every coin." You have ${d.gold} gold.`));
+  const tbl = el('div', 'trade comp');
+  for (const k in ST_SCROLLS) { const S = ST_SCROLLS[k], pr = stPrice(S.price), act = el('span', 'tbtn'), x = el('button', '', `Buy (${pr})`); x.disabled = d.gold < pr;
+    x.addEventListener('click', () => { if (d.gold < pr) return; d.gold -= pr; d.items[k] = (d.items[k] || 0) + 1; sfx('pickup'); stScrollShop(who); }); act.appendChild(x);
+    tbl.append(el('span', '', `${S.name}${d.items[k] ? ` ×${d.items[k]}` : ''}`), el('span', 'hint', S.desc), act); }
+  m.appendChild(tbl); const row = el('div', 'row'), c = el('button', '', 'Done'); c.addEventListener('click', stCloseMenu); row.appendChild(c); m.appendChild(row); stSave();
+}
+function stReadScroll(k, f) {
+  const d = stData(), s = stStats(), b = ST.battle, S = ST_SCROLLS[k]; if (!b || !d.items[k]) return;
+  if ((k === 'sc_ice' || k === 'sc_storm' || k === 'sc_drain') && !f) return stPick(t => stReadScroll(k, t));
+  d.items[k]--; ST.sub = null; const P = Math.max(s.mag, s.atk) * (1 + d.lv * .01), alive = b.foes.filter(x => x.hp > 0), hit = (t, mul, col) => { const dm = Math.min(t.hp, stDmg(P * mul, t.def * .5)); t.hp -= dm; t.flash = .25; if (t.hp <= 0) t.deadT = 0; stAnim(t.id, 'hurt'); stNum(t.id, dm, col, true); return dm; };
+  stAnim('p', 'cast'); stEffect('runes', 'p', '#ffe9a8'); stCallout(S.name, '#ffe9a8'); sfx('ult');
+  if (k === 'sc_fire') { let tot = 0; for (const t of alive) { stEffect('explode', t.id, '#ff7a2a'); tot += hit(t, 1.4, '#ff9a4a'); if (t.hp > 0) t.burn = 3; } sfx('flame'); stLog(`The scroll bursts into flame: ${tot} damage to every enemy.`); }
+  else if (k === 'sc_ice') { stEffect('shatter', f.id, '#9fe6ff'); const dm = hit(f, 1.3, '#9fe6ff'); if (f.hp > 0) { f.frozen = 1; stNum(f.id, 'Frozen', '#9fe6ff'); } sfx('frost'); stLog(`Ice seals ${f.name} in a prison of frost for ${dm}.`); }
+  else if (k === 'sc_storm') { stEffect('zap', f.id, '#c8b8ff', 1.6); const dm = hit(f, 2.8, '#c8b8ff'); sfx('zap'); STFX.slow = .2; stLog(`Thunder splits the sky and strikes ${f.name} for ${dm}!`); }
+  else if (k === 'sc_drain') { stEffect('tendril', f.id, '#c0102a'); const dm = hit(f, 1.5, '#ff6a8a'); d.hp = Math.min(s.hp, d.hp + dm); stNum('p', '+' + dm, '#6be08a'); sfx('drain'); stLog(`You siphon ${dm} life from ${f.name}.`); }
+  else if (k === 'sc_mend') { const h = Math.round(s.hp * .5); d.hp = Math.min(s.hp, d.hp + h); d.wounds = null; stEffect('sparkle', 'p', '#9fffb8'); stNum('p', '+' + h, '#6be08a', true); stLog(`Golden words knit your wounds shut. +${h} health.`); }
+  else if (k === 'sc_ward') { b.buffs.ward = 2; stEffect('dome', 'p', '#8fd4ff', 1.3); stNum('p', 'Shield up', '#8fd4ff'); sfx('shield'); stLog('A shield of light surrounds you for 2 turns.'); }
+  stRenderBattle(); setTimeout(stEndTurn, 600);
 }
 function stItem(k) {
   const d = stData(), s = stStats(); if (!d.items[k]) return;
@@ -8287,7 +8332,7 @@ function stEnemyPhase() {
   const next = () => {
     if (!ST.battle || b.over) return;
     if (i >= alive.length) {
-      for (const k of ['guard', 'rally', 'wolf', 'mist', 'vamp', 'rage', 'stone']) if (b.buffs[k]) b.buffs[k]--;
+      for (const k of ['guard', 'rally', 'wolf', 'mist', 'vamp', 'rage', 'stone', 'ward']) if (b.buffs[k]) { b.buffs[k]--; if (k === 'ward' && !b.buffs.ward) stLog('Your shield fades.'); }
       if (d.race === 'scalekin' && d.hp > 0) { const rg = Math.round(s.hp * .04); if (d.hp < s.hp) { d.hp = Math.min(s.hp, d.hp + rg); stNum('p', '+' + rg, '#9fffb8'); } }
       if (d.race === 'stonekin' && d.wounds && d.wounds.bleed) d.wounds.bleed = 0;
       for (const x of b.foes) if (x.guard) x.guard--;
@@ -8309,8 +8354,8 @@ function stEnemyPhase() {
         else {
           for (const v of extra === 'all' ? ['p', 'a'] : [b.ally && b.ally.hp > 0 && Math.random() < .3 ? 'a' : 'p']) {
             if (v === 'a' && !(b.ally && b.ally.hp > 0)) continue;
-            if (v === 'p' ? Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade() - .03) : Math.random() < .1) { stDodgeFx(v, v === 'p' ? d.name : 'Liora'); continue; }
-            let dm = stDmg(f.atk * mult, v === 'p' ? s.def * (b.buffs.guard ? 2 : 1) : 6); if (v === 'p' && b.defending) dm = Math.round(dm / 2);
+            if (v === 'p' ? Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade() - .03) : Math.random() < .1) { stDodgeFx(v, v === 'p' ? d.name : b.ally.name); continue; }
+            let dm = stDmg(f.atk * mult, v === 'p' ? s.def * (b.buffs.guard ? 2 : 1) : 6); if (v === 'p' && b.defending) dm = Math.round(dm / 2); if (v === 'p' && b.buffs.ward) dm = Math.round(dm * .25); if (v === 'p' && b.buffs.stone) dm = 0;
             if (v === 'p') { d.hp -= dm; stRageAdd(dm / s.hp * 140); } else b.ally.hp -= dm;
             stEffect(fx, v, col); stAnim(v, 'hurt', .4); stNum(v, dm, '#ff7a66', true); stGore(v, 14, true);
             if (v === 'p' && Math.random() < .2) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
@@ -8330,7 +8375,7 @@ function stEnemyPhase() {
     if (hitAlly ? Math.random() < .1 : Math.random() < stDodgeChance(s.spd, f.spd, stPlayerEvade())) { stDodgeFx(victim, hitAlly ? b.ally.name : d.name); stRenderBattle(); return setTimeout(next, 600); }
     if (hitAlly) { const dm = stDmg(base, 6); b.ally.hp -= dm; stNum('a', dm, '#ff7a66', big); stLog(`${f.name} ${big ? 'unleashes a fierce attack on' : 'hits'} ${b.ally.name} for ${dm}.`); }
     else {
-      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); if (b.buffs.stone) { dm = 0; stEffect('aura', 'p', '#c9ced6'); } d.hp -= dm; stRageAdd(dm / s.hp * 140); stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
+      const fcrit = Math.random() < (big ? .3 : .08); let dm = stDmg(base * (fcrit ? 1.7 : 1), s.def * (b.buffs.guard ? 2 : 1)); if (b.defending) dm = Math.round(dm / 2); if (b.buffs.ward && dm > 0) { dm = Math.round(dm * .25); stEffect('dome', 'p', '#8fd4ff'); } if (b.buffs.stone) { dm = 0; stEffect('aura', 'p', '#c9ced6'); } d.hp -= dm; stRageAdd(dm / s.hp * 140); stNum('p', fcrit ? dm + '!' : dm, '#ff7a66', big || fcrit);
       stLog(`${f.name} ${fcrit ? 'lands a brutal critical! You take' : big ? 'unleashes a fierce attack! You take' : 'hits you for'} ${dm}${big || fcrit ? ' damage' : ''}.`);
       if (d.hp <= 0 && fcrit) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore('p', 50, true); STFX.slow = .7; }
       else if (fcrit || (big && Math.random() < .4)) { const u = {w: d.wounds || {}, color: d.color}; stWound('p', u, 'phys', true, 0, false); d.wounds = u.w; }
@@ -8480,6 +8525,7 @@ function stOpenMenu() {
   btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
   if (!stData().race) btn('🧬 Choose race', () => stChooseRace());
+  if (stData().items.sc_return) btn(`📜 Scroll of Return ×${stData().items.sc_return}`, () => stTeleport());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
@@ -8609,6 +8655,8 @@ function stDrawBattle(now, dt) {
   if (b.buffs.wolf) { const wu = {x: px + pox, y: py + poy + bob, face: 0, walk: now * 20, _lw: 0, hitFlash: 0, atkT: atkP ? 1 : 0, atkCd: 1, id: 30, team: 0, level: 12, r: 34, fur: '#6a5a4a'}; ctx.save(); ctx.translate(wu.x, wu.y); ctx.scale(k * 1.5, k * 1.5); ctx.translate(-wu.x, -wu.y); drawWolf(ctx, wu, now); ctx.restore(); }
   else if (b.buffs.mist) { ctx.globalAlpha = .35 + Math.sin(now * 6) * .1; drawCharacterScaled(pu, now, k * 1.3); ctx.globalAlpha = 1; if (Math.random() < .5) STFX.parts.push({x: px + rand(-30, 30), y: py - rand(10, 90), vx: rand(-20, 20), vy: -rand(10, 40), t: 0, life: .8, color: 'rgba(200,140,160,.4)', r: rand(6, 12)}); }
   else drawCharacterScaled(pu, now, k * 1.3);
+  if (b.buffs.ward) { const R = 64 * k + Math.sin(now * 4) * 3 * k, cy = py - 44 * k; ctx.save(); const g = ctx.createRadialGradient(px, cy, R * .5, px, cy, R); g.addColorStop(0, 'rgba(143,212,255,0)'); g.addColorStop(1, 'rgba(143,212,255,.35)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, cy, R, 0, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(200,236,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + now * .6; ctx.lineTo(px + Math.cos(a) * R, cy + Math.sin(a) * R); } ctx.closePath(); ctx.stroke(); ctx.restore(); } // the Arcane Shield
   if (d.hr && Math.random() < .35) STFX.parts.push({x: px + rand(-22, 22), y: py - rand(0, 80), vx: 0, vy: -rand(40, 90), t: 0, life: .6, color: 'rgba(255,250,230,.55)', r: rand(1.5, 3)}); // the Restricted body steams with power
   stWoundDraw(d.wounds, px + pox, py + poy + bob, k * 1.3, 1, true, now);
   (b.coop || []).forEach((c, i) => { const cx = px - (130 + i * 60) * k, cy = py - (26 - i * 50) * k; STFX.pos[c.id] = [cx, cy]; const [ox, oy] = stFxOffset(c.id), cu = stUnit(c.look, c.color, cx + ox, cy + oy + bob, 0, 0, 300 + i, c.lv); if (STFX.anims.some(a => a.who === c.id && a.kind === 'lunge')) cu.atkT = 1; drawCharacterScaled(cu, now, k * 1.15);
