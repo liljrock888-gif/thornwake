@@ -362,6 +362,9 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stMenu .rwList{display:flex;flex-direction:column;gap:6px;margin:10px 0}#stMenu .rw{display:grid;grid-template-columns:34px 1fr;grid-template-rows:auto auto;align-items:center;text-align:left;padding:6px 10px;border-radius:10px;background:rgba(255,215,94,.08);border:1px solid rgba(255,215,94,.25)}
 #stMenu .rwIc{grid-row:1/3;font-size:20px;color:#ffd75e;text-align:center}#stMenu .rw small{color:#c8b89a}#stMenu button.primary{background:linear-gradient(#f5cf63,#c8951e);color:#1a1206;border-color:#f5cf63}
 #stMenu .tabs{display:flex;gap:4px;margin:-4px 0 8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}#stMenu .tabs button{padding:6px 12px;border-radius:999px;background:transparent}#stMenu .tabs button.on{background:var(--gold);color:#1a1206;border-color:var(--gold)}
+.outfit{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}.outfit .orow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.outfit .olab{min-width:72px;font-size:13px;color:var(--muted)}.outfit .oswatches{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.outfit select{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font:inherit}.outfit .sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,0,0,.5);cursor:pointer;padding:0}.outfit .sw[aria-pressed=true]{outline:2px solid var(--gold);outline-offset:2px}.outfit .chip{padding:3px 9px;font-size:12px}
+#stMenu .wardCv{display:block;margin:0 auto;width:160px;height:160px}
 #stMenu h3{margin:4px 0;font-family:var(--display);font-weight:400;color:var(--gold)}
 #stMenu .row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 #stPad{position:absolute;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px}
@@ -564,6 +567,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
         <p class="status">Class</p><div class="row" id="crClass"></div>
         <p class="status">Color</p><div class="row" id="crColor"></div>
         <p class="status">Voice</p><div class="row" id="crVoice"></div>
+        <p class="status">Outfit</p><div class="outfit" id="crOutfit"></div>
         <p class="status" id="crSkillNote">Pick 3 abilities</p><div class="row" id="crSkills"></div>
         <div class="row"><button class="mbtn primary" id="crStart">Begin your story</button><button class="mbtn small back" id="crBack">Back</button></div>
       </section>
@@ -2496,7 +2500,7 @@ function animState(u, stride) {
 // Heroes grow 1.5% per level and pick up a new detail at every level; levels 6, 11 and 16 are full evolutions.
 function drawCharacter(c, u, now) {
   if (LOOKS[u.look].monster) return drawMonsterHero(c, u, now, LOOKS[u.look]);
-  const L = LOOKS[u.look], A = animState(u, 13), lv = u.level || 1, form = formOf(lv);
+  const O = u.outfit, L = O ? Object.assign({}, LOOKS[u.look], O.hat ? {hat: O.hat} : {}, O.body ? {body: O.body} : {}, O.skin ? {skin: O.skin} : {}, O.cape ? {cape: O.cape === 'none' ? null : O.cape} : {}) : LOOKS[u.look], A = animState(u, 13), lv = u.level || 1, form = formOf(lv);
   const metal = form >= 3 ? '#e8c25a' : form >= 2 ? '#d7dde6' : '#9aa3ae';
   const sc = 1 + (lv - 1) * .015;
   const bob = A.moving ? Math.abs(Math.cos(A.ph)) * 2.5 : Math.sin(now * 2 + u.id) * .8;
@@ -2536,7 +2540,7 @@ function drawCharacter(c, u, now) {
     c.quadraticCurveTo(-2, -20, -14 + sway, -4); c.lineTo(-24 + sway, -8); c.quadraticCurveTo(-16, -30, -9, -46 - bob); c.closePath(); c.fill();
   }
   if (!L.cape) { // a scarf that trails behind and ripples
-    c.strokeStyle = shade(u.color, .12); c.lineCap = 'round';
+    c.strokeStyle = O && O.scarf && O.scarf !== 'none' ? O.scarf : shade(u.color, .12); c.lineCap = 'round'; if (O && O.scarf === 'none') c.strokeStyle = 'rgba(0,0,0,0)';
     let px = -2, py = -47 - bob;
     for (let i = 1; i <= 5; i++) {
       const nx = -2 - i * (5 + flow * 1.6), ny = -47 - bob + i * (A.moving ? .8 : 2.6) + Math.sin(now * (4 + flow * 3) - i * 1.1 + u.id) * (.8 + i * .7) * flow;
@@ -2551,7 +2555,7 @@ function drawCharacter(c, u, now) {
   c.translate(0, -bob);
   const breath = A.moving ? 0 : Math.sin(now * 2.2 + u.id) * .03; c.translate(0, -16); c.scale(1 - breath * .4, 1 + breath); c.translate(0, 16); // breathing
   const cloakEnd = lv >= 3 ? -2 : -7, flap = Math.sin(now * (3 + flow * 3) + u.id) * 1.6 * flow - (A.moving ? 5 : wind * 3), flap2 = Math.sin(now * (3 + flow * 3) + u.id + 1.7) * 1.2 * flow;
-  c.fillStyle = shade(u.color, -.45); // the cloak hem ripples
+  c.fillStyle = O && O.cloak ? O.cloak : shade(u.color, -.45); // the cloak hem ripples
   c.beginPath(); c.moveTo(-9, -46); c.lineTo(6, -46); c.lineTo(2 - A.sw * 2, cloakEnd - 3 + flap2 * .5);
   c.quadraticCurveTo(-7 - A.sw * 2 + flap * .5, cloakEnd + 2 + flap2, -18 - A.sw * 3 + flap, cloakEnd - flap2 * .6); c.closePath(); c.fill();
   if (lv >= 3) { c.strokeStyle = form >= 3 ? '#e8c25a' : u.color; c.lineWidth = 1.5; c.beginPath(); c.moveTo(2 - A.sw * 2, cloakEnd - 3 + flap2 * .5); c.quadraticCurveTo(-7 - A.sw * 2 + flap * .5, cloakEnd + 2 + flap2, -18 - A.sw * 3 + flap, cloakEnd - flap2 * .6); c.stroke(); }
@@ -6699,7 +6703,7 @@ const stPartyOf = p => p.presence.sw.pt;
 const stPartyMembers = () => SW.party ? stOthers().filter(p => stPartyOf(p) === SW.party) : [];
 function stNetPush(force) { // share where you are and what you look like, a few times a second
   if (!SW.room) return; const d = stData(), s = stStats(), M = d.riding && stM(d.mount);
-  const sw = {n: stTitledName(), k: ST_CLASSES[d.cls].look, c: d.color, lv: d.lv, m: d.map, x: Math.round(d.x), y: Math.round(d.y), f: (ST.face || 0) > 1 ? 1 : 0, mv: ST.moving ? 1 : 0, pt: SW.party, inv: SW.inv,
+  const sw = {n: stTitledName(), k: ST_CLASSES[d.cls].look, c: d.color, o: d.outfit || null, lv: d.lv, m: d.map, x: Math.round(d.x), y: Math.round(d.y), f: (ST.face || 0) > 1 ? 1 : 0, mv: ST.moving ? 1 : 0, pt: SW.party, inv: SW.inv,
     r: M ? {k: M.kind, c: M.color, m: M.mane, f: M.fly ? 1 : 0, g: M.glow || 0} : 0, b: ST.mode === 'battle' ? 1 : 0, at: Math.round(s.atk), hp: s.hp, g: d.guild ? d.guild.rank : ''};
   const sig = JSON.stringify(sw); if (!force && sig === SW.sig && performance.now() - SW.last < 2000) return; SW.sig = sig; SW.last = performance.now();
   SW.room.presence({sw, ch: SW.myChat}).catch(() => {});
@@ -6722,7 +6726,7 @@ function stDrawOthers(now) { // other players on this map, with name tags (party
   const d = stData();
   for (const p of stOthers()) { const sw = p.presence.sw; if (sw.m !== d.map) continue; const v = SW.vis[p.peer]; if (!v) continue; const party = SW.party && sw.pt === SW.party;
     if (sw.r) { const mid = 'peer:' + p.peer; SW.mounts[mid] = {name: '', kind: sw.r.k, color: sw.r.c, mane: sw.r.m, fly: !!sw.r.f, glow: sw.r.g || null, speed: 1}; ctx.save(); ctx.translate(v.x, v.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-v.x, -(v.y + 10)); stDrawMount(ctx, mid, v.x, v.y + 10, sw.f ? Math.PI : 0, v.w, now, !!sw.mv); ctx.restore(); }
-    stDrawCh(stUnit(sw.k, sw.c, v.x, v.y - (sw.r ? 21 + (sw.r.f ? 21 : 0) : 0), sw.f ? Math.PI : 0, sw.mv ? v.w : 0, 200 + (p.peer.charCodeAt(0) || 0), sw.lv), now);
+    stDrawCh(Object.assign(stUnit(sw.k, sw.c, v.x, v.y - (sw.r ? 21 + (sw.r.f ? 21 : 0) : 0), sw.f ? Math.PI : 0, sw.mv ? v.w : 0, 200 + (p.peer.charCodeAt(0) || 0), sw.lv), {outfit: sw.o && typeof sw.o === 'object' ? sw.o : null}), now);
     ctx.textAlign = 'center'; ctx.font = '700 13px "Barlow Semi Condensed", sans-serif'; ctx.fillStyle = party ? '#7fe08a' : '#8fd4ff'; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = 3;
     const tag = `${sw.n} · Lv ${sw.lv}${sw.g ? ' · ' + sw.g : ''}${sw.b ? ' ⚔' : ''}`; ctx.strokeText(tag, v.x, v.y - 60); ctx.fillText(tag, v.x, v.y - 60);
     const bub = SW.bubble && SW.bubble[p.peer]; if (bub && performance.now() - bub.at < 6000) { ctx.font = '600 12px "Barlow Semi Condensed", sans-serif'; const w = Math.min(220, ctx.measureText(bub.t).width + 16); ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fillRect(v.x - w / 2, v.y - 96, w, 22); ctx.fillStyle = '#1a1206'; ctx.fillText(bub.t.length > 34 ? bub.t.slice(0, 33) + '…' : bub.t, v.x, v.y - 81); }
@@ -6802,7 +6806,31 @@ function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // draw
 }
 
 // ---- story menu and character creator
-let crSel = {cls: 'warrior', color: ST_COLORS[0], skills: [], voice: 'm'};
+let crSel = {cls: 'warrior', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {}};
+const ST_HATS = [['', 'Class default'], ['helm', 'Knight\'s helm'], ['heavyhelm', 'Great helm'], ['winghelm', 'Winged helm'], ['visor', 'Visor'], ['crest', 'Crested helm'], ['hood', 'Hood'], ['cowl', 'Cowl'], ['ninja', 'Shinobi wrap'], ['mask', 'Mask'],
+  ['pointy', 'Wizard hat'], ['brim', 'Witch\'s brim'], ['widehat', 'Wide hat'], ['tricorn', 'Tricorn'], ['boonie', 'Ranger\'s cap'], ['helmet', 'Soldier\'s helmet'], ['crown', 'Crown'], ['feathers', 'Feathers'], ['horns', 'Horns'],
+  ['longhair', 'Long hair'], ['twintails', 'Twin tails'], ['topknot', 'Topknot'], ['spiky', 'Spiky hair'], ['scruffy', 'Scruffy hair']];
+const ST_CLOTH = ['#7d8a9b', '#5d4392', '#3f5a2e', '#6a3f2a', '#8a2a2a', '#2a4a6a', '#c9a24a', '#2a2a2a', '#e8e2d0', '#4a7a8a', '#7a3a6a', '#b85a2a'];
+const ST_SKINS = ['#f1c9a5', '#e8b894', '#d9a07a', '#c98d6a', '#8a5a3a', '#5a3a2a', '#d7e8c8'];
+function stOutfitUI(box, O, onChange) { // headwear, tunic, cloak, cape, scarf and skin
+  box.innerHTML = ''; const set = (k, v) => { if (v === '' || v == null) delete O[k]; else O[k] = v; onChange(); };
+  const sel = el('select'); sel.setAttribute('aria-label', 'Headwear'); for (const [v, n] of ST_HATS) { const o = el('option', '', n); o.value = v; if ((O.hat || '') === v) o.selected = true; sel.appendChild(o); }
+  sel.addEventListener('change', () => set('hat', sel.value)); const hr = el('div', 'orow'); hr.append(el('span', 'olab', 'Headwear'), sel); box.appendChild(hr);
+  const row = (label, key, list, extra) => { const r = el('div', 'orow'); r.appendChild(el('span', 'olab', label)); const w = el('div', 'oswatches');
+    for (const [v, n] of extra) { const b = el('button', 'chip' + ((O[key] || '') === v ? ' sel' : ''), n); b.addEventListener('click', () => { set(key, v); stOutfitUI(box, O, onChange); }); w.appendChild(b); }
+    for (const c of list) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-label', `${label} ${c}`); b.setAttribute('aria-pressed', O[key] === c); b.addEventListener('click', () => { set(key, c); stOutfitUI(box, O, onChange); }); w.appendChild(b); }
+    r.appendChild(w); box.appendChild(r); };
+  row('Tunic', 'body', ST_CLOTH, [['', 'Default']]); row('Cloak', 'cloak', ST_CLOTH, [['', 'Default']]); row('Cape', 'cape', ST_CLOTH, [['', 'Default'], ['none', 'None']]);
+  row('Scarf', 'scarf', ST_CLOTH, [['', 'Default'], ['none', 'None']]); row('Skin', 'skin', ST_SKINS, [['', 'Default']]);
+}
+function stWardrobe() { // change your clothes any time, free
+  const d = stData(), m = $('stMenu'); d.outfit = d.outfit || {}; ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  m.appendChild(el('h3', '', '👘 Wardrobe')); const cv = el('canvas'); cv.width = 200; cv.height = 200; cv.className = 'wardCv'; m.appendChild(cv);
+  const draw = () => { const g = cv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 200, 200); g.setTransform(1.35, 0, 0, 1.35, 100, 180); drawCharacter(g, {look: ST_CLASSES[d.cls].look, color: d.color, outfit: d.outfit, team: 0, level: d.lv, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, performance.now() / 1000); };
+  const box = el('div', 'outfit'); m.appendChild(box); stOutfitUI(box, d.outfit, () => { draw(); stSave(); stNetPush && stNetPush(true); }); draw();
+  const anim = setInterval(() => { if (m.hidden || !m.contains(cv)) return clearInterval(anim); draw(); }, 80);
+  const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row);
+}
 function openStoryMenu() {
   const d = stData();
   $('stContinue').hidden = !d;
@@ -6814,6 +6842,7 @@ function renderCreator() {
   for (const id in ST_CLASSES) { const b = el('button', 'chip' + (crSel.cls === id ? ' sel' : ''), ST_CLASSES[id].name); b.addEventListener('click', () => { crSel.cls = id; crSel.skills = []; renderCreator(); }); cl.appendChild(b); }
   const co = $('crColor'); co.innerHTML = '';
   for (const c of ST_COLORS) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-pressed', c === crSel.color); b.setAttribute('aria-label', 'Color ' + c); b.addEventListener('click', () => { crSel.color = c; renderCreator(); }); co.appendChild(b); }
+  if (!crSel.outfitBuilt) { crSel.outfitBuilt = true; stOutfitUI($('crOutfit'), crSel.outfit, () => { crSel.outfitBuilt = true; renderCreator(); }); }
   const vo = $('crVoice'); vo.innerHTML = '';
   for (const [k, label] of [['m', 'Male voice'], ['f', 'Female voice']]) { const b = el('button', 'chip' + (crSel.voice === k ? ' sel' : ''), label); b.addEventListener('click', () => { crSel.voice = k; renderCreator(); stPreviewVoice(k); }); vo.appendChild(b); }
   const hear = el('button', 'chip', 'Hear it ▶'); hear.addEventListener('click', () => stPreviewVoice(crSel.voice)); vo.appendChild(hear);
@@ -6829,7 +6858,7 @@ function renderCreator() {
   $('crStart').disabled = crSel.skills.length !== 3;
   const c = $('crCv'), g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
   g.setTransform(2.4, 0, 0, 2.4, c.width / 2, c.height * .85);
-  drawCharacter(g, {look: ST_CLASSES[crSel.cls].look, color: crSel.color, team: 0, level: 3, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, 0);
+  drawCharacter(g, {look: ST_CLASSES[crSel.cls].look, color: crSel.color, outfit: crSel.outfit, team: 0, level: 3, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, 0);
 }
 function stPreviewVoice(sex) { // speaks with the chosen voice, before a story exists
   musicStart(); if (!window.speechSynthesis) return;
@@ -6840,12 +6869,12 @@ $('stBack').addEventListener('click', () => show('scr-main'));
 $('stContinue').addEventListener('click', () => startStory());
 $('stNew').addEventListener('click', () => {
   if (stData() && !confirm('Start a new story? Your current story progress will be replaced.')) return;
-  crSel = {cls: 'warrior', color: ST_COLORS[0], skills: [], voice: 'm'}; $('crName').value = ''; renderCreator(); show('scr-create');
+  crSel = {cls: 'warrior', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {}}; $('crName').value = ''; renderCreator(); show('scr-create');
 });
 $('crBack').addEventListener('click', openStoryMenu);
 $('crStart').addEventListener('click', () => {
   const name = ($('crName').value.trim() || 'Wanderer').slice(0, 14), c = ST_CLASSES[crSel.cls];
-  PROF.story = {name, cls: crSel.cls, color: crSel.color, voice: crSel.voice, skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
+  PROF.story = {name, cls: crSel.cls, color: crSel.color, voice: crSel.voice, outfit: Object.assign({}, crSel.outfit), skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
     items: {potion: 3, ether: 1}, x: 11 * ST_TILE, y: 11 * ST_TILE + 32, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false, tut: 1,
     map: 'world', shrine: {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64}, lost: null};
   stSave(); startStory(true);
@@ -7584,7 +7613,7 @@ function stAnim(who, kind = 'lunge', dur = .32) {
 }
 function stNum(who, text, color = '#fff3c9', big, dy = 0) { const [x, y] = stPos(who); STFX.nums.push({x: x + rand(-14, 14), y: y - 90 - dy, text: String(text), color, t: 0, big}); }
 function stBurst(who, color, n = 14, spread = 160) { const [x, y] = stPos(who); for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = rand(40, spread); STFX.parts.push({x, y: y - 50, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, t: 0, life: rand(.35, .7), color, r: rand(2, 5)}); } }
-function stShot(from, to, color, size = 10, onHit) { STFX.shots.push({from, to, t: 0, dur: .32, color, size, onHit}); }
+function stShot(from, to, color, size = 10, onHit, style = ST.nextShot) { STFX.shots.push({from, to, t: 0, dur: style === 'arrow' ? .28 : style === 'ice' ? .26 : .36, color, size, onHit, style}); }
 function stFxOffset(who) { // lunges toward the other side and back, hurt shakes
   let ox = 0, oy = 0;
   for (const a of STFX.anims) if (a.who === who) {
@@ -7628,9 +7657,27 @@ function stFxDraw(dt) {
   for (const a of STFX.anims) a.t += dt; STFX.anims = STFX.anims.filter(a => a.t < a.dur);
   for (const sh of STFX.shots) {
     sh.t += dt; const k = Math.min(1, sh.t / sh.dur), [x0, y0] = stPos(sh.from), [x1, y1] = stPos(sh.to);
-    const x = x0 + (x1 - x0) * k, y = (y0 - 60) + (y1 - y0) * k - Math.sin(Math.PI * k) * 40;
-    ctx.fillStyle = sh.color; ctx.shadowColor = sh.color; ctx.shadowBlur = 20; ctx.beginPath(); ctx.arc(x, y, sh.size, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
-    STFX.parts.push({x, y, vx: rand(-20, 20), vy: rand(-20, 20), t: 0, life: .25, color: sh.color, r: sh.size * .5});
+    const arc = sh.style === 'arrow' ? 70 : sh.style === 'ice' ? 10 : 40, x = x0 + (x1 - x0) * k, y = (y0 - 60) + (y1 - y0) * k - Math.sin(Math.PI * k) * arc;
+    const nx = x0 + (x1 - x0) * Math.min(1, k + .05), ny = (y0 - 60) + (y1 - y0) * Math.min(1, k + .05) - Math.sin(Math.PI * Math.min(1, k + .05)) * arc, ang = Math.atan2(ny - y, nx - x), S = sh.size;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.shadowColor = sh.color; ctx.shadowBlur = 22;
+    if (sh.style === 'fire') { // a roaring fireball with a flame tail
+      const g = ctx.createRadialGradient(0, 0, 1, 0, 0, S * 1.8); g.addColorStop(0, '#fff6d0'); g.addColorStop(.35, '#ffb33a'); g.addColorStop(1, 'rgba(255,60,20,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, S * 1.8, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,120,30,.7)'; ctx.beginPath(); ctx.moveTo(S * .6, -S * .8); ctx.quadraticCurveTo(-S * 3, -S * .2 + Math.sin(sh.t * 40) * 3, -S * 4.2, 0); ctx.quadraticCurveTo(-S * 3, S * .2, S * .6, S * .8); ctx.fill();
+      for (let i = 0; i < 3; i++) STFX.parts.push({x: x - Math.cos(ang) * S, y: y - Math.sin(ang) * S, vx: rand(-40, 40), vy: rand(-90, -20), t: 0, life: rand(.25, .5), color: Math.random() < .5 ? '#ff7a2a' : '#ffd75e', r: rand(2, 4.5)});
+    } else if (sh.style === 'ice') { // a spinning spear of ice
+      ctx.fillStyle = '#e8f8ff'; ctx.beginPath(); ctx.moveTo(S * 2.6, 0); ctx.lineTo(-S * 1.6, -S * .6); ctx.lineTo(-S * 1.1, 0); ctx.lineTo(-S * 1.6, S * .6); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = sh.color; ctx.lineWidth = 2; ctx.stroke(); STFX.parts.push({x, y, vx: rand(-30, 30), vy: rand(-30, 30), t: 0, life: .35, color: '#cfefff', r: rand(1.5, 3)});
+    } else if (sh.style === 'venom') { // a dripping green droplet
+      ctx.fillStyle = '#9cff3a'; ctx.beginPath(); ctx.moveTo(S * 1.6, 0); ctx.quadraticCurveTo(0, -S, -S, 0); ctx.quadraticCurveTo(0, S, S * 1.6, 0); ctx.fill(); if (Math.random() < .6) STFX.parts.push({x, y, vx: rand(-10, 10), vy: rand(20, 60), t: 0, life: .4, color: '#5aaa1a', r: rand(1.5, 3)});
+    } else if (sh.style === 'arrow') { // a fletched arrow
+      ctx.shadowBlur = 0; ctx.strokeStyle = '#d8c8a0'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(12, 0); ctx.stroke(); ctx.fillStyle = '#e8e8f0'; ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(10, -4); ctx.lineTo(10, 4); ctx.fill(); ctx.fillStyle = sh.color; ctx.fillRect(-18, -4, 6, 3); ctx.fillRect(-18, 1, 6, 3);
+    } else if (sh.style === 'dark') { // a dark orb wrapped in a spiral
+      ctx.fillStyle = '#1a0a2a'; ctx.beginPath(); ctx.arc(0, 0, S, 0, 7); ctx.fill(); ctx.strokeStyle = sh.color; ctx.lineWidth = 2.5; for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.arc(0, 0, S * 1.5, sh.t * 18 + i * Math.PI, sh.t * 18 + i * Math.PI + 1.8); ctx.stroke(); }
+      STFX.parts.push({x, y, vx: rand(-20, 20), vy: rand(-20, 20), t: 0, life: .4, color: sh.color, r: rand(1.5, 3)});
+    } else if (sh.style === 'holy') { // a star of light
+      ctx.fillStyle = '#fff3c9'; ctx.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? S * .5 : S * 1.6, a = i * Math.PI / 5 + sh.t * 10; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill();
+    } else { ctx.fillStyle = sh.color; ctx.beginPath(); ctx.arc(0, 0, S, 0, 7); ctx.fill(); STFX.parts.push({x, y, vx: rand(-20, 20), vy: rand(-20, 20), t: 0, life: .25, color: sh.color, r: S * .5}); }
+    ctx.restore(); ctx.shadowBlur = 0;
     if (k >= 1 && !sh.done) { sh.done = true; if (sh.onHit) sh.onHit(); }
   }
   STFX.shots = STFX.shots.filter(sh => !sh.done);
@@ -7646,7 +7693,82 @@ function stFxDraw(dt) {
   STFX.nums = STFX.nums.filter(n => n.t < .9); ctx.globalAlpha = 1; ctx.textAlign = 'left';
 }
 // big per-move effects: slash arcs, falling lightning, arrow rain, poison clouds, light pillars, shield bubbles
-function stEffect(kind, who, color) { STFX.effects = STFX.effects || []; STFX.effects.push({kind, who, color, t: 0, dur: kind === 'pillar' || kind === 'aura' ? .7 : .45}); }
+const ST_FX_DUR = {pillar: .8, aura: .7, runes: .8, explode: .6, shatter: .65, heavyslash: .42, hammer: .8, afterimage: .4, bite: .5, dome: 1, warcry: .75, sparkle: 1.1, moon: 1.2, bats: 1.1, chain: .5, slash: .42, zap: .45, tendril: .6, cloud: .8, rain: .6, shards: .5};
+function stEffect(kind, who, color, pow = 1, extra) {
+  STFX.effects = STFX.effects || []; const e = {kind, who, color, t: 0, dur: (ST_FX_DUR[kind] || .45) * (kind === 'runes' ? 1 : 1 + (pow - 1) * .3), pow, extra}; STFX.effects.push(e);
+  const [x, y] = stPos(who), burst = (n, f) => { for (let i = 0; i < n; i++) STFX.parts.push(f(i)); };
+  if (kind === 'explode') { burst(Math.round(26 * pow), () => { const a = Math.random() * 6.28, v = rand(80, 320) * pow; return {x, y: y - 50, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, t: 0, life: rand(.4, .9), color: ['#ff5a1f', '#ffb33a', '#ffd75e', '#3a2a20'][Math.floor(Math.random() * 4)], r: rand(2, 5)}; }); ST.hurt = Math.max(ST.hurt || 0, .25); }
+  if (kind === 'sparkle') burst(Math.round(22 * pow), () => ({x: x + rand(-45, 45), y: y - rand(0, 30), vx: rand(-10, 10), vy: -rand(40, 120), t: 0, life: rand(.6, 1.1), color: Math.random() < .5 ? '#fff3c9' : '#9fffb8', r: rand(1.5, 3.5)}));
+  if (kind === 'heavyslash') { burst(Math.round(16 * pow), () => { const a = rand(-2.6, -.4), v = rand(120, 300); return {x, y: y - 50, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0, life: rand(.2, .45), color: '#fff6d0', r: rand(1.5, 3)}; }); ST.hurt = Math.max(ST.hurt || 0, .3); }
+  if (kind === 'warcry' || kind === 'hammer') ST.hurt = Math.max(ST.hurt || 0, .35);
+}
+function stEffectsDraw(dt) {
+  const L = STFX.effects || [];
+  for (const e of L) {
+    e.t += dt; const k = Math.min(1, e.t / e.dur), P = e.pow || 1, [x, y] = stPos(e.who), C = e.color || '#fff'; ctx.save(); ctx.globalAlpha = Math.max(0, 1 - k);
+    if (e.kind === 'slash') { // two bright crescents with a soft trail
+      for (const [r, off, w] of [[62 * P, 0, 14], [48 * P, .35, 8]]) { const a0 = -2.5 + k * 1.3 + off, a1 = -.5 + k * 1.3 + off; ctx.lineCap = 'round'; ctx.strokeStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 18; ctx.lineWidth = w * (1 - k) + 2; ctx.beginPath(); ctx.arc(x, y - 50, r, a0, a1); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); }
+    } else if (e.kind === 'heavyslash') { // a huge cleave, a white flash, and the after-glow of the cut
+      ctx.lineCap = 'round'; ctx.shadowColor = C; ctx.shadowBlur = 30; for (let i = 0; i < 3; i++) { ctx.strokeStyle = i ? C : '#fff'; ctx.lineWidth = (22 - i * 6) * (1 - k) + 2; ctx.beginPath(); ctx.moveTo(x - 80 * P + i * 10, y - 130 * P + k * 30); ctx.quadraticCurveTo(x, y - 40, x + 70 * P - i * 10, y + 10 - k * 20); ctx.stroke(); }
+      ctx.globalAlpha = Math.max(0, .5 - k); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y - 50, 50 * P * (1 + k), 0, 7); ctx.fill();
+    } else if (e.kind === 'zap') { // a forked bolt from the sky and a flash where it lands
+      ctx.strokeStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 26; const pts = [[x + rand(-30, 30), 0]]; let yy = 0; while (yy < y - 50) { yy += 36; pts.push([x + rand(-24, 24), yy]); }
+      for (const [lw, col] of [[7 * P, C], [2.5, '#fff']]) { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); pts.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.stroke(); }
+      ctx.lineWidth = 2; ctx.strokeStyle = C; for (let i = 2; i < pts.length; i += 2) { ctx.beginPath(); ctx.moveTo(pts[i][0], pts[i][1]); ctx.lineTo(pts[i][0] + rand(-40, 40), pts[i][1] + rand(10, 40)); ctx.stroke(); }
+      ctx.fillStyle = '#fff'; ctx.globalAlpha = Math.max(0, .7 - k * 1.5); ctx.beginPath(); ctx.arc(x, y - 50, 40 * P, 0, 7); ctx.fill();
+    } else if (e.kind === 'chain') { // lightning leaping from enemy to enemy
+      const T = (e.extra || []).map(id => stPos(id)); ctx.strokeStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 24; ctx.lineWidth = 4 * P;
+      for (let i = 1; i < T.length; i++) { const [ax, ay] = T[i - 1], [bx, by] = T[i]; ctx.beginPath(); ctx.moveTo(ax, ay - 50); for (let s2 = 1; s2 < 6; s2++) ctx.lineTo(ax + (bx - ax) * s2 / 6 + rand(-14, 14), ay - 50 + (by - ay) * s2 / 6 + rand(-14, 14)); ctx.lineTo(bx, by - 50); ctx.stroke(); }
+    } else if (e.kind === 'rain') { // a volley that falls in waves and kicks up dust
+      ctx.strokeStyle = C; ctx.lineWidth = 3; const n = Math.round(12 * P); for (let i = 0; i < n; i++) { const ax = x + (i - n / 2) * 11, ay = y - 160 + ((k * 260 + i * 41) % 170); ctx.beginPath(); ctx.moveTo(ax - 9, ay - 26); ctx.lineTo(ax, ay); ctx.stroke(); ctx.fillStyle = '#e8e8f0'; ctx.beginPath(); ctx.moveTo(ax + 2, ay + 3); ctx.lineTo(ax - 4, ay - 3); ctx.lineTo(ax + 3, ay - 5); ctx.fill(); }
+      ctx.fillStyle = 'rgba(200,180,140,.4)'; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.ellipse(x + (i - 1.5) * 26, y + 6, 14 + k * 20, 5, 0, 0, 7); ctx.fill(); }
+    } else if (e.kind === 'cloud') { // a swirling toxic cloud with rising bubbles
+      for (let i = 0; i < 8; i++) { ctx.fillStyle = i % 2 ? '#7acc2a' : '#4a8a1a'; ctx.globalAlpha = Math.max(0, .55 - k * .55); const a = i * .8 + e.t * 3; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 34 * P, y - 42 + Math.sin(a * 1.3) * 18, (22 + k * 22) * P, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = Math.max(0, 1 - k); ctx.strokeStyle = '#c8ff8a'; ctx.lineWidth = 1.5; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(x + Math.sin(i * 3 + e.t * 2) * 30, y - 40 - ((e.t * 80 + i * 20) % 70), 4, 0, 7); ctx.stroke(); }
+    } else if (e.kind === 'shards' || e.kind === 'shatter') { // crystals bursting outward, frost spreading on the ground
+      const n = Math.round((e.kind === 'shatter' ? 12 : 8) * P); ctx.fillStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 14;
+      for (let i = 0; i < n; i++) { const a = i * 6.28 / n + .3, r = 18 + k * 90 * P; ctx.save(); ctx.translate(x + Math.cos(a) * r, y - 50 + Math.sin(a) * r); ctx.rotate(a + k * 4); ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-7, 6); ctx.lineTo(-4, 0); ctx.lineTo(-7, -6); ctx.closePath(); ctx.fill(); ctx.restore(); }
+      if (e.kind === 'shatter') { ctx.strokeStyle = '#e8f8ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(x, y + 4, 30 + k * 70 * P, 8 + k * 16, 0, 0, 7); ctx.stroke(); }
+    } else if (e.kind === 'explode') { // a fireball bursting: core, shell and shockwave
+      const r = (20 + k * 80) * P, g = ctx.createRadialGradient(x, y - 50, 2, x, y - 50, r); g.addColorStop(0, '#fffbe8'); g.addColorStop(.3, '#ffcf5a'); g.addColorStop(.65, '#ff5a1f'); g.addColorStop(1, 'rgba(120,20,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y - 50, r, 0, 7); ctx.fill(); ctx.strokeStyle = '#ffb33a'; ctx.lineWidth = 4 * (1 - k); ctx.beginPath(); ctx.ellipse(x, y + 4, r * 1.3, r * .35, 0, 0, 7); ctx.stroke();
+    } else if (e.kind === 'pillar') { // a column of light with rings climbing it
+      const w = 44 * P * (1 - k * .4), g2 = ctx.createLinearGradient(0, 0, 0, y); g2.addColorStop(0, C + '00'); g2.addColorStop(1, C); ctx.fillStyle = g2; ctx.fillRect(x - w, 0, w * 2, y + 10);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; for (let i = 0; i < 3; i++) { const ry = y - ((e.t * 220 + i * 70) % 220); ctx.beginPath(); ctx.ellipse(x, ry, w * 1.2, 8, 0, 0, 7); ctx.stroke(); }
+    } else if (e.kind === 'aura' || e.kind === 'dome') { // a shimmering shield; the dome is a hexagon lattice
+      ctx.strokeStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 20; ctx.lineWidth = 3;
+      if (e.kind === 'dome') { ctx.globalAlpha = Math.min(1, e.t * 4) * Math.max(0, 1 - k * .8); const R = 70 * P; ctx.beginPath(); ctx.arc(x, y - 30, R, Math.PI, 0); ctx.stroke(); for (let r2 = 0; r2 < 3; r2++) for (let c2 = -3; c2 <= 3; c2++) { const hx = x + c2 * 20 + (r2 % 2) * 10, hy = y - 40 - r2 * 18; if (Math.hypot(hx - x, hy - (y - 30)) > R - 6) continue; ctx.beginPath(); for (let i = 0; i < 6; i++) ctx.lineTo(hx + Math.cos(i * Math.PI / 3) * 9, hy + Math.sin(i * Math.PI / 3) * 9); ctx.closePath(); ctx.stroke(); } }
+      else { ctx.beginPath(); ctx.ellipse(x, y - 45, (55 + k * 20) * P, (70 + k * 20) * P, 0, 0, 7); ctx.stroke(); }
+    } else if (e.kind === 'tendril') { // grasping tendrils, and stolen life flowing back as orbs
+      const [px2, py2] = stPos('p'); ctx.strokeStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 14;
+      for (let i = 0; i < Math.round(3 * P); i++) { ctx.lineWidth = 4 - i; ctx.beginPath(); ctx.moveTo(x, y - 50); ctx.bezierCurveTo((x + px2) / 2 + i * 20, y - 180 - i * 20 + Math.sin(e.t * 8 + i) * 15, (x + px2) / 2 - i * 20, py2 + 60, px2, py2 - 50); ctx.stroke(); }
+      for (let i = 0; i < 5; i++) { const q = (k + i * .2) % 1, bx = x + (px2 - x) * q, by = (y - 50) + (py2 - y) * q - Math.sin(q * Math.PI) * 90; ctx.fillStyle = '#ff6a8a'; ctx.beginPath(); ctx.arc(bx, by, 5, 0, 7); ctx.fill(); }
+    } else if (e.kind === 'runes') { // a turning circle of runes under a spellcaster
+      ctx.globalAlpha = Math.min(1, e.t * 5) * Math.max(0, 1 - k); ctx.strokeStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 16; ctx.lineWidth = 2; const R = 46 * P;
+      ctx.beginPath(); ctx.ellipse(x, y + 4, R, R * .32, 0, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.ellipse(x, y + 4, R * .7, R * .22, 0, 0, 7); ctx.stroke();
+      for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + e.t * 2.5; ctx.fillStyle = C; ctx.fillRect(x + Math.cos(a) * R * .85 - 2, y + 4 + Math.sin(a) * R * .27 - 4, 4, 8); }
+    } else if (e.kind === 'hammer') { // a sword of light falls from the sky and cracks the ground
+      const drop = Math.min(1, k * 2.2), sy = -60 + (y - 40 + 60) * drop; ctx.fillStyle = '#fff3c9'; ctx.shadowColor = '#ffe9a8'; ctx.shadowBlur = 30; ctx.fillRect(x - 10 * P, sy - 150 * P, 20 * P, 150 * P); ctx.fillRect(x - 34 * P, sy - 150 * P, 68 * P, 12 * P); ctx.beginPath(); ctx.moveTo(x - 10 * P, sy); ctx.lineTo(x, sy + 26 * P); ctx.lineTo(x + 10 * P, sy); ctx.fill();
+      if (drop >= 1) { const q = (k - .45) / .55; ctx.strokeStyle = '#ffe9a8'; ctx.lineWidth = 5 * (1 - q); ctx.beginPath(); ctx.ellipse(x, y + 6, 30 + q * 120 * P, 8 + q * 30, 0, 0, 7); ctx.stroke(); ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 2; for (let i = 0; i < 6; i++) { const a = i * 1.05; ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.lineTo(x + Math.cos(a) * 60 * P, y + 6 + Math.sin(a) * 14); ctx.stroke(); } }
+    } else if (e.kind === 'afterimage') { // the blur of a body moving faster than sight
+      const [px2, py2] = stPos('p'); for (let i = 0; i < 4; i++) { const q = i / 4, gx = px2 + (x - px2) * q, gy = py2 + (y - py2) * q; ctx.globalAlpha = Math.max(0, (1 - k) * (.15 + q * .2)); ctx.fillStyle = C; ctx.beginPath(); ctx.ellipse(gx, gy - 45, 16, 40, 0, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = Math.max(0, 1 - k); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(px2, py2 - 20 - i * 14); ctx.lineTo(x, y - 20 - i * 14); ctx.stroke(); }
+    } else if (e.kind === 'bite') { // fangs snapping shut, blood ribbons flying to you
+      const c2 = 1 - Math.min(1, k * 2.5); ctx.fillStyle = '#f0f0f0'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x - 30, y - 50 + sd * (10 + c2 * 30)); ctx.quadraticCurveTo(x, y - 50 + sd * (30 + c2 * 30), x + 30, y - 50 + sd * (10 + c2 * 30)); for (let i = 0; i < 4; i++) ctx.lineTo(x + 22 - i * 15, y - 50 + sd * (6 + c2 * 30)); ctx.fill(); }
+      const [px2, py2] = stPos('p'); ctx.strokeStyle = '#c0102a'; ctx.lineWidth = 3; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(x, y - 50); ctx.quadraticCurveTo((x + px2) / 2, y - 140 - i * 30, px2, py2 - 50); ctx.stroke(); }
+    } else if (e.kind === 'warcry') { // shockwave rings bursting from you
+      ctx.strokeStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 16; for (let i = 0; i < 3; i++) { const q = Math.min(1, k * 1.4 - i * .15); if (q <= 0) continue; ctx.lineWidth = 6 * (1 - q) + 1; ctx.beginPath(); ctx.ellipse(x, y - 40, 30 + q * 140 * P, 20 + q * 70 * P, 0, 0, 7); ctx.stroke(); }
+    } else if (e.kind === 'sparkle') { ctx.strokeStyle = '#fff3c9'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x, y + 4, 40 * P, 12, 0, 0, 7); ctx.stroke(); }
+    else if (e.kind === 'moon') { // a blood moon rising behind you
+      ctx.globalAlpha = Math.min(1, e.t * 3) * Math.max(0, 1 - k * .9); const g = ctx.createRadialGradient(x, y - 150, 10, x, y - 150, 90 * P); g.addColorStop(0, '#ffe8e0'); g.addColorStop(.6, '#c0303a'); g.addColorStop(1, 'rgba(120,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y - 150, 90 * P, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#cfd8e0'; ctx.lineWidth = 2; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(x, y - 50, 40 + ((e.t * 120 + i * 40) % 120), -2.6, -.5); ctx.stroke(); }
+    } else if (e.kind === 'bats') { // a swarm of bats spiralling out
+      ctx.strokeStyle = '#1a0006'; ctx.lineWidth = 3; for (let i = 0; i < Math.round(10 * P); i++) { const a = i * .9 + e.t * 4, r = 20 + k * 140, bx = x + Math.cos(a) * r, by = y - 60 + Math.sin(a) * r * .6, f = Math.sin(e.t * 22 + i) * 6; ctx.beginPath(); ctx.moveTo(bx - 9, by - f); ctx.lineTo(bx - 3, by); ctx.lineTo(bx, by - 3); ctx.lineTo(bx + 3, by); ctx.lineTo(bx + 9, by - f); ctx.stroke(); }
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1; STFX.effects = L.filter(e => e.t < e.dur);
+}
 // Dodging: the faster fighter slips more blows. Heavenly Restriction and Mist Form make you hard to touch.
 const stDodgeChance = (defSpd, atkSpd, bonus = 0) => clamp(.05 + (defSpd - atkSpd) * .012 + bonus, .02, .45);
 function stPlayerEvade() { const d = stData(), b = ST.battle; return (d.gear && d.gear.moonCharm ? .05 : 0) + (d.hr ? .15 : 0) + (b && b.buffs.mist ? .6 : 0) + (b && b.buffs.wolf ? .08 : 0); }
@@ -7743,21 +7865,6 @@ function stGore(who, n = 10, pool) { // blood spray, and a pool on the ground
   const [x, y] = stPos(who); n = Math.round(n * .6); if (pool !== true && Math.random() < .35) pool = false; // toned down: fewer drops, fewer pools
   for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + rand(-1.4, 1.4), v = rand(80, 260); STFX.parts.push({x, y: y - 45, vx: Math.cos(a) * v + (who === 'p' || who === 'a' ? -60 : 60), vy: Math.sin(a) * v, t: 0, life: rand(.5, .9), color: Math.random() < .5 ? '#a3121a' : '#6a0a0f', r: rand(2, 4.5)}); }
   STFX.pools = STFX.pools || []; if (pool !== false) STFX.pools.push({x: x + rand(-20, 20), y: y + rand(4, 14), r: rand(10, 18) * (pool ? 1.45 : 1), rot: Math.random() * 3});
-}
-function stEffectsDraw(dt) {
-  const L = STFX.effects || [];
-  for (const e of L) {
-    e.t += dt; const k = e.t / e.dur, [x, y] = stPos(e.who); ctx.globalAlpha = Math.max(0, 1 - k);
-    if (e.kind === 'slash') { ctx.strokeStyle = e.color; ctx.lineWidth = 12 * (1 - k) + 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(x, y - 50, 60, -2.4 + k * 1.2, -.6 + k * 1.2); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.stroke(); ctx.lineCap = 'butt'; }
-    else if (e.kind === 'zap') { ctx.strokeStyle = e.color; ctx.lineWidth = 6; ctx.shadowColor = e.color; ctx.shadowBlur = 24; ctx.beginPath(); let yy = 0; ctx.moveTo(x + rand(-30, 30), 0); while (yy < y - 50) { yy += 40; ctx.lineTo(x + rand(-26, 26), yy); } ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.shadowBlur = 0; }
-    else if (e.kind === 'rain') { ctx.strokeStyle = e.color; ctx.lineWidth = 3; for (let i = 0; i < 9; i++) { const ax = x + (i - 4) * 14, ay = y - 140 + ((k * 180 + i * 37) % 120); ctx.beginPath(); ctx.moveTo(ax - 8, ay - 22); ctx.lineTo(ax, ay); ctx.stroke(); } }
-    else if (e.kind === 'cloud') { for (let i = 0; i < 6; i++) { ctx.fillStyle = i % 2 ? '#7acc2a' : '#4a8a1a'; ctx.globalAlpha = Math.max(0, .5 - k * .5); ctx.beginPath(); ctx.arc(x + Math.cos(i + e.t * 3) * 30, y - 40 + Math.sin(i * 2 + e.t * 2) * 18, 26 + k * 20, 0, 7); ctx.fill(); } }
-    else if (e.kind === 'shards') { ctx.fillStyle = e.color; for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + .3, r = 20 + k * 70; ctx.save(); ctx.translate(x + Math.cos(a) * r, y - 50 + Math.sin(a) * r); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(-6, 5); ctx.lineTo(-6, -5); ctx.closePath(); ctx.fill(); ctx.restore(); } }
-    else if (e.kind === 'pillar') { const g2 = ctx.createLinearGradient(0, 0, 0, y); g2.addColorStop(0, e.color + '00'); g2.addColorStop(1, e.color); ctx.fillStyle = g2; ctx.fillRect(x - 40 * (1 - k * .5), 0, 80 * (1 - k * .5), y + 10); }
-    else if (e.kind === 'aura') { ctx.strokeStyle = e.color; ctx.lineWidth = 5; ctx.shadowColor = e.color; ctx.shadowBlur = 18; ctx.beginPath(); ctx.ellipse(x, y - 45, 55 + k * 20, 70 + k * 20, 0, 0, 7); ctx.stroke(); ctx.shadowBlur = 0; }
-    else if (e.kind === 'tendril') { const [px2, py2] = stPos('p'); ctx.strokeStyle = e.color; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x, y - 50); ctx.bezierCurveTo((x + px2) / 2, y - 180, (x + px2) / 2, py2 + 60, px2, py2 - 50); ctx.stroke(); }
-  }
-  ctx.globalAlpha = 1; STFX.effects = L.filter(e => e.t < e.dur);
 }
 // Voice lines, spoken by the browser. Each speaker has its own pitch and pace.
 const ST_VOICE = {p: [1, 1.05], a: [1.4, 1.08], boss: [.25, .78], foe: [.6, .95], ann: [.45, .82]};
@@ -7861,7 +7968,8 @@ function stCalloutDraw(dt) {
   ctx.shadowColor = c.color; ctx.shadowBlur = 24; ctx.fillStyle = '#fff3e0'; ctx.fillText(c.text, 0, 4);
   ctx.restore();
 }
-const SK_FX = {flash: 'slash', crush: 'slash', bloodfeast: 'tendril', strike: 'slash', fireball: 'shards', frost: 'shards', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril'};
+const SK_SHOT = {fireball: 'fire', frost: 'ice', venom: 'venom', drain: 'dark', rain: 'arrow', lightning: 'holy'};
+const SK_FX = {flash: 'afterimage', crush: 'hammer', bloodfeast: 'bite', fireball: 'explode', frost: 'shatter', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril', strike: 'heavyslash'};
 const SK_COLOR = {flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
 function stLog(t) { if (ST.battle) ST.battle.log = t; $('stLog').textContent = t; }
 const stSkCost = S => Math.round(S.mp * (1 + (stData().lv - 1) * .035)); // skills grow pricier with your mana pool
@@ -7924,7 +8032,7 @@ function stPlayerHit(f, base, kind, extra, color) {
       if (f.hp <= 0) return; const dm2 = stDmg(base * .7, f.def); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
     }, 140);
     f.hp -= total; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact');
-    stEffect(SK_FX[sk] || 'slash', f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'));
+    const fxPow = 1 + rk * .3; stEffect(SK_FX[sk] || (crit ? 'heavyslash' : 'slash'), f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'), fxPow); if (crit) STFX.slow = Math.max(STFX.slow || 0, .12); // a hit-stop on criticals
     stRageAdd(6);
     if (ST.battle.buffs.vamp) { const dd = stData(), heal = Math.round(total * .25); dd.hp = Math.min(stStats().hp, dd.hp + heal); stNum('p', '+' + heal, '#ff6a8a'); } // vampire form drinks from every wound
     if (f.boss && !f.enraged && f.hp > 0 && f.hp < f.maxHp * .3) { f.enraged = true; f.atk *= 1.3; setTimeout(() => { stTransformFx(f.id, '#ff2a2a', `${f.name.split(',')[0]} is ENRAGED!`); stGrunt(ST_FOE_SEX[f.key] || 'boss', true, 'enr'); }, 300); } // bosses near death fly into a fury
@@ -7945,29 +8053,31 @@ function stPlayerHit(f, base, kind, extra, color) {
   };
   ST.battle.turn = 'anim'; stRenderBattle();
   if (beam) { stAnim('p', 'cast', .6); stBeam('p', f.id, color || '#c79bff', land); }
-  else if (kind === 'mag') { stAnim('p', 'cast', .3); stShot('p', f.id, color || '#c79bff', 11, land); }
+  else if (kind === 'mag') { stAnim('p', 'cast', .3); stShot('p', f.id, color || '#c79bff', 11 + rk * 2, land, SK_SHOT[sk]); }
   else { stAnim('p', 'lunge', .32); setTimeout(land, 160); }
 }
 function stUseSkill(id) {
   const S = ST_SKILLS[id], d = stData(), s = stStats(), b = ST.battle;
   if (d.mp < stSkCost(S)) return; const COST = stSkCost(S);
+  const rkC = stRank(id), CPOW = 1 + rkC * .3; if (S.kind === 'mag' || S.kind === 'heal' || S.kind === 'buff') stEffect('runes', 'p', SK_COLOR[id] || (S.kind === 'heal' ? '#9fffb8' : '#ffd75e'), CPOW); // a rune circle as you begin the spell
   const nm = stSkName(id); stCallout(`${d.name}: "${nm}!"`, SK_COLOR[id] || '#ffe9a8');
   const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag * (b.buffs.vamp ? 1.5 : 1) : s.atk * stAtkMul(b)) * (S.mult || 1) * (S.kind === 'heal' || S.all ? 1 + .2 * stRank(id) : 1);
   if (S.kind === 'heal' || S.kind === 'buff' || S.all) stMaster(id);
   if (S.kind === 'heal') {
     d.mp -= COST; const h = Math.round(power + 10); d.hp = Math.min(s.hp, d.hp + h); if (b.ally) { b.ally.hp = Math.min(b.ally.maxHp, b.ally.hp + h * .7); stNum('a', '+' + Math.round(h * .7), '#6be08a'); stBurst('a', '#6be08a', 12); }
     if (d.wounds && stRank(id) >= 2) d.wounds = null; // Sacred Light and Rebirth close wounds
-    stAnim('p', 'cast'); stEffect('pillar', 'p', '#fff3c9'); stBurst('p', '#6be08a', 22); stNum('p', '+' + h, '#6be08a', true); sfx('shield'); stLog(`${nm} restores ${h} health.`); ST.sub = null; return setTimeout(stEndTurn, 450);
+    stAnim('p', 'cast'); stEffect('pillar', 'p', '#fff3c9', CPOW); stEffect('sparkle', 'p', '#9fffb8', CPOW); if (b.ally) stEffect('sparkle', 'a', '#9fffb8'); stBurst('p', '#6be08a', 22); stNum('p', '+' + h, '#6be08a', true); sfx('shield'); stLog(`${nm} restores ${h} health.`); ST.sub = null; return setTimeout(stEndTurn, 450);
   }
-  if (S.kind === 'buff') { d.mp -= COST; b.buffs[S.buff] = S.buff === 'guard' || S.buff === 'mist' ? 2 : 3; if (S.buff === 'wolf') { stTransformFx('p', '#cfd8e0', 'THE BEAST AWAKENS'); stGrunt('boss', true, 'wolf'); }
+  if (S.kind === 'buff') { stEffect({guard: 'dome', rally: 'warcry', wolf: 'moon', mist: 'bats', vamp: 'bats'}[S.buff] || 'aura', 'p', {guard: '#7fd1c7', rally: '#ff5a1f', wolf: '#cfd8e0', mist: '#c08a9a', vamp: '#c0102a'}[S.buff] || '#ffd75e', CPOW);
+    d.mp -= COST; b.buffs[S.buff] = S.buff === 'guard' || S.buff === 'mist' ? 2 : 3; if (S.buff === 'wolf') { stTransformFx('p', '#cfd8e0', 'THE BEAST AWAKENS'); stGrunt('boss', true, 'wolf'); }
     if (S.buff === 'vamp') { stTransformFx('p', '#c0102a', 'BLOOD ASCENDANT'); stGrunt(stSex('p'), true, 'vamp'); } if (S.buff === 'mist') stEffect('cloud', 'p', '#c08a9a'); stAnim('p', 'cast'); stEffect('aura', 'p', S.buff === 'guard' ? '#7fd1c7' : '#ff5a1f'); stBurst('p', S.buff === 'guard' ? '#7fd1c7' : '#ff6a4d', 22); stNum('p', S.buff === 'guard' ? 'Defense up' : 'Attack up', '#ffd75e'); sfx('shield'); stLog(S.buff === 'guard' ? 'Your defense doubles!' : 'Your attack surges!'); ST.sub = null; return setTimeout(stEndTurn, 450); }
   if (S.all) {
     d.mp -= COST; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
     for (const f of b.foes) if (f.hp > 0) {
       const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def); total += dm; left++;
-      stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } f.hp -= dm; f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff'); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
+      ST.nextShot = SK_SHOT[id]; stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (id === 'lightning') stEffect('chain', f.id, SK_COLOR[id], CPOW, b.foes.filter(x => x.hp > 0).map(x => x.id)); if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } f.hp -= dm; f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff', CPOW); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dm); if (--left === 0) setTimeout(stEndTurn, 250); });
     }
-    sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
+    ST.nextShot = null; sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
   stPick(f => { d.mp -= COST; ST.curSkill = id; stPlayerHit(f, power, S.kind, (t, dm) => {
     if (S.burn) t.burn = 2; if (S.poison) t.poison = 3; if (S.slow && Math.random() < .5) { t.frozen = 1; stNum(t.id, 'Frozen', '#9fe6ff'); }
@@ -8192,7 +8302,7 @@ function stOpenMenu() {
   btn(`Online world: ${PROF.onlineOff ? 'Off' : 'On'}`, () => { PROF.onlineOff = !PROF.onlineOff; saveProfile(); if (PROF.onlineOff) stNetLeave(); else stNetJoin(); stCloseMenu(); stOpenMenu(); });
   btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
-  btn('📖 Journal', () => stJournal());
+  btn('📖 Journal', () => stJournal()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
 }
@@ -8264,8 +8374,8 @@ function stDrawWorld(now, dt = 1 / 60) {
   if (!dun) for (const h of ST_HOUSES) { const x = (h.x + 1) * ST_TILE, y = (h.y + 2) * ST_TILE - 4; ctx.fillStyle = '#2a1a10'; ctx.fillRect(x - 12, y - 30, 24, 30); ctx.fillStyle = '#ffb35a'; ctx.globalAlpha = .5 + Math.sin(now * 2 + h.x) * .15; ctx.fillRect(x - 8, y - 26, 16, 10); ctx.globalAlpha = 1; } // lit doorways
   if (d.flags.liora) stDrawCh(stUnit('valkyrie', '#9fd8ff', d.x - 36 * (Math.cos(ST.face || 0) || 1), d.y + 4, ST.face || 0, ST.walk || 0, 31, d.lv), now);
   const ride = !dun && d.riding && stM(d.mount);
-  if (ride) { ctx.save(); ctx.translate(d.x, d.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-d.x, -(d.y + 10)); stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); ctx.restore(); stDrawCh(stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 3 * Math.cos(ST.face || 0), d.y - 21 - (ride.fly ? 21 + Math.sin(now * 4) * 4 : 0), ST.face || 0, 0, 30, d.lv), now); }
-  else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); stDrawCh(pu, now); }
+  if (ride) { ctx.save(); ctx.translate(d.x, d.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-d.x, -(d.y + 10)); stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); ctx.restore(); stDrawCh(Object.assign(stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 3 * Math.cos(ST.face || 0), d.y - 21 - (ride.fly ? 21 + Math.sin(now * 4) * 4 : 0), ST.face || 0, 0, 30, d.lv), {outfit: d.outfit}), now); }
+  else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); pu.outfit = d.outfit; if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); stDrawCh(pu, now); }
   stObjArrow(now);
   stAmbientOver(dt, now);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -8310,7 +8420,7 @@ function stDrawBattle(now, dt) {
   const px = cw * .28, py = ch * .55, bob = Math.sin(now * 3) * 2;
   STFX.pos.p = [px, py]; STFX.pos.a = [px - 70 * k, py + 30 * k];
   const [pox, poy] = stFxOffset('p'), atkP = STFX.anims.some(a => a.who === 'p' && a.kind === 'lunge');
-  const pu = stUnit(ST_CLASSES[d.cls].look, d.color, px + pox, py + poy + bob, 0, 0, 30, d.lv); if (atkP) pu.atkT = 1;
+  const pu = stUnit(ST_CLASSES[d.cls].look, d.color, px + pox, py + poy + bob, 0, 0, 30, d.lv); pu.outfit = d.outfit; if (atkP) pu.atkT = 1;
   stBadges(stStatus('p'), px, py - 132 * k, now);
   if (b.buffs.rage) { const ra = ctx.createRadialGradient(px, py - 50, 10, px, py - 50, 110 * k); ra.addColorStop(0, 'rgba(255,60,30,.55)'); ra.addColorStop(1, 'rgba(255,60,30,0)'); ctx.fillStyle = ra; ctx.fillRect(px - 120 * k, py - 170 * k, 240 * k, 240 * k);
     for (let i = 0; i < 3; i++) STFX.parts.push({x: px + rand(-28, 28) * k, y: py - rand(0, 30), vx: rand(-15, 15), vy: -rand(120, 220), t: 0, life: rand(.3, .6), color: Math.random() < .5 ? '#ff5a1f' : '#ffb35a', r: rand(2, 5)}); } // flames pour off you
