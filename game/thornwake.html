@@ -316,10 +316,17 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #story>*{pointer-events:auto}
 #stHud{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 10px;width:200px;display:flex;flex-direction:column;gap:4px}
 #stHud .bar{height:14px} #stHud small{color:var(--gold)}
-#stQuest{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 12px;max-width:min(46vw,360px);font-size:14px}
-#stQuest b{color:var(--gold);display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-#stRide{position:absolute;left:calc(84px + env(safe-area-inset-left,0px));top:calc(94px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
-#stMenuBtn{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(94px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stQuest{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(138px + env(safe-area-inset-top,0px));padding:8px 12px;width:min(46vw,300px);font-size:14px;border-left:3px solid var(--gold)!important}
+#stQuest b{color:var(--gold);display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+#stQuest .obj{font-size:15px;font-weight:600;line-height:1.3;margin:2px 0 4px;color:#fff3e0}#stQuest .loc{display:block;font-size:12px;color:#c8b89a}
+#stMini{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));width:176px;height:118px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.5);pointer-events:none}
+#stHint{position:absolute;left:50%;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:12px;color:rgba(255,243,224,.7);background:rgba(5,7,10,.5);padding:3px 12px;border-radius:999px;pointer-events:none;white-space:nowrap}
+#stHud .hn{display:flex;align-items:center;gap:6px;flex-wrap:wrap}#stHud .badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid currentColor}#stHud .lvb{color:#ffd75e}#stHud .rkb{color:#7fe0c7}#stHud .alb{color:#c8b89a}
+#stHud .bar.xp{height:5px}#stHud .bar.xp i{background:linear-gradient(90deg,#8a5a1a,#ffd75e)}#stHud .bl{font-size:10px;letter-spacing:.1em;color:#c8b89a;margin-bottom:-2px}
+@media (max-width:640px){#stMini{width:118px;height:80px}#stQuest{top:calc(98px + env(safe-area-inset-top,0px));width:min(52vw,240px);font-size:12px}#stQuest .obj{font-size:13px}#stHint{display:none}}
+#game.touch #stHint{display:none}
+#stRide{position:absolute;left:calc(84px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stMenuBtn{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 #stPrompt{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(5,7,10,.75);border:1px solid var(--gold);color:var(--gold);font-weight:600}
 #stDialog{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(94vw,720px);padding:14px 18px}
 #stDialog b{color:var(--gold);font-family:var(--display);font-size:20px;font-weight:400}
@@ -330,15 +337,21 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stParty .pm{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:center;font-size:13px}
 #stParty .pm .bar{height:12px}
 .bar.rage i{background:linear-gradient(90deg,#8a1010,#ff3a2a)!important}.rageBtn{background:linear-gradient(#ff5a3a,#a01010)!important;color:#fff!important;font-weight:800;animation:ragePulse .6s infinite alternate}@keyframes ragePulse{to{box-shadow:0 0 18px #ff3a2a}}
-#stMenu .trade{display:grid;grid-template-columns:1.5fr .5fr .6fr .6fr 1fr auto;gap:4px 8px;align-items:center;font-size:13px;margin:6px 0;max-height:52vh;overflow:auto}#stMenu .trade .tbtn{display:flex;gap:3px}#stMenu .trade.craft{grid-template-columns:1.2fr 1fr 1.6fr auto}#stMenu .trade.mats{grid-template-columns:1.4fr 1fr auto}
+#stMenu .trade{display:grid;grid-template-columns:1.5fr .5fr .6fr .6fr 1fr auto;gap:4px 8px;align-items:center;font-size:13px;margin:6px 0;max-height:52vh;overflow:auto}#stMenu .trade .tbtn{display:flex;gap:3px}#stMenu .trade.gq{grid-template-columns:1.2fr 1.6fr .7fr auto}#stMenu .rankbar{height:10px;margin:4px 0 8px}#stMenu .rankbar i{background:linear-gradient(90deg,#8a5a1a,#ffd75e)}
+@media (max-width:600px){#stMenu .trade.gq{grid-template-columns:1fr auto}#stMenu .trade.gq .hint{grid-column:1/-1;order:0}}#stMenu .trade.craft{grid-template-columns:1.2fr 1fr 1.6fr auto}#stMenu .trade.mats{grid-template-columns:1.4fr 1fr auto}
 @media (max-width:600px){#stMenu .trade.craft{grid-template-columns:1fr auto}#stMenu .trade.craft .hint{display:none}}#stMenu .trade .tbtn button{padding:3px 7px;font-size:12px}#stMenu .trade .cheap{color:#8fe08a}#stMenu .trade .wanted{color:#ffb35a}#stMenu .trade .hint{color:#b8b0a0;font-size:12px}
 @media (max-width:600px){#stMenu .trade{grid-template-columns:1.3fr .4fr .5fr .5fr;}#stMenu .trade .hint,#stMenu .trade>b:nth-child(5){display:none}#stMenu .trade .tbtn{grid-column:1/-1}#stMenu .trade>b:nth-child(6){display:none}}
 .stChips{display:flex;flex-wrap:wrap;gap:4px}.stChips span{padding:1px 8px;border-radius:9px;font-size:12px;font-weight:700;background:rgba(10,8,12,.7);border:1px solid}.stChips .good{color:#7fe0c7;border-color:#7fe0c7}.stChips .bad{color:#ff7a6a;border-color:#ff7a6a}
-#stActions .row{display:flex;flex-wrap:wrap;gap:6px}
+#stActions .row{display:flex;flex-wrap:wrap;gap:6px}#stActions .acthint{display:block;margin-top:6px;color:#c8b89a;font-size:12px;line-height:1.3}
+#stActions .row button:first-child{background:linear-gradient(#6a3a2a,#3a1a14);border-color:#c9a24a}
 #stActions button,#stMenu button,#stChoices button{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
 #stActions button:disabled{opacity:.45;cursor:not-allowed}
 #stActions button:focus,#stMenu button:focus,#stChoices button:focus{outline:3px solid var(--gold);outline-offset:2px}
 #stMenu{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(94vw,560px);max-height:86vh;overflow:auto;padding:14px 18px}
+#stMenu.rewards{text-align:center;border-color:#ffd75e;box-shadow:0 0 40px rgba(255,200,90,.35)}#stMenu .rwTop{margin:0;font-family:var(--display);letter-spacing:.3em;color:#ffd75e;font-size:22px}
+#stMenu .rwList{display:flex;flex-direction:column;gap:6px;margin:10px 0}#stMenu .rw{display:grid;grid-template-columns:34px 1fr;grid-template-rows:auto auto;align-items:center;text-align:left;padding:6px 10px;border-radius:10px;background:rgba(255,215,94,.08);border:1px solid rgba(255,215,94,.25)}
+#stMenu .rwIc{grid-row:1/3;font-size:20px;color:#ffd75e;text-align:center}#stMenu .rw small{color:#c8b89a}#stMenu button.primary{background:linear-gradient(#f5cf63,#c8951e);color:#1a1206;border-color:#f5cf63}
+#stMenu .tabs{display:flex;gap:4px;margin:-4px 0 8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}#stMenu .tabs button{padding:6px 12px;border-radius:999px;background:transparent}#stMenu .tabs button.on{background:var(--gold);color:#1a1206;border-color:var(--gold)}
 #stMenu h3{margin:4px 0;font-family:var(--display);font-weight:400;color:var(--gold)}
 #stMenu .row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 #stPad{position:absolute;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px}
@@ -366,7 +379,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
     <div id="stHud" class="panel"><b id="stHudName"></b><div class="bar hp"><i id="stHp"></i><span id="stHpT"></span></div><div class="bar mp"><i id="stMp"></i><span id="stMpT"></span></div><small id="stGold"></small></div>
     <div id="stQuest" class="panel"></div>
     <button id="stMenuBtn" class="panel">Menu</button><button id="stRide" class="panel" hidden>Ride</button>
-    <div id="stPrompt" hidden></div>
+    <div id="stPrompt" hidden></div><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
     <div id="stDialog" class="panel" hidden><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
     <div id="stBattle" hidden><div id="stLog" class="panel"></div><div id="stParty" class="panel"></div><div id="stActions" class="panel"></div></div>
     <div id="stMenu" class="panel" hidden></div>
@@ -5404,6 +5417,21 @@ const ST_FOES = {
   golem:   {name: 'Stone Golem', hp: 300, atk: 20, def: 10, spd: 4, xp: 120, gold: 80, draw: 'golem', boss: true},
   drake:   {name: 'Frost Drake', hp: 440, atk: 26, def: 10, spd: 9, xp: 200, gold: 120, draw: 'drake', boss: true},
   stalker: {name: 'The Gloam Stalker', hp: 340, atk: 24, def: 9, spd: 13, xp: 160, gold: 140, draw: 'hero', look: 'hunter', color: '#2a1f3d', boss: true},
+  brigand:  {name: 'Corvane Brigand', hp: 160, atk: 33, def: 12, spd: 14, xp: 120, gold: 80, draw: 'hero', look: 'rogue', color: '#6a3a2a', lv: 9},
+  direwolf: {name: 'Ironpine Direwolf', hp: 150, atk: 34, def: 12, spd: 16, xp: 120, gold: 60, draw: 'wolf', fur: '#4a4a50'},
+  orcwar:   {name: 'Highland Orc', hp: 190, atk: 36, def: 14, spd: 10, xp: 140, gold: 70, draw: 'goblin'},
+  ironknight:{name: 'Renegade Ironknight', hp: 220, atk: 38, def: 18, spd: 9, xp: 160, gold: 90, draw: 'hero', look: 'knight', color: '#5a5a6a', lv: 12},
+  wyvern:   {name: 'Wyrmspine Wyvern', hp: 240, atk: 42, def: 14, spd: 15, xp: 190, gold: 100, draw: 'drake', species: 'ember', fire: '#ff7a2a'},
+  ignaroth: {name: 'Ignaroth, Tyrant of Wyrmspine', hp: 5200, atk: 150, def: 40, spd: 18, xp: 6000, gold: 2500, draw: 'drake', species: 'ember', fire: '#ff7a2a', boss: true},
+  voidwolf: {name: 'Voidhound', hp: 200, atk: 42, def: 16, spd: 18, xp: 230, gold: 110, draw: 'wolf', fur: '#2a1a4a'},
+  archon:   {name: 'Fallen Archon', hp: 260, atk: 46, def: 20, spd: 15, xp: 270, gold: 130, draw: 'hero', look: 'paladin', color: '#c8c8ff', lv: 15},
+  abyssfiend:{name: 'Abyssal Fiend', hp: 300, atk: 50, def: 20, spd: 12, xp: 300, gold: 150, draw: 'hero', look: 'brute', color: '#3a0a3a', lv: 13, horns: true},
+  starwyrm: {name: 'Starwyrm', hp: 320, atk: 52, def: 18, spd: 17, xp: 330, gold: 160, draw: 'drake', species: 'frost', fire: '#c8b8ff'},
+  unmaker:  {name: 'The Unmaker', hp: 9500, atk: 210, def: 55, spd: 20, xp: 15000, gold: 6000, draw: 'golem', boss: true},
+  examC:    {name: 'Examiner Bram (C-Rank Exam)', hp: 420, atk: 24, def: 9, spd: 10, xp: 200, gold: 0, draw: 'hero', look: 'knight', color: '#b33a3a', lv: 10, boss: true},
+  examB:    {name: 'Examiner Sif (B-Rank Exam)', hp: 1300, atk: 46, def: 16, spd: 14, xp: 900, gold: 0, draw: 'hero', look: 'valkyrie', color: '#4a8ac8', lv: 13, boss: true},
+  examA:    {name: 'Examiner Corvin (A-Rank Exam)', hp: 2600, atk: 78, def: 24, spd: 16, xp: 2400, gold: 0, draw: 'hero', look: 'hunter', color: '#2a6a3a', lv: 15, boss: true},
+  examS:    {name: 'Guildmaster Oskar (S-Rank Exam)', hp: 5200, atk: 120, def: 34, spd: 18, xp: 5000, gold: 0, draw: 'hero', look: 'knight', color: '#b33a3a', lv: 17, boss: true},
   thrall:   {name: 'Blood Thrall', hp: 130, atk: 24, def: 8, spd: 12, xp: 70, gold: 35, draw: 'hero', look: 'rogue', color: '#5a1a2a', lv: 8},
   vampire:  {name: 'Noble Vampire', hp: 220, atk: 30, def: 11, spd: 16, xp: 110, gold: 70, draw: 'hero', look: 'warlock', color: '#8a0a2a', lv: 13, unholy: true},
   marquis:  {name: 'Marquis Valcourt, the Crimson Prince', hp: 1100, atk: 40, def: 15, spd: 18, xp: 700, gold: 500, draw: 'hero', look: 'warlock', color: '#c0102a', lv: 18, boss: true, unholy: true},
@@ -5539,7 +5567,7 @@ const ST_DUNGEONS = {
   jail: {name: 'Thornwake Cells', home: true, lit: true, pool: [], theme: {floor: '#3a3a3a', wall: '#141414', glow: '#9fb4c8'}, exit: [13, 9], rows: ['##########', '#.k#.b#..#', '#..#..#..#', '#j.#j.#..#', '#........#', '#c.......#', '####E#####']},
 };
 // Houses you can walk into: the door is the middle of the house's south wall
-const ST_HOUSES = [{key: 'alden', x: 11, y: 8}, {key: 'wrenhome', x: 16, y: 8}, {key: 'mill', x: 10, y: 19}, {key: 'grave', x: 4, y: 22}, {key: 'nets', x: 36, y: 13}];
+const ST_HOUSES = [{key: 'guildhall', x: 16, y: 13, start: [6, 7]}, {key: 'alden', x: 11, y: 8}, {key: 'wrenhome', x: 16, y: 8}, {key: 'mill', x: 10, y: 19}, {key: 'grave', x: 4, y: 22}, {key: 'nets', x: 36, y: 13}];
 // Mounts: speed multiplier; fliers cross rivers and mountains. Gold, Crowns (premium) or a boss drop.
 const ST_MOUNTS = {
   mare:      {name: 'Ashen Mare', kind: 'horse', color: '#6a5a4a', mane: '#2a201a', speed: 1.6, price: 150},
@@ -5593,8 +5621,59 @@ ST_DUNGEONS.vcrypt = {name: 'The Delacroix-Noir Crypt', lit: false, pool: [['thr
   '#.X..........X...#',
   '#.......c........#',
   '##################']};
-const ST_PORTS = {world: {name: 'Saltmere', at: [37, 16]}, isles: {name: 'the Brightwater Isles', at: [2, 10]}, rouge: {name: 'Rougemarais', at: [2, 12], lv: 12}};
-const stMapSong = () => { const m = stData() && stData().map; return m === 'isles' ? 2 : m === 'rouge' ? SONG_BAYOU : SONG_VALE; };
+const ST_PORTS = {world: {name: 'Saltmere', at: [37, 16]}, isles: {name: 'the Brightwater Isles', at: [2, 10]}, rouge: {name: 'Rougemarais', at: [2, 12], lv: 20, fare: 60}, land2: {name: 'Valdris, the Guild Commonwealth', at: [6, 24], lv: 26, rank: 'C', fare: 120}, land3: {name: 'Aetherfall, the Shattered Heavens', at: [22, 22], lv: 41, rank: 'A', fare: 200}};
+// ---- the far lands: big generated maps with islands, cities, roads, bridges and level-banded regions
+function stLandKit(W, H, fillC) {
+  const m = Array.from({length: H}, () => Array(W).fill(fillC)), at = (x, y) => m[y] && m[y][x];
+  const blob = (cx, cy, rx, ry, c) => { for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1) m[y][x] = c; };
+  const isle = (cx, cy, rx, ry) => { blob(cx, cy, rx, ry, ','); blob(cx, cy, rx - 1.3, ry - 1.2, '.'); };
+  const fill = (x0, y0, x1, y1, c) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (m[y] && m[y][x] != null) m[y][x] = c; };
+  const bridge = (x0, y0, x1, y1) => { let x = x0, y = y0; const put = () => { if (m[y][x] === fillC) m[y][x] = 'Z'; }; while (x !== x1) { put(); x += Math.sign(x1 - x); } while (y !== y1) { put(); y += Math.sign(y1 - y); } put(); };
+  const walls = (x0, y0, x1, y1, gates) => { for (let x = x0; x <= x1; x++) { m[y0][x] = 'W'; m[y1][x] = 'W'; } for (let y = y0; y <= y1; y++) { m[y][x0] = 'W'; m[y][x1] = 'W'; } fill(x0 + 1, y0 + 1, x1 - 1, y1 - 1, '='); for (const [gx, gy] of gates) m[gy][gx] = '='; };
+  const hall = (x, y) => { fill(x, y, x + 3, y + 2, 'a'); m[y][x] = 'A'; };
+  const scatter = (R, rect, c, n, ok = t => t === '.') => { let tries = 0; while (n > 0 && tries++ < 4000) { const x = rect[0] + Math.floor(R() * (rect[2] - rect[0] + 1)), y = rect[1] + Math.floor(R() * (rect[3] - rect[1] + 1)); if (ok(at(x, y))) { m[y][x] = c; n--; } } };
+  return {m, at, blob, isle, fill, bridge, walls, hall, scatter, rows: () => m.map(r => r.join(''))};
+}
+function stBuildValdris() { // Valdris, the Guild Commonwealth: a mainland, three islands, a capital and a port
+  const K = stLandKit(60, 44, '#'), R = mulberry(303);
+  K.isle(30, 24, 24, 16); K.isle(8, 7, 5.5, 4.5); K.isle(53, 37, 5.5, 4.5); K.isle(50, 5, 6, 3.6);
+  for (let x = 12; x <= 48; x++) { if (x === 29 || x === 30) continue; const y = 12 + Math.round(Math.sin(x * .45)); for (const yy of [y, y + 1]) if (K.at(x, yy) === '.' || K.at(x, yy) === ',') K.m[yy][x] = '^'; } // the Wyrmspine ridge, with one pass
+  K.bridge(8, 11, 8, 16); K.bridge(8, 16, 11, 16); K.bridge(48, 31, 48, 34); K.bridge(47, 8, 47, 12);
+  K.fill(9, 21, 15, 27, '='); K.fill(9, 21, 15, 21, 'J'); K.fill(9, 27, 15, 27, 'J'); for (const [x, y] of [[10, 23], [14, 23], [10, 25], [14, 25]]) K.m[y][x] = 'L'; K.m[26][12] = 'S'; K.m[24][5] = 'E'; // Port Corvane
+  K.walls(25, 18, 35, 29, [[25, 23], [25, 24], [35, 23], [35, 24], [30, 29]]); K.hall(28, 19); K.fill(26, 19, 27, 21, 'J'); K.fill(32, 19, 34, 21, 'J'); K.fill(26, 27, 29, 28, 'J'); K.fill(31, 27, 34, 28, 'J'); // Highmarch
+  for (const [x, y] of [[27, 23], [33, 23], [27, 26], [33, 26]]) K.m[y][x] = 'L'; K.m[24][30] = 'S';
+  for (let x = 16; x <= 24; x++) K.m[24][x] = '='; for (let x = 36; x <= 46; x++) if (K.at(x, 24) === '.') K.m[24][x] = '='; for (let y = 30; y <= 38; y++) if (K.at(30, y) === '.') K.m[y][30] = '=';
+  for (const [x, y] of [[51, 36], [55, 36], [53, 39]]) K.m[y][x] = 'H'; K.m[37][53] = 'S'; for (const [x, y] of [[6, 6], [10, 7]]) K.m[y][x] = 'H'; K.m[8][8] = 'S'; // island villages
+  K.scatter(R, [37, 14, 54, 36], 'T', 120); K.scatter(R, [6, 14, 22, 40], 'T', 25); K.scatter(R, [20, 30, 36, 40], 'T', 12); K.scatter(R, [10, 8, 50, 11], 'T', 10); K.scatter(R, [46, 31, 58, 42], 'T', 10);
+  K.m[10][30] = 'B';
+  for (const [x, y] of [[49, 5], [41, 30], [14, 10], [55, 38], [18, 37]]) if (K.at(x, y) !== '#') K.m[y][x] = 'c';
+  const X = [[[2, 2, 13, 12], 2], [[0, 14, 20, 42], 7], [[20, 30, 36, 42], 5], [[37, 14, 56, 40], 8], [[10, 8, 50, 11], 5], [[46, 31, 59, 43], 3], [[43, 1, 58, 8], 3]];
+  for (const [r, n] of X) K.scatter(R, r, 'X', n, t => t === '.' || t === ',');
+  return K.rows();
+}
+function stBuildAether() { // Aetherfall, the Shattered Heavens: floating isles joined by bridges of light
+  const K = stLandKit(60, 44, '#'), R = mulberry(909);
+  K.isle(10, 11, 6, 5); K.isle(9, 31, 6, 5); K.isle(19, 21, 5, 4); K.isle(31, 22, 9, 7.5); K.isle(47, 11, 8, 6); K.isle(47, 33, 9, 7);
+  K.bridge(13, 15, 16, 19); K.bridge(12, 27, 16, 23); K.bridge(24, 21, 22, 21); K.bridge(38, 18, 42, 15); K.bridge(38, 26, 41, 29);
+  K.walls(24, 16, 38, 28, [[24, 22], [38, 22], [31, 16], [31, 28], [38, 18], [38, 26]]); K.hall(30, 17); K.fill(25, 17, 28, 19, 'J'); K.fill(34, 17, 37, 19, 'J'); K.fill(25, 26, 29, 27, 'J'); K.fill(33, 26, 37, 27, 'J'); // Celestine
+  for (const [x, y] of [[27, 21], [35, 21], [27, 24], [35, 24]]) K.m[y][x] = 'L'; K.m[24][31] = 'S'; K.m[22][21] = 'E'; K.m[22][22] = ','; K.m[22][23] = ','; K.m[22][24] = '=';
+  K.scatter(R, [40, 5, 55, 17], 'T', 45); K.scatter(R, [3, 5, 17, 36], 'T', 18); K.scatter(R, [39, 26, 56, 40], 'T', 14);
+  K.m[35][52] = 'B';
+  for (const [x, y] of [[5, 10], [14, 32], [50, 8], [42, 36]]) if (K.at(x, y) !== '#') K.m[y][x] = 'c';
+  for (const [r, n] of [[[3, 5, 17, 17], 4], [[3, 26, 16, 37], 4], [[14, 17, 24, 25], 3], [[39, 5, 55, 17], 7], [[38, 26, 56, 40], 8]]) K.scatter(R, r, 'X', n, t => t === '.' || t === ',');
+  return K.rows();
+}
+const ST_LAND_POOLS = lv => lv <= 30 ? [['brigand'], ['direwolf'], ['brigand', 'direwolf']] : lv <= 35 ? [['orcwar'], ['ironknight'], ['orcwar', 'direwolf']] : lv <= 40 ? [['wyvern'], ['ironknight', 'orcwar'], ['wyvern', 'direwolf']]
+  : lv <= 45 ? [['voidwolf'], ['archon'], ['voidwolf', 'voidwolf']] : lv <= 50 ? [['archon', 'voidwolf'], ['starwyrm'], ['archon', 'archon']] : [['abyssfiend'], ['starwyrm', 'abyssfiend'], ['abyssfiend', 'voidwolf']];
+ST_DUNGEONS.land2 = {name: 'Valdris, the Guild Commonwealth', land: true, outdoor: true, lit: true, boss: 'ignaroth', pool: [['brigand']], exit: [37, 15], ship: [4.4, 24.5], sky: 'V', song: 1, trees: 'pine',
+  pal: {sea: '#1f5a7a', shore: '#3a8aa0', sand: '#d8c690', grass: '#4f7a3a', grass2: '#45703a', road: '#7a6a50', roof: '#8a3a2a', hut: '#a08a5a', mount: '#6a6a70'},
+  zones: [{name: 'Gullrock Isle', lv: 27, r: [0, 0, 14, 13]}, {name: 'Skyreach Isle', lv: 40, r: [43, 0, 59, 9], rank: 'B'}, {name: 'Emberfall Isle', lv: 36, r: [46, 31, 59, 43], rank: 'B'},
+    {name: 'Port Corvane', lv: 26, r: [8, 20, 16, 28], safe: true}, {name: 'Highmarch, Seat of the Guild Compact', lv: 30, r: [25, 18, 35, 29], safe: true}, {name: 'Wyrmspine Peaks', lv: 39, r: [8, 6, 52, 13], rank: 'B'},
+    {name: 'Ironpine Forest', lv: 35, r: [37, 14, 56, 40]}, {name: 'Highmarch Plains', lv: 32, r: [20, 14, 36, 43]}, {name: 'Corvane Coast', lv: 28, r: [0, 0, 59, 43]}], rows: stBuildValdris()};
+ST_DUNGEONS.land3 = {name: 'Aetherfall, the Shattered Heavens', land: true, outdoor: true, lit: true, boss: 'unmaker', pool: [['voidwolf']], exit: [37, 15], ship: [20.4, 22.5], sky: 'Q', song: 2, trees: 'crystal', void: true,
+  pal: {sea: '#120a26', shore: '#2a1a4a', sand: '#d8d0e8', grass: '#6a6a9a', grass2: '#62628f', road: '#b8b0c8', roof: '#e8e2ff', hut: '#c8c0e0', mount: '#8a82a8'},
+  zones: [{name: 'Celestine, City of the Choir', lv: 45, r: [24, 16, 38, 28], safe: true}, {name: 'Seraph Gardens', lv: 48, r: [38, 0, 59, 21]}, {name: 'Abyssal Rift', lv: 53, r: [38, 22, 59, 43], rank: 'S'}, {name: 'Lowcloud Isles', lv: 43, r: [0, 0, 59, 43]}], rows: stBuildAether()};
+const stMapSong = () => { const m = stData() && stData().map; return ST_DUNGEONS[m] && ST_DUNGEONS[m].song != null ? ST_DUNGEONS[m].song : m === 'isles' ? 2 : m === 'rouge' ? SONG_BAYOU : SONG_VALE; };
 ST_DUNGEONS.stair = {name: 'The Celestial Stair', lit: true, holy: true, boss: 'seraphiel', pool: [['seraph'], ['cherub', 'cherub'], ['seraph', 'cherub']], theme: {floor: '#d8d0bc', wall: '#8a8070', glow: '#ffe9a8'}, exit: [10, 2], rows: [
   '######################',
   '#E....#.......#.....c#',
@@ -5608,8 +5687,18 @@ ST_DUNGEONS.stair = {name: 'The Celestial Stair', lit: true, holy: true, boss: '
   '#c...................#',
   '#.........B..........#',
   '######################']};
+ST_DUNGEONS.guildhall = {name: 'The Adventurers\' Guild Hall', home: true, guild: true, lit: true, pool: [], theme: {floor: '#5a4a3a', wall: '#2a1e16', glow: '#ffb35a'}, exit: [16, 14], rows: [
+  '##############',
+  '#q...t..t...k#',
+  '#............#',
+  '#..tt....tt..#',
+  '#..tt....tt..#',
+  '#............#',
+  '#f..........k#',
+  '#............#',
+  '######E#######']};
 const ST_DOOR_AT = {'24,16': 'catacomb', '4,2': 'crypt', '44,9': 'duskwatch', '10,2': 'stair', 'rouge:36,18': 'vcrypt'};
-const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0, mara: 0, seraphiel: 0, marquis: 0};
+const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0, mara: 0, seraphiel: 0, marquis: 0, ignaroth: 0, unmaker: 0};
 const ST_MAP = stBuildMap();
 const stGrid = () => { const d = stData(); return d && d.map !== 'world' && ST_DUNGEONS[d.map] ? ST_DUNGEONS[d.map].rows : ST_MAP; };
 const ST_NPCS = [
@@ -5618,7 +5707,16 @@ const ST_NPCS = [
   {id: 'merchant', name: 'Pell the Merchant', x: 15, y: 12, look: 'pirate', color: '#f2c14e'},
   {id: 'inn', name: 'Innkeeper Bree', x: 13, y: 14, look: 'witch', color: '#7fe08a'},
   {id: 'liora', name: 'Liora', x: 15, y: 10, look: 'valkyrie', color: '#9fd8ff'},
-  {id: 'guild', name: 'Guildmaster Oskar', x: 15, y: 14, look: 'knight', color: '#b33a3a'},
+  {id: 'lyra', name: 'Clerk Lyra', map: 'guildhall', x: 3, y: 2, look: 'witch', color: '#c9a24a'},
+  {id: 'imra', name: 'Clerk Imra', map: 'land2', x: 29, y: 23, look: 'witch', color: '#c9a24a'},
+  {id: 'valen', name: 'Speaker Valen', map: 'land2', x: 31, y: 23, look: 'paladin', color: '#e8e2d0'},
+  {id: 'doro', name: 'Merchant Doro', map: 'land2', x: 28, y: 25, look: 'pirate', color: '#8a6a3a'},
+  {id: 'sorrel', name: 'Innkeeper Sorrel', map: 'land2', x: 32, y: 25, look: 'heavy', color: '#7a5a3a'},
+  {id: 'hela', name: 'Trader Hela', map: 'land2', x: 11, y: 24, look: 'rogue', color: '#6a8a5a'},
+  {id: 'sol', name: 'Archivist Sol', map: 'land3', x: 30, y: 21, look: 'warlock', color: '#c8c8ff'},
+  {id: 'yuun', name: 'Merchant Yuun', map: 'land3', x: 28, y: 23, look: 'magicgirl', color: '#9fe6ff'},
+  {id: 'aris', name: 'Keeper Aris', map: 'land3', x: 34, y: 23, look: 'valkyrie', color: '#e8e2ff'},
+  {id: 'guild', name: 'Guildmaster Oskar', map: 'guildhall', x: 10, y: 6, look: 'knight', color: '#b33a3a'},
   {id: 'tam', name: 'Old Tam', x: 11, y: 12, look: 'paladin', color: '#8a8a8a'},
   {id: 'wren', name: 'Wren', x: 16, y: 11, look: 'rogue', color: '#ff9ccf'},
   // Ravenhollow
@@ -5641,6 +5739,7 @@ const ST_NPCS = [
   {id: 'lucien', name: 'Pere Lucien', map: 'rouge', x: 19, y: 7, look: 'paladin', color: '#e8e2d0'},
   {id: 'silas', name: 'Silas the Gravekeeper', map: 'rouge', x: 31, y: 14, look: 'hunter', color: '#5a5a5a'},
   {id: 'countessNpc', name: 'The Countess', map: 'vcrypt', x: 15, y: 2, look: 'witch', color: '#6a0a2a', lv: 18, hideIf: 'countessDone'},
+  {id: 'edda', name: 'Warden Edda', x: 10, y: 12, look: 'paladin', color: '#7a9ac8', need: 'tutDone'},
   {id: 'garth', name: 'Garth the Stablemaster', x: 14, y: 8, look: 'hunter', color: '#8a5a2a'},
   {id: 'ulric', name: 'Captain Ulric', x: 13, y: 12, look: 'knight', color: '#4a6a9a'},
   {id: 'dorn', name: 'Watchman Dorn', x: 33, y: 12, look: 'knight', color: '#3a5a7a'},
@@ -5686,7 +5785,7 @@ const ST_QUESTS = [
   'The king is ash. The curse loosens its grip. Wander as you will.',
 ];
 const stVillage = (x, y) => x >= 20 * ST_TILE && x < 27 * ST_TILE && y >= 21 * ST_TILE ? 'Harrowfield' : x > 29 * ST_TILE ? 'Saltmere, the Drowned Harbor' : y > 17 * ST_TILE ? 'Ravenhollow' : 'Thornwake, the Last Lit Village';
-const stNpcShown = (n, d) => (n.id !== 'liora' || !d.flags.liora) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]) && (!n.night || stClock().dark > .25);
+const stNpcShown = (n, d) => (n.id !== 'liora' || !d.flags.liora) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]) && (!n.night || stClock().dark > .25) && (n.id !== 'edda' || !ST.tut);
 const stChestShown = (c, d) => !d.chests.includes(c.id) && (!c.need || d.flags[c.need]);
 const ST = {treesBy: {}, on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
 const stData = () => PROF.story;
@@ -5695,6 +5794,7 @@ function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
   const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (W.hole ? .75 : 1), spd: c.spd + .4 * L};
+  if (d.guild && stEdict() === 'wall') st.def *= 1.1;
   for (const k in d.gear || {}) { const G = ST_GEAR[k]; if (!G || !d.gear[k]) continue; st.atk += G.atk || 0; st.def += G.def || 0; st.mag += G.mag || 0; st.spd += G.spd || 0; }
   if (d.hr) { st.hp = Math.round(st.hp * 1.35); st.atk = st.atk * 1.5 + 6; st.def += 6; st.spd += 6; st.mag = 0; } // Heavenly Restriction: a perfect body, no magic at all
   if (d.pact) { st.atk += 6; st.mag += 6; }
@@ -5713,7 +5813,7 @@ function stShift(n) {
   stCallout(n > 0 ? `Light +${n}` : `Ashen ${n}`, n > 0 ? '#ffe9a8' : '#ff5a3a');
   if (stAlignName() !== was) setTimeout(() => stCallout(`You are now: ${stAlignName()}`, n > 0 ? '#ffe9a8' : '#ff5a3a'), 1500);
 }
-function stCrime(gold, why) { const d = stData(); d.crime = (d.crime || 0) + gold; stShift(-2); sfx('crack'); setTimeout(() => stCallout(`Crime: ${why} · Bounty ${d.crime}`, '#ff3a3a'), 1500); }
+function stCrime(gold, why) { const d = stData(); d.crime = (d.crime || 0) + gold; stShift(-2); if (d.guild) { d.guild.pts = Math.max(0, d.guild.pts - 15); setTimeout(() => stCallout('The Guild records your crime: -15 standing', '#c8b89a'), 3000); } sfx('crack'); setTimeout(() => stCallout(`Crime: ${why} · Bounty ${d.crime}`, '#ff3a3a'), 1500); }
 function stPickpocket(who) { // a quick hand: sometimes it works
   const d = stData();
   if (Math.random() < .5) { d.items.potion++; stShift(-1); stSay([['', `While ${who} looks away, a potion slips into your coat.`]]); }
@@ -5753,7 +5853,7 @@ function stDrawSail(now, dt) { // the voyage: waves, a ship crossing the screen,
   if (ST.sail.land) return stDrawRoad(now, dt);
   const S = ST.sail; S.t += dt; const k = Math.min(1, S.t / S.dur);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const sk = ctx.createLinearGradient(0, 0, 0, ch * .6); sk.addColorStop(0, S.dark ? '#1a0a1e' : S.home ? '#3a3a5a' : '#f4b87a'); sk.addColorStop(1, S.dark ? '#6a2a3a' : S.home ? '#8a8aa0' : '#7aa8d0'); ctx.fillStyle = sk; ctx.fillRect(0, 0, cw, ch);
+  const sk = ctx.createLinearGradient(0, 0, 0, ch * .6); sk.addColorStop(0, S.to[0] === 'land3' ? '#1a0a3a' : S.dark ? '#1a0a1e' : S.home ? '#3a3a5a' : '#f4b87a'); sk.addColorStop(1, S.dark ? '#6a2a3a' : S.home ? '#8a8aa0' : '#7aa8d0'); ctx.fillStyle = sk; ctx.fillRect(0, 0, cw, ch);
   ctx.fillStyle = S.home ? '#d8d8e8' : '#fff2c0'; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(cw * .78, ch * .2, 34, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
   for (let L = 0; L < 4; L++) {
     const y0 = ch * (.56 + L * .11); ctx.fillStyle = ['#3a7a9a', '#2a6a8a', '#1a5070', '#0e3a52'][L]; ctx.beginPath(); ctx.moveTo(0, ch);
@@ -5861,6 +5961,13 @@ function stDrawTree(t, now, wind) {
     ctx.fillStyle = '#2a1e16'; ctx.beginPath(); ctx.moveTo(-9 * s, 0); ctx.lineTo(9 * s, 0); ctx.lineTo(3 * s + sw * .4, -60 * s); ctx.lineTo(-3 * s + sw * .4, -60 * s); ctx.fill();
     for (let i = 0; i < 3; i++) { ctx.fillStyle = ['#18241a', '#1e2e20', '#26382a'][i]; ctx.beginPath(); ctx.ellipse(sw * (.5 + i * .2), -66 * s - i * 16 * s, (26 - i * 6) * s, 14 * s, 0, 0, 7); ctx.fill(); }
     ctx.strokeStyle = 'rgba(140,150,110,.75)'; ctx.lineWidth = 2; for (let i = 0; i < 6; i++) { const mx = (-20 + i * 8) * s + sw * .6, my = -60 * s; ctx.beginPath(); ctx.moveTo(mx, my); ctx.quadraticCurveTo(mx + Math.sin(now * 1.5 + i) * 4 * (1 + wind), my + 14 * s, mx + Math.sin(now * 1.5 + i + 1) * 6 * (1 + wind), my + (22 + (i % 3) * 6) * s); ctx.stroke(); }
+  } else if (t.pine) { // a tall dark pine
+    ctx.fillStyle = '#3a2a1a'; ctx.fillRect(-3 * s, -18 * s, 6 * s, 18 * s);
+    for (let i = 0; i < 3; i++) { ctx.fillStyle = ['#1a3a24', '#22482c', '#2a5634'][i]; const w = (26 - i * 6) * s, yb = -14 * s - i * 16 * s; ctx.beginPath(); ctx.moveTo(-w + sw * (.3 + i * .2), yb); ctx.lineTo(sw * (.6 + i * .3), yb - 28 * s); ctx.lineTo(w + sw * (.3 + i * .2), yb); ctx.closePath(); ctx.fill(); }
+  } else if (t.crystal) { // a shard of living crystal that hums and sways
+    const gl = .6 + Math.sin(now * 2 + t.ph) * .3; ctx.shadowColor = '#c8b8ff'; ctx.shadowBlur = 14 * gl;
+    for (const [ox, h, w, c] of [[-8, 44, 8, '#9a8ad8'], [6, 60, 10, '#c8b8ff'], [16, 34, 7, '#8ac8e8']]) { ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo((ox - w) * s, 0); ctx.lineTo((ox + sw * .4) * s, -h * s); ctx.lineTo((ox + w) * s, 0); ctx.closePath(); ctx.fill(); }
+    ctx.shadowBlur = 0;
   } else if (t.palm) { // a curved trunk and drooping fronds
     ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 7 * s; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(6 * s + sw * .3, -40 * s, 4 * s + sw, -78 * s); ctx.stroke();
     ctx.strokeStyle = '#3a8a3a'; ctx.lineWidth = 6 * s; for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + Math.sin(now * 1.5 + i) * .08 * (1 + wind); ctx.beginPath(); ctx.moveTo(4 * s + sw, -78 * s); ctx.quadraticCurveTo(4 * s + sw + Math.cos(a) * 26 * s, -88 * s + Math.sin(a) * 10 * s, 4 * s + sw * 1.3 + Math.cos(a) * 40 * s, -66 * s + Math.abs(Math.sin(a)) * 8 * s); ctx.stroke(); }
@@ -5888,7 +5995,7 @@ function stAmbient(dt, now, Zs, d, dun, isles) {
   const wind = ST.wx ? ST.wx.wind : .3, grid = stGrid(), tileAt = (x, y) => (grid[Math.floor(y / ST_TILE)] || '')[Math.floor(x / ST_TILE)] || '#';
   ST.lights = [];
   if (dun && !isles) return;
-  grid.forEach((row, y) => { if (Math.abs(y * ST_TILE - ST.cam.y) > vh + 300) return; [...row].forEach((t, x) => { if (Math.abs(x * ST_TILE - ST.cam.x) > vw + 300) return; const city = ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].city; if (city && t === 'L') ST.lights.push([x * ST_TILE + 32, y * ST_TILE - 10, 190]); else if (city && t === 'A') ST.lights.push([x * ST_TILE + 128, y * ST_TILE + 40, 220]); else if (city && (t === 'H' || t === 'I')) ST.lights.push([x * ST_TILE + 32, y * ST_TILE - 30, 90]); else if ('HIUK'.includes(t)) ST.lights.push(isles ? [x * ST_TILE + 32, y * ST_TILE + 30, 120] : [x * ST_TILE + 64, y * ST_TILE + 80, 170]); else if (t === 'Q' || t === 'O') ST.lights.push([x * ST_TILE + 44, y * ST_TILE + 36, 110]); else if (t === 'S') ST.lights.push([x * ST_TILE + 32, y * ST_TILE + 40, 70]); }); });
+  grid.forEach((row, y) => { if (Math.abs(y * ST_TILE - ST.cam.y) > vh + 300) return; [...row].forEach((t, x) => { if (Math.abs(x * ST_TILE - ST.cam.x) > vw + 300) return; const city = ST_DUNGEONS[d.map] && (ST_DUNGEONS[d.map].city || ST_DUNGEONS[d.map].land); if (city && t === 'J') { ST.lights.push([x * ST_TILE + 32, y * ST_TILE - 20, 80]); return; } if (city && t === 'L') ST.lights.push([x * ST_TILE + 32, y * ST_TILE - 10, 190]); else if (city && t === 'A') ST.lights.push([x * ST_TILE + 128, y * ST_TILE + 40, 220]); else if (city && (t === 'H' || t === 'I')) ST.lights.push([x * ST_TILE + 32, y * ST_TILE - 30, 90]); else if ('HIUK'.includes(t)) ST.lights.push(isles ? [x * ST_TILE + 32, y * ST_TILE + 30, 120] : [x * ST_TILE + 64, y * ST_TILE + 80, 170]); else if (t === 'Q' || t === 'O') ST.lights.push([x * ST_TILE + 44, y * ST_TILE + 36, 110]); else if (t === 'S') ST.lights.push([x * ST_TILE + 32, y * ST_TILE + 40, 70]); }); });
   if (!isles) { for (const [cx0, cy0] of ST_CAMPS) ST.lights.push([cx0 * ST_TILE + 32, cy0 * ST_TILE + 30, 230]); ST.lights.push([39.5 * ST_TILE, 14 * ST_TILE - 190, 260]); }
   // fish leap from the water now and then
   A.fishT -= dt; if (A.fishT <= 0) { A.fishT = rand(.6, 2); for (let k = 0; k < 8; k++) { const x = ST.cam.x + rand(-vw, vw), y = ST.cam.y + rand(-vh, vh), t = tileAt(x, y); if (t === '~' || (isles && t === '#')) { A.fish.push({x, y, t: 0, dir: Math.random() < .5 ? -1 : 1}); break; } } }
@@ -5902,7 +6009,7 @@ function stAmbient(dt, now, Zs, d, dun, isles) {
     const bx = 18 * ST_TILE + 32 + Math.sin(now) * 6, by = A.boatY; if (inView(bx, by)) { ctx.fillStyle = '#5a3a1a'; ctx.beginPath(); ctx.ellipse(bx, by, 9, 22, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#3a2614'; ctx.fillRect(bx - 7, by - 3, 14, 4); ctx.fillStyle = '#8a7a5a'; ctx.beginPath(); ctx.arc(bx, by + 8, 6, 0, 7); ctx.fill(); ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 2; const oar = Math.sin(now * 3) * 6; ctx.beginPath(); ctx.moveTo(bx - 18, by + 6 + oar); ctx.lineTo(bx + 18, by + 6 - oar); ctx.stroke(); }
   }
   { // a ship at anchor: in Saltmere harbor, or beside the Port Halcyon pier
-    const hx = isles ? .45 * ST_TILE : 38.9 * ST_TILE, hy = (d.map === 'rouge' ? 12.5 : isles ? 10.5 : 16) * ST_TILE + Math.sin(now * 1.4) * 3; if (inView(hx, hy)) { ctx.save(); ctx.translate(hx, hy); ctx.rotate(Math.sin(now * 1.1) * .03); ctx.fillStyle = '#4a2a14'; ctx.beginPath(); ctx.moveTo(-26, -60); ctx.lineTo(26, -60); ctx.lineTo(20, 60); ctx.lineTo(-20, 60); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#c9a24a'; ctx.fillRect(-24, -60, 48, 4); ctx.fillStyle = '#2a1a0a'; ctx.fillRect(-3, -40, 6, 80); ctx.fillStyle = '#efe6d2'; ctx.fillRect(-30 - wind * 4, -24, 60, 12); ctx.fillRect(-24 - wind * 4, 10, 48, 10); ctx.fillStyle = '#b33a3a'; ctx.beginPath(); ctx.moveTo(0, -44); ctx.lineTo(16 + Math.sin(now * 6) * 3, -40); ctx.lineTo(0, -36); ctx.fill(); ctx.restore(); }
+    const SP = ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].ship, hx = SP ? SP[0] * ST_TILE : isles ? .45 * ST_TILE : 38.9 * ST_TILE, hy = (SP ? SP[1] : d.map === 'rouge' ? 12.5 : isles ? 10.5 : 16) * ST_TILE + Math.sin(now * 1.4) * 3; if (inView(hx, hy)) { ctx.save(); ctx.translate(hx, hy); ctx.rotate(Math.sin(now * 1.1) * .03); ctx.fillStyle = '#4a2a14'; ctx.beginPath(); ctx.moveTo(-26, -60); ctx.lineTo(26, -60); ctx.lineTo(20, 60); ctx.lineTo(-20, 60); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#c9a24a'; ctx.fillRect(-24, -60, 48, 4); ctx.fillStyle = '#2a1a0a'; ctx.fillRect(-3, -40, 6, 80); ctx.fillStyle = '#efe6d2'; ctx.fillRect(-30 - wind * 4, -24, 60, 12); ctx.fillRect(-24 - wind * 4, 10, 48, 10); ctx.fillStyle = '#b33a3a'; ctx.beginPath(); ctx.moveTo(0, -44); ctx.lineTo(16 + Math.sin(now * 6) * 3, -40); ctx.lineTo(0, -36); ctx.fill(); ctx.restore(); }
   }
   if (!dun) {
     // the lighthouse and the windmill
@@ -5969,6 +6076,9 @@ const ST_MARKETS = { // below 1: made here, cheap. Above 1: wanted here.
   saltmere:    {name: 'Saltmere', m: {grain: 1.2, wool: 1.2, fish: .5, iron: .7, furs: 1.3, relic: 1, spice: 1.2, rum: 1.1, silk: 1.3, wine: 1.2}},
   harrow:      {name: 'Harrowfield', m: {grain: .45, wool: .6, fish: 1.3, iron: 1.3, furs: 1.2, relic: 1.2, spice: 1.7, rum: 1.5, silk: 1.6, wine: 1.5}},
   isles:       {name: 'Port Halcyon', m: {grain: 1.5, wool: 1.6, fish: .7, iron: 1.6, furs: 1.8, relic: 1.4, spice: .5, rum: .55, silk: 1.2, wine: 1.3}},
+  corvane:     {name: 'Port Corvane', m: {grain: 1.1, wool: .7, fish: .6, iron: 1, furs: .8, relic: 1.3, spice: 1.3, rum: 1, silk: 1.2, wine: 1.2}},
+  highmarch:   {name: 'Highmarch', m: {grain: 1.3, wool: 1.1, fish: 1.4, iron: .6, furs: 1.3, relic: 1.4, spice: 1.5, rum: 1.4, silk: 1.1, wine: 1.1}},
+  celestine:   {name: 'Celestine', m: {grain: 1.8, wool: 1.7, fish: 1.9, iron: 1.8, furs: 1.9, relic: .5, spice: 1.6, rum: 1.7, silk: 1.4, wine: 1.5}},
   rouge:       {name: 'Rougemarais', m: {grain: 1.4, wool: 1.4, fish: 1.2, iron: 1.3, furs: 1.6, relic: .8, spice: 1.4, rum: 1.5, silk: .55, wine: .6}},
 };
 function stMarketPrice(mk, g) { // today's price: the market's need, plus a daily swing
@@ -5999,7 +6109,7 @@ function stTrade(mk) {
   m.appendChild(tbl);
   const mats = Object.entries(d.mats || {}).filter(([, n]) => n > 0);
   if (mats.length) { m.appendChild(el('h3', '', 'Sell fish, ore and gems')); const t2 = el('div', 'trade mats');
-    for (const [k, n] of mats) { const price = Math.max(1, Math.round(ST_MATS[k][1] * .8)), sb = el('button', '', `Sell ${n} for ${price * n}g`); sb.addEventListener('click', () => { d.gold += price * n; d.trade.earned += price * n; d.mats[k] = 0; sfx('pickup'); stTrade(mk); }); t2.append(el('span', '', `${ST_MATS[k][0]} ×${n}`), el('span', 'hint', `${price}g each`), sb); }
+    for (const [k, n] of mats) { const price = Math.max(1, Math.round(ST_MATS[k][1] * .8 * (d.guild && stEdict() === 'market' ? 1.15 : 1))), sb = el('button', '', `Sell ${n} for ${price * n}g`); sb.addEventListener('click', () => { d.gold += price * n; d.trade.earned += price * n; d.mats[k] = 0; sfx('pickup'); stTrade(mk); }); t2.append(el('span', '', `${ST_MATS[k][0]} ×${n}`), el('span', 'hint', `${price}g each`), sb); }
     m.appendChild(t2); }
   const row = el('div', 'row'), done = el('button', '', 'Done trading'); done.addEventListener('click', stCloseMenu); row.appendChild(done); m.appendChild(row); setTimeout(() => done.focus({preventScroll: true}), 0);
 }
@@ -6029,6 +6139,130 @@ const ST_GEAR = { // forged at Brann's smithy
   pearlCrown: {name: 'Pearl Diadem', need: {pearl: 3, gold: 1}, lv: 5, mag: 6, def: 4, desc: '+6 magic, +4 defense'},
   sunBlade: {name: 'Sunsteel Greatblade', need: {sunsteel: 3, gold: 2, gem: 1}, lv: 7, atk: 14, desc: '+14 attack'},
 };
+// Boss trophies: unique gear that only drops from a boss (worn at once, stacks with crafted gear)
+Object.assign(ST_GEAR, {
+  emberCore: {drop: true, name: 'Ember Core', atk: 4, desc: '+4 attack'}, frostHeart: {drop: true, name: 'Frost Heart', def: 5, desc: '+5 defense'},
+  oathShield: {drop: true, name: 'Oathkeeper Shield', def: 7, desc: '+7 defense'}, facelessMask: {drop: true, name: 'Faceless Mask', spd: 4, desc: '+4 speed'},
+  hollowCrown: {drop: true, name: 'Hollow Crown', mag: 8, def: 4, desc: '+8 magic, +4 defense'}, corsairCutlass: {drop: true, name: 'Corsair Cutlass', atk: 8, desc: '+8 attack'},
+  moonfangPelt: {drop: true, name: 'Moonfang Pelt', def: 5, spd: 3, desc: '+5 defense, +3 speed'}, silverCrossbow: {drop: true, name: 'Silver Crossbow', atk: 9, desc: '+9 attack'},
+  ashenVeil: {drop: true, name: 'Ashen Veil', mag: 7, spd: 3, desc: '+7 magic, +3 speed'}, seraphFeather: {drop: true, name: 'Seraph Feather', spd: 5, def: 5, desc: '+5 speed, +5 defense'},
+  crimsonSignet: {drop: true, name: 'Crimson Signet', atk: 12, desc: '+12 attack'}, elderRose: {drop: true, name: 'Elder Rose', mag: 12, desc: '+12 magic'},
+  wyrmscale: {drop: true, name: 'Wyrmscale Plate', def: 25, atk: 10, desc: '+25 defense, +10 attack'}, aetherHeart: {drop: true, name: 'Heart of Aetherfall', atk: 30, mag: 30, def: 15, desc: '+30 attack, +30 magic, +15 defense'},
+});
+const ST_BOSS_REWARD = {
+  golem: [150, 20, 'emberCore'], drake: [220, 30, 'frostHeart'], brother: [200, 25, 'oathShield'], stalker: [250, 30, 'facelessMask'], king: [500, 100, 'hollowCrown'], mara: [400, 60, 'corsairCutlass'],
+  ysolde: [350, 50, 'moonfangPelt'], garrick: [350, 50, 'silverCrossbow'], witch: [500, 80, 'ashenVeil'], seraphiel: [600, 100, 'seraphFeather'], marquis: [800, 120, 'crimsonSignet'], countess: [900, 150, 'elderRose'],
+  ignaroth: [3000, 250, 'wyrmscale'], unmaker: [8000, 500, 'aetherHeart'],
+};
+function stShowRewards(id, then) { // the trophy screen after a boss falls
+  const d = stData(), R = ST_BOSS_REWARD[id], F = ST_FOES[id], m = $('stMenu'); if (!R) return then && then();
+  d.bossPaid = d.bossPaid || {}; const first = !d.bossPaid[id], G = ST_GEAR[R[2]];
+  ST.mode = 'menu'; m.hidden = false; m.innerHTML = ''; m.classList.add('rewards');
+  m.append(el('p', 'rwTop', 'BOSS DEFEATED'), el('h3', '', F.name));
+  const list = el('div', 'rwList'), add = (ic, t, sub) => { const r = el('div', 'rw'); r.append(el('span', 'rwIc', ic), el('b', '', t), el('small', '', sub || '')); list.appendChild(r); };
+  add('✦', `${F.xp} XP`, 'Experience'); add('◎', `${F.gold + R[0]} gold`, `${F.gold} spoils + ${R[0]} bounty`);
+  if (first) { add('♛', `${R[1]} Crowns`, 'First victory bonus'); if (G) add('⚔', G.name, G.desc + ' · trophy, worn at once'); }
+  if (d.guild) add('▲', `+50 guild points`, `${d.guild.rank}-Rank standing`);
+  m.appendChild(list);
+  const row = el('div', 'row'), claim = el('button', 'primary', 'Claim rewards'); row.appendChild(claim); m.appendChild(row); setTimeout(() => claim.focus({preventScroll: true}), 0);
+  claim.addEventListener('click', () => {
+    d.gold += R[0]; if (first) { PROF.crowns += R[1]; if (G) { d.gear = d.gear || {}; d.gear[R[2]] = true; } d.bossPaid[id] = true; } if (d.guild) d.guild.pts += 50;
+    sfx('levelup'); m.classList.remove('rewards'); m.hidden = true; ST.mode = 'walk'; stHud(); stSave(); if (then) then();
+  });
+}
+const ST_RANKS = ['D', 'C', 'B', 'A', 'S'];
+const ST_RANK_PTS = {D: 120, C: 320, B: 650, A: 1100}; // standing needed to sit the exam for the next rank
+const ST_EXAM = {D: 'examC', C: 'examB', B: 'examA', A: 'examS'};
+const stRankAtLeast = r => { const g = stData().guild; return !!g && ST_RANKS.indexOf(g.rank) >= ST_RANKS.indexOf(r); };
+const stEdict = () => (stData().guild || {}).edict || 'bounty';
+const ST_EDICTS = {bounty: ['Edict of the Bounty', 'Guild quests pay 30% more'], road: ['Edict of the Open Road', 'Coach and ship fares are halved'], wall: ['Edict of the Iron Wall', '+10% defense for all members'], market: ['Edict of the Market', 'Fish, ore and gems sell for 15% more']};
+const ST_GQ_PAY = {D: [60, 30, 60], C: [130, 45, 150], B: [240, 70, 320], A: [420, 100, 700], S: [800, 150, 1500]}; // gold, guild points, xp
+const ST_GQUESTS = [
+  {id: 'd1', rank: 'D', kind: 'hunt', zone: 'world:T', need: 4, name: 'Thornwood Cull', text: 'Defeat 4 groups in the Thornwood'},
+  {id: 'd2', rank: 'D', kind: 'hunt', zone: 'world::', need: 3, name: 'Ruin Rats', text: 'Defeat 3 groups in the Sunken Ruins'},
+  {id: 'd3', rank: 'D', kind: 'gather', mat: 'trout', need: 3, name: 'Fish for the Hall', text: 'Bring 3 River Trout'},
+  {id: 'd4', rank: 'D', kind: 'gather', mat: 'copper', need: 4, name: 'Copper for the Forge', text: 'Bring 4 Copper Ore'},
+  {id: 'd5', rank: 'D', kind: 'boss', boss: 'golem', name: 'The Ember Guardian', text: 'Defeat the guardian of the Sunken Catacombs'},
+  {id: 'c1', rank: 'C', kind: 'hunt', zone: 'world:*', need: 4, name: 'Frostbite Contract', text: 'Defeat 4 groups on the Frost Peaks'},
+  {id: 'c2', rank: 'C', kind: 'hunt', zone: 'world:b', need: 3, name: 'Marsh Wardens', text: 'Defeat 3 groups in the Bone Marsh'},
+  {id: 'c3', rank: 'C', kind: 'gather', mat: 'iron', need: 5, name: 'Iron for the Wardens', text: 'Bring 5 Iron Ore'},
+  {id: 'c4', rank: 'C', kind: 'gather', mat: 'salmon', need: 2, name: 'The Guildmaster\'s Supper', text: 'Bring 2 Silver Salmon'},
+  {id: 'c5', rank: 'C', kind: 'boss', boss: 'drake', name: 'Wyrm of the Crypt', text: 'Slay the frost drake of the Ice Crypt'},
+  {id: 'c6', rank: 'C', kind: 'boss', boss: 'stalker', name: 'The Nameless Hunter', text: 'End what stalks the Gloamwood'},
+  {id: 'b1', rank: 'B', kind: 'hunt', zone: 'world:g', need: 4, name: 'Gloam Hunt', text: 'Defeat 4 groups in the Gloamwood'},
+  {id: 'b2', rank: 'B', kind: 'hunt', zone: 'world:a', need: 4, name: 'Dune Patrol', text: 'Defeat 4 groups in the Ashfall Dunes'},
+  {id: 'b3', rank: 'B', kind: 'hunt', zone: 'isles', need: 4, name: 'Corsair Sweep', text: 'Defeat 4 groups on the Brightwater Isles'},
+  {id: 'b4', rank: 'B', kind: 'gather', mat: 'silver', need: 4, name: 'Silver for the Hunters', text: 'Bring 4 Silver Ore'},
+  {id: 'b5', rank: 'B', kind: 'boss', boss: 'king', name: 'Lord of Hollows', text: 'Defeat the Hollow King'},
+  {id: 'b6', rank: 'B', kind: 'boss', boss: 'mara', name: 'The Corsair Queen', text: 'Bring down Mara\'s flag'},
+  {id: 'b7', rank: 'B', kind: 'boss', boss: 'witch', name: 'The Ashen Witch', text: 'End Sister Vey of Duskwatch'},
+  {id: 'a1', rank: 'A', kind: 'hunt', zone: 'rouge', need: 4, name: 'Thrall Purge', text: 'Defeat 4 groups in Rougemarais'},
+  {id: 'a2', rank: 'A', kind: 'hunt', zone: 'land2:Corvane Coast', need: 4, name: 'Coastal Brigands', text: 'Defeat 4 groups on the Corvane Coast (Valdris)'},
+  {id: 'a3', rank: 'A', kind: 'hunt', zone: 'land2:Ironpine Forest', need: 4, name: 'Ironpine Wolves', text: 'Defeat 4 groups in the Ironpine Forest (Valdris)'},
+  {id: 'a4', rank: 'A', kind: 'gather', mat: 'gold', need: 3, name: 'Gold for the Treasury', text: 'Bring 3 Gold Ore'},
+  {id: 'a5', rank: 'A', kind: 'boss', boss: 'marquis', name: 'The Crimson Prince', text: 'End Marquis Valcourt'},
+  {id: 'a6', rank: 'A', kind: 'boss', boss: 'seraphiel', name: 'The Sixfold Wing', text: 'Face Seraphiel atop the Celestial Stair'},
+  {id: 's1', rank: 'S', kind: 'hunt', zone: 'land2:Wyrmspine Peaks', need: 5, name: 'Wyvern Cull', text: 'Defeat 5 groups in the Wyrmspine Peaks'},
+  {id: 's2', rank: 'S', kind: 'hunt', zone: 'land3:Lowcloud Isles', need: 5, name: 'Voidhound Hunt', text: 'Defeat 5 groups on the Lowcloud Isles (Aetherfall)'},
+  {id: 's3', rank: 'S', kind: 'hunt', zone: 'land3:Seraph Gardens', need: 5, name: 'The Fallen Choir', text: 'Defeat 5 groups in the Seraph Gardens'},
+  {id: 's4', rank: 'S', kind: 'gather', mat: 'sunsteel', need: 3, name: 'Sunsteel for the Council', text: 'Bring 3 Sunsteel Ore'},
+  {id: 's5', rank: 'S', kind: 'boss', boss: 'ignaroth', name: 'Tyrant of the Wyrmspine', text: 'Slay Ignaroth in Valdris'},
+  {id: 's6', rank: 'S', kind: 'boss', boss: 'unmaker', name: 'The End of All Things', text: 'Destroy the Unmaker in the Abyssal Rift'},
+];
+const stGQ = id => ST_GQUESTS.find(q => q.id === id);
+const stGQDone = q => { const d = stData(), a = (d.guild.quests || []).find(x => x.id === q.id); return q.kind === 'hunt' ? a && a.prog >= q.need : q.kind === 'gather' ? ((d.mats || {})[q.mat] || 0) >= q.need : !!d.flags[q.boss]; };
+function stGuildJoin(name) {
+  const d = stData();
+  stSay([[name, 'The Adventurers\' Guild is no tavern club. It is a government. The Free Guild Compact rules every road and wild place beyond the town walls, and all of Valdris across the sea.'],
+    [name, 'Its law is short: merit is the only crown. Members rise from D-Rank to S-Rank by work done and exams passed. The Council of S-Ranks issues edicts that bind every member; A-Ranks vote on them.'],
+    [name, 'Members may travel guild territory, like the Gloamwood and the Ashfall Dunes. The Compact takes a 10% levy on quest pay until you reach A-Rank. Crimes cost you standing. The joining fee is 20 gold.']], null,
+    [['Join the Guild (20 gold)', () => { if (d.gold < 20) return stSay([[name, 'Twenty gold. The Compact does not run on promises.']]); d.gold -= 20; d.guild = {rank: 'D', pts: 0, quests: [], edict: 'bounty'}; sfx('levelup'); stCallout('D-RANK ADVENTURER', '#ffd75e'); stSay([[name, 'Welcome to the Compact, D-Rank. Take work from the quest board. Earn standing, then sit your exam with the Guildmaster.']]); }], ['Not yet', null]]);
+}
+function stGuildDesk(name) { // the front desk in any guild hall
+  const d = stData(), g = d.guild;
+  if (!g) return stGuildJoin(name);
+  const nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], need = ST_RANK_PTS[g.rank];
+  stSay([[name, `${g.rank}-Rank. Standing: ${g.pts}${nx ? ` of ${need} for your ${nx}-Rank exam` : ', the highest there is'}. Current edict: ${ST_EDICTS[stEdict()][0]} (${ST_EDICTS[stEdict()][1]}).`]], null,
+    [['Quest board', () => stGuildBoard()]].concat(nx && g.pts >= need ? [[`Sit the ${nx}-Rank exam (level ${ST_BOSS_LV[ST_EXAM[g.rank]]}+)`, () => stBossFight(ST_EXAM[g.rank])]] : [], stRankAtLeast('A') ? [[g.rank === 'S' ? 'Decree an edict' : 'Vote on the next edict', () => stEdictMenu()]] : [], [['Leave', null]]));
+}
+function stEdictMenu() {
+  const d = stData();
+  stSay([['', d.guild.rank === 'S' ? 'The Council chamber. Your seal is as good as law. Choose the edict that binds the Compact.' : 'The ballot box of the Compact. Your vote tips the Council. Choose an edict.']], null,
+    Object.entries(ST_EDICTS).map(([k, E]) => [`${E[0]}: ${E[1]}${k === stEdict() ? ' (in force)' : ''}`, () => { d.guild.edict = k; sfx('shield'); stCallout(`${E[0]} is now law`, '#ffd75e'); }]).concat([['Leave it as it is', null]]));
+}
+function stGuildBoard() { // take, track and turn in guild quests
+  const d = stData(), g = d.guild, m = $('stMenu'); if (!g) return; g.quests = g.quests || []; g.done = g.done || [];
+  ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  const nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], need = ST_RANK_PTS[g.rank], pay = q => { const P = ST_GQ_PAY[q.rank], mul = (q.kind === 'boss' ? 2 : 1); return [Math.round(P[0] * mul * (stEdict() === 'bounty' ? 1.3 : 1)), P[1] * mul, P[2] * mul]; };
+  m.append(el('h3', '', `Quest board · ${g.rank}-Rank`), el('p', '', nx ? `Standing ${g.pts}/${need} toward your ${nx}-Rank exam.` : 'S-Rank. There is no higher rank.'));
+  const bar = el('div', 'bar rankbar'), fill = el('i'); fill.style.width = (nx ? Math.min(100, g.pts / need * 100) : 100) + '%'; bar.appendChild(fill); m.appendChild(bar);
+  m.appendChild(el('h3', '', `Your quests (${g.quests.length}/3)`));
+  const mine = el('div', 'trade gq');
+  if (!g.quests.length) mine.append(el('span', 'hint', 'None taken. Pick from the board below.'));
+  for (const a of g.quests) { const q = stGQ(a.id); if (!q) continue; const ok = stGQDone(q), P = pay(q);
+    const prog = q.kind === 'hunt' ? `${a.prog}/${q.need}` : q.kind === 'gather' ? `${Math.min(q.need, (d.mats || {})[q.mat] || 0)}/${q.need}` : ok ? 'done' : 'not yet';
+    const act = el('span', 'tbtn'), tb = el('button', ok ? 'primary' : '', ok ? 'Turn in' : 'Abandon');
+    tb.addEventListener('click', () => {
+      if (ok) { if (q.kind === 'gather') d.mats[q.mat] -= q.need; const tax = stRankAtLeast('A') ? 0 : Math.round(P[0] * .1); d.gold += P[0] - tax; g.pts += P[1]; d.xp += P[2]; g.done.push(q.id); sfx('levelup'); stCallout(`${q.name}: +${P[0] - tax} gold · +${P[1]} standing`, '#ffd75e'); if (tax) setTimeout(() => stCallout(`The Compact levies ${tax} gold (10%)`, '#c8b89a'), 1500); }
+      g.quests = g.quests.filter(x => x !== a); stGuildBoard();
+    });
+    act.appendChild(tb); mine.append(el('span', '', `[${q.rank}] ${q.name}`), el('span', 'hint', q.text), el('span', '', prog), act); }
+  m.appendChild(mine);
+  m.appendChild(el('h3', '', 'On the board'));
+  const avail = el('div', 'trade gq');
+  for (const q of ST_GQUESTS) { if (ST_RANKS.indexOf(q.rank) > ST_RANKS.indexOf(g.rank) || g.quests.some(a => a.id === q.id) || (q.kind === 'boss' && g.done.includes(q.id))) continue;
+    const P = pay(q), b = el('button', '', 'Take'); b.disabled = g.quests.length >= 3;
+    b.addEventListener('click', () => { g.quests.push({id: q.id, prog: 0}); sfx('pickup'); stGuildBoard(); });
+    const act = el('span', 'tbtn'); act.appendChild(b); avail.append(el('span', '', `[${q.rank}] ${q.name}`), el('span', 'hint', q.text), el('span', '', `${P[0]}g · +${P[1]}`), act); }
+  m.appendChild(avail);
+  const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row); setTimeout(() => x.focus({preventScroll: true}), 0);
+}
+// guild territory: some regions are only open to members of a certain rank
+function stAreaRule(x, y) {
+  const d = stData();
+  if (d.map === 'world') { const t = stTileAt(x, y); return t === 'g' || t === 'a' ? {name: ST_REGION[t], rank: 'D'} : null; }
+  const z = stZoneAt(x, y); return z && z.rank ? {name: z.name, rank: z.rank} : null;
+}
 const ST_MEALS = { // cooked at inns; eat them in battle from Items
   grilled: {name: 'Grilled Fish', need: {any: 2}, lv: 1, hp: 90, desc: '+90 HP'},
   stew: {name: 'Hearty Fish Stew', need: {eel: 1, salmon: 1}, lv: 2, hp: 160, cure: true, desc: '+160 HP, stops bleeding'},
@@ -6129,6 +6363,7 @@ function stCraft(station) {
   m.append(el('h3', '', station === 'forge' ? 'Brann\'s forge' : 'The inn kitchen'), el('p', '', `Crafting level ${lv} (${stProfTitle(lv)}). ` + (station === 'forge' ? 'Forged gear is worn at once and stacks with your other gear.' : 'Meals can be eaten in battle from Items.')));
   const tbl = el('div', 'trade craft');
   for (const k in list) {
+    if (list[k].drop) continue;
     const R = list[k], have = need => need === 'any' ? stFishCount() : d.mats[need] || 0, ok = Object.entries(R.need).every(([n, c]) => have(n) >= c), done = station === 'forge' && d.gear[k], locked = lv < R.lv;
     const b = el('button', '', done ? 'Owned' : locked ? `Craft lv ${R.lv}` : 'Craft'); b.disabled = done || locked || !ok;
     b.addEventListener('click', () => {
@@ -6227,7 +6462,7 @@ $('crBack').addEventListener('click', openStoryMenu);
 $('crStart').addEventListener('click', () => {
   const name = ($('crName').value.trim() || 'Wanderer').slice(0, 14), c = ST_CLASSES[crSel.cls];
   PROF.story = {name, cls: crSel.cls, color: crSel.color, voice: crSel.voice, skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
-    items: {potion: 3, ether: 1}, x: 11 * ST_TILE, y: 11 * ST_TILE + 32, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false,
+    items: {potion: 3, ether: 1}, x: 11 * ST_TILE, y: 11 * ST_TILE + 32, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false, tut: 1,
     map: 'world', shrine: {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64}, lost: null};
   stSave(); startStory(true);
 });
@@ -6274,7 +6509,52 @@ function stDrawCityCanvas(key) { // cobblestones, townhouses with iron balconies
   }));
   ST.dunC[key] = c;
 }
+function stDrawLandCanvas(key) { // the far lands: sea or void, sand, meadow, roads, bridges, peaks, cottages, townhouses, walls and a great hall
+  const D = ST_DUNGEONS[key], P = D.pal, rows = D.rows, c = document.createElement('canvas'); c.width = rows[0].length * ST_TILE; c.height = rows.length * ST_TILE;
+  const g = c.getContext('2d'), R = mulberry(51), trees = ST.treesBy[key] = [], at = (x, y) => (rows[y] && rows[y][x]) || '#';
+  const FAC = D.void ? ['#b8b0d8', '#a8a0c8', '#c8c0e8', '#9890b8'] : ['#8a6a4a', '#6a5a4a', '#7a5a3a', '#5a6a7a', '#8a7a5a'];
+  rows.forEach((row, y) => [...row].forEach((t, x) => {
+    const px = x * ST_TILE, py = y * ST_TILE, shore = (t === '#' || t === 'E' || t === 'Z') && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => !'#EZ'.includes(at(x + a, y + b)));
+    g.fillStyle = '#EZ'.includes(t) ? (shore ? P.shore : P.sea) : t === ',' || t === 'S' ? P.sand : '=JLAaW'.includes(t) ? P.road : (x + y) % 2 ? P.grass : P.grass2; g.fillRect(px, py, ST_TILE, ST_TILE);
+    if (t === '#') { if (D.void) { for (let i = 0; i < 2; i++) { g.fillStyle = `rgba(255,250,240,${.3 + R() * .6})`; g.fillRect(px + R() * 64, py + R() * 64, 1.5, 1.5); } if (R() < .1) { g.fillStyle = 'rgba(200,190,255,.08)'; g.beginPath(); g.ellipse(px + 32, py + 32, 50, 14, 0, 0, 7); g.fill(); } }
+      else { g.strokeStyle = shore ? 'rgba(255,255,255,.45)' : 'rgba(200,240,255,.22)'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 6, py + 20 + R() * 20); g.quadraticCurveTo(px + 32, py + 12 + R() * 20, px + 58, py + 24 + R() * 20); g.stroke(); } }
+    else if (t === ',') { g.fillStyle = 'rgba(120,90,40,.25)'; for (let i = 0; i < 4; i++) g.fillRect(px + R() * 60, py + R() * 60, 2, 2); }
+    else if ('.XcBT'.includes(t)) { g.strokeStyle = 'rgba(20,40,15,.45)'; g.lineWidth = 2; for (let i = 0; i < 4; i++) { const gx = px + R() * 60, gy = py + R() * 60; g.beginPath(); g.moveTo(gx, gy); g.lineTo(gx + 2, gy - 7); g.stroke(); } if (R() < .12) { g.fillStyle = D.void ? '#e8e2ff' : ['#ff6a8a', '#ffd75e', '#fff', '#9ad0ff'][Math.floor(R() * 4)]; g.beginPath(); g.arc(px + R() * 56 + 4, py + R() * 56 + 4, 3, 0, 7); g.fill(); } }
+    if ('=JLAaW'.includes(t)) { g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = 1.5; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) g.strokeRect(px + j * 16 + (i % 2) * 8, py + i * 16, 16, 16); }
+    if (t === 'Z') { g.fillStyle = D.void ? 'rgba(200,190,255,.75)' : '#7a5a3a'; for (let i = 0; i < 4; i++) g.fillRect(px + 2, py + 4 + i * 15, 60, 10); if (D.void) { g.shadowColor = '#c8b8ff'; g.shadowBlur = 12; g.fillRect(px, py + 30, 64, 3); g.shadowBlur = 0; } }
+    if (t === 'E') { g.fillStyle = '#6a4a2a'; for (let i = 0; i < 4; i++) g.fillRect(px + 2, py + 4 + i * 15, 60, 11); }
+    if (t === '^') { g.fillStyle = P.mount; g.beginPath(); g.moveTo(px - 4, py + 62); g.lineTo(px + 32, py - 14); g.lineTo(px + 68, py + 62); g.fill(); g.fillStyle = '#f0f4f8'; g.beginPath(); g.moveTo(px + 20, py + 12); g.lineTo(px + 32, py - 14); g.lineTo(px + 44, py + 12); g.fill(); }
+    if (t === 'T') { trees.push({x: px + 32, y: py + 48, s: .9 + R() * .4, pine: D.trees === 'pine' && R() < .8, crystal: D.trees === 'crystal', ph: R() * 6}); g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(px + 32, py + 52, 16, 5, 0, 0, 7); g.fill(); }
+    if (t === 'S') { g.fillStyle = '#3a3330'; g.beginPath(); g.ellipse(px + 32, py + 48, 20, 8, 0, 0, 7); g.fill(); g.strokeStyle = '#c9c0b0'; g.lineWidth = 4; g.beginPath(); g.moveTo(px + 32, py + 48); g.lineTo(px + 36, py + 14); g.stroke(); }
+    if (t === 'L') { g.fillStyle = '#141414'; g.fillRect(px + 30, py - 10, 4, 66); g.fillStyle = '#1a1a1a'; g.fillRect(px + 24, py - 24, 16, 16); g.fillStyle = D.void ? '#c8e8ff' : '#ffd08a'; g.shadowColor = g.fillStyle; g.shadowBlur = 22; g.fillRect(px + 27, py - 21, 10, 10); g.shadowBlur = 0; }
+    if (t === 'W') { g.fillStyle = D.void ? '#a8a0c8' : '#6a6460'; g.fillRect(px, py + 4, 64, 56); g.fillStyle = 'rgba(0,0,0,.25)'; for (let i = 0; i < 3; i++) g.fillRect(px, py + 18 + i * 14, 64, 2); g.fillStyle = D.void ? '#c8c0e8' : '#7a7470'; for (let i = 0; i < 3; i++) g.fillRect(px + 4 + i * 22, py - 6, 14, 12); }
+    if (t === 'H') { // a cottage with a steep roof
+      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(px + 2, py + 54, 64, 10); g.fillStyle = P.hut; g.fillRect(px + 6, py + 8, 52, 50); g.fillStyle = '#3a2414'; g.fillRect(px + 24, py + 30, 16, 28);
+      g.fillStyle = '#ffd08a'; g.globalAlpha = .8; g.fillRect(px + 10, py + 20, 10, 10); g.fillRect(px + 44, py + 20, 10, 10); g.globalAlpha = 1;
+      g.fillStyle = P.roof; g.beginPath(); g.moveTo(px - 8, py + 14); g.lineTo(px + 32, py - 48); g.lineTo(px + 72, py + 14); g.closePath(); g.fill();
+    }
+    if (t === 'J') { // a tall townhouse
+      const fc = FAC[(x * 7 + y * 3) % FAC.length], top = py - 80;
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(px, py + 54, 64, 10); g.fillStyle = fc; g.fillRect(px + 1, top, 62, py + 60 - top); g.fillStyle = P.roof; g.beginPath(); g.moveTo(px - 2, top + 4); g.lineTo(px + 32, top - 28); g.lineTo(px + 66, top + 4); g.fill();
+      for (let f = 0; f < 3; f++) for (const wx of [12, 38]) { const wy = top + 12 + f * 44, lit = R() < .6; g.fillStyle = lit ? (D.void ? '#c8e8ff' : '#ffc870') : '#1a1418'; g.globalAlpha = lit ? .85 : 1; g.fillRect(px + wx, wy, 14, 20); g.globalAlpha = 1; }
+      g.fillStyle = '#1a1210'; g.fillRect(px + 24, py + 30, 16, 30);
+    }
+  }));
+  rows.forEach((row, y) => [...row].forEach((t, x) => { // the great hall: the Guild Council of Highmarch, or Celestine's spire
+    if (t !== 'A') return; const px = x * ST_TILE, py = y * ST_TILE, W4 = ST_TILE * 4, H3 = ST_TILE * 3;
+    g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(px, py + H3 - 10, W4, 16);
+    g.fillStyle = D.void ? '#d8d0f0' : '#8a7a6a'; g.fillRect(px + 8, py - 30, W4 - 16, H3 + 30);
+    for (let i = 0; i < 5; i++) { g.fillStyle = D.void ? '#f0ecff' : '#a8988a'; g.fillRect(px + 22 + i * 46, py + 10, 14, H3 - 20); } // columns
+    g.fillStyle = D.void ? '#b8b0e0' : '#5a3a2a'; g.beginPath(); g.moveTo(px - 6, py - 26); g.lineTo(px + W4 / 2, py - (D.void ? 190 : 100)); g.lineTo(px + W4 + 6, py - 26); g.fill();
+    if (D.void) { g.fillStyle = '#c8e8ff'; g.shadowColor = '#c8e8ff'; g.shadowBlur = 30; g.beginPath(); g.moveTo(px + W4 / 2 - 14, py - 170); g.lineTo(px + W4 / 2, py - 240); g.lineTo(px + W4 / 2 + 14, py - 170); g.fill(); g.shadowBlur = 0; }
+    else { for (const bx of [px + 30, px + W4 - 46]) { g.fillStyle = '#b33a3a'; g.fillRect(bx, py - 10, 16, 50); g.fillStyle = '#ffd75e'; g.fillRect(bx + 5, py + 4, 6, 6); } g.fillStyle = '#ffd75e'; g.font = '700 14px Georgia, serif'; g.textAlign = 'center'; g.fillText('GUILD COUNCIL', px + W4 / 2, py - 36); g.textAlign = 'left'; }
+    g.fillStyle = '#140a0e'; g.fillRect(px + W4 / 2 - 22, py + H3 - 60, 44, 60);
+    g.fillStyle = D.void ? '#c8c0e8' : '#7a7470'; for (let i = 0; i < 3; i++) g.fillRect(px + 40 - i * 10, py + H3 + i * 10, W4 - 80 + i * 20, 10);
+  }));
+  ST.dunC[key] = c;
+}
 function stDrawOutdoorCanvas(key) { // sea, sand, grass, huts, a pier; palms are drawn live so they sway
+  if (ST_DUNGEONS[key].land) return stDrawLandCanvas(key);
   if (ST_DUNGEONS[key].city) return stDrawCityCanvas(key);
   const D = ST_DUNGEONS[key], rows = D.rows, c = document.createElement('canvas'); c.width = rows[0].length * ST_TILE; c.height = rows.length * ST_TILE;
   const g = c.getContext('2d'), R = mulberry(41), trees = ST.treesBy[key] = [], at = (x, y) => (rows[y] && rows[y][x]) || '#';
@@ -6387,17 +6667,110 @@ function startStory(fresh) {
   const d = stData(); d.map = d.map || 'world'; if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
   if (d.map !== 'world') { const px = d.x, py = d.y; stEnterMap(d.map, 2, 2); d.x = px; d.y = py; }
   ST.cam.x = d.x; ST.cam.y = d.y; musicStart(); musicForce(stMapSong());
+  if (d.tut == null) { d.tut = 99; d.flags.tutDone = true; } // stories begun before the tutorial skip it
+  if (d.tut > 0 && d.tut < 99 && !fresh) { ST.tut = Object.assign(stTutPos(d.tut), {seg: 0, wait: false}); }
   if (fresh) stSay([
     ['', `You wake face-down in cold ash. You remember dying. You remember nothing before it. Only a name, scratched into the hilt of your weapon: ${d.name}.`],
     ['', 'The sky is the color of a bruise. To the east, one village still keeps its fires lit. Everything else has gone hollow.'],
     ['', 'Rest at Ashen Shrines (the swords in the ash) to heal. If you die, you drop your gold where you fall. Return for it, or lose it forever.'],
     ['', 'Move with the arrow keys, WASD, the left stick or the on-screen pad. Interact with E, A or the A button.'],
-  ]);
+  ], () => stTutStart());
   stHud();
 }
 function stLeave() {
   stSave(); ST.on = false; document.body.classList.remove('story'); $('story').hidden = true; musicForce(null); try { speechSynthesis.cancel(); } catch (e) { /* no speech */ }
   reset(0); G.started = false; show('scr-main');
+}
+
+// ---- tutorial: Warden Edda walks ahead through Thornwake and stops to explain each place. Paths are tile coordinates.
+const ST_TUT = [
+  {path: [[12.8, 11.6]], lines: [['Warden Edda', 'Easy. Breathe. You died out there in the ash, and the ash spat you back. It happens here. Not often.'], ['Warden Edda', 'I am Edda, warden of Thornwake. Walk with me and I will show you how to stay alive. Follow the gold arrow, or just follow me.']]},
+  {path: [[12.6, 12.2]], lines: [['Warden Edda', 'An Ashen Shrine. Kneel at one (press E) to heal and to set where you wake if you die.'], ['Warden Edda', 'Die, and you drop your gold where you fell. Walk back and pick it up. Die again first, and it is gone.']]},
+  {path: [[14.6, 12.2], [14.6, 12.9]], lines: [['Warden Edda', 'Pell the merchant. Potions, ethers, and trade goods. Every town buys and sells at its own prices. Buy cheap where goods are made, sell where they are wanted.']]},
+  {path: [[14, 12.9], [14, 14.6]], lines: [['Warden Edda', 'Bree\'s inn. Pay to rest and heal fully, and cook meals from the fish you catch. Meals heal far more than potions in a fight.']]},
+  {path: [[14, 15.5], [16.9, 15.5]], lines: [['Warden Edda', 'The Adventurers\' Guild. They govern every road beyond the walls: the Free Guild Compact. Join them, take quests from the board inside, and climb from D-Rank to S-Rank.'], ['Warden Edda', 'Some wild lands are guild territory, members only. And the ships to far lands only carry ranked adventurers. Walk in through the door below the sign.']]},
+  {path: [[15, 15.5], [15, 12.4], [17.3, 12.4]], lines: [['Warden Edda', 'The coach post. Coaches run between the towns for a fare. Ships sail from Saltmere, east of here, to the isles and the lands beyond, once you are strong enough.']]},
+  {path: [[14.5, 12.4], [14.5, 9.2]], lines: [['Warden Edda', 'Garth\'s stables. A horse makes the road short. Buy one and press R to ride.']]},
+  {path: [[14.5, 10.6], [10.6, 10.6]], lines: [['Warden Edda', 'West of here is the Thornwood. The wolves have gone hollow. Talk to Maren the Pale in the square first; she has work for you.'], ['Warden Edda', 'In a fight, pick Attack or a Skill. Items heal. Defend halves the next blows. The faster fighter dodges more. Every move you use grows stronger and evolves.'],
+    ['Warden Edda', 'Press M for your menu: your quests, bag and skills are all there. The map in the corner shows where you are, and the gold star where you should go. That is all I can teach. The rest, the Vale will.']], done: true},
+];
+function stTutPos(i) { const P = ST_TUT[Math.max(0, i - 1)].path, e = P[P.length - 1]; return {x: e[0] * ST_TILE, y: e[1] * ST_TILE}; }
+function stTutStart(again) {
+  const d = stData(); d.tut = 1; ST.tut = Object.assign(stTutPos(0), {seg: 0, wait: true}); ST.tut.x = d.x + 90; ST.tut.y = d.y - 10;
+  stSay(ST_TUT[0].lines, null, [['Show me around', () => { ST.tut.wait = false; ST.tut.seg = 0; }], ['Skip the tour', () => stTutEnd(true)]]);
+  if (again) stCallout('Follow Warden Edda', '#ffd75e');
+}
+function stTutEnd(skipped) {
+  const d = stData(); d.tut = 99; ST.tut = null; d.flags.tutDone = true;
+  if (!skipped) { d.gold += 40; d.items.potion += 2; sfx('levelup'); stCallout('Tour complete: +40 gold, +2 potions', '#ffd75e'); }
+  stSave(); stHud();
+}
+function stTutTick(dt) { // Edda walks her path, waits for you if you fall behind, then speaks
+  const d = stData(), T = ST.tut; if (!T || d.map !== 'world' || ST.mode !== 'walk') return;
+  const step = ST_TUT[d.tut]; if (!step) return stTutEnd();
+  if (T.wait) return;
+  const dist = Math.hypot(d.x - T.x, d.y - T.y), tgt = step.path[T.seg];
+  if (tgt) {
+    if (dist > 330) { T.walking = false; return; } // she waits for you
+    const tx = tgt[0] * ST_TILE, ty = tgt[1] * ST_TILE, a = Math.atan2(ty - T.y, tx - T.x), r = Math.hypot(tx - T.x, ty - T.y), v = Math.min(r, 150 * dt);
+    T.x += Math.cos(a) * v; T.y += Math.sin(a) * v; T.face = Math.cos(a) < -.1 ? Math.PI : Math.cos(a) > .1 ? 0 : T.face || 0; T.walk = (T.walk || 0) + v; T.walking = true;
+    if (r < 4) T.seg++;
+    return;
+  }
+  T.walking = false;
+  if (dist < 150) { T.wait = true; stSay(step.lines, () => { if (step.done) return stTutEnd(); d.tut++; T.seg = 0; T.wait = false; stSave(); }); }
+}
+function stTutDraw(now) {
+  const d = stData(), T = ST.tut; if (!T || d.map !== 'world') return;
+  drawCharacter(ctx, stUnit('paladin', '#7a9ac8', T.x, T.y, T.face || 0, T.walking ? T.walk : 0, 77, 8), now);
+  ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Warden Edda', T.x, T.y - 74);
+  if (!T.walking && !T.wait) { ctx.fillStyle = '#ffd75e'; ctx.font = '800 22px "Barlow Semi Condensed", sans-serif'; ctx.fillText('!', T.x, T.y - 92 + Math.sin(now * 5) * 4); }
+  ctx.textAlign = 'left';
+}
+
+// ---- objectives: what to do next, and where. Drives the tracker, the minimap star and the gold arrow.
+function stObjective() {
+  const d = stData(), T = (x, y, map = 'world') => ({x: x * ST_TILE + 32, y: y * ST_TILE + 32, map});
+  if (ST.tut && d.map === 'world') return Object.assign({text: 'Follow Warden Edda through Thornwake', x: ST.tut.x, y: ST.tut.y, map: 'world'});
+  if (d.map !== 'world') { const D = ST_DUNGEONS[d.map]; let b = null; if (D.boss && !d.flags[D.boss]) D.rows.forEach((r, y) => { const x = r.indexOf('B'); if (x >= 0) b = T(x, y, d.map); });
+    return Object.assign({text: D.home ? `Inside ${D.name}. The door is at the bottom of the room.` : D.boss && !d.flags[D.boss] ? `Find and defeat ${ST_FOES[D.boss].name}${ST_BOSS_LV[D.boss] ? ` (level ${ST_BOSS_LV[D.boss]})` : ''}` : `Explore ${D.name}`}, b || {}); }
+  if (d.ch === 0) return d.pelts < 3 ? Object.assign({text: `Drive off the hollowed wolves in the Thornwood (${d.pelts}/3)`}, T(6, 11)) : Object.assign({text: 'Return to Maren the Pale in Thornwake'}, T(14, 10));
+  if (d.ch === 1) return Object.assign({text: 'Enter the Sunken Catacombs (level 4) and take the Ember Shard'}, T(24, 16));
+  if (d.ch === 2) return Object.assign({text: 'Climb the Frost Peaks to the Ice Crypt (level 7) for the Frost Shard'}, T(4, 2));
+  if (d.ch === 3) return Object.assign({text: 'Break the seal of the Hollow Castle and face the Hollow King (level 13)'}, T(24, 6));
+  if (!d.guild) return Object.assign({text: 'Join the Adventurers\' Guild in Thornwake'}, T(17, 15));
+  const a = (d.guild.quests || []).map(a => stGQ(a.id)).find(Boolean);
+  if (a) return Object.assign({text: `Guild quest: ${a.name}. ${a.text}`}, T(17, 15));
+  return Object.assign({text: stRankAtLeast('C') && d.lv >= 26 ? 'Sail from Saltmere to Valdris, the Guild Commonwealth' : 'Take quests from the guild board and climb the ranks'}, stRankAtLeast('C') && d.lv >= 26 ? T(37, 16) : T(17, 15));
+}
+function stObjArrow(now) { // a gold chevron circling you, pointing the way
+  const d = stData(), o = stObjective(); if (!o || o.x == null || o.map !== d.map) return;
+  const dx = o.x - d.x, dy = o.y - d.y, dist = Math.hypot(dx, dy); if (dist < 240) return;
+  const a = Math.atan2(dy, dx), r = 78 + Math.sin(now * 4) * 4, x = d.x + Math.cos(a) * r, y = d.y - 30 + Math.sin(a) * r;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.fillStyle = '#ffd75e'; ctx.shadowColor = '#ffb35a'; ctx.shadowBlur = 12; ctx.globalAlpha = .9;
+  ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-8, -10); ctx.lineTo(-3, 0); ctx.lineTo(-8, 10); ctx.closePath(); ctx.fill(); ctx.restore();
+  ctx.fillStyle = '#fff3c9'; ctx.font = '700 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(`${Math.round(dist / ST_TILE)}m`, d.x + Math.cos(a) * (r + 24), d.y - 26 + Math.sin(a) * (r + 24)); ctx.textAlign = 'left';
+}
+// ---- the minimap: a small overview of the current map, you, and the objective star
+const ST_MINI_COL = {'#': '#2a5a7a', '~': '#2a5a7a', '^': '#8a8a90', T: '#2a4a2a', g: '#1a2a1a', v: '#8a7a5a', '=': '#9a8a6a', '.': '#4a6a3a', ',': '#c8b888', '*': '#d8e0e8', a: '#a8885a', b: '#3a4a2a', C: '#3a2a4a', W: '#5a5a5a', ':': '#5a6a62', F: '#7a6a3a', S: '#e8e0c8', E: '#8a6a3a', Z: '#8a6a3a', J: '#8a6a5a', H: '#9a6a4a', h: '#9a6a4a', I: '#9a6a4a', U: '#9a6a4a', K: '#9a6a4a', A: '#d8c8a8', a2: '#d8c8a8', L: '#e8d8a0', O: '#c8a86a', D: '#111', G: '#7a3aff', B: '#6a5230', P: '#8a6a3a', Q: '#4a6a3a', M: '#8a7a5a', Y: '#888'};
+function stMiniBase(key) {
+  ST.miniC = ST.miniC || {}; if (ST.miniC[key]) return ST.miniC[key];
+  const rows = key === 'world' ? ST_MAP.map(r => r.join ? r.join('') : r) : ST_DUNGEONS[key].rows, D = ST_DUNGEONS[key], c = document.createElement('canvas'); c.width = rows[0].length; c.height = rows.length;
+  const g = c.getContext('2d');
+  rows.forEach((row, y) => [...row].forEach((t, x) => { g.fillStyle = key !== 'world' && !D.outdoor ? (t === '#' ? '#151515' : '#6a5a4a') : D && D.void && t === '#' ? '#120a26' : D && D.pal && t === '.' ? D.pal.grass : ST_MINI_COL[t === 'a' && D && D.outdoor ? 'a2' : t] || '#4a6a3a'; g.fillRect(x, y, 1, 1); }));
+  return (ST.miniC[key] = c);
+}
+function stMiniDraw(now) {
+  const cv = $('stMini'), d = stData(); if (!cv || !d) return;
+  const W = cv.width, H = cv.height, g = cv.getContext('2d'), base = stMiniBase(d.map), cols = base.width, rows = base.height;
+  const view = Math.min(cols, d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].land) ? 34 : cols), vh = Math.min(rows, view * H / W), pxs = W / view;
+  const ptx = d.x / ST_TILE, pty = d.y / ST_TILE, x0 = clamp(ptx - view / 2, 0, Math.max(0, cols - view)), y0 = clamp(pty - vh / 2, 0, Math.max(0, rows - vh));
+  g.imageSmoothingEnabled = false; g.fillStyle = '#05070a'; g.fillRect(0, 0, W, H); g.drawImage(base, x0, y0, view, vh, 0, 0, W, vh * pxs);
+  const o = stObjective();
+  if (o && o.x != null && o.map === d.map) { const ox = clamp((o.x / ST_TILE - x0) * pxs, 6, W - 6), oy = clamp((o.y / ST_TILE - y0) * pxs, 6, H - 6); g.fillStyle = '#ffd75e'; g.save(); g.translate(ox, oy); g.rotate(now); g.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 3 : 7; g.lineTo(Math.cos(i * Math.PI / 5) * r, Math.sin(i * Math.PI / 5) * r); } g.fill(); g.restore(); }
+  if (ST.tut && d.map === 'world') { g.fillStyle = '#7ab8ff'; g.beginPath(); g.arc((ST.tut.x / ST_TILE - x0) * pxs, (ST.tut.y / ST_TILE - y0) * pxs, 3, 0, 7); g.fill(); }
+  const px = (ptx - x0) * pxs, py = (pty - y0) * pxs; g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.arc(px, py, 4, 0, 7); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(255,215,94,.6)'; g.lineWidth = 2; g.strokeRect(1, 1, W - 2, H - 2);
 }
 
 // ---- dialogue: lines of [speaker, text]; an optional last entry with choices
@@ -6425,14 +6798,15 @@ function stShowLine() {
 // ---- the world: movement, interaction and random encounters
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
 const stRockAt = (x, y) => ST_ROCKS.find(r => r.x === Math.floor(x / ST_TILE) && r.y === Math.floor(y / ST_TILE));
-const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYW'.includes(t) : '#fbtkjH'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
+const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
   const d = stData(); if (key !== 'world') d.riding = false; d.map = key; d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
   if (key !== 'world') {
     if (!ST.dunC[key]) stDrawDungeonCanvas(key);
     const D = ST_DUNGEONS[key];
-    D.rows.forEach((row, y) => [...row].forEach((t, x) => { if (t === 'X') ST.foes.push({x: x * ST_TILE + 32, y: y * ST_TILE + 32, group: D.pool[(x + y) % D.pool.length], alive: true, home: [x * ST_TILE + 32, y * ST_TILE + 32]}); }));
+    D.rows.forEach((row, y) => [...row].forEach((t, x) => { if (t !== 'X') return; const z = D.zones && D.zones.find(z => x >= z.r[0] && x <= z.r[2] && y >= z.r[1] && y <= z.r[3]), pool = z ? ST_LAND_POOLS(z.lv) : D.pool; ST.foes.push({x: x * ST_TILE + 32, y: y * ST_TILE + 32, group: pool[(x * 7 + y) % pool.length], alive: true, home: [x * ST_TILE + 32, y * ST_TILE + 32]}); }));
+    if (D.land) for (const k in ST.dunC) if (k !== key && ST_DUNGEONS[k] && ST_DUNGEONS[k].land) delete ST.dunC[k]; // keep only one big land in memory
   }
   stHud(); stSave();
 }
@@ -6457,6 +6831,7 @@ function stNearby() {
     if (t === 'D') return {kind: 'door', key: ST_DOOR_AT[(d.map === 'world' ? '' : d.map + ':') + x + ',' + y] || 'crypt'};
     if (t === 'P') return {kind: 'ship'};
     if (d.map === 'world') continue; // the rest only exist in dungeons ('B' is a bridge up top)
+    if (t === 'q') return {kind: 'board'};
     if (t === 'E') return {kind: ST_DUNGEONS[d.map].outdoor ? 'ship' : 'exit'};
     if (t === 'c' && !d.chests.includes(d.map + x + '_' + y)) return {kind: 'chest', c: {id: d.map + x + '_' + y, loot: (x + y) % 2 ? {potion: 2, gold: 40} : {ether: 1, gold: 60}}};
     if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) return {kind: 'boss', b: {id: ST_DUNGEONS[d.map].boss, ch: ST_BOSS_CH[ST_DUNGEONS[d.map].boss] || 0}};
@@ -6471,7 +6846,7 @@ function stInteract(pre) {
   const it = pre || stNearby(), d = stData(); if (!it) return;
   if (it.kind === 'chest' && ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home && !it.stolen) return stSay([['', d.map === 'jail' ? 'A locked chest of confiscated goods. The warden is right there.' : 'A family\'s coffer. Everything they have is in here. They are watching you.']], null,
     [['Steal it (a crime)', () => { stCrime(40, 'burglary'); it.stolen = true; stInteract(it); }], ['Leave it', null]]);
-  if (it.kind === 'house') { const D = ST_DUNGEONS[it.h.key]; return stSay([['', `The door of ${D.name} is unlatched. Smoke curls from the chimney.`]], null, [['Go inside', () => stEnterMap(it.h.key, 4, 5)], ['Leave them be', null]]); }
+  if (it.kind === 'house') { const D = ST_DUNGEONS[it.h.key]; return stSay([['', `The door of ${D.name} is unlatched. Smoke curls from the chimney.`]], null, [['Go inside', () => stEnterMap(it.h.key, ...(it.h.start || [4, 5]))], ['Leave them be', null]]); }
   if (it.kind === 'chest') {
     d.chests.push(it.c.id); const L = it.c.loot, got = [];
     if (L.potion) { d.items.potion += L.potion; got.push(L.potion + ' potions'); }
@@ -6485,6 +6860,7 @@ function stInteract(pre) {
   else if (it.kind === 'gate') stSay([['', 'A seal of violet light bars the gate. It hums like a held breath. Two shards would break it. You carry ' + Math.max(0, d.ch - 1) + '.']]);
   else if (it.kind === 'shrine') stRest();
   else if (it.kind === 'fish') stGatherStart('fish', it.spot);
+  else if (it.kind === 'board') { if (d.guild) stGuildBoard(); else stSay([['', 'Contracts, bounties and pleas, pinned three deep. Only guild members may take them. Talk to Clerk Lyra at the desk.']]); }
   else if (it.kind === 'mine') {
     const r = it.r, need = ST_ORE_LV[r.ore];
     if (!d.pickaxe) stSay([['', `A rock seamed with ${ST_MATS[r.ore][0].toLowerCase()}. You need a pickaxe. Brann the Smith in Saltmere sells them.`]]);
@@ -6493,18 +6869,19 @@ function stInteract(pre) {
     else stGatherStart('mine', r);
   }
   else if (it.kind === 'ship') {
-    const fare = k => stPrice((d.map === 'rouge' || k === 'rouge') ? 60 : 30);
+    const fare = k => Math.round(stPrice(ST_PORTS[k].fare || (d.map === 'rouge' ? 60 : 30)) * (stEdict() === 'road' ? .5 : 1));
     stSay([['Captain Isolde', d.map === 'world' ? 'The Gull\'s Promise. Fastest hull in the Drowned Harbor, because she\'s the only one left. East to the sunny Brightwater Isles, or south through the bayou to Rougemarais, if you\'re tired of living.' : d.map === 'rouge' ? 'Keep your collar up until we\'re clear of the bayou. Things here drink.' : 'Where to, wanderer?'],
       ['Captain Isolde', `You have ${d.gold} gold.`]], null,
-      Object.keys(ST_PORTS).filter(k => k !== d.map).map(k => { const P = ST_PORTS[k]; return [`Sail to ${P.name} (${fare(k)} gold)${P.lv ? `, level ${P.lv}+` : ''}`, () => {
-        if (P.lv && d.lv < P.lv) return stSay([['Captain Isolde', `Rougemarais? At your level? No. I don\'t ferry corpses. Come back when you\'re level ${P.lv}. (You are level ${d.lv}.)`]]);
+      Object.keys(ST_PORTS).filter(k => k !== d.map).map(k => { const P = ST_PORTS[k]; return [`Sail to ${P.name} (${fare(k)} gold)${P.lv ? `, level ${P.lv}+` : ''}${P.rank ? `, ${P.rank}-Rank` : ''}`, () => {
+        if (P.lv && d.lv < P.lv) return stSay([['Captain Isolde', `${P.name}? At your level? No. I don\'t ferry corpses. Come back when you\'re level ${P.lv}. (You are level ${d.lv}.)`]]);
+        if (P.rank && !stRankAtLeast(P.rank)) return stSay([['Captain Isolde', `${P.name} is Guild Compact land. Only ${P.rank}-Rank adventurers or higher may land there. ${d.guild ? `You are ${d.guild.rank}-Rank.` : 'You are not even a guild member.'} Climb the ranks at the Adventurers\' Guild.`]]);
         if (d.gold < fare(k)) return stSay([['Captain Isolde', 'No coin, no passage. The sea doesn\'t take favors.']]);
         d.gold -= fare(k); stSail(k, P.at[0], P.at[1]); }]; }).concat([['Not today', null]]));
   }
   else if (it.kind === 'coach' && it.c) {
-    const here = it.c, cost = c => stPrice(Math.max(8, Math.round(Math.hypot(c.x - here.x, c.y - here.y) * .9)));
+    const here = it.c, cost = c => Math.round(stPrice(Math.max(8, Math.round(Math.hypot(c.x - here.x, c.y - here.y) * .9))) * (stEdict() === 'road' && d.guild ? .5 : 1));
     stSay([['Coach Driver', `Coach leaves on the hour, ash or no ash. Where to? You have ${d.gold} gold.`]], null,
-      ST_COACHES.filter(c => c !== here).map(c => [`${c.name} (${cost(c)} gold)`, () => { if (d.gold < cost(c)) return stSay([['Coach Driver', 'Fare first. The horses don\'t eat promises.']]); d.gold -= cost(c); stSail('world', c.x, c.y + 1, {land: true, label: `Riding the coach to ${c.name}`, arrive: c.name}); }]).concat([['Not today', null]]));
+      ST_COACHES.filter(c => c !== here).map(c => [`${c.name} (${cost(c)} gold)`, () => { if (c.id === 'dunes' && !d.guild) return stSay([['Coach Driver', 'The Waystation is guild territory. Members only. Join the Guild in Thornwake first.']]); if (d.gold < cost(c)) return stSay([['Coach Driver', 'Fare first. The horses don\'t eat promises.']]); d.gold -= cost(c); stSail('world', c.x, c.y + 1, {land: true, label: `Riding the coach to ${c.name}`, arrive: c.name}); }]).concat([['Not today', null]]));
   }
   else if (it.kind === 'crystal') {
     d.crystals = d.crystals || [];
@@ -6514,12 +6891,12 @@ function stInteract(pre) {
       dests.map(c => [`Travel to ${c.name}`, () => { sfx('blink'); stEnterMap('world', c.x, c.y + 1); }]).concat([['Stay', null]]));
   }
   else if (it.kind === 'door' && it.key === 'vcrypt') {
-    if (stLetters() >= 3 && d.lv < 14) stSay([['', `The crest stirs, then goes still. Something inside is very old and very strong. Required level: 14. You are level ${d.lv}.`]]);
+    if (stLetters() >= 3 && d.lv < 23) stSay([['', `The crest stirs, then goes still. Something inside is very old and very strong. Required level: 23. You are level ${d.lv}.`]]);
     else if (stLetters() < 3) stSay([['', 'A crypt with a red crest: a bat holding a crown. The door has no handle and no lock. It is waiting for something.']]);
     else stSay([['', 'The crest bleeds a single drop as you approach, and the door swings inward. It knows you.']], null, [['Enter the crypt', () => stEnterMap('vcrypt', 2, 2)], ['Not yet', null]]);
   }
   else if (it.kind === 'door' && it.key === 'stair') {
-    if (d.flags.hrQuest && d.lv < 10) stSay([['', `The stair holds you for a step, then fades. The heavens test only the strong. Required level: 10. You are level ${d.lv}.`]]);
+    if (d.flags.hrQuest && d.lv < 18) stSay([['', `The stair holds you for a step, then fades. The heavens test only the strong. Required level: 18. You are level ${d.lv}.`]]);
     else if (!d.flags.hrQuest) stSay([['', 'A stair of pale light climbs from the snow into the clouds. When you set your foot on it, it will not hold your weight.']]);
     else stSay([['', 'The stair of light holds you now. Far above, something with too many wings is waiting.']], null, [['Climb', () => stEnterMap('stair', 2, 2)], ['Not yet', null]]);
   }
@@ -6549,6 +6926,14 @@ function stTalk(id) {
     [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('thornwake')], ['Steal a potion', () => stPickpocket('Pell the Merchant')], ['Leave', null]]);
   else if (id === 'inn') stSay([['Innkeeper Bree', 'A bed, a bowl of something hot, and a locked door. 10 gold. You will wake. Probably.']], null,
     [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['Cook a meal', () => stCraft('meal')], ['No thanks', null]]);
+  else if (id === 'lyra' || id === 'imra' || id === 'sol') stGuildDesk({lyra: 'Clerk Lyra', imra: 'Clerk Imra', sol: 'Archivist Sol'}[id]);
+  else if (id === 'valen') stSay([['Speaker Valen', 'Valdris has no king. It had one, once. He sold the roads to bandits and the forests to orcs. The Guild bought them back, one contract at a time.'], ['Speaker Valen', 'Now the Compact governs. Merit is the only crown. D-Ranks work, A-Ranks vote, S-Ranks sit the Council and decree. Even the Council answers to the board.'],
+    ['Speaker Valen', d.guild && stRankAtLeast('A') ? 'Your rank gives you a voice here. Use it.' : `Rise to A-Rank and you will have a vote. ${d.guild ? `You are ${d.guild.rank}-Rank.` : 'You are not yet a member.'}`]], null, d.guild && stRankAtLeast('A') ? [['Vote on an edict', () => stEdictMenu()], ['Leave', null]] : null);
+  else if (id === 'doro' || id === 'hela' || id === 'yuun') stSay([[{doro: 'Merchant Doro', hela: 'Trader Hela', yuun: 'Merchant Yuun'}[id], id === 'yuun' ? 'Starlight sells well below. Ore sells well up here. Everything sells to someone.' : 'Compact law keeps the roads safe enough to trade. Mostly.']], null, [['Trade goods', () => stTrade(id === 'yuun' ? 'celestine' : id === 'doro' ? 'highmarch' : 'corvane')], ['Leave', null]]);
+  else if (id === 'sorrel' || id === 'aris') stSay([[id === 'sorrel' ? 'Innkeeper Sorrel' : 'Keeper Aris', `A bed for ${stPrice(40)} gold. ${id === 'aris' ? 'You will sleep above the clouds.' : 'Guild members drink at half price.'}`]], null,
+    [[`Rest (${stPrice(40)} gold)`, () => { if (d.gold >= stPrice(40)) { d.gold -= stPrice(40); d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['Cook a meal', () => stCraft('meal')], ['No thanks', null]]);
+  else if (id === 'guild' && !d.guild) stSay([['Guildmaster Oskar', 'Not a member? Then you\'re a visitor. Clerk Lyra at the desk will sign you up, if you can stomach the paperwork.']]);
+  else if (id === 'guild' && !(d.bounty && ST_BOUNTIES.find(x => x.id === d.bounty.id))) stGuildDesk('Guildmaster Oskar');
   else if (id === 'guild') {
     const B = d.bounty && ST_BOUNTIES.find(x => x.id === d.bounty.id);
     if (B && d.bounty.prog >= B.need) stSay([['Guildmaster Oskar', `"${B.name}." Done, and you're still breathing. That's rarer than you'd think. ${B.gold} gold, as promised.`]], () => { d.gold += B.gold; d.xp += B.xp; d.bounties = (d.bounties || 0) + 1; d.bounty = null; sfx('levelup'); });
@@ -6655,7 +7040,7 @@ function stTalk(id) {
     else if (d.flags.ysolde && !d.flags.garrickPaid) stSay([['Garrick the Silver', 'Her head. Gods, she was old. Older than Ravenhollow.'], ['Garrick the Silver', 'Take this. A silver edge. It bites anything the moon made.']], () => { d.flags.garrickPaid = true; d.silver = true; d.gold += 200; sfx('levelup'); stCallout('Silver Blade · +5 attack · +200 gold', '#e8e8f0'); });
     else if (d.flags.garrickPaid) stSay([['Garrick the Silver', 'Quiet nights since. The sheep sleep. So do I, almost.']]);
     else if (d.flags.wolfQuest) stSay([['Garrick the Silver', 'The pack mother walks the Gloamwood. Only at night. Bring silver, or bring friends, or bring a prayer.']]);
-    else if (d.ch < 2 || d.lv < 8) stSay([['Garrick the Silver', 'Something hunts the Gloamwood at night. Not wolves. Worse.'], ['Garrick the Silver', `Come back when you have a shard in your pocket and some steel in your spine. (Requires chapter 3 and level 8. You are level ${d.lv}.)`]]);
+    else if (d.ch < 2 || d.lv < 12) stSay([['Garrick the Silver', 'Something hunts the Gloamwood at night. Not wolves. Worse.'], ['Garrick the Silver', `Come back when you have a shard in your pocket and some steel in your spine. (Requires chapter 3 and level 12. You are level ${d.lv}.)`]]);
     else stSay([['Garrick the Silver', 'The sheep are gone. Then a shepherd. Werewolves. A pack of them, led by a she-wolf older than this village.'], ['Garrick the Silver', 'She walks the Gloamwood when the moon is up. Find her. End her. I pay in silver.']], null, [['I\'ll hunt the pack', () => { d.flags.wolfQuest = true; stShift(1); }], ['Not my fight', null]]);
   }
   else if (id === 'ysolde') stSay([['Ysolde of the Pack', 'You came at night, alone, to the Gloamwood. Either very brave, or the hunter\'s dog.'], ['Ysolde of the Pack', 'We take only what the cruel would waste. Garrick hunts us for the bounty on our pelts. Ask him how many children he has skinned.'],
@@ -6671,7 +7056,7 @@ function stTalk(id) {
     if (d.vamp) stSay([['Pere Lucien', 'Your eyes. Gods forgive me, I can see it in your eyes. Leave, creature, before I remember my vows.']]);
     else if (d.flags.marquis && !d.flags.lucienPaid) stSay([['Pere Lucien', 'The Marquis is ash on the cathedral steps. For the first time in a century, I hear the bells.'], ['Pere Lucien', 'Take this, with the church\'s thanks. And light a candle for me.']], () => { d.flags.lucienPaid = true; d.gold += 400; PROF.crowns += 150; stShift(2); sfx('levelup'); stCallout('+400 gold · +150 Crowns', '#ffd75e'); });
     else if (d.flags.marquis) stSay([['Pere Lucien', 'The city is still theirs. But it is a little less theirs, because of you.']]);
-    else stSay([['Pere Lucien', 'I am the last priest in a city of the dead. Marquis Valcourt holds court on the steps of my cathedral and feeds on whoever wanders by.'], ['Pere Lucien', 'He is old and terribly strong. Level 14 at least, or he will drink you like a glass of wine. If you can, end him.']]);
+    else stSay([['Pere Lucien', 'I am the last priest in a city of the dead. Marquis Valcourt holds court on the steps of my cathedral and feeds on whoever wanders by.'], ['Pere Lucien', 'He is old and terribly strong. Level 22 at least, or he will drink you like a glass of wine. If you can, end him.']]);
   }
   else if (id === 'silas') { const n = stLetters(); stSay([['Silas the Gravekeeper', n >= 3 ? 'You have all three letters. I can see it on you. The Delacroix-Noir crypt will open for its own blood.' : n ? `You found one of the old letters. ${n} of 3. The others went where the family went: to a witch's castle in the dunes, and a gravedigger's coffer up north.` : 'Every tomb here has a name but one. The crypt with the red crest. It opens only for the family. And the family is all dead. Mostly.']]); }
   else if (id === 'countessNpc') stSay([['The Countess', 'So. The lost child comes home. You do not remember me. You should not. They took you from the crib and drowned you in the Ashen Vale, and the ash gave you back.'], ['The Countess', 'You are Delacroix-Noir. My blood. Awaken it, and you will be what you were born to be: strong at night, undying, hungry.']], null, [
@@ -6679,6 +7064,7 @@ function stTalk(id) {
       stSay([['', 'She cuts her palm and you drink. It tastes like coming home.'], ['', 'You are a vampire of the Delacroix-Noir line. New abilities: Blood Feast, Mist Form and Blood Ascension. You are stronger at night. Sunlight weakens you.']]); }],
     ['Refuse your blood', () => { d.flags.countessDone = true; d.signet = true; stShift(2); stSay([['The Countess', 'Then take the signet, at least. Wear it, and remember what you threw away.'], ['', 'Delacroix-Noir Signet: +3 magic, +3 defense.']]); }],
     ['Destroy her', () => stBossFight('countess')]]);
+  else if (id === 'edda') stSay([['Warden Edda', ['Rest at shrines before you go somewhere new. Always.', 'Guild quests pay, and they build standing. Standing earns exams. Exams earn ranks.', 'Fish when you can. A cooked meal has saved more lives than any sword.', 'If a place says Danger, believe it. Come back stronger.', 'Every move you use grows stronger. Use the ones you like.'][(d.lv + d.ch) % 5]]], null, [['Show me around again', () => stTutStart(true)], ['Thanks, Edda', null]]);
   else if (id === 'odo') stSay([['Farmer Odo', 'Harrowfield grows the grain that feeds three villages, and nobody remembers our name. Grain and wool, cheap as dirt. Cheaper, some years.']], null, [['Trade goods', () => stTrade('harrow')], ['Leave', null]]);
   else if (id === 'malphas') {
     if (d.hr) stSay([['Malphas the Smiling', 'The heavens bound you up like a parcel. How dull. Run along, little saint.']]);
@@ -6701,7 +7087,7 @@ function stHunters(dt) { // dungeon enemies wander home, and charge when they se
     if (!f.alive) continue;
     const dist = Math.hypot(d.x - f.x, d.y - f.y), tx = dist < 300 ? d.x : f.home[0], ty = dist < 300 ? d.y : f.home[1], a = Math.atan2(ty - f.y, tx - f.x);
     if (Math.hypot(tx - f.x, ty - f.y) > 4) { const nx = f.x + Math.cos(a) * 95 * dt, ny = f.y + Math.sin(a) * 95 * dt; if (!stBlocked(nx, f.y)) f.x = nx; if (!stBlocked(f.x, ny)) f.y = ny; f.walk = (f.walk || 0) + 3; f.face = Math.cos(a) < 0 ? Math.PI : 0; }
-    if (dist < 44 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : d.map === 'keep' ? 'C' : d.map === 'duskwatch' ? 'a' : d.map === 'isles' ? ',' : d.map === 'stair' ? 'L' : d.map === 'rouge' || d.map === 'vcrypt' ? 'R' : ':'); return; }
+    if (dist < 44 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : d.map === 'keep' ? 'C' : d.map === 'duskwatch' ? 'a' : d.map === 'isles' ? ',' : d.map === 'stair' ? 'L' : d.map === 'rouge' || d.map === 'vcrypt' ? 'R' : ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].sky || ':'); return; }
   }
 }
 function stWalk(dt) {
@@ -6713,6 +7099,11 @@ function stWalk(dt) {
   const m = Math.hypot(dx, dy); ST.moving = m > .1;
   if (!ST.moving) return;
   const sp = 230 * (d.riding && ST_MOUNTS[d.mount] ? ST_MOUNTS[d.mount].speed : 1) * dt / Math.max(1, m), nx = d.x + dx * sp, ny = d.y + dy * sp;
+  const rule = stAreaRule(nx, ny + 14), here = stAreaRule(d.x, d.y + 14);
+  if (rule && !stRankAtLeast(rule.rank) && !(here && here.name === rule.name)) { // guild territory
+    if (!ST.ruleT || performance.now() - ST.ruleT > 3500) { ST.ruleT = performance.now(); stCallout(`Guild territory: ${rule.name}. ${rule.rank === 'D' ? 'Members only. Join at the Guild Hall in Thornwake.' : `${rule.rank}-Rank or higher.`}`, '#ffd75e'); }
+    ST.moving = false; return;
+  }
   if (!stBlocked(nx, d.y + 14)) d.x = nx; if (!stBlocked(d.x, ny + 14)) d.y = ny;
   ST.face = dx < 0 ? Math.PI : dx > 0 ? 0 : ST.face || 0; ST.walk = (ST.walk || 0) + sp * m;
   ST.walkDist += sp * m;
@@ -6739,11 +7130,12 @@ function stStartBattle(foes, bossId, tile) {
   const s = stStats(), d = stData();
   const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06);
   ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
-    foes: foes.map((k, i) => { const F = ST_FOES[k]; const hp = Math.round(F.hp * (1 + lvl)); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl), xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
+    foes: foes.map((k, i) => { const F = ST_FOES[k], bs = bossId && ST_BOSS_SCALE[k] || 1; const hp = Math.round(F.hp * (1 + lvl) * bs); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl) * bs, xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
     ally: d.flags.liora ? {name: 'Liora', hp: 80 + 12 * d.lv, maxHp: 80 + 12 * d.lv, atk: 10 + 2 * d.lv + (d.flags.lioraOath ? 6 : 0)} : null};
   ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
   STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
   sfx(bossId ? 'roar' : 'swing'); musicForce(bossId ? SONG_CROWN : SONG_STEEL);
+  d.battles = (d.battles || 0) + 1;
   stLog(bossId ? `${ST_FOES[foes[0]].name} blocks your way!` : 'Enemies appear: ' + ST.battle.foes.map(f => f.name).join(', ') + '.');
   // a cinematic opening: letterbox bars, a title card, and a spoken line; you act when it ends
   const I = ST_INTRO[bossId], F0 = ST_FOES[foes[0]];
@@ -6991,7 +7383,7 @@ function stGrunt(sex, big, key) {
   if (!music.noise) return; const n = a.createBufferSource(), nf = a.createBiquadFilter(), ng = a.createGain(); n.buffer = music.noise; nf.type = 'bandpass'; nf.frequency.value = 1600 * fs; nf.Q.value = 1.2;
   ng.gain.setValueAtTime(.08, t); ng.gain.exponentialRampToValueAtTime(.001, t + dur * .8); n.connect(nf); nf.connect(ng); ng.connect(music.out); n.start(t, Math.random() * .5); n.stop(t + dur);
 }
-const ST_FOE_SEX = {marquis: 'boss', countess: 'f', ysolde: 'f', garrick: 'boss', vampire: 'm', thrall: 'm', seraphiel: 'f', seraph: 'm', fiend: 'boss', imp: 'm', witch: 'f', mara: 'f', king: 'boss', brother: 'boss', stalker: 'boss', bandit: 'm', knight: 'm', guard: 'm', cultist: 'm', corsair: 'm'};
+const ST_FOE_SEX = {ignaroth: 'boss', examC: 'm', examB: 'f', examA: 'm', examS: 'boss', brigand: 'm', ironknight: 'm', archon: 'm', abyssfiend: 'boss', marquis: 'boss', countess: 'f', ysolde: 'f', garrick: 'boss', vampire: 'm', thrall: 'm', seraphiel: 'f', seraph: 'm', fiend: 'boss', imp: 'm', witch: 'f', mara: 'f', king: 'boss', brother: 'boss', stalker: 'boss', bandit: 'm', knight: 'm', guard: 'm', cultist: 'm', corsair: 'm'};
 // Threatened, bloodied, facing a boss: your hero speaks
 const ST_HERO_LINES = {
   boss: ['Then come and take it.', 'I have died before. I am not afraid of you.', 'This ends here.', 'Stand aside, or fall.'],
@@ -7004,6 +7396,9 @@ const ST_INTRO = { // boss title cards and their opening words
   drake: ['Wyrm of the Frozen Heart', 'Your warmth. I will drink it.'],
   stalker: ['The Nameless Hunter', 'I know your name. I wore it once.'],
   brother: ['The Last of the Old Company', 'Sister. Forgive me. I cannot stop.'],
+  ignaroth: ['Tyrant of the Wyrmspine', 'Little thing. I have eaten kings.'],
+  unmaker: ['The End of All Things', 'I am the silence after the last word.'],
+  examS: ['Guildmaster of the Free Compact', 'Show me you are worth a seat on the Council.'],
   marquis: ['The Crimson Prince of Rougemarais', 'Ah, a guest. How rude of you to arrive alive.'],
   countess: ['Matriarch of the Delacroix-Noir', 'So. You would kill your own blood. How very like your mother.'],
   ysolde: ['Mother of the Moon Pack', 'The moon sees you, little hunter. So do I.'],
@@ -7024,6 +7419,10 @@ const ST_FOE_MOVES = {
   cultist: [['Hex Bolt', 'zap', 1.4, '#b06bff'], ['Drink the Light', 'tendril', 1.2, '#7a1fff']],
   mara: [['Broadside', 'shards', 1.6, '#ffb35a', 'all'], ['Cutlass Flurry', 'slash', 1.9, '#ffffff'], ['Rum and Thunder', 'aura', 0, '#ffd75e', 'guard']],
   corsair: [['Powder Shot', 'zap', 1.4, '#ffb35a']],
+  ignaroth: [['Tyrant Flame', 'shards', 1.7, '#ff7a2a', 'all'], ['Wyrm Crush', 'slash', 2.0, '#ffb35a'], ['Molten Scales', 'aura', 0, '#ff7a2a', 'guard']],
+  unmaker: [['Unmaking', 'pillar', 1.8, '#c8b8ff', 'all'], ['Void Collapse', 'cloud', 1.5, '#3a0a5a', 'all'], ['Reforge', 'pillar', 0, '#c8b8ff', 'heal']],
+  wyvern: [['Searing Dive', 'shards', 1.5, '#ff7a2a']], archon: [['Fallen Light', 'pillar', 1.5, '#c8c8ff']], abyssfiend: [['Abyssal Flame', 'shards', 1.5, '#a01a6a']], starwyrm: [['Starfall', 'shards', 1.5, '#c8b8ff', 'all']],
+  examC: [['Guild Strike', 'slash', 1.6, '#b33a3a']], examB: [['Tempest Spear', 'zap', 1.7, '#4a8ac8']], examA: [['Hunter\'s Volley', 'shards', 1.6, '#4ae06a', 'all']], examS: [['Guildmaster\'s Verdict', 'slash', 2.0, '#b33a3a'], ['Iron Resolve', 'aura', 0, '#ffd75e', 'guard']],
   marquis: [['Crimson Waltz', 'slash', 1.8, '#c0102a'], ['Sanguine Feast', 'tendril', 1.4, '#a0001a'], ['Night Veil', 'cloud', 1.2, '#3a0a1a', 'all']],
   countess: [['Blood Moon Requiem', 'pillar', 1.7, '#c0102a', 'all'], ['Kiss of the Elder', 'tendril', 1.9, '#a0001a'], ['Eternal Night', 'aura', 0, '#6a0a2a', 'guard']],
   vampire: [['Blood Bolt', 'zap', 1.4, '#c0102a']], thrall: [['Frenzied Bite', 'slash', 1.3, '#a0001a']],
@@ -7038,8 +7437,9 @@ function stCalloutDraw(dt) {
   const c = STFX.callout; if (!c) return; c.t += dt; if (c.t > 1.4) { STFX.callout = null; return; }
   const a = Math.min(1, c.t / .15) * Math.min(1, (1.4 - c.t) / .3), sc = 1 + Math.max(0, .25 - c.t) * 1.5;
   ctx.save(); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = a; ctx.translate(cw / 2, ch * .22); ctx.scale(sc, sc); ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(-cw * .42, -34, cw * .84, 52);
-  ctx.font = `${Math.round(Math.min(cw / 18, 40))}px "Marcellus SC", Georgia, serif`; ctx.shadowColor = c.color; ctx.shadowBlur = 24; ctx.fillStyle = '#fff3e0'; ctx.fillText(c.text, 0, 4);
+  let fs = Math.round(Math.min(cw / 18, 40)); ctx.font = `${fs}px "Marcellus SC", Georgia, serif`; const tw = ctx.measureText(c.text).width; if (tw > cw * .84) { fs = Math.max(13, Math.floor(fs * cw * .84 / tw)); ctx.font = `${fs}px "Marcellus SC", Georgia, serif`; }
+  ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(-cw * .45, -fs * .85, cw * .9, fs * 1.3);
+  ctx.shadowColor = c.color; ctx.shadowBlur = 24; ctx.fillStyle = '#fff3e0'; ctx.fillText(c.text, 0, 4);
   ctx.restore();
 }
 const SK_FX = {flash: 'slash', crush: 'slash', bloodfeast: 'tendril', strike: 'slash', fireball: 'shards', frost: 'shards', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril'};
@@ -7079,14 +7479,15 @@ function stRenderBattle(picking) {
     for (const k in ST_MEALS) if (d.items[k]) btn(`${ST_MEALS[k].name} ×${d.items[k]} (${ST_MEALS[k].desc})`, () => stItem(k));
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else {
-    btn(b.buffs.wolf ? 'Claw' : b.buffs.vamp ? 'Rend' : `${stSkName('attack')} ${'★'.repeat(stRank('attack'))}`, () => stPick(f => stPlayerHit(f, s.atk * stAtkMul(b), 'phys'))).title = 'Basic attack. Mastery: ' + stMasteryText('attack');
+    btn('⚔ ' + (b.buffs.wolf ? 'Claw' : b.buffs.vamp ? 'Rend' : `${stSkName('attack')} ${'★'.repeat(stRank('attack'))}`), () => stPick(f => stPlayerHit(f, s.atk * stAtkMul(b), 'phys'))).title = 'Basic attack. Mastery: ' + stMasteryText('attack');
     if ((b.rage || 0) >= 100 && !b.buffs.rage) btn('RAGE!', () => { b.rage = 0; b.buffs.rage = 3; stAnim('p', 'cast', .5); stTransformFx('p', '#ff3a2a', `${d.name} flies into a RAGE!`); stGrunt(stSex('p'), true, 'rage2'); stLog('Rage! +60% attack and more criticals for 3 turns.'); stEndTurn(); }).classList.add('rageBtn');
-    btn('Skills', () => { ST.sub = 'skills'; stRenderBattle(); });
-    btn('Items', () => { ST.sub = 'items'; stRenderBattle(); });
-    btn('Defend', () => { b.defending = true; stLog(`${d.name} braces for the next attack.`); stEndTurn(); });
-    btn('Flee', () => { if (Math.random() < .6) { stLog('You got away!'); stEndBattle('fled'); } else { stLog('You could not escape!'); stEndTurn(); } }, !!b.bossId);
+    btn('✦ Skills', () => { ST.sub = 'skills'; stRenderBattle(); }).title = 'Special moves. They cost MP.';
+    btn('◆ Items', () => { ST.sub = 'items'; stRenderBattle(); }).title = 'Potions, ethers and cooked meals.';
+    btn('⛨ Defend', () => { b.defending = true; stLog(`${d.name} braces for the next attack.`); stEndTurn(); });
+    btn('➜ Flee', () => { if (Math.random() < .6) { stLog('You got away!'); stEndBattle('fled'); } else { stLog('You could not escape!'); stEndTurn(); } }, !!b.bossId);
   }
   act.appendChild(r1);
+  if (!picking && !ST.sub && (d.battles || 0) < 4) act.appendChild(el('small', 'acthint', 'Tip: Attack hits one enemy. Skills are stronger but cost MP. Items heal. Defend halves the damage you take this turn.'));
   setTimeout(() => { const x = act.querySelector('button:not(:disabled)'); if (x) x.focus({preventScroll: true}); }, 0);
 }
 function stPick(fn) { const alive = ST.battle.foes.filter(f => f.hp > 0); if (alive.length === 1) fn(alive[0]); else stRenderBattle(fn); }
@@ -7252,6 +7653,7 @@ function stEndBattle(result) {
   const xp = b.foes.reduce((a, f) => a + f.xp, 0), gold = b.foes.reduce((a, f) => a + f.gold, 0);
   d.xp += xp; d.gold += gold; sfx('levelup');
   const lines = [['', `Victory! You earn ${xp} XP and ${gold} gold.`]];
+  if (!b.bossId && d.guild) { const zk = stZoneKey(); for (const a of d.guild.quests || []) { const q = stGQ(a.id); if (q && q.kind === 'hunt' && q.zone === zk && a.prog < q.need) { a.prog++; lines.push(['', `Guild quest "${q.name}": ${a.prog} of ${q.need}.` + (a.prog >= q.need ? ' Turn it in at a guild hall.' : '')]); } } }
   if (b.foes.some(f => f.key === 'guard')) { d.crime = (d.crime || 0) + 60; d.align = clamp((d.align || 0) - 2, -10, 10); ST.guardCd = 40; lines.push(['', `The guards lie still in the road. Your bounty climbs to ${d.crime} gold. Every watchman in the vale knows your face now.`]); }
   if (!b.bossId && d.bounty && b.tile === ST_BOUNTIES.find(x => x.id === d.bounty.id).tile && d.bounty.prog < ST_BOUNTIES.find(x => x.id === d.bounty.id).need) {
     const B = ST_BOUNTIES.find(x => x.id === d.bounty.id); d.bounty.prog++; lines.push(['', `Contract "${B.name}": ${d.bounty.prog} of ${B.need}.` + (d.bounty.prog >= B.need ? ' Return to Guildmaster Oskar.' : '')]);
@@ -7281,13 +7683,19 @@ function stEndBattle(result) {
     }
   }
   if (b.bossId === 'seraphiel') lines.push(['Seraphiel', 'Enough. The body is worthy. Now hear the terms.']);
-  setTimeout(() => { done(); stSay(lines, b.bossId === 'seraphiel' ? stTrialChoice : learn ? stLearnSkill : null); }, 600);
+  if (/^exam/.test(b.bossId || '')) { const g = d.guild, nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], pay = {C: [150, 0], B: [300, 50], A: [600, 100], S: [1000, 500]}[nx]; g.rank = nx; d.gold += pay[0]; PROF.crowns += pay[1]; lines.push(['', `PROMOTED TO ${nx}-RANK. ${pay[0]} gold${pay[1] ? ` and ${pay[1]} Crowns` : ''}. ` + {C: 'Ships to Valdris will now carry you.', B: 'The B-Rank wilds of Valdris are open to you.', A: 'You may vote on the Council\'s edicts, and sail to Aetherfall.', S: 'You hold a seat on the Council of the Free Compact. Your word is law on the roads.'}[nx]]); setTimeout(() => stCallout(`${nx}-RANK ADVENTURER`, '#ffd75e'), 800); delete d.flags[b.bossId]; }
+  const after = b.bossId === 'seraphiel' ? stTrialChoice : learn ? stLearnSkill : null;
+  setTimeout(() => { done(); stSay(lines, ST_BOSS_REWARD[b.bossId] ? () => stShowRewards(b.bossId, after) : after); }, 600);
 }
 // Level structure. Regions warn you, dungeons and bosses require their level. Enemies are scaled to at least their region's level.
-const ST_ZONE_LV = {'.': 1, '=': 1, v: 1, T: 1, F: 1, B: 1, ':': 2, '*': 4, b: 5, g: 6, C: 7, a: 8};
-const ST_MAP_LV = {catacomb: 2, crypt: 4, keep: 7, duskwatch: 9, stair: 10, isles: 7, rouge: 12, vcrypt: 14};
-const ST_BOSS_LV = {golem: 3, drake: 5, brother: 6, stalker: 6, king: 8, mara: 8, ysolde: 9, garrick: 9, witch: 10, seraphiel: 11, marquis: 14, countess: 15};
-const stZoneLv = () => { const d = stData(); return d.map === 'world' ? ST_ZONE_LV[stTileAt(d.x, d.y)] || 1 : ST_MAP_LV[d.map] || 1; };
+// Land one, the Ashen Vale, runs from level 1 to 25. Valdris (by ship) runs 26 to 40, and Aetherfall 41 to 55.
+const ST_ZONE_LV = {'.': 1, '=': 1, v: 1, T: 2, F: 1, B: 1, ':': 4, '*': 7, b: 9, g: 11, C: 12, a: 15};
+const ST_MAP_LV = {catacomb: 4, crypt: 7, keep: 12, duskwatch: 15, stair: 18, isles: 10, rouge: 20, vcrypt: 23};
+const ST_BOSS_LV = {golem: 4, drake: 7, brother: 9, stalker: 10, king: 13, mara: 12, ysolde: 14, garrick: 14, witch: 16, seraphiel: 19, marquis: 22, countess: 25, ignaroth: 40, unmaker: 55, examC: 8, examB: 18, examA: 30, examS: 42};
+const ST_BOSS_SCALE = {golem: 1.3, drake: 1.4, brother: 1.5, stalker: 1.6, king: 1.6, mara: 1.5, ysolde: 1.55, garrick: 1.55, witch: 1.6, seraphiel: 1.7, marquis: 1.6, countess: 1.65}; // the old bosses toughened to match their new levels
+const stZoneAt = (x, y) => { const D = ST_DUNGEONS[stData().map]; if (!D || !D.zones) return null; const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE); return D.zones.find(z => tx >= z.r[0] && tx <= z.r[2] && ty >= z.r[1] && ty <= z.r[3]) || D.zones[D.zones.length - 1]; };
+const stZoneLv = () => { const d = stData(), z = stZoneAt(d.x, d.y); return z ? z.lv : d.map === 'world' ? ST_ZONE_LV[stTileAt(d.x, d.y)] || 1 : ST_MAP_LV[d.map] || 1; };
+const stZoneKey = () => { const d = stData(), z = stZoneAt(d.x, d.y); return d.map === 'world' ? 'world:' + stTileAt(d.x, d.y) : z ? d.map + ':' + z.name : d.map; };
 const ST_LETTERS = (() => { const L = {}, first = (k, n) => { const R = ST_DUNGEONS[k].rows; for (let y = 0; y < R.length; y++) { const x = R[y].indexOf('c'); if (x >= 0) { L[k + x + '_' + y] = n; return; } } }; first('rouge', 1); first('duskwatch', 2); first('grave', 3); return L; })();
 const stLetters = () => [1, 2, 3].filter(n => stData().flags['vletter' + n]).length;
 function stBossFight(id) { // bosses have a level requirement, and the game tells you
@@ -7328,9 +7736,9 @@ function stOpenMenu() {
       d.flags.wrenQuest && !d.flags.hessaDone ? 'Wren\'s Mother: search the Ashfall Dunes, far east.' : '',
       d.flags.corinQuest && !d.flags.stalker ? 'Corin\'s Hunter: find what stalks the Gloamwood.' : d.flags.stalker && !d.charm ? 'Corin\'s Hunter: bring the locket to Corin in Ravenhollow.' : '',
       d.flags.lioraQuest && !d.flags.brother ? 'Liora\'s Oath: find her brother in the Bone Marsh.' : '',
-      d.flags.hrQuest && !d.flags.hrDone ? 'The Heavenly Restriction: climb the Celestial Stair above the Frost Peaks (level 10+).' : '',
-      d.flags.wolfQuest && !d.flags.ysoldeDone ? 'The Moon Pack: find Ysolde in the Gloamwood at night (level 9+). Hunt her, or join her.' : d.flags.ysolde && !d.flags.garrickPaid ? 'The Moon Pack: return to Garrick in Ravenhollow.' : '',
-      d.map === 'rouge' && !d.flags.marquis ? 'The Crimson Prince: end Marquis Valcourt on the cathedral steps (level 14+).' : d.flags.marquis && !d.flags.lucienPaid ? 'The Crimson Prince: tell Pere Lucien.' : '',
+      d.flags.hrQuest && !d.flags.hrDone ? 'The Heavenly Restriction: climb the Celestial Stair above the Frost Peaks (level 18+).' : '',
+      d.flags.wolfQuest && !d.flags.ysoldeDone ? 'The Moon Pack: find Ysolde in the Gloamwood at night (level 14+). Hunt her, or join her.' : d.flags.ysolde && !d.flags.garrickPaid ? 'The Moon Pack: return to Garrick in Ravenhollow.' : '',
+      d.map === 'rouge' && !d.flags.marquis ? 'The Crimson Prince: end Marquis Valcourt on the cathedral steps (level 22+).' : d.flags.marquis && !d.flags.lucienPaid ? 'The Crimson Prince: tell Pere Lucien.' : '',
       stLetters() && !d.flags.countessDone ? `???: bloodline letters ${stLetters()} of 3.` + (stLetters() >= 3 ? ' A crypt in Rougemarais waits for you.' : '') : '',
     ].filter(Boolean).join(' · ') || 'None right now. Talk to people; everyone here has lost something.'),
     el('h3', '', 'Contract'), el('p', '', d.bounty ? (B => `${B.name}: ${B.text}, ${d.bounty.prog}/${B.need}.`)(ST_BOUNTIES.find(x => x.id === d.bounty.id)) : 'None. Visit the guild in Thornwake.'),
@@ -7340,6 +7748,14 @@ function stOpenMenu() {
   const row = el('div', 'row'), btn = (l, fn) => { const b = el('button', '', l); b.addEventListener('click', fn); row.appendChild(b); return b; };
   btn('Drink potion', () => { if (d.items.potion) { d.items.potion--; d.hp = Math.min(s.hp, d.hp + 60); sfx('pickup'); stCloseMenu(); stOpenMenu(); } });
   for (const k of d.mounts || []) if (k !== d.mount) btn(`Choose ${ST_MOUNTS[k].name}`, () => { d.mount = k; stCloseMenu(); stOpenMenu(); });
+  { // sort the sections into tabs: Hero, Quests, Bag, Skills, Guild
+    const TAB = {Abilities: 'Hero', Wounds: 'Hero', Alignment: 'Hero', Mounts: 'Hero', Gear: 'Hero', 'Crafted gear': 'Hero', Quest: 'Quests', 'Side stories': 'Quests', Contract: 'Quests', Bag: 'Bag', Materials: 'Bag', Cargo: 'Bag', Professions: 'Skills', Guild: 'Guild'};
+    const g = d.guild; m.append(el('h3', '', 'Guild'), el('p', '', g ? `${g.rank}-Rank of the Free Guild Compact. Standing ${g.pts}${ST_RANK_PTS[g.rank] ? ` of ${ST_RANK_PTS[g.rank]} for your next exam` : ''}. Edict in force: ${ST_EDICTS[stEdict()][0]} (${ST_EDICTS[stEdict()][1]}). Active quests: ${(g.quests || []).map(a => stGQ(a.id) && stGQ(a.id).name).filter(Boolean).join(', ') || 'none'}.` : 'Not a member. Join at the Guild Hall in Thornwake to travel guild territory and take paid quests.'));
+    let cur = 'Hero'; const kids = [...m.children]; for (const k of kids) { if (k.tagName === 'H3' && TAB[k.textContent]) cur = TAB[k.textContent]; k.dataset.tab = cur; }
+    const bar = el('div', 'tabs'), showTab = t => { ST.menuTab = t; for (const k of kids) k.hidden = k.dataset.tab !== t; for (const b of bar.children) b.classList.toggle('on', b.textContent === t); };
+    for (const t of ['Hero', 'Quests', 'Bag', 'Skills', 'Guild']) { const b = el('button', '', t); b.addEventListener('click', () => showTab(t)); bar.appendChild(b); }
+    m.insertBefore(bar, m.firstChild); showTab(ST.menuTab || 'Hero');
+  }
   btn(`Voice lines: ${PROF.voiceOff ? 'Off' : 'On'}`, () => { PROF.voiceOff = !PROF.voiceOff; saveProfile(); stCloseMenu(); stOpenMenu(); if (!PROF.voiceOff) stVoice('Ready.', 'p'); });
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
@@ -7351,19 +7767,23 @@ $('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu(
 // ---- HUD and drawing
 function stHud() {
   const d = stData(); if (!d) return; const s = stStats();
-  $('stHudName').textContent = `${d.name} · Lv ${d.lv} · ${stAlignName()}`;
+  const hn = $('stHudName'); hn.textContent = ''; hn.className = 'hn'; hn.append(document.createTextNode(d.name), el('span', 'badge lvb', `Lv ${d.lv}`), el('span', 'badge rkb', d.guild ? `${d.guild.rank}-Rank` : 'No guild'));
+  if (!$('stXpBar')) { const xb = el('div', 'bar xp'); xb.id = 'stXpBar'; xb.appendChild(el('i')); xb.title = 'Experience'; $('stHud').insertBefore(xb, $('stGold')); for (const [id, lb] of [['stHp', 'HEALTH'], ['stMp', 'MANA']]) $('stHud').insertBefore(el('small', 'bl', lb), $(id).parentNode); }
+  $('stXpBar').firstChild.style.width = Math.min(100, d.xp / stXpNeed(d.lv) * 100) + '%';
+  $('stHint').textContent = device() === 'pad' ? 'Left stick: move · A: interact · Start: menu · Y: ride' : 'WASD or arrows: move · E: interact · M: menu · R: ride';
   $('stHp').style.width = Math.max(0, d.hp / s.hp * 100) + '%'; $('stHpT').textContent = `${Math.max(0, Math.round(d.hp))}/${s.hp}`;
   $('stMp').style.width = d.mp / s.mp * 100 + '%'; $('stMpT').textContent = `${Math.round(d.mp)}/${s.mp}`;
   $('stGold').textContent = `${d.gold} gold · ${d.items.potion} potions` + (d.crime ? ` · Bounty ${d.crime}` : '');
-  const tl = stTileAt(d.x, d.y), zl = stZoneLv(), where = (d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale') + (zl > 1 ? ` (Lv ${zl}${zl > d.lv ? ', dangerous' : ''})` : '');
+  const tl = stTileAt(d.x, d.y), zl = stZoneLv(), zn = stZoneAt(d.x, d.y), where = (zn ? zn.name : d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale') + (zl > 1 ? ` (Lv ${zl}${zl > d.lv ? ', dangerous' : ''})` : '');
   const outside = d.map === 'world' || d.map === 'isles', C = stClock(), wx = [outside ? `${stTimeName(C.h)} ${stTimeText(C.h)}` : '', ST.wx && ST.wx.k > .5 && outside ? ST_WX_NAME[ST.wx.kind] : ''].filter(Boolean).join(' · ');
-  $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', `Chapter ${Math.min(4, d.ch + 1)} · ${where}` + (wx ? ` · ${wx}` : '')), document.createTextNode(ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts) + (d.lost ? ` Your Lost Embers (${d.lost.gold} gold) wait where you fell.` : '')));
+  const ob = stObjective();
+  $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', 'Objective'), el('div', 'obj', ob ? ob.text : ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)), el('span', 'loc', where + (wx ? ` · ${wx}` : '')), ...(d.lost ? [el('span', 'loc', `Lost Embers: ${d.lost.gold} gold wait where you fell.`)] : []));
 }
 const stUnit = (look, color, x, y, face, walk, id, level = 3) => ({look, color, team: 0, level, face, x, y, walk, _lw: walk - 1, atkT: 0, atkCd: 1, hitFlash: 0, id});
 function stDrawWorld(now, dt = 1 / 60) {
   const d = stData(), Zs = Math.max(.7, Math.min(1.2, Math.min(cw, ch) / 700));
   ST.cam.x += (d.x - ST.cam.x) * .12; ST.cam.y += (d.y - ST.cam.y) * .12;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = d.map === 'isles' ? '#1f6a8a' : d.map === 'rouge' ? '#1a2e28' : '#0c1411'; ctx.fillRect(0, 0, cw, ch);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].pal ? ST_DUNGEONS[d.map].pal.sea : d.map === 'isles' ? '#1f6a8a' : d.map === 'rouge' ? '#1a2e28' : '#0c1411'; ctx.fillRect(0, 0, cw, ch);
   ctx.setTransform(dpr * Zs, 0, 0, dpr * Zs, dpr * (cw / 2 - ST.cam.x * Zs), dpr * (ch / 2 - ST.cam.y * Zs));
   const dun = d.map !== 'world';
   ctx.drawImage(dun ? ST.dunC[d.map] : ST.mapC, 0, 0);
@@ -7373,6 +7793,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   }));
   const isles = dun && ST_DUNGEONS[d.map].outdoor; stAmbient(dt, now, Zs, d, dun, isles);
   if (!dun) for (const r of ST_ROCKS) if (Math.abs(r.x * ST_TILE - ST.cam.x) < cw / Zs && Math.abs(r.y * ST_TILE - ST.cam.y) < ch / Zs) stDrawRock(r, now);
+  stTutDraw(now);
   if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6, f.face || 0);
   if (d.lost && d.lost.map === d.map) { ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff7a2a'; ctx.shadowBlur = 20; ctx.globalAlpha = .7 + Math.sin(now * 4) * .3; ctx.beginPath(); ctx.arc(d.lost.x, d.lost.y, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
   if (!dun) for (const c of ST_CHESTS) if (stChestShown(c, d)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
@@ -7387,6 +7808,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   const ride = !dun && d.riding && ST_MOUNTS[d.mount];
   if (ride) { stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); drawCharacter(ctx, stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 4 * Math.cos(ST.face || 0), d.y - 26 - (ride.fly ? 26 + Math.sin(now * 4) * 5 : 0), ST.face || 0, 0, 30, d.lv), now); }
   else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); drawCharacter(ctx, pu, now); }
+  stObjArrow(now);
   stAmbientOver(dt, now);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   // light: a torch circle in dungeons, a heavy vignette above ground
@@ -7403,7 +7825,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
+  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
   $('stRide').hidden = dun || !(d.mounts || []).length; $('stRide').textContent = d.riding ? 'Dismount' : 'Ride';
 }
 function stDrawFoe(key, x, y, now, scale, face, flash) {
@@ -7411,14 +7833,14 @@ function stDrawFoe(key, x, y, now, scale, face, flash) {
   ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.translate(-x, -y);
   if (F.draw === 'wolf') { u.r = F.small ? 20 : F.boss ? 40 : 30; u.fur = F.fur; drawWolf(ctx, u, now); }
   else if (F.draw === 'golem') { u.r = 46; drawGolem(ctx, u, now); }
-  else if (F.draw === 'drake') { u.species = 'frost'; u.fire = '#9fe3ff'; u.sc = .9; u.r = 52; drawDragon(ctx, u, now); }
+  else if (F.draw === 'drake') { u.species = F.species || 'frost'; u.fire = F.fire || '#9fe3ff'; u.sc = .9; u.r = 52; drawDragon(ctx, u, now); }
   else if (F.draw === 'goblin') { u.type = 'melee'; u.tier = 2; u.big = 1.3; drawMinion(ctx, u, now); }
   else { u.look = F.look; u.color = F.color || '#b33a3a'; u.level = F.lv || (F.boss ? 18 : 6); u.horns = F.horns; u.noHalo = F.horns || F.unholy; drawCharacter(ctx, u, now); }
   ctx.restore();
 }
 function stDrawBattle(now, dt) {
   const b = ST.battle, d = stData(), tile = b.tile || (b.bossId === 'golem' ? 'K' : b.bossId === 'drake' ? '*' : b.bossId === 'king' ? 'C' : b.bossId === 'seraphiel' ? 'L' : '.');
-  const sky = {R: ['#2a0a1a', '#0a0206'], L: ['#e8eef8', '#8a9ab8'], ',': ['#6ab0d8', '#1a4a5a'], v: ['#2a2a3a', '#0a0a12'], a: ['#4a3626', '#120a06'], b: ['#22261a', '#070806'], g: ['#10180f', '#030603'], T: ['#152a1c', '#05100a'], ':': ['#1e332e', '#070f0d'], K: ['#2a1a14', '#080403'], '*': ['#5a7486', '#1a2630'], C: ['#22182f', '#05030a'], '.': ['#2a3a26', '#0a120c']}[tile] || ['#2a3a26', '#0a120c'];
+  const sky = {V: ['#6a9ac8', '#2a4a3a'], Q: ['#3a2a6a', '#0a0618'], R: ['#2a0a1a', '#0a0206'], L: ['#e8eef8', '#8a9ab8'], ',': ['#6ab0d8', '#1a4a5a'], v: ['#2a2a3a', '#0a0a12'], a: ['#4a3626', '#120a06'], b: ['#22261a', '#070806'], g: ['#10180f', '#030603'], T: ['#152a1c', '#05100a'], ':': ['#1e332e', '#070f0d'], K: ['#2a1a14', '#080403'], '*': ['#5a7486', '#1a2630'], C: ['#22182f', '#05030a'], '.': ['#2a3a26', '#0a120c']}[tile] || ['#2a3a26', '#0a120c'];
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const g = ctx.createLinearGradient(0, 0, 0, ch); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]); ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
   if (d.map === 'world' || d.map === 'isles') { const C = stClock(); if (C.dark > .02) { ctx.fillStyle = `rgba(6,10,32,${C.dark * .6})`; ctx.fillRect(0, 0, cw, ch); } if (C.warm > .02) { ctx.fillStyle = `rgba(255,130,80,${C.warm * .3})`; ctx.fillRect(0, 0, cw, ch); } }
@@ -7515,7 +7937,8 @@ function stPollPad() {
 }
 function storyFrame(now, dt) {
   stPollPad();
-  if (ST.mode === 'walk') stWalk(dt);
+  if (ST.mode === 'walk') { stWalk(dt); stTutTick(dt); }
+  if ((ST.miniF = (ST.miniF || 0) + 1) % 5 === 0 && ST.mode !== 'battle') stMiniDraw(now / 1000);
   stWeatherTick(dt);
   if (ST.mode === 'battle' && ST.battle) stDrawBattle(now / 1000, dt); else if (ST.mode === 'sail' && ST.sail) stDrawSail(now / 1000, dt); else stDrawWorld(now / 1000, dt);
   $('game').classList.toggle('touch', touchUI.on);
