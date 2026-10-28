@@ -368,6 +368,10 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stMenu .rwIc{grid-row:1/3;font-size:20px;color:#ffd75e;text-align:center}#stMenu .rw small{color:#c8b89a}#stMenu button.primary{background:linear-gradient(#f5cf63,#c8951e);color:#1a1206;border-color:#f5cf63}
 #stMenu .tabs{display:flex;gap:4px;margin:-4px 0 8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}#stMenu .tabs button{padding:6px 12px;border-radius:999px;background:transparent}#stMenu .tabs button.on{background:var(--gold);color:#1a1206;border-color:var(--gold)}
 .outfit{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}.outfit .orow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}#stMenu .trade.comp{grid-template-columns:1fr 2fr auto}@media (max-width:600px){#stMenu .trade.comp{grid-template-columns:1fr auto}#stMenu .trade.comp .hint{grid-column:1/-1}}
+#stMenu .trade.attrs{grid-template-columns:110px 1fr auto}#stMenu .trade.attrs .tbtn{display:flex;align-items:center;gap:6px}#stMenu .trade.attrs .av{min-width:26px;text-align:center;font-size:16px;color:#ffd75e}#stMenu .trade.attrs button{min-width:34px}
+@media (max-width:600px){#stMenu .trade.attrs{grid-template-columns:1fr auto}#stMenu .trade.attrs .hint{grid-column:1/-1;order:3}}
+#crAttrs .trade.attrs{display:grid;grid-template-columns:100px 1fr auto;gap:4px 10px;align-items:center;text-align:left;font-size:13px}#crAttrs .tbtn{display:flex;align-items:center;gap:6px}#crAttrs .av{min-width:22px;text-align:center;color:#ffd75e}#crAttrs button{min-width:32px;padding:4px 8px}
+@media (max-width:600px){#crAttrs .trade.attrs{grid-template-columns:1fr auto}#crAttrs .hint{grid-column:1/-1}}
 .outfit .onote{color:var(--gold);font-size:12px}.outfit .olab{min-width:72px;font-size:13px;color:var(--muted)}.outfit .oswatches{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .outfit select{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font:inherit}.outfit .sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,0,0,.5);cursor:pointer;padding:0}.outfit .sw[aria-pressed=true]{outline:2px solid var(--gold);outline-offset:2px}.outfit .chip{padding:3px 9px;font-size:12px}
 #stMenu .wardCv{display:block;margin:0 auto;width:160px;height:160px}
@@ -575,6 +579,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
         <p class="status">Color</p><div class="row" id="crColor"></div>
         <p class="status">Voice</p><div class="row" id="crVoice"></div>
         <p class="status">Outfit</p><div class="outfit" id="crOutfit"></div>
+        <p class="status">Starting stat points</p><div id="crAttrs"></div>
         <p class="status" id="crSkillNote">Pick 3 abilities</p><div class="row" id="crSkills"></div>
         <div class="row"><button class="mbtn primary" id="crStart">Begin your story</button><button class="mbtn small back" id="crBack">Back</button></div>
       </section>
@@ -5884,11 +5889,56 @@ const stChestShown = (c, d) => !d.chests.includes(c.id) && (!c.need || d.flags[c
 const ST = {treesBy: {}, on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
 const stData = () => PROF.story;
 const stXpNeed = lv => Math.round(30 + 25 * lv + 1.1 * lv * lv); // later levels need more, so the far lands don't fly by
+// Stat points: you spend them on six attributes. 5 at creation, 2 more each level.
+const ST_ATTRS = [
+  ['str', 'Strength', 'atk', .8, '+0.8 attack: stronger weapon blows and physical skills'],
+  ['int', 'Intellect', 'mag', .8, '+0.8 magic: stronger spells and healing'],
+  ['vit', 'Vitality', 'hp', 5, '+5 maximum health'],
+  ['end', 'Endurance', 'def', .5, '+0.5 defense: take less damage'],
+  ['agi', 'Agility', 'spd', .25, '+0.25 speed: dodge more and hit more often'],
+  ['spi', 'Spirit', 'mp', 3, '+3 maximum mana'],
+];
+const ST_ATTR_START = 5, ST_ATTR_PER_LV = 2, ST_ATTR_CAP = lv => 10 + lv * 2; // no single attribute above this, so builds stay rounded
+const stAttrTotal = lv => ST_ATTR_START + (lv - 1) * ST_ATTR_PER_LV;
+const stAttrSpent = A => Object.values(A || {}).reduce((a, b) => a + (b || 0), 0);
+const stAttrFree = () => { const d = stData(); return Math.max(0, stAttrTotal(d.lv) - stAttrSpent(d.attr)); };
+function stAttrUI(box, A, free, lv, onChange, keep) { // a row per attribute with − and + buttons
+  box.innerHTML = ''; const left = free(); box.appendChild(el('p', 'status ' + (left ? 'ok' : ''), left ? `${left} stat point${left > 1 ? 's' : ''} to spend` : 'All points spent'));
+  const tbl = el('div', 'trade comp attrs');
+  for (const [k, name, , , desc] of ST_ATTRS) { const act = el('span', 'tbtn'), mi = el('button', '', '−'), pl = el('button', '', '+'); const v = A[k] || 0, base = (keep && keep[k]) || 0;
+    mi.disabled = v <= base; pl.disabled = !free() || v >= ST_ATTR_CAP(lv); mi.setAttribute('aria-label', 'Remove a point from ' + name); pl.setAttribute('aria-label', 'Add a point to ' + name);
+    mi.addEventListener('click', () => { A[k] = v - 1; onChange(); }); pl.addEventListener('click', () => { A[k] = v + 1; onChange(); }); act.append(mi, el('b', 'av', String(v)), pl);
+    tbl.append(el('span', '', name), el('span', 'hint', desc), act); }
+  box.appendChild(tbl);
+}
+function stStatsMenu() {
+  const d = stData(), m = $('stMenu'); d.attr = d.attr || {}; ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  const before = Object.assign({}, d.attr); let draft = Object.assign({}, d.attr);
+  const draw = () => {
+    m.innerHTML = ''; m.appendChild(el('h3', '', '📊 Stats'));
+    const cur = d.attr; d.attr = draft; const s = stStats(); d.attr = cur; const R = stRace(), C = ST_CLASSES[d.cls];
+    m.appendChild(el('p', '', `${C.name} · ${R.name} · Level ${d.lv}. Health ${s.hp} · Mana ${s.mp} · Attack ${Math.round(s.atk)} · Magic ${Math.round(s.mag)} · Defense ${Math.round(s.def)} · Speed ${Math.round(s.spd * 10) / 10}`));
+    const box = el('div'); m.appendChild(box);
+    stAttrUI(box, draft, () => Math.max(0, stAttrTotal(d.lv) - stAttrSpent(draft)), d.lv, draw, before);
+    m.appendChild(el('small', 'hint', `You get ${ST_ATTR_PER_LV} points every level. No attribute can go above ${ST_ATTR_CAP(d.lv)} at your level. Points are locked in once you confirm; Ashen Shrines can reset them for a fee.`));
+    const row = el('div', 'row'), ok = el('button', 'primary', 'Confirm'), back = el('button', '', 'Cancel');
+    ok.addEventListener('click', () => { d.attr = draft; const s2 = stStats(); d.hp = Math.min(s2.hp, d.hp + Math.max(0, s2.hp - stStatsWith(before).hp)); d.mp = Math.min(s2.mp, d.mp); sfx('levelup'); stSave(); stHud(); stCloseMenu(); });
+    back.addEventListener('click', stCloseMenu); row.append(ok, back); m.appendChild(row);
+  };
+  draw();
+}
+const stStatsWith = A => { const d = stData(), cur = d.attr; d.attr = A; const s = stStats(); d.attr = cur; return s; };
+function stRespec() { // at a shrine: get every point back
+  const d = stData(), fee = 50 + d.lv * 20; if (!stAttrSpent(d.attr)) return stSay([['', 'You have no stat points spent yet.']]);
+  stSay([['', `The shrine can unmake what you have become and let you choose again. It asks ${fee} gold.`]], null, [[`Reset stat points (${fee} gold)`, () => { if (d.gold < fee) return stSay([['', 'You do not have enough gold.']]); d.gold -= fee; d.attr = {}; const s = stStats(); d.hp = Math.min(d.hp, s.hp); d.mp = Math.min(d.mp, s.mp); sfx('respawn'); stSave(); setTimeout(stStatsMenu, 0); }], ['Not now', null]]);
+}
 function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
   const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
   if (d.guild && stEdict() === 'wall') st.def *= 1.1;
+  for (const [k, , stat, per] of ST_ATTRS) { const v = (d.attr && d.attr[k]) || 0; if (v) st[stat] += v * per; } // stat points
+  st.hp = Math.round(st.hp); st.mp = Math.round(st.mp);
   { const R = ST_RACES[d.race] || ST_RACES.human; st.hp = Math.round(st.hp * (1 + (R.hp || 0))); st.mp = Math.round(st.mp * (1 + (R.mp || 0))); st.atk *= 1 + (R.atk || 0); st.mag *= 1 + (R.mag || 0); st.def *= 1 + (R.def || 0); st.spd += R.spd || 0;
     if (d.race === 'tuskborn' && d.hp < st.hp * .3) st.atk *= 1.15; } // racial traits
   { const close = Object.values(d.bonds || {}).filter(b => b.pts >= 80).length, mul = 1 + Math.min(.06, close * .02) + (d.spouse ? .04 : 0) + Math.min(.045, ((d.family && d.family.kids) || []).length * .015); if (mul > 1) { st.atk *= mul; st.def *= mul; st.mag *= mul; st.hp = Math.round(st.hp * mul); } } // friends and family fight beside you in spirit
@@ -6965,7 +7015,7 @@ function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // draw
 }
 
 // ---- story menu and character creator
-let crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}};
+let crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}, attr: {}};
 const ST_HATS = [['', 'Class default'], ['helm', 'Knight\'s helm'], ['heavyhelm', 'Great helm'], ['winghelm', 'Winged helm'], ['visor', 'Visor'], ['crest', 'Crested helm'], ['hood', 'Hood'], ['cowl', 'Cowl'], ['ninja', 'Shinobi wrap'], ['mask', 'Mask'],
   ['pointy', 'Wizard hat'], ['brim', 'Witch\'s brim'], ['widehat', 'Wide hat'], ['tricorn', 'Tricorn'], ['boonie', 'Ranger\'s cap'], ['helmet', 'Soldier\'s helmet'], ['crown', 'Crown'], ['feathers', 'Feathers'], ['horns', 'Horns'],
   ['longhair', 'Long hair'], ['twintails', 'Twin tails'], ['topknot', 'Topknot'], ['spiky', 'Spiky hair'], ['scruffy', 'Scruffy hair']];
@@ -7025,6 +7075,7 @@ function renderCreator() {
   for (const [k, label] of [['m', 'Male voice'], ['f', 'Female voice']]) { const b = el('button', 'chip' + (crSel.voice === k ? ' sel' : ''), label); b.addEventListener('click', () => { crSel.voice = k; renderCreator(); stPreviewVoice(k); }); vo.appendChild(b); }
   const hear = el('button', 'chip', 'Hear it ▶'); hear.addEventListener('click', () => stPreviewVoice(crSel.voice)); vo.appendChild(hear);
   const sk = $('crSkills'); sk.innerHTML = '';
+  stAttrUI($('crAttrs'), crSel.attr, () => Math.max(0, ST_ATTR_START - stAttrSpent(crSel.attr)), 1, renderCreator); // more come with every level
   const rec = ST_CLASSES[crSel.cls].skills;
   for (const id in ST_SKILLS) {
     const S = ST_SKILLS[id], on = crSel.skills.includes(id); if (S.gift) continue;
@@ -7047,12 +7098,12 @@ $('stBack').addEventListener('click', () => show('scr-main'));
 $('stContinue').addEventListener('click', () => startStory());
 $('stNew').addEventListener('click', () => {
   if (stData() && !confirm('Start a new story? Your current story progress will be replaced.')) return;
-  crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}}; $('crName').value = ''; renderCreator(); show('scr-create');
+  crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}, attr: {}}; $('crName').value = ''; renderCreator(); show('scr-create');
 });
 $('crBack').addEventListener('click', openStoryMenu);
 $('crStart').addEventListener('click', () => {
   const name = ($('crName').value.trim() || 'Wanderer').slice(0, 14), c = ST_CLASSES[crSel.cls];
-  PROF.story = {name, cls: crSel.cls, race: crSel.race, color: crSel.color, voice: crSel.voice, outfit: Object.assign({}, crSel.outfit), skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
+  PROF.story = {name, cls: crSel.cls, race: crSel.race, attr: Object.assign({}, crSel.attr), color: crSel.color, voice: crSel.voice, outfit: Object.assign({}, crSel.outfit), skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30,
     items: {potion: 3, ether: 1}, x: 11 * ST_TILE, y: 11 * ST_TILE + 32, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false, tut: 1,
     map: 'world', shrine: {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64}, lost: null};
   stSave(); startStory(true);
@@ -7438,7 +7489,7 @@ function stEnterMap(key, tx, ty) { // move between the world and a dungeon
 }
 function stRest() { // an Ashen Shrine: heal fully, set your return point, and the dead in the dungeons rise again
   const d = stData(), hurt = !!d.wounds; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; d.shrine = {map: d.map, x: d.x, y: d.y + 40}; sfx('respawn');
-  stSay([['', (hurt ? 'The ash fills your wounds and knits them closed. Even the lost arm grows back, grey and new. ' : '') + 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']]);
+  stSay([['', (hurt ? 'The ash fills your wounds and knits them closed. Even the lost arm grows back, grey and new. ' : '') + 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']], null, stAttrSpent(d.attr) ? [['Rise', null], ['Reset my stat points', () => setTimeout(stRespec, 0)]] : null);
 }
 function stNearby() {
   const d = stData(), near = (tx, ty) => Math.hypot(d.x - (tx * ST_TILE + 32), d.y - (ty * ST_TILE + 32)) < 80, grid = stGrid();
@@ -7787,7 +7838,7 @@ function stWalk(dt) {
 // ---- turn-based battles
 function stStartBattle(foes, bossId, tile) {
   const s = stStats(), d = stData();
-  const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06), CMP = stCompanion(), soloMul = CMP ? 1 : .85; // fighting alone, enemies are a little softer
+  const lvl = Math.max(0, Math.max(d.lv, stZoneLv() + 1) - 1) * (bossId ? 0 : .06), CMP = stCompanion(), nearParty = stPartyMembers().some(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 14 * ST_TILE), soloMul = CMP || nearParty ? 1 : .85; // fighting alone, enemies are a little softer
   ST.battle = {bossId, tile, turn: 'player', log: '', over: false, buffs: {guard: 0, rally: 0},
     foes: foes.map((k, i) => { const F = ST_FOES[k], bs = bossId && ST_BOSS_SCALE[k] || [1, 1]; const hp = Math.round(F.hp * (1 + lvl) * bs[0] * soloMul); return Object.assign({key: k, hp, maxHp: hp, poison: 0, burn: 0, frozen: 0, flash: 0}, F, {atk: F.atk * (1 + lvl) * bs[1], xp: Math.round(F.xp * (1 + lvl * .5)), gold: Math.round(F.gold * (1 + lvl * .5)), id: i}); }),
     coop: stPartyMembers().filter(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 14 * ST_TILE).slice(0, 3).map((p, i) => { const sw = p.presence.sw; return {id: 'c' + i, peer: p.peer, name: sw.n, look: sw.k, color: sw.c, lv: sw.lv, atk: sw.at || 20, hp: sw.hp || 200, maxHp: sw.hp || 200}; }),
@@ -8352,7 +8403,7 @@ function stRacePower() {
   else if (key === 'ashkin') { for (const f of alive) { const dm = Math.min(f.hp, stDmg(s.mag * 1.2 + s.atk * .5, f.def * .5)); f.hp -= dm; f.burn = 3; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stEffect('explode', f.id, '#ff7a2a'); stNum(f.id, dm, '#ff9a4a'); } sfx('flame'); }
   else if (key === 'tuskborn') { b.buffs.rage = 3; stTransformFx('p', '#ff3a2a', `${d.name} roars with Blood Fury!`); stGrunt(stSex('p'), true, 'rage2'); }
   else if (key === 'stonekin') { b.buffs.stone = 1; stEffect('aura', 'p', '#c9ced6', 1.4); sfx('shield'); }
-  else if (key === 'felari') { b.pounce = true; return stPick(f => stPlayerHit(f, s.atk * stAtkMul(b) * 2.3, 'phys', null, '#ffd75e')); }
+  else if (key === 'felari') { b.racial = false; return stPick(f => { b.racial = true; b.pounce = true; stPlayerHit(f, s.atk * stAtkMul(b) * 2.3, 'phys', null, '#ffd75e'); }); } // backing out keeps the power
   else if (key === 'scalekin') { const h = Math.round(s.hp * .45); d.hp = Math.min(s.hp, d.hp + h); d.wounds = null; stEffect('sparkle', 'p', '#9fffb8'); stNum('p', '+' + h, '#6be08a'); }
   stRenderBattle(); setTimeout(stEndTurn, 500);
 }
@@ -8467,7 +8518,7 @@ function stEndBattle(result) {
   if (!b.bossId && b.tile === 'T' && d.ch === 0 && d.pelts < 3) { d.pelts++; lines.push(['', `Wolf packs driven off: ${d.pelts} of 3.` + (d.pelts >= 3 ? ' Return to Elder Maren.' : '')]); }
   let learn = false;
   const ranksWas = {}; for (const id of d.skills.concat('attack')) ranksWas[id] = stRank(id);
-  while (d.xp >= stXpNeed(d.lv)) { d.xp -= stXpNeed(d.lv); d.lv++; const s = stStats(); d.hp = s.hp; d.mp = s.mp; lines.push(['', `Level up! You are now level ${d.lv}. Health and mana fully restored.`]); if (d.lv % 2 === 1 && d.skills.length < Object.keys(ST_SKILLS).length) learn = true; }
+  while (d.xp >= stXpNeed(d.lv)) { d.xp -= stXpNeed(d.lv); d.lv++; const s = stStats(); d.hp = s.hp; d.mp = s.mp; lines.push(['', `Level up! You are now level ${d.lv}. Health and mana fully restored. +${ST_ATTR_PER_LV} stat points: spend them in Menu → Stats.`]); if (d.lv % 2 === 1 && d.skills.length < Object.keys(ST_SKILLS).length) learn = true; }
   for (const id in ranksWas) if (stRank(id) > ranksWas[id]) { lines.push(['', `Your mastery is finally ready: ${ST_EVOLVE[id] ? ST_EVOLVE[id][ranksWas[id]] : stSkName(id)} evolved into ${stSkName(id)}!`]); sfx('evolve'); }
   if (d.lv >= ST_COMP_LV && !d.flags.compTold) { d.flags.compTold = true; lines.push(['', `You are level ${ST_COMP_LV}. Companions can now fight beside you. Open Companions from the menu or the guild hall.`]); }
   if (b.bossId) {
@@ -8579,6 +8630,7 @@ function stOpenMenu() {
   btn(`Your voice: ${(d.voice || 'm') === 'f' ? 'Female' : 'Male'}`, () => { d.voice = (d.voice || 'm') === 'f' ? 'm' : 'f'; stSave(); stCloseMenu(); stOpenMenu(); stPreviewVoice(d.voice); });
   if (!stData().race) btn('🧬 Choose race', () => stChooseRace());
   if (stData().items.sc_return) btn(`📜 Scroll of Return ×${stData().items.sc_return}`, () => stTeleport());
+  btn(stAttrFree() ? `📊 Stats (${stAttrFree()} points!)` : '📊 Stats', () => stStatsMenu());
   btn('👥 Party', () => stPartyMenu());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
@@ -8603,7 +8655,7 @@ $('stJournalBtn').addEventListener('click', () => ST.mode === 'menu' && ST.journ
 // ---- HUD and drawing
 function stHud() {
   const d = stData(); if (!d) return; const s = stStats();
-  const hn = $('stHudName'); hn.textContent = ''; hn.className = 'hn'; hn.append(document.createTextNode(stTitledName()), el('span', 'badge lvb', `Lv ${d.lv}`), el('span', 'badge rkb', d.guild ? `${d.guild.rank}-Rank` : 'No guild'));
+  const hn = $('stHudName'); hn.textContent = ''; hn.className = 'hn'; $('stMenuBtn').textContent = stAttrFree() ? `Menu · ${stAttrFree()} pts` : 'Menu'; hn.append(document.createTextNode(stTitledName()), el('span', 'badge lvb', `Lv ${d.lv}`), el('span', 'badge rkb', d.guild ? `${d.guild.rank}-Rank` : 'No guild'));
   if (!$('stXpBar')) { const xb = el('div', 'bar xp'); xb.id = 'stXpBar'; xb.appendChild(el('i')); xb.title = 'Experience'; $('stHud').insertBefore(xb, $('stGold')); for (const [id, lb] of [['stHp', 'HEALTH'], ['stMp', 'MANA']]) $('stHud').insertBefore(el('small', 'bl', lb), $(id).parentNode); }
   $('stXpBar').firstChild.style.width = Math.min(100, d.xp / stXpNeed(d.lv) * 100) + '%';
   $('stHint').textContent = device() === 'pad' ? 'Left stick: move · A: interact · Start: menu · Back: journal · Y: ride' : 'WASD or arrows: move · E: interact · M: menu · J: journal · R: ride';
