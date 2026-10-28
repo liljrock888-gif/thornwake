@@ -99,7 +99,7 @@
     const {data: row, error} = await sb.from('saves').select('data, player_id, updated_at').eq('user_id', u.id).maybeSingle();
     if (error) return render('Couldn\'t reach your online save right now. Your progress is still saved on this device.');
     const link = store.get(LINK_KEY);
-    if (!row) return push(true);
+    if (!row || !row.data || (row.data.epoch || 0) < (TW.getProfile().epoch || 0)) return push(true); // a save from before the last wipe is replaced, never loaded
     if (link && link.uid === u.id) {
       // this device was already linked: keep whichever side changed last
       if (link.dirty && new Date(link.dirty) > new Date(row.updated_at)) return push(true);
