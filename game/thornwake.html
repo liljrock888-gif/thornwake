@@ -100,6 +100,38 @@ body.padnav button:focus,body.padnav input:focus{outline:3px solid var(--gold);o
 #card h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,10vw,76px);margin:0;letter-spacing:.04em;line-height:1;background:linear-gradient(180deg,#fff3c9,#f2c14e 55%,#a5701a);-webkit-background-clip:text;background-clip:text;color:transparent}
 #card .sub{color:var(--muted);font-size:17px;margin:8px auto 18px;max-width:440px;text-wrap:balance}
 .screen{display:flex;flex-direction:column;align-items:center}
+/* Main menu: a launcher layout. Menu column on the left, the hero art in the middle, What's new down the right. */
+#overlay.home{align-items:stretch;justify-content:stretch;padding:0;background:linear-gradient(90deg,rgba(6,10,8,.88) 0,rgba(6,10,8,.55) 30%,rgba(6,10,8,0) 55%,rgba(6,10,8,.6) 80%,rgba(6,10,8,.85))}
+#overlay.home #card,#overlay.home.art #card{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;max-width:none;max-height:none;width:100%;height:100%;padding:0;overflow:visible;border-radius:0}
+#overlay.home.art{background:linear-gradient(90deg,rgba(6,10,8,.88) 0,rgba(6,10,8,.55) 30%,rgba(6,10,8,0) 55%,rgba(6,10,8,.6) 80%,rgba(6,10,8,.85))}
+#scr-main{width:100%}
+#scr-main{display:grid;grid-template-columns:minmax(280px,360px) 1fr minmax(280px,340px);height:100%;align-items:stretch;gap:0}
+#scr-main .homeLeft{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:calc(28px + env(safe-area-inset-top,0px)) 28px calc(24px + env(safe-area-inset-bottom,0px)) calc(32px + env(safe-area-inset-left,0px));overflow-y:auto;min-height:0}
+#scr-main .menuLogo{text-align:left;font-size:clamp(34px,3.4vw,50px);line-height:1.05;letter-spacing:.03em;max-width:100%}
+#scr-main .menuTag{text-align:left;margin:4px 0 22px;font-size:12px}
+#scr-main .menu{width:100%;margin:0;gap:2px}
+#scr-main .homePlay{font-size:28px;padding:16px 24px;margin-bottom:14px;text-align:left;letter-spacing:.06em;box-shadow:0 8px 26px rgba(232,176,74,.25)}
+#scr-main .menu .mbtn:not(.primary){background:transparent;border:1px solid transparent;border-left:3px solid transparent;border-radius:6px;text-align:left;font-size:19px;padding:9px 14px;display:flex;align-items:center;gap:12px;transition:background .15s,border-color .15s,padding .15s}
+#scr-main .menu .mbtn:not(.primary)::before{content:attr(data-i);width:24px;text-align:center;font-size:17px;filter:saturate(.8)}
+#scr-main .menu .mbtn:not(.primary):hover:not(:disabled),#scr-main .menu .mbtn:not(.primary):focus-visible{background:rgba(255,243,201,.07);border-left-color:var(--gold);padding-left:18px}
+#scr-main .homeSet{width:100%;margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+#scr-main .homeSet summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--muted);padding:6px 4px;list-style:none}#scr-main .homeSet summary::-webkit-details-marker{display:none}
+#scr-main .homeSet[open] summary{color:var(--ink)}#scr-main .homeSet .mbtn{width:100%;margin-top:6px}
+#scr-main #padHint{text-align:left;margin-top:10px}
+#whatsNew{display:flex;flex-direction:column;margin:calc(20px + env(safe-area-inset-top,0px)) calc(20px + env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) 0;background:rgba(12,20,17,.86);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.45);text-align:left;min-height:0;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#whatsNew .wnHead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;border-bottom:1px solid var(--line)}
+#whatsNew h2{font-family:var(--display);color:var(--gold);font-size:20px;margin:0;letter-spacing:.04em}
+#wnClose{display:none;background:none;border:0;font-size:18px;cursor:pointer;padding:4px 8px}
+#wnList{overflow-y:auto;padding:4px 16px 14px;-webkit-overflow-scrolling:touch;min-height:0}
+#wnList .wn{padding:12px 0;border-bottom:1px solid rgba(51,70,61,.6)}#wnList .wn:last-child{border-bottom:0}
+#wnList .wn h3{margin:2px 0;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px}
+#wnList .wn time{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+#wnList .wn ul{margin:4px 0 0;padding-left:18px;color:#c8d2c8;font-size:13px;line-height:1.45}
+#wnList .new,#wnBtn .new{background:var(--ash);color:#fff;font-size:10px;font-weight:700;border-radius:6px;padding:1px 6px;letter-spacing:.06em}
+#wnBtn{display:none}
+@media (max-width:1000px){#scr-main{grid-template-columns:minmax(280px,380px) 1fr}#whatsNew{display:none;position:fixed;inset:calc(16px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) calc(16px + env(safe-area-inset-left,0px));margin:0;max-width:480px;margin-left:auto;z-index:5}#whatsNew.open{display:flex}#wnClose{display:block}#wnBtn{display:inline-flex;gap:6px;align-items:center;margin-top:10px}}
+@media (max-width:640px){#scr-main{grid-template-columns:1fr}#scr-main .homeMid{display:none}#overlay.home{background:rgba(6,10,8,.72)}#scr-main .homeLeft{align-items:stretch;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}#scr-main .menuLogo,#scr-main .menuTag,#scr-main #padHint{text-align:center}#scr-main .homePlay{text-align:center}#wnBtn{align-self:center}}
+body.tv #scr-main{grid-template-columns:minmax(340px,440px) 1fr minmax(340px,420px)}
 .screen h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,40px);margin:0 0 8px}
 .menu{display:flex;flex-direction:column;gap:10px;width:min(320px,80vw);margin:4px auto 10px}
 .mbtn{font-family:var(--display);font-size:20px;padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:linear-gradient(#22332b,#16221d);color:var(--ink);cursor:pointer}
@@ -503,21 +535,28 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
       </section>
 
       <section class="screen" id="scr-main" hidden>
-        <h1 class="menuLogo">Thornwake</h1><p class="menuTag">Choose your path</p>
+        <div class="homeLeft">
+        <h1 class="menuLogo">Thornwake</h1><p class="menuTag">Legends of the Ashen Vale</p>
         <div class="menu">
-          <button class="mbtn primary" id="m-new">New Game</button>
-          <button class="mbtn" id="m-story">Story</button>
-          <button class="mbtn" id="m-ranked">Ranked</button>
-          <button class="mbtn" id="m-continue">Continue</button>
-          <button class="mbtn" id="m-load">Load Game</button>
-          <button class="mbtn" id="m-multi">Multiplayer</button>
-          <button class="mbtn" id="m-daily">Daily</button>
-          <button class="mbtn" id="m-store">Store</button>
-          <button class="mbtn" id="m-help">How to Play</button>
+          <button class="mbtn primary homePlay" id="m-new">▶ Play</button>
+          <button class="mbtn" id="m-story" data-i="📖">Story</button>
+          <button class="mbtn" id="m-ranked" data-i="🏆">Ranked</button>
+          <button class="mbtn" id="m-multi" data-i="🌐">Multiplayer</button>
+          <button class="mbtn" id="m-continue" data-i="⏵">Continue</button>
+          <button class="mbtn" id="m-load" data-i="💾">Load Game</button>
+          <button class="mbtn" id="m-daily" data-i="🎁">Daily</button>
+          <button class="mbtn" id="m-store" data-i="🛒">Store</button>
+          <button class="mbtn" id="m-help" data-i="❔">How to Play</button>
+        </div>
+        <details class="homeSet"><summary>⚙ Settings</summary>
           <label class="vol" for="m-vol">Music volume <input type="range" id="m-vol" min="0" max="100" step="5"></label>
           <button class="mbtn small" id="m-tv">Big screen mode: Off</button>
-        </div>
+        </details>
         <p class="hint" id="padHint">Plug in a controller and press any button to use it.</p>
+        <button class="mbtn small" id="wnBtn" aria-controls="whatsNew" aria-expanded="false">📰 What's new</button>
+        </div>
+        <div class="homeMid" aria-hidden="true"></div>
+        <aside id="whatsNew" aria-label="What's new"><div class="wnHead"><h2>What's new</h2><button id="wnClose" aria-label="Close">✕</button></div><div id="wnList"></div></aside>
       </section>
 
       <section class="screen" id="scr-mode" hidden>
@@ -2244,12 +2283,12 @@ function drawMenuArt(now) {
   const loop = 28, t = (now % loop) / loop, ds = clamp(w / 1500, .45, .9);
   drawDragon(ctx, {x: -260 + t * (w + 520), y: h * .3 + Math.sin(now * .8) * 26, face: .06, atkT: 0, atkCd: 1.5, hitFlash: 0, id: 7, species: 'ember', fire: '#ff7a2a', sc: ds, noShadow: true}, now);
   // heroes on the cliff
-  const k = clamp(h / 480, .9, 2.4), base = h * .855;
+  const k = clamp(h / 480, .9, 2.4), base = h * .855, mid = document.getElementById('overlay').classList.contains('home') && w > 1000 ? .29 : 0; // on the launcher menu the heroes stand in the middle
   [['knight', '#7fd1c7', 11, .1], ['mage', '#f2c14e', 18, .2], ['ranger', '#e58cff', 6, .3]].forEach(([look, color, level, fx], i) => {
-    ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * w * fx, dpr * base);
+    ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * w * (fx + mid), dpr * base);
     drawCharacter(ctx, {look, color, team: i === 2 ? 1 : 0, level, face: 0, x: 0, y: -16, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: i + 1, vx: 0, vy: 0}, now);
   });
-  ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * w * .36, dpr * base);
+  ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * w * (.36 + mid), dpr * base);
   drawPet(ctx, {kind: 'pip', x: 0, y: -4, face: 0, walk: 0, seed: 2}, now);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   // embers drifting up
@@ -3543,14 +3582,46 @@ function cleanSegs(s) {
 // ---------- menus ----------
 const overlay = $('overlay');
 let currentScreen = 'scr-main';
+// What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
+const UPDATES = [
+  {id: 48, date: 'Oct 28', title: 'What\'s new panel', items: ['This list! See every update right from the main menu.']},
+  {id: 47, date: 'Oct 28', title: 'Smoother frame rate', items: ['Towns and big lands draw up to 3× faster.', 'Slow phones switch to a lite mode with fewer glow effects.']},
+  {id: 46, date: 'Oct 28', title: 'Stat points', items: ['Spend 5 points at creation and 2 per level on Strength, Intellect, Vitality, Endurance, Agility and Spirit.', 'Reset them at any Ashen Shrine for a fee.']},
+  {id: 45, date: 'Oct 28', title: 'Parties, balance and roads', items: ['New Party menu: invite anyone online, accept invites from a card, teleport to party members, leaders can remove members. Parties of up to 4.', 'Party members show on the minimap and join battles from farther away.', 'Class, race, skill and companion balance pass.', 'Coach posts no longer block the road.']},
+  {id: 44, date: 'Oct 28', title: 'Scrolls and Arcane Shield', items: ['Scrolls of Return teleport you to towns and lands you have reached.', 'Battle scrolls: Flames, Ice Prison, Thunder, Mending, Warding and Siphoning.', 'Arcane Shield spell blocks most damage for 2 turns.']},
+  {id: 43, date: 'Oct 28', title: 'Fresh start', items: ['All progress was reset for a clean start for everyone.']},
+  {id: 42, date: 'Oct 28', title: 'Races, classes and Acts II and III', items: ['8 races with their own traits and a once-per-battle racial power.', '5 new classes: Necromancer, Monk, Druid, Berserker and Blademaster.', 'The story continues: hunt the five shards of the Hollow Crown across the Isles, Rougemarais, Valdris and Aetherfall.', 'Trees sway more gently.']},
+  {id: 41, date: 'Oct 28', title: 'Companions and safer chat', items: ['Recruit companions at level 45: Liora, Garm, Sylwen, Vex, Orrin and Fang the direwolf.', 'Stronger chat and name filter.', 'Moves now need a minimum level to evolve.']},
+  {id: 40, date: 'Oct 27', title: 'Class clothing and party HP', items: ['Every class has its own wardrobe.', 'See your party members\' health in battle.', 'No overkill damage, and battles end the moment the last enemy falls.']},
+  {id: 38, date: 'Oct 27', title: 'Spell animations and outfits', items: ['New and improved animations for moves and spells.', 'More clothing to choose from.']},
+  {id: 36, date: 'Oct 27', title: 'Co-op and mobile', items: ['Play story mode together: see other players, form parties, fight together and chat.', 'New mobile layout with a thumbstick and thumb buttons.']},
+  {id: 34, date: 'Oct 27', title: 'Balance and polish', items: ['Full balance pass for levels, bosses, healing, mana and trading.', 'Smaller characters, sturdier buildings, less gore.']},
+  {id: 32, date: 'Oct 27', title: 'Life in the Vale', items: ['Love, friendship and flirting with townsfolk, romance and marriage.', 'Farming, a homestead and children.', 'Mount breeding.', 'Your actions have consequences: town reputation and a commoner-to-noble rank.', 'A journal you can open any time.']},
+  {id: 30, date: 'Oct 27', title: 'The Adventurers\' Guild', items: ['Join the guild and climb from D to S rank.', 'Walk inside the guild hall and take quests from the board, one at a time.', 'The guild\'s government passes edicts that change the world.']},
+  {id: 28, date: 'Oct 27', title: 'A bigger world', items: ['A tutorial with Warden Edda, who walks you through Thornwake.', 'New lands: the Ashen Vale (levels 1 to 25), Valdris (26 to 40) and Aetherfall (41 to 55), with more islands and cities.', 'Rewards for beating bosses.', 'A clearer interface with a minimap, objective arrow and menu tabs.']},
+  {id: 20, date: 'Earlier', title: 'Story mode', items: ['A dark story RPG: make your own hero, explore an open world and fight turn-based battles.', 'Dungeons, bosses, mounts, fishing, cooking, trading, shrines and wounds.', 'Werewolf, vampire and Heavenly Restriction paths.']},
+  {id: 10, date: 'Earlier', title: 'Arena and online', items: ['Ranked and multiplayer arena matches.', 'Warzone with guns, grenades and tanks.', 'Daily rewards, the Store, Game Pass and Mythic hero bundles.', 'Accounts and cloud saves on the website.']},
+  {id: 1, date: 'Launch', title: 'Thornwake launches', items: ['Lead your goblin horde down three lanes, hunt jungle beasts and evolve your hero through four forms.', '30+ heroes, pets and seven living maps.']},
+];
+const WN_KEY = 'thornwake.seenUpdate';
+function renderWhatsNew() {
+  const box = $('wnList'); if (!box) return; const seen = store.get(WN_KEY) || 0; box.innerHTML = '';
+  for (const U of UPDATES) { const it = el('article', 'wn'), h = el('h3', '', U.title); if (U.id > seen) h.appendChild(el('span', 'new', 'NEW'));
+    const ul = el('ul'); for (const t of U.items) ul.appendChild(el('li', '', t)); it.append(el('time', '', U.date), h, ul); box.appendChild(it); }
+  const b = $('wnBtn'); b.textContent = "📰 What's new "; if (UPDATES[0].id > seen) b.appendChild(el('span', 'new', 'NEW'));
+}
+function markUpdatesSeen() { store.set(WN_KEY, UPDATES[0].id); }
 function show(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  overlay.hidden = false; currentScreen = id; musicScene();
+  overlay.hidden = false; currentScreen = id; musicScene(); overlay.classList.toggle('home', id === 'scr-main');
   if (id === 'scr-main') refreshMain();
   setTimeout(() => { const b = $(id).querySelector('button:not(:disabled)'); if (b) b.focus({preventScroll: true}); }, 0);
 }
-function hideMenus() { overlay.hidden = true; musicScene(); }
-function refreshMain() { $('m-continue').disabled = !store.get(AUTO_KEY); $('m-daily').textContent = dailyReady() ? 'Daily  •  rewards ready' : 'Daily'; }
+function hideMenus() { overlay.hidden = true; overlay.classList.remove('home'); musicScene(); }
+function refreshMain() { renderWhatsNew(); clearTimeout(refreshMain.seenT); refreshMain.seenT = setTimeout(() => { if (currentScreen === 'scr-main' && !overlay.hidden && $('whatsNew').offsetParent) { markUpdatesSeen(); } }, 5000); // on wide screens the panel is always visible
+  $('m-continue').disabled = !store.get(AUTO_KEY); $('m-daily').textContent = dailyReady() ? 'Daily  •  rewards ready' : 'Daily'; }
+$('wnBtn').addEventListener('click', () => { const w = $('whatsNew'), open = !w.classList.contains('open'); w.classList.toggle('open', open); $('wnBtn').setAttribute('aria-expanded', open); if (open) { markUpdatesSeen(); setTimeout(() => $('wnClose').focus(), 0); } });
+$('wnClose').addEventListener('click', () => { $('whatsNew').classList.remove('open'); $('wnBtn').setAttribute('aria-expanded', 'false'); renderWhatsNew(); $('wnBtn').focus(); });
 function begin(loaded) {
   hideMenus(); closeShop();
   G.started = true; G.paused = false; G.over = false; lastAuto = G.time;
