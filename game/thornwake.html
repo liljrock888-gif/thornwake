@@ -6847,7 +6847,7 @@ function stNetTick(dt) {
 }
 function stDrawOthers(now) { // other players on this map, with name tags (party members in green)
   const d = stData();
-  for (const p of stOthers()) { const sw = p.presence.sw; if (sw.m !== d.map) continue; const v = SW.vis[p.peer]; if (!v) continue; const party = SW.party && sw.pt === SW.party;
+  for (const p of stOthers()) { const sw = p.presence.sw; if (sw.m !== d.map) continue; const v = SW.vis[p.peer]; if (!v || Math.abs(v.x - ST.cam.x) > cw + 200 || Math.abs(v.y - ST.cam.y) > ch + 200) continue; const party = SW.party && sw.pt === SW.party;
     if (sw.r) { const mid = 'peer:' + p.peer; SW.mounts[mid] = {name: '', kind: sw.r.k, color: sw.r.c, mane: sw.r.m, fly: !!sw.r.f, glow: sw.r.g || null, speed: 1}; ctx.save(); ctx.translate(v.x, v.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-v.x, -(v.y + 10)); stDrawMount(ctx, mid, v.x, v.y + 10, sw.f ? Math.PI : 0, v.w, now, !!sw.mv); ctx.restore(); }
     stDrawCh(Object.assign(stUnit(sw.k, sw.c, v.x, v.y - (sw.r ? 21 + (sw.r.f ? 21 : 0) : 0), sw.f ? Math.PI : 0, sw.mv ? v.w : 0, 200 + (p.peer.charCodeAt(0) || 0), sw.lv), {outfit: sw.o && typeof sw.o === 'object' ? sw.o : null}), now);
     ctx.textAlign = 'center'; ctx.font = '700 13px "Barlow Semi Condensed", sans-serif'; ctx.fillStyle = party ? '#7fe08a' : '#8fd4ff'; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = 3;
@@ -7504,7 +7504,8 @@ function stNearby() {
     for (const b of ST_BOSSES) if (!d.flags[b.id] && near(b.x, b.y)) return {kind: 'boss', b};
   }
   if (d.map === 'world' && (stTileAt(d.x, d.y - 40) === 'G' || stTileAt(d.x, d.y - 70) === 'G')) return {kind: 'gate'};
-  for (let y = 0; y < grid.length; y++) for (let x = 0; x < grid[y].length; x++) {
+  const tx0 = Math.floor(d.x / ST_TILE), ty0 = Math.floor(d.y / ST_TILE); // interactables are within 80px, so two tiles around you is plenty
+  for (let y = Math.max(0, ty0 - 2); y <= Math.min(grid.length - 1, ty0 + 2); y++) for (let x = Math.max(0, tx0 - 2); x <= Math.min(grid[y].length - 1, tx0 + 2); x++) {
     const t = grid[y][x]; if (!near(x, y)) continue;
     if (t === 'S') return {kind: 'shrine'};
     if (t === 'O' && d.map === 'world') return {kind: 'coach', c: ST_COACHES.find(c => c.x === x && c.y === y)};
@@ -8670,22 +8671,26 @@ function stHud() {
 const ST_CS = .72; // how big characters are drawn on the world map, so they fit the streets and doorways
 function stDrawCh(u, now, k = 1) { drawCharacterScaled(u, now, ST_CS * k); }
 const stUnit = (look, color, x, y, face, walk, id, level = 3) => ({look, color, team: 0, level, face, x, y, walk, _lw: walk - 1, atkT: 0, atkCd: 1, hitFlash: 0, id});
+const vwH = Zs => cw / Zs / 2 + 80, vhH = Zs => ch / Zs / 2 + 80;
 function stDrawWorld(now, dt = 1 / 60) {
   const d = stData(), Zs = Math.max(.7, Math.min(1.2, Math.min(cw, ch) / 700));
   ST.cam.x += (d.x - ST.cam.x) * .12; ST.cam.y += (d.y - ST.cam.y) * .12;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].pal ? ST_DUNGEONS[d.map].pal.sea : d.map === 'isles' ? '#1f6a8a' : d.map === 'rouge' ? '#1a2e28' : '#0c1411'; ctx.fillRect(0, 0, cw, ch);
   ctx.setTransform(dpr * Zs, 0, 0, dpr * Zs, dpr * (cw / 2 - ST.cam.x * Zs), dpr * (ch / 2 - ST.cam.y * Zs));
   const dun = d.map !== 'world';
-  ctx.drawImage(dun ? ST.dunC[d.map] : ST.mapC, 0, 0);
-  if (dun) stGrid().forEach((row, y) => [...row].forEach((t, x) => {
+  { const img = dun ? ST.dunC[d.map] : ST.mapC, x0 = Math.max(0, Math.floor(ST.cam.x - vwH(Zs))), y0 = Math.max(0, Math.floor(ST.cam.y - vhH(Zs))), w = Math.min(img.width - x0, Math.ceil(vwH(Zs) * 2)), h = Math.min(img.height - y0, Math.ceil(vhH(Zs) * 2));
+    if (w > 0 && h > 0) ctx.drawImage(img, x0, y0, w, h, x0, y0, w, h); } // drawing the whole land each frame wastes most of the work
+  const vw2 = cw / Zs / 2 + 140, vh2 = ch / Zs / 2 + 160, onScr = (x, y) => Math.abs(x - ST.cam.x) < vw2 && Math.abs(y - ST.cam.y) < vh2; // skip what is off screen
+  ST.marks = ST.marks || {}; if (dun && !ST.marks[d.map]) { const L = []; stGrid().forEach((row, y) => { for (let x = 0; x < row.length; x++) if (row[x] === 'c' || row[x] === 'B') L.push([row[x], x, y]); }); ST.marks[d.map] = L; }
+  if (dun) for (const [t, x, y] of ST.marks[d.map]) { if (!onScr(x * ST_TILE + 32, y * ST_TILE + 32)) continue; (() => {
     if (t === 'c' && !d.chests.includes(d.map + x + '_' + y)) { const cx = x * ST_TILE + 32, cy = y * ST_TILE + 36; ctx.fillStyle = '#5a3a1e'; ctx.fillRect(cx - 16, cy - 12, 32, 22); ctx.fillStyle = '#c9a24a'; ctx.fillRect(cx - 16, cy - 4, 32, 4); }
     if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) stDrawFoe(ST_DUNGEONS[d.map].boss, x * ST_TILE + 32, y * ST_TILE + 40, now, .75, Math.PI);
-  }));
+  })(); }
   const isles = dun && ST_DUNGEONS[d.map].outdoor; stAmbient(dt, now, Zs, d, dun, isles);
   stDrawCrops(now);
   if (!dun) for (const r of ST_ROCKS) if (Math.abs(r.x * ST_TILE - ST.cam.x) < cw / Zs && Math.abs(r.y * ST_TILE - ST.cam.y) < ch / Zs) stDrawRock(r, now);
   stTutDraw(now); stDrawOthers(now);
-  if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6 * ST_CS, f.face || 0);
+  if (dun) for (const f of ST.foes) if (f.alive && onScr(f.x, f.y)) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6 * ST_CS, f.face || 0);
   if (d.lost && d.lost.map === d.map) { ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff7a2a'; ctx.shadowBlur = 20; ctx.globalAlpha = .7 + Math.sin(now * 4) * .3; ctx.beginPath(); ctx.arc(d.lost.x, d.lost.y, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
   if (!dun) for (const c of ST_CHESTS) if (stChestShown(c, d)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
   if (!dun) for (const b of ST_BOSSES) if (!d.flags[b.id]) { const x = b.x * ST_TILE + 32, y = b.y * ST_TILE + 32; ctx.strokeStyle = '#ff6a4d'; ctx.globalAlpha = .5 + Math.sin(now * 3) * .3; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 34, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; stDrawFoe(b.id, x, y + 10, now, .7, Math.PI); }
@@ -8696,7 +8701,7 @@ function stDrawWorld(now, dt = 1 / 60) {
       else stDrawCh(stUnit(['rogue', 'magicgirl', 'hunter'][i % 3], ['#ff9ccf', '#9fd8ff', '#e0c060'][i % 3], x, y, Math.sin(now * .5 + i) > 0 ? 0 : Math.PI, st === 'child' ? now * 20 : 0, 90 + i), now, st === 'toddler' ? .55 : .7);
       ctx.fillStyle = '#fff3c9'; ctx.font = '600 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(K.name, x, y - (st === 'baby' ? 26 : 50)); ctx.textAlign = 'left'; });
   }
-  for (const n of ST_NPCS) if ((n.map || 'world') === d.map && stNpcShown(n, d)) {
+  for (const n of ST_NPCS) if ((n.map || 'world') === d.map && onScr(n.x * ST_TILE + 32, n.y * ST_TILE + 30) && stNpcShown(n, d)) {
     const x = n.x * ST_TILE + 32, y = n.y * ST_TILE + 30, u = stUnit(n.look, n.color, x, y, Math.PI, 0, 20 + n.x); if (n.horns) { u.horns = true; u.level = 12; } if (n.lv) { u.level = n.lv; u.noHalo = true; }
     stDrawCh(u, now, n.kid ? .65 : 1);
     ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n.name, x, y - (n.kid ? 40 : 56)); ctx.textAlign = 'left';
@@ -8725,9 +8730,10 @@ function stDrawWorld(now, dt = 1 / 60) {
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({player: 'Meet ' + (near.p ? near.p.presence.sw.n : ''), plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
-  $('stRide').hidden = dun || !(d.mounts || []).length; $('stRide').textContent = d.riding ? 'Dismount' : 'Ride';
+  const PR = $('stPrompt'); if (PR.hidden !== !near) PR.hidden = !near; if (near) stSetText(PR, (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({player: 'Meet ' + (near.p ? near.p.presence.sw.n : ''), plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach'));
+  const RB = $('stRide'), rh = dun || !(d.mounts || []).length; if (RB.hidden !== rh) RB.hidden = rh; stSetText(RB, d.riding ? 'Dismount' : 'Ride');
 }
+function stSetText(e, t) { if (e.textContent !== t) e.textContent = t; } // writing the same text every frame still costs a layout
 function stDrawFoe(key, x, y, now, scale, face, flash) {
   const F = ST_FOES[key] || ST_FOES.wolf, u = {x, y, face, walk: now * 30, _lw: 0, hitFlash: flash || 0, atkT: 0, atkCd: 1, id: 5, team: 1, level: 8};
   ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.translate(-x, -y);
@@ -8846,6 +8852,14 @@ function stPollPad() {
   }
   ST.pad.lx = Math.abs(lx) > .6; ST.pad.prev = gp.buttons.map(x => x.pressed);
 }
+// Lite mode: if frames stay slow for a few seconds, glow effects (shadowBlur, very costly on phones) are switched off for the session.
+const PERF = {avg: 1 / 60, slow: 0, lite: false};
+function stPerfWatch(dt) {
+  if (PERF.lite || !(dt > 0) || dt > .25) return; PERF.avg += (dt - PERF.avg) * .05;
+  PERF.slow = PERF.avg > 1 / 45 ? PERF.slow + dt : Math.max(0, PERF.slow - dt);
+  if (PERF.slow > 4) stLiteMode();
+}
+function stLiteMode() { if (PERF.lite) return; PERF.lite = true; try { Object.defineProperty(ctx, 'shadowBlur', {get: () => 0, set: () => {}, configurable: true}); } catch (e) { /* older browser */ } }
 function storyFrame(now, dt) {
   stPollPad();
   if (ST.mode === 'walk') { stWalk(dt); stTutTick(dt); }
@@ -8853,8 +8867,9 @@ function storyFrame(now, dt) {
   if ((ST.miniF = (ST.miniF || 0) + 1) % 5 === 0 && ST.mode !== 'battle') stMiniDraw(now / 1000);
   stWeatherTick(dt);
   if (ST.mode === 'battle' && ST.battle) stDrawBattle(now / 1000, dt); else if (ST.mode === 'sail' && ST.sail) stDrawSail(now / 1000, dt); else stDrawWorld(now / 1000, dt);
-  $('game').classList.toggle('touch', touchUI.on); $('story').dataset.mode = ST.mode;
-  $('stJoyZone').hidden = !(touchUI.on && (ST.mode === 'walk')); if ($('stJoyZone').hidden && ST.touchMove) { ST.touchMove = null; $('stJoyBase').classList.remove('on'); }
+  if (ST.lastMode !== ST.mode || ST.lastTouch !== touchUI.on) { ST.lastMode = ST.mode; ST.lastTouch = touchUI.on; $('game').classList.toggle('touch', touchUI.on); $('story').dataset.mode = ST.mode; // only when it changes
+    $('stJoyZone').hidden = !(touchUI.on && (ST.mode === 'walk')); if ($('stJoyZone').hidden && ST.touchMove) { ST.touchMove = null; $('stJoyBase').classList.remove('on'); } }
+  stPerfWatch(dt);
   if (Math.random() < .05) stHud();
 }
 
