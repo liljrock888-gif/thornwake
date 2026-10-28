@@ -330,7 +330,8 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stParty .pm{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:center;font-size:13px}
 #stParty .pm .bar{height:12px}
 .bar.rage i{background:linear-gradient(90deg,#8a1010,#ff3a2a)!important}.rageBtn{background:linear-gradient(#ff5a3a,#a01010)!important;color:#fff!important;font-weight:800;animation:ragePulse .6s infinite alternate}@keyframes ragePulse{to{box-shadow:0 0 18px #ff3a2a}}
-#stMenu .trade{display:grid;grid-template-columns:1.5fr .5fr .6fr .6fr 1fr auto;gap:4px 8px;align-items:center;font-size:13px;margin:6px 0;max-height:52vh;overflow:auto}#stMenu .trade .tbtn{display:flex;gap:3px}#stMenu .trade .tbtn button{padding:3px 7px;font-size:12px}#stMenu .trade .cheap{color:#8fe08a}#stMenu .trade .wanted{color:#ffb35a}#stMenu .trade .hint{color:#b8b0a0;font-size:12px}
+#stMenu .trade{display:grid;grid-template-columns:1.5fr .5fr .6fr .6fr 1fr auto;gap:4px 8px;align-items:center;font-size:13px;margin:6px 0;max-height:52vh;overflow:auto}#stMenu .trade .tbtn{display:flex;gap:3px}#stMenu .trade.craft{grid-template-columns:1.2fr 1fr 1.6fr auto}#stMenu .trade.mats{grid-template-columns:1.4fr 1fr auto}
+@media (max-width:600px){#stMenu .trade.craft{grid-template-columns:1fr auto}#stMenu .trade.craft .hint{display:none}}#stMenu .trade .tbtn button{padding:3px 7px;font-size:12px}#stMenu .trade .cheap{color:#8fe08a}#stMenu .trade .wanted{color:#ffb35a}#stMenu .trade .hint{color:#b8b0a0;font-size:12px}
 @media (max-width:600px){#stMenu .trade{grid-template-columns:1.3fr .4fr .5fr .5fr;}#stMenu .trade .hint,#stMenu .trade>b:nth-child(5){display:none}#stMenu .trade .tbtn{grid-column:1/-1}#stMenu .trade>b:nth-child(6){display:none}}
 .stChips{display:flex;flex-wrap:wrap;gap:4px}.stChips span{padding:1px 8px;border-radius:9px;font-size:12px;font-weight:700;background:rgba(10,8,12,.7);border:1px solid}.stChips .good{color:#7fe0c7;border-color:#7fe0c7}.stChips .bad{color:#ff7a6a;border-color:#ff7a6a}
 #stActions .row{display:flex;flex-wrap:wrap;gap:6px}
@@ -5694,6 +5695,7 @@ function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
   const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (W.hole ? .75 : 1), spd: c.spd + .4 * L};
+  for (const k in d.gear || {}) { const G = ST_GEAR[k]; if (!G || !d.gear[k]) continue; st.atk += G.atk || 0; st.def += G.def || 0; st.mag += G.mag || 0; st.spd += G.spd || 0; }
   if (d.hr) { st.hp = Math.round(st.hp * 1.35); st.atk = st.atk * 1.5 + 6; st.def += 6; st.spd += 6; st.mag = 0; } // Heavenly Restriction: a perfect body, no magic at all
   if (d.pact) { st.atk += 6; st.mag += 6; }
   const outside = d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].outdoor), C = typeof stClock === 'function' ? stClock() : {dark: 0};
@@ -5995,7 +5997,149 @@ function stTrade(mk) {
     tbl.append(el('span', cheap ? 'cheap' : wanted ? 'wanted' : '', ST_GOODS[g][0] + (cheap ? ' (local)' : wanted ? ' (wanted)' : '')), el('span', '', String(have)), el('span', '', P.buy + 'g'), el('span', '', P.sell + 'g'), el('span', 'hint', best ? `${best[1]}g ${ST_MARKETS[best[0]].name}` : '?'), act);
   }
   m.appendChild(tbl);
+  const mats = Object.entries(d.mats || {}).filter(([, n]) => n > 0);
+  if (mats.length) { m.appendChild(el('h3', '', 'Sell fish, ore and gems')); const t2 = el('div', 'trade mats');
+    for (const [k, n] of mats) { const price = Math.max(1, Math.round(ST_MATS[k][1] * .8)), sb = el('button', '', `Sell ${n} for ${price * n}g`); sb.addEventListener('click', () => { d.gold += price * n; d.trade.earned += price * n; d.mats[k] = 0; sfx('pickup'); stTrade(mk); }); t2.append(el('span', '', `${ST_MATS[k][0]} ×${n}`), el('span', 'hint', `${price}g each`), sb); }
+    m.appendChild(t2); }
   const row = el('div', 'row'), done = el('button', '', 'Done trading'); done.addEventListener('click', stCloseMenu); row.appendChild(done); m.appendChild(row); setTimeout(() => done.focus({preventScroll: true}), 0);
+}
+// ---- professions: fishing, mining and crafting. Each levels up on its own and makes the next catch, swing or craft better.
+const ST_MATS = {
+  trout: ['River Trout', 6, 'fish'], carp: ['Mud Carp', 5, 'fish'], eel: ['Grey Eel', 12, 'fish'], salmon: ['Silver Salmon', 14, 'fish'], moonfish: ['Moonfish', 40, 'fish'], boot: ['Old Boot', 1, 'junk'],
+  snapper: ['Red Snapper', 9, 'fish'], tuna: ['Bluefin Tuna', 18, 'fish'], pearl: ['Brightwater Pearl', 60, 'gem'], sunfish: ['Golden Sunfish', 45, 'fish'],
+  catfish: ['Bayou Catfish', 10, 'fish'], gar: ['Gator Gar', 22, 'fish'], bloodgill: ['Bloodgill', 55, 'fish'],
+  copper: ['Copper Ore', 6, 'ore'], iron: ['Iron Ore', 10, 'ore'], silver: ['Silver Ore', 20, 'ore'], gold: ['Gold Ore', 32, 'ore'], sunsteel: ['Sunsteel Ore', 60, 'ore'], moonstone: ['Moonstone', 50, 'gem'], gem: ['Rough Ruby', 70, 'gem'],
+};
+const ST_CATCH = { // what bites where: [material, weight, minimum fishing level, night only]
+  world: [['trout', 40], ['carp', 30], ['boot', 8], ['eel', 14, 2], ['salmon', 12, 3], ['moonfish', 5, 4, true]],
+  isles: [['snapper', 40], ['tuna', 20, 2], ['sunfish', 6, 4], ['pearl', 6, 3], ['boot', 4]],
+  rouge: [['catfish', 40], ['gar', 20, 2], ['bloodgill', 7, 4, true], ['boot', 6]],
+};
+const ST_ROCKS = [ // ore rocks out in the regions; each refills a few minutes after you mine it
+  {x: 6, y: 13, ore: 'copper'}, {x: 3, y: 11, ore: 'copper'}, {x: 20, y: 14, ore: 'copper'}, {x: 26, y: 15, ore: 'iron'}, {x: 7, y: 4, ore: 'iron'}, {x: 10, y: 5, ore: 'silver'}, {x: 3, y: 5, ore: 'silver'},
+  {x: 41, y: 5, ore: 'gold'}, {x: 45, y: 18, ore: 'gold'}, {x: 43, y: 26, ore: 'sunsteel'}, {x: 34, y: 23, ore: 'moonstone'}, {x: 12, y: 27, ore: 'iron'},
+];
+const ST_ORE_LV = {copper: 1, iron: 2, silver: 3, gold: 4, sunsteel: 6, moonstone: 5};
+const ST_GEAR = { // forged at Brann's smithy
+  copperRing: {name: 'Copper Ring', need: {copper: 3}, lv: 1, def: 2, desc: '+2 defense'},
+  ironPlate: {name: 'Iron Breastplate', need: {iron: 4, copper: 1}, lv: 2, def: 5, desc: '+5 defense'},
+  silverEdge: {name: 'Silver Edge', need: {silver: 3, iron: 2}, lv: 3, atk: 7, desc: '+7 attack'},
+  goldAmulet: {name: 'Gold Amulet', need: {gold: 2, silver: 1}, lv: 4, mag: 5, desc: '+5 magic'},
+  moonCharm: {name: 'Moonstone Charm', need: {moonstone: 2, silver: 1}, lv: 5, spd: 3, desc: '+3 speed, dodge more'},
+  pearlCrown: {name: 'Pearl Diadem', need: {pearl: 3, gold: 1}, lv: 5, mag: 6, def: 4, desc: '+6 magic, +4 defense'},
+  sunBlade: {name: 'Sunsteel Greatblade', need: {sunsteel: 3, gold: 2, gem: 1}, lv: 7, atk: 14, desc: '+14 attack'},
+};
+const ST_MEALS = { // cooked at inns; eat them in battle from Items
+  grilled: {name: 'Grilled Fish', need: {any: 2}, lv: 1, hp: 90, desc: '+90 HP'},
+  stew: {name: 'Hearty Fish Stew', need: {eel: 1, salmon: 1}, lv: 2, hp: 160, cure: true, desc: '+160 HP, stops bleeding'},
+  islandPlatter: {name: 'Island Platter', need: {snapper: 1, tuna: 1}, lv: 3, hp: 180, mp: 30, desc: '+180 HP, +30 MP'},
+  moonBroth: {name: 'Moonfish Broth', need: {moonfish: 1}, lv: 4, hp: 120, mp: 60, desc: '+120 HP, +60 MP'},
+  bayouGumbo: {name: 'Bayou Gumbo', need: {catfish: 2, gar: 1}, lv: 4, hp: 240, cure: true, desc: '+240 HP, stops bleeding'},
+};
+const ST_PROF_NAME = {fishing: 'Fishing', mining: 'Mining', crafting: 'Crafting'};
+const stProfLv = k => ((stData().prof || {})[k] || {lv: 1}).lv;
+const stProfTitle = lv => ['', 'Novice', 'Novice', 'Apprentice', 'Apprentice', 'Journeyman', 'Journeyman', 'Adept', 'Expert', 'Master', 'Grandmaster'][Math.min(10, lv)];
+function stProfXp(k, n) {
+  const d = stData(); d.prof = d.prof || {}; const P = d.prof[k] || (d.prof[k] = {lv: 1, xp: 0}); if (P.lv >= 10) return;
+  P.xp += n; let up = false; while (P.lv < 10 && P.xp >= 20 + P.lv * 25) { P.xp -= 20 + P.lv * 25; P.lv++; up = true; }
+  if (up) setTimeout(() => { stCallout(`${ST_PROF_NAME[k]} level ${P.lv} · ${stProfTitle(P.lv)}`, '#8fe0ff'); sfx('levelup'); }, 900);
+}
+const stMat = (k, n) => { const d = stData(); d.mats = d.mats || {}; d.mats[k] = (d.mats[k] || 0) + n; };
+const stFishCount = () => Object.entries(stData().mats || {}).filter(([k]) => ST_MATS[k][2] === 'fish').reduce((a, [, n]) => a + n, 0);
+
+// ---- the gathering minigames, drawn over the world
+function stGatherStart(kind, info) {
+  const d = stData(); ST.mode = 'gather'; $('stPrompt').hidden = true; d.riding = false;
+  if (kind === 'fish') { const lv = stProfLv('fishing'); ST.gx = {kind, t: 0, phase: 'wait', bite: rand(1.6, 4.2), win: .6 + lv * .05, hits: 0, miss: 0, cur: 0, dir: 1, zone: Math.max(.1, .26 + lv * .015), zx: rand(.2, .7), spot: info, msg: 'Wait for a bite…'}; sfx('swing'); }
+  else ST.gx = {kind, t: 0, strikes: 0, score: 0, ring: 1, rock: info, msg: 'Strike when the rings meet', tol: .12 + stProfLv('mining') * .012, swing: 0};
+}
+function stGatherEnd(lines) { ST.mode = 'walk'; ST.gx = null; if (lines) stSay(lines); stHud(); stSave(); }
+function stGatherPress() {
+  const G = ST.gx, d = stData(); if (!G) return;
+  if (G.kind === 'fish') {
+    if (G.phase === 'wait') return stGatherEnd([['', 'You yank the line too soon. Ripples spread and the fish is gone.']]);
+    if (G.phase === 'bite') { G.phase = 'reel'; G.t = 0; G.msg = 'Reel! Press when the marker is in the green'; sfx('pickup'); return; }
+    if (G.phase === 'reel') {
+      if (Math.abs(G.cur - G.zx) < G.zone / 2) { G.hits++; sfx('hit'); G.zx = rand(.15, .85); } else { G.miss++; sfx('hurt'); }
+      if (G.miss >= 3) return stGatherEnd([['', 'The line snaps. Whatever it was, it was big.']]);
+      if (G.hits >= 3) { // landed it
+        const map = d.map === 'isles' ? 'isles' : d.map === 'rouge' ? 'rouge' : 'world', lv = stProfLv('fishing'), night = stClock().dark > .25;
+        const pool = ST_CATCH[map].filter(([, , mlv = 1, nt]) => lv >= mlv && (!nt || night)), tot = pool.reduce((a, c) => a + c[1] * (c[2] > 1 ? 1 + lv * .1 : 1), 0); let r = Math.random() * tot, got = pool[0][0];
+        for (const c of pool) { r -= c[1] * (c[2] > 1 ? 1 + lv * .1 : 1); if (r <= 0) { got = c[0]; break; } }
+        stMat(got, 1); stProfXp('fishing', ST_MATS[got][2] === 'junk' ? 2 : 6 + ST_MATS[got][1] / 3); sfx('pickup');
+        stCallout(`Caught: ${ST_MATS[got][0]}!`, ST_MATS[got][1] >= 40 ? '#ffd75e' : '#8fe0ff');
+        return stGatherEnd(got === 'boot' ? [['', 'You haul in… an old boot. Somebody\'s, once.']] : null);
+      }
+    }
+  } else {
+    const q = Math.max(0, 1 - Math.abs(G.ring - .35) / G.tol); G.strikes++; G.score += q; G.swing = .25; G.flash = q > .5 ? q : 0; sfx(q > .5 ? 'crack' : 'thud');
+    STFX.parts = STFX.parts || []; G.sparks = (G.sparks || []).concat(Array.from({length: q > .5 ? 14 : 4}, () => ({x: 0, y: 0, vx: rand(-160, 160), vy: rand(-220, -40), t: 0})));
+    G.ring = 1;
+    if (G.strikes >= 3) {
+      const R = G.rock, lv = stProfLv('mining'), n = G.score < .6 ? 0 : 1 + (G.score > 1.6 ? 1 : 0) + (G.score > 2.4 ? 1 : 0) + (lv >= 6 ? 1 : 0);
+      d.rocks = d.rocks || {}; d.rocks[R.x + ',' + R.y] = Date.now();
+      if (!n) { stProfXp('mining', 2); return stGatherEnd([['', 'The rock cracks wrong and the vein crumbles to dust. Steadier swings next time.']]); }
+      const ore = R.ore === 'moonstone' && stClock().dark < .25 ? 'silver' : R.ore; stMat(ore, n); const gem = Math.random() < .04 + lv * .012; if (gem) stMat('gem', 1);
+      stProfXp('mining', 5 * n + ST_MATS[ore][1] / 4); stCallout(`Mined: ${n} ${ST_MATS[ore][0]}${gem ? ' + a Rough Ruby!' : ''}`, gem ? '#ff6a8a' : '#d8c8a8');
+      return stGatherEnd();
+    }
+  }
+}
+function stGatherDraw(dt, now, Zs) {
+  const G = ST.gx; if (!G) return; G.t += dt; const d = stData();
+  if (G.kind === 'fish') { // the line, the bobber, and the reel bar
+    if (G.phase === 'wait' && G.t > G.bite) { G.phase = 'bite'; G.t = 0; G.msg = 'A bite! Press now!'; sfx('pop'); }
+    if (G.phase === 'bite' && G.t > G.win) return stGatherEnd([['', 'It took the bait and ran. Too slow.']]);
+    if (G.phase === 'reel') { G.cur += G.dir * dt * (1.1 + G.hits * .25); if (G.cur > 1) { G.cur = 1; G.dir = -1; } if (G.cur < 0) { G.cur = 0; G.dir = 1; } }
+    const bx = cw / 2 + (G.spot[0] - ST.cam.x) * Zs, by = ch / 2 + (G.spot[1] - ST.cam.y) * Zs + Math.sin(now * 3) * 2 + (G.phase === 'bite' ? Math.sin(now * 40) * 4 : 0), px = cw / 2 + (d.x - ST.cam.x) * Zs, py = ch / 2 + (d.y - 70 - ST.cam.y) * Zs;
+    ctx.strokeStyle = 'rgba(230,230,230,.8)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(px + 14, py); ctx.quadraticCurveTo((px + bx) / 2, Math.max(py, by) + 20, bx, by); ctx.stroke();
+    ctx.fillStyle = '#e03a2a'; ctx.beginPath(); ctx.arc(bx, by, 5, Math.PI, 0); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(bx, by, 5, 0, Math.PI); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.ellipse(bx, by + 4, 10 + (now * 10 % 10), 3, 0, 0, 7); ctx.stroke();
+    if (G.phase === 'bite') { ctx.fillStyle = '#ffd75e'; ctx.font = '800 34px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('!', bx, by - 22); ctx.textAlign = 'left'; }
+    if (G.phase === 'reel') { const W = Math.min(cw * .7, 420), x0 = (cw - W) / 2, y0 = ch * .74;
+      ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(x0 - 8, y0 - 8, W + 16, 36); ctx.fillStyle = '#2a3a4a'; ctx.fillRect(x0, y0, W, 20);
+      ctx.fillStyle = '#4ae06a'; ctx.fillRect(x0 + (G.zx - G.zone / 2) * W, y0, G.zone * W, 20); ctx.fillStyle = '#fff'; ctx.fillRect(x0 + G.cur * W - 3, y0 - 6, 6, 32);
+      for (let i = 0; i < 3; i++) { ctx.fillStyle = i < G.hits ? '#4ae06a' : 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(x0 + 10 + i * 18, y0 + 40, 6, 0, 7); ctx.fill(); ctx.fillStyle = i < G.miss ? '#ff4a4a' : 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(x0 + W - 10 - i * 18, y0 + 40, 6, 0, 7); ctx.fill(); } }
+  } else { // rings close in on the ore; strike when they meet
+    G.ring -= dt * (1.1 + G.strikes * .2); if (G.ring < 0) G.ring = 1; G.swing = Math.max(0, G.swing - dt); G.flash = Math.max(0, (G.flash || 0) - dt * 2);
+    const rx = cw / 2 + (G.rock.x * ST_TILE + 32 - ST.cam.x) * Zs, ry = ch / 2 + (G.rock.y * ST_TILE + 30 - ST.cam.y) * Zs, R = 120;
+    ctx.strokeStyle = '#ffd75e'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(rx, ry, R * .35, 0, 7); ctx.stroke();
+    ctx.strokeStyle = Math.abs(G.ring - .35) < G.tol ? '#4ae06a' : '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(rx, ry, R * Math.max(.05, G.ring), 0, 7); ctx.stroke();
+    if (G.flash > 0) { ctx.fillStyle = `rgba(255,240,180,${G.flash * .6})`; ctx.beginPath(); ctx.arc(rx, ry, 50, 0, 7); ctx.fill(); }
+    for (const sp of G.sparks || []) { sp.t += dt; sp.x += sp.vx * dt; sp.y += sp.vy * dt; sp.vy += 500 * dt; ctx.fillStyle = `rgba(255,200,120,${Math.max(0, 1 - sp.t * 1.5)})`; ctx.fillRect(rx + sp.x, ry + sp.y, 3, 3); }
+    G.sparks = (G.sparks || []).filter(sp => sp.t < .7);
+    for (let i = 0; i < 3; i++) { ctx.fillStyle = i < G.strikes ? '#ffd75e' : 'rgba(255,255,255,.3)'; ctx.beginPath(); ctx.arc(rx - 20 + i * 20, ry + R * .55, 6, 0, 7); ctx.fill(); }
+  }
+  ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.font = '700 18px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; const tw = ctx.measureText(G.msg).width + 30; ctx.fillRect(cw / 2 - tw / 2, ch * .12 - 22, tw, 34);
+  ctx.fillStyle = '#fff3e0'; ctx.fillText(G.msg + (device() === 'touch' ? ' (tap)' : device() === 'pad' ? ' (A)' : ' (E)'), cw / 2, ch * .12); ctx.textAlign = 'left';
+}
+const stRockReady = r => { const t = (stData().rocks || {})[r.x + ',' + r.y]; return !t || Date.now() - t > 4 * 60e3; };
+function stDrawRock(r, now) { // an ore rock with glinting veins, or rubble while it refills
+  const x = r.x * ST_TILE + 32, y = r.y * ST_TILE + 40, ok = stRockReady(r), col = {copper: '#d8803a', iron: '#b8b0a8', silver: '#e8eef8', gold: '#ffd75e', sunsteel: '#ff9a3a', moonstone: '#9fe6ff'}[r.ore];
+  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(x, y + 6, 30, 8, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = ok ? '#5a5a60' : '#4a4a4e'; ctx.beginPath(); ctx.moveTo(x - 28, y + 4); ctx.lineTo(x - 20, y - (ok ? 30 : 10)); ctx.lineTo(x + 2, y - (ok ? 40 : 14)); ctx.lineTo(x + 24, y - (ok ? 24 : 8)); ctx.lineTo(x + 28, y + 4); ctx.closePath(); ctx.fill();
+  if (!ok) return; ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 6 + Math.sin(now * 3 + r.x) * 4;
+  for (const [ox, oy] of [[-12, -14], [4, -26], [14, -10], [-2, -6]]) { ctx.beginPath(); ctx.moveTo(x + ox, y + oy - 4); ctx.lineTo(x + ox + 4, y + oy); ctx.lineTo(x + ox, y + oy + 4); ctx.lineTo(x + ox - 4, y + oy); ctx.fill(); }
+  ctx.shadowBlur = 0;
+}
+// ---- crafting: forge gear at Brann's smithy, cook meals at any inn
+function stCraft(station) {
+  const d = stData(), m = $('stMenu'), list = station === 'forge' ? ST_GEAR : ST_MEALS, lv = stProfLv('crafting'); d.mats = d.mats || {}; d.gear = d.gear || {};
+  ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
+  m.append(el('h3', '', station === 'forge' ? 'Brann\'s forge' : 'The inn kitchen'), el('p', '', `Crafting level ${lv} (${stProfTitle(lv)}). ` + (station === 'forge' ? 'Forged gear is worn at once and stacks with your other gear.' : 'Meals can be eaten in battle from Items.')));
+  const tbl = el('div', 'trade craft');
+  for (const k in list) {
+    const R = list[k], have = need => need === 'any' ? stFishCount() : d.mats[need] || 0, ok = Object.entries(R.need).every(([n, c]) => have(n) >= c), done = station === 'forge' && d.gear[k], locked = lv < R.lv;
+    const b = el('button', '', done ? 'Owned' : locked ? `Craft lv ${R.lv}` : 'Craft'); b.disabled = done || locked || !ok;
+    b.addEventListener('click', () => {
+      for (const [n, c] of Object.entries(R.need)) { if (n === 'any') { let left = c; for (const f of Object.keys(d.mats).filter(f => ST_MATS[f][2] === 'fish')) { const u = Math.min(left, d.mats[f]); d.mats[f] -= u; left -= u; if (!left) break; } } else d.mats[n] -= c; }
+      if (station === 'forge') d.gear[k] = true; else d.items[k] = (d.items[k] || 0) + 1;
+      stProfXp('crafting', 10 + R.lv * 6); sfx(station === 'forge' ? 'cannon' : 'pickup'); stCallout(`Crafted: ${R.name}`, '#ffd75e'); stCraft(station);
+    });
+    tbl.append(el('span', '', R.name + (station === 'meal' && d.items[k] ? ` (×${d.items[k]})` : '')), el('span', 'hint', R.desc), el('span', '', Object.entries(R.need).map(([n, c]) => `${have(n)}/${c} ${n === 'any' ? 'any fish' : ST_MATS[n][0]}`).join(', ')), b);
+  }
+  m.appendChild(tbl);
+  const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row); setTimeout(() => x.focus({preventScroll: true}), 0);
 }
 function stToggleRide() {
   const d = stData(), own = d.mounts || [];
@@ -6280,7 +6424,8 @@ function stShowLine() {
 
 // ---- the world: movement, interaction and random encounters
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
-const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYW'.includes(t) : '#fbtkjH'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
+const stRockAt = (x, y) => ST_ROCKS.find(r => r.x === Math.floor(x / ST_TILE) && r.y === Math.floor(y / ST_TILE));
+const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYW'.includes(t) : '#fbtkjH'.includes(t); if (d.riding && ST_MOUNTS[d.mount] && ST_MOUNTS[d.mount].fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
   const d = stData(); if (key !== 'world') d.riding = false; d.map = key; d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
@@ -6298,6 +6443,7 @@ function stRest() { // an Ashen Shrine: heal fully, set your return point, and t
 function stNearby() {
   const d = stData(), near = (tx, ty) => Math.hypot(d.x - (tx * ST_TILE + 32), d.y - (ty * ST_TILE + 32)) < 80, grid = stGrid();
   for (const n of ST_NPCS) if ((n.map || 'world') === d.map && stNpcShown(n, d) && near(n.x, n.y)) return {kind: 'npc', n};
+  if (d.map === 'world') for (const r of ST_ROCKS) if (near(r.x, r.y)) return {kind: 'mine', r};
   if (d.map === 'world') {
     for (const h of ST_HOUSES) if (Math.hypot(d.x - (h.x + 1) * ST_TILE, d.y - (h.y + 2) * ST_TILE) < 60) return {kind: 'house', h};
     for (const c of ST_CHESTS) if (stChestShown(c, d) && near(c.x, c.y)) return {kind: 'chest', c};
@@ -6314,6 +6460,10 @@ function stNearby() {
     if (t === 'E') return {kind: ST_DUNGEONS[d.map].outdoor ? 'ship' : 'exit'};
     if (t === 'c' && !d.chests.includes(d.map + x + '_' + y)) return {kind: 'chest', c: {id: d.map + x + '_' + y, loot: (x + y) % 2 ? {potion: 2, gold: 40} : {ether: 1, gold: 60}}};
     if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) return {kind: 'boss', b: {id: ST_DUNGEONS[d.map].boss, ch: ST_BOSS_CH[ST_DUNGEONS[d.map].boss] || 0}};
+  }
+  if (d.rod && (d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].outdoor))) { // water within a cast of where you stand
+    const water = d.map === 'world' ? '~' : '#';
+    for (const [ox, oy] of [[0, 70], [70, 0], [-70, 0], [0, -60], [50, 50], [-50, 50]]) if (stTileAt(d.x + ox, d.y + 14 + oy) === water) return {kind: 'fish', spot: [d.x + ox * 1.3, d.y + 14 + oy * 1.3]};
   }
   return null;
 }
@@ -6334,6 +6484,14 @@ function stInteract(pre) {
   } else if (it.kind === 'gate' && d.ch >= 3) stSay([['', 'The seal shatters as the shards draw near. The gate of the Hollow Keep groans open onto a hall of cold torches.']], null, [['Enter the keep', () => stEnterMap('keep', 2, 2)], ['Not yet', null]]);
   else if (it.kind === 'gate') stSay([['', 'A seal of violet light bars the gate. It hums like a held breath. Two shards would break it. You carry ' + Math.max(0, d.ch - 1) + '.']]);
   else if (it.kind === 'shrine') stRest();
+  else if (it.kind === 'fish') stGatherStart('fish', it.spot);
+  else if (it.kind === 'mine') {
+    const r = it.r, need = ST_ORE_LV[r.ore];
+    if (!d.pickaxe) stSay([['', `A rock seamed with ${ST_MATS[r.ore][0].toLowerCase()}. You need a pickaxe. Brann the Smith in Saltmere sells them.`]]);
+    else if (!stRockReady(r)) stSay([['', 'This vein is spent for now. Give it a few minutes to show more ore.']]);
+    else if (stProfLv('mining') < need) stSay([['', `${ST_MATS[r.ore][0]} is too hard for your skill. Requires mining level ${need}. You are mining level ${stProfLv('mining')}. Mine softer ore to learn.`]]);
+    else stGatherStart('mine', r);
+  }
   else if (it.kind === 'ship') {
     const fare = k => stPrice((d.map === 'rouge' || k === 'rouge') ? 60 : 30);
     stSay([['Captain Isolde', d.map === 'world' ? 'The Gull\'s Promise. Fastest hull in the Drowned Harbor, because she\'s the only one left. East to the sunny Brightwater Isles, or south through the bayou to Rougemarais, if you\'re tired of living.' : d.map === 'rouge' ? 'Keep your collar up until we\'re clear of the bayou. Things here drink.' : 'Where to, wanderer?'],
@@ -6390,7 +6548,7 @@ function stTalk(id) {
   } else if (id === 'merchant') stSay([['Pell the Merchant', `Coin is coin, even at the end of the world. Potions are ${stPrice(15)}, ethers ${stPrice(25)}.${stAlign() >= 3 ? ' A friend\'s price.' : stAlign() <= -3 ? ' Price goes up for your kind.' : ''} You have ${d.gold}. Don't die with it.`]], null,
     [[`Buy potion (${stPrice(15)})`, () => { if (d.gold >= stPrice(15)) { d.gold -= stPrice(15); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(25)})`, () => { if (d.gold >= stPrice(25)) { d.gold -= stPrice(25); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('thornwake')], ['Steal a potion', () => stPickpocket('Pell the Merchant')], ['Leave', null]]);
   else if (id === 'inn') stSay([['Innkeeper Bree', 'A bed, a bowl of something hot, and a locked door. 10 gold. You will wake. Probably.']], null,
-    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
+    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['Cook a meal', () => stCraft('meal')], ['No thanks', null]]);
   else if (id === 'guild') {
     const B = d.bounty && ST_BOUNTIES.find(x => x.id === d.bounty.id);
     if (B && d.bounty.prog >= B.need) stSay([['Guildmaster Oskar', `"${B.name}." Done, and you're still breathing. That's rarer than you'd think. ${B.gold} gold, as promised.`]], () => { d.gold += B.gold; d.xp += B.xp; d.bounties = (d.bounties || 0) + 1; d.bounty = null; sfx('levelup'); });
@@ -6413,7 +6571,7 @@ function stTalk(id) {
      ['Grant her rest', () => { d.flags.hessaDone = true; d.flags.hessaRest = true; d.items.potion += 3; stSay([['', 'She thanks you. She asks you to make it quick. You do. You take her red scarf back to Thornwake.'], ['', 'It is the right thing, you tell yourself. You will tell yourself for a long time.']]); }]]);
   else if (id === 'hessaHome') stSay([['Hessa', 'Every morning I wake up and I still know her name. Every morning, that is a gift. Thank you.']]);
   else if (id === 'hask' || id === 'mira') stSay([[id === 'hask' ? 'Innkeeper Hask' : 'Innkeeper Mira', id === 'hask' ? 'Ravenhollow\'s only bed. The ravens are the only thing that sleeps sound here. 10 gold.' : 'Salt in the air keeps the dead away. Mostly. A room is 10 gold, and the stew is free if you don\'t ask what\'s in it.']], null,
-    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
+    [['Rest (10 gold)', () => { if (d.gold >= 10) { d.gold -= 10; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['Cook a meal', () => stCraft('meal')], ['No thanks', null]]);
   else if (id === 'ansel' && d.pact) stSay([['Brother Ansel', 'Gods above. You let one of THEM touch your soul. I can scrub it clean, but it will cost you, in gold and in pain. 100 gold.']], null, [['Cleanse the pact (100 gold)', () => { if (d.gold < 100) return; d.gold -= 100; d.pact = false; stShift(2); sfx('shield'); stSay([['', 'It feels like a fishhook pulled out of your chest. Something far below howls in disappointment.']]); }], ['Keep it', null]]);
   else if (id === 'ansel' && d.ch >= 1 && !d.flags.hrQuest) stSay([['Brother Ansel', 'You fight like someone who has already died once. Listen. There is an old rite, older than the shrines. The Heavenly Restriction.'],
     ['Brother Ansel', 'The heavens take every spark of magic from you, forever, and in return they make your body perfect. Stronger. Faster. Hard to kill.'], ['Brother Ansel', 'Above the Frost Peaks, north of the ice crypt, a Celestial Stair climbs into the clouds. It only holds those who have been told of it. Now you have been told.']], () => { d.flags.hrQuest = true; });
@@ -6431,12 +6589,12 @@ function stTalk(id) {
   else if (id === 'brann') {
     const w = d.weapon || 0, next = ST_WEAPONS[w + 1];
     stSay([['Brann the Smith', next ? `You're carrying ${ST_WEAPONS[w].name}. I can make you ${next.name} (+${next.atk} attack) for ${next.price} gold. You have ${d.gold}.` : 'That blade is the best I\'ll ever make. Don\'t waste it on wolves.']], null,
-      next ? [[`Forge it (${next.price} gold)`, () => { if (d.gold >= next.price) { d.gold -= next.price; d.weapon = w + 1; sfx('cannon'); } }], ['Not now', null]] : null);
+      (next ? [[`Forge it (${next.price} gold)`, () => { if (d.gold >= next.price) { d.gold -= next.price; d.weapon = w + 1; sfx('cannon'); } }]] : []).concat([['Craft at the forge', () => stCraft('forge')]], d.pickaxe ? [] : [[`Buy a pickaxe (${stPrice(40)} gold)`, () => { if (d.gold < stPrice(40)) return; d.gold -= stPrice(40); d.pickaxe = true; sfx('pickup'); stSay([['Brann the Smith', 'Ore rocks glint in the Thornwood, the ruins, the peaks and the dunes. Soft copper first. The hard stuff fights back.']]); }]], [['Not now', null]]));
   }
   else if (id === 'dunn' && d.flags.bell && !d.flags.bellDone) stSay([['Dunn the Fisher', 'The Drowned Bell. Gods. My father rang that bell every dusk so the boats could find the harbor.'], ['Dunn the Fisher', 'Maybe the boats will come home now. Maybe nothing will. Either way, take this. It\'s all I have.']], () => { d.flags.bellDone = true; d.gold += 150; d.items.ether++; sfx('levelup'); });
   else if (id === 'dunn' && !d.flags.bellQuest) stSay([['Dunn the Fisher', 'The harbor bell sank when the marsh swallowed the old chapel. Without it, nobody\'s boat comes home.'], ['Dunn the Fisher', 'It\'s in the Bone Marsh, south of Ravenhollow, under the green water. Bring it back and I\'ll make it worth your while.']], null,
     [['I\'ll find the bell', () => { d.flags.bellQuest = true; stShift(1); }], ['Not now', null]]);
-  else if (id === 'dunn') stSay([['Dunn the Fisher', ['Nets come up with bones lately. Old bones. Crowned ones, once.', 'The Gloamwood used to be orchards. My grandmother picked apples there. Now nothing picks anything there. It gets picked.', 'If you\'re going east, go at noon. The dark there has opinions.'][(d.lv + (d.bounties || 0)) % 3]], ['Dunn the Fisher', 'Salted fish and ore from Brann\'s mine are cheap here. Want to trade?']], null, [['Trade goods', () => stTrade('saltmere')], ['Leave', null]]);
+  else if (id === 'dunn') stSay([['Dunn the Fisher', ['Nets come up with bones lately. Old bones. Crowned ones, once.', 'The Gloamwood used to be orchards. My grandmother picked apples there. Now nothing picks anything there. It gets picked.', 'If you\'re going east, go at noon. The dark there has opinions.'][(d.lv + (d.bounties || 0)) % 3]], ['Dunn the Fisher', d.rod ? 'Salted fish and ore from Brann\'s mine are cheap here. Want to trade?' : 'You\'ve no rod? A wanderer with no rod starves. I\'ll sell you my spare.']], null, [['Trade goods', () => stTrade('saltmere')]].concat(d.rod ? [] : [[`Buy a fishing rod (${stPrice(25)} gold)`, () => { if (d.gold < stPrice(25)) return; d.gold -= stPrice(25); d.rod = true; sfx('pickup'); stSay([['Dunn the Fisher', 'Stand by any water and cast. Wait for the bite, strike, then reel when the line is in the green. Night brings the strange ones.']]); }]], [['Leave', null]]));
   else if (id === 'pilgrim') stSay([['The Pale Pilgrim', 'You died, and the ash gave you back. Do you know how few it chooses?'], ['The Pale Pilgrim', 'The King did not make the Hollowing. He held it back, the way a dam holds a river. When he falls, the water goes somewhere.'],
     ['The Pale Pilgrim', d.ch >= 4 ? 'And so it did. Into you, I think. I can teach you to drink it, the way he did. Or you can carry it like a stone until it drowns you.' : 'Kill him anyway. Some dams deserve to break.']], null,
     d.ch >= 4 && !d.flags.pilgrimChoice ? [['Drink the Hollow (+5 magic, Ashen)', () => { d.flags.pilgrimChoice = true; d.hollowPower = true; stShift(-4); stSay([['', 'It tastes of ash and old kings. Your shadow stretches a little longer than it should.']]); }],
@@ -6508,7 +6666,7 @@ function stTalk(id) {
   else if (id === 'sabine') stSay([['Dockmaster Sabine', 'Welcome to Rougemarais. Sun hasn\'t risen here in a hundred years. The vampires prefer it that way, and they own the city.'], ['Dockmaster Sabine', 'Mind the streets. Thralls hunt anyone without a crest. The ship leaves from my pier whenever you\'re tired of being prey.']]);
   else if (id === 'remy') stSay([['Old Remy', 'Silk and blood wine, cheapest you\'ll find anywhere. The nobles make it. Don\'t ask what\'s in the wine.']], null, [['Trade goods', () => stTrade('rouge')], ['Leave', null]]);
   else if (id === 'odile') stSay([['Madame Odile', d.vamp ? 'Ah, one of the family. Your room is ready, darling. No windows.' : 'The Velvet Lantern. Doors locked at dusk, which is always. 20 gold, and I\'ll keep the teeth from your throat till morning.']], null,
-    [[`Rest (${stPrice(20)} gold)`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['No thanks', null]]);
+    [[`Rest (${stPrice(20)} gold)`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; sfx('respawn'); } }], ['Cook a meal', () => stCraft('meal')], ['No thanks', null]]);
   else if (id === 'lucien') {
     if (d.vamp) stSay([['Pere Lucien', 'Your eyes. Gods forgive me, I can see it in your eyes. Leave, creature, before I remember my vows.']]);
     else if (d.flags.marquis && !d.flags.lucienPaid) stSay([['Pere Lucien', 'The Marquis is ash on the cathedral steps. For the first time in a century, I hear the bells.'], ['Pere Lucien', 'Take this, with the church\'s thanks. And light a candle for me.']], () => { d.flags.lucienPaid = true; d.gold += 400; PROF.crowns += 150; stShift(2); sfx('levelup'); stCallout('+400 gold · +150 Crowns', '#ffd75e'); });
@@ -6534,7 +6692,7 @@ function stTalk(id) {
     else stSay([['Harbormaster Oona', 'Welcome to Port Halcyon. The Hollowing never crossed the sea. Here the sun still means something.'], ['Harbormaster Oona', 'But Mara the Corsair Queen holds the east isle. She takes our catch, and sometimes our children. Bring down her flag and the harbor will pay.']]);
   }
   else if (id === 'kesh') stSay([['Kesh the Trader', `Island goods! Potions ${stPrice(12)}, ethers ${stPrice(20)}. Cheaper than the mainland, because nobody here is dying.`]], null,
-    [[`Buy potion (${stPrice(12)})`, () => { if (d.gold >= stPrice(12)) { d.gold -= stPrice(12); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(20)})`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('isles')], ['Steal a potion', () => stPickpocket('Kesh the Trader')], ['Leave', null]]);
+    [[`Buy potion (${stPrice(12)})`, () => { if (d.gold >= stPrice(12)) { d.gold -= stPrice(12); d.items.potion++; sfx('pickup'); } }], [`Buy ether (${stPrice(20)})`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.items.ether++; sfx('pickup'); } }], ['Trade goods', () => stTrade('isles')]].concat(d.rod ? [] : [[`Buy a fishing rod (${stPrice(20)} gold)`, () => { if (d.gold >= stPrice(20)) { d.gold -= stPrice(20); d.rod = true; sfx('pickup'); } }]], [['Steal a potion', () => stPickpocket('Kesh the Trader')], ['Leave', null]]));
   else if (id === 'liora') stSay([['Liora', 'I watched the last stranger walk into the Thornwood. I found his sword a week later. Prove you are worth following.']]);
 }
 function stHunters(dt) { // dungeon enemies wander home, and charge when they see you
@@ -6672,7 +6830,7 @@ function stFxDraw(dt) {
 function stEffect(kind, who, color) { STFX.effects = STFX.effects || []; STFX.effects.push({kind, who, color, t: 0, dur: kind === 'pillar' || kind === 'aura' ? .7 : .45}); }
 // Dodging: the faster fighter slips more blows. Heavenly Restriction and Mist Form make you hard to touch.
 const stDodgeChance = (defSpd, atkSpd, bonus = 0) => clamp(.05 + (defSpd - atkSpd) * .012 + bonus, .02, .45);
-function stPlayerEvade() { const d = stData(), b = ST.battle; return (d.hr ? .15 : 0) + (b && b.buffs.mist ? .6 : 0) + (b && b.buffs.wolf ? .08 : 0); }
+function stPlayerEvade() { const d = stData(), b = ST.battle; return (d.gear && d.gear.moonCharm ? .05 : 0) + (d.hr ? .15 : 0) + (b && b.buffs.mist ? .6 : 0) + (b && b.buffs.wolf ? .08 : 0); }
 function stTransformFx(who, color, text) {
   STFX.trans = STFX.trans || []; STFX.trans.push({who, color, t: 0}); ST.hurt = .4; STFX.slow = .45; sfx('ult');
   if (text) stCallout(text, color);
@@ -6918,6 +7076,7 @@ function stRenderBattle(picking) {
     act.appendChild(el('small', '', 'Items'));
     btn(`Potion ×${d.items.potion} (+60 HP)`, () => stItem('potion'), !d.items.potion);
     btn(`Ether ×${d.items.ether} (+30 MP)`, () => stItem('ether'), !d.items.ether);
+    for (const k in ST_MEALS) if (d.items[k]) btn(`${ST_MEALS[k].name} ×${d.items[k]} (${ST_MEALS[k].desc})`, () => stItem(k));
     btn('Back', () => { ST.sub = null; stRenderBattle(); });
   } else {
     btn(b.buffs.wolf ? 'Claw' : b.buffs.vamp ? 'Rend' : `${stSkName('attack')} ${'★'.repeat(stRank('attack'))}`, () => stPick(f => stPlayerHit(f, s.atk * stAtkMul(b), 'phys'))).title = 'Basic attack. Mastery: ' + stMasteryText('attack');
@@ -6996,7 +7155,9 @@ function stUseSkill(id) {
 }
 function stItem(k) {
   const d = stData(), s = stStats(); if (!d.items[k]) return;
-  d.items[k]--; if (k === 'potion') { d.hp = Math.min(s.hp, d.hp + 60); if (d.wounds) d.wounds.bleed = 0; } else d.mp = Math.min(s.mp, d.mp + 30);
+  d.items[k]--; const ML = ST_MEALS[k];
+  if (ML) { d.hp = Math.min(s.hp, d.hp + ML.hp); if (ML.mp) d.mp = Math.min(s.mp, d.mp + ML.mp); if (ML.cure && d.wounds) d.wounds.bleed = 0; stBurst('p', '#ffb35a', 18); stNum('p', '+' + ML.hp, '#6be08a', true); sfx('pickup'); stLog(`You eat ${ML.name}. ${ML.desc}.`); ST.sub = null; return stEndTurn(); }
+  if (k === 'potion') { d.hp = Math.min(s.hp, d.hp + 60); if (d.wounds) d.wounds.bleed = 0; } else d.mp = Math.min(s.mp, d.mp + 30);
   stBurst('p', k === 'potion' ? '#e0405a' : '#7aa9ff', 16); stNum('p', k === 'potion' ? '+60' : '+30 MP', k === 'potion' ? '#6be08a' : '#9fc0ff');
   sfx('pickup'); stLog(k === 'potion' ? 'You drink a potion. +60 HP.' : 'You drink an ether. +30 MP.'); ST.sub = null; stEndTurn();
 }
@@ -7157,6 +7318,9 @@ function stOpenMenu() {
     el('h3', '', 'Abilities'), el('p', '', ['attack'].concat(d.skills).map(k => `${stSkName(k)}${k === 'attack' ? '' : ` (${ST_SKILLS[k].mp} MP)`}: ${stMasteryText(k)}`).join(' · ') + '. Use a move to master it. Mastered moves crit harder, open worse wounds, and fire magic as beams that can obliterate.'),
     ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed (-20% attack)', d.wounds.hole && 'Pierced (-25% defense)'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
     el('h3', '', 'Bag'), el('p', '', `${d.items.potion} potions · ${d.items.ether} ethers` + (d.items.blade ? ' · Royal Blade' : '')),
+    el('h3', '', 'Professions'), el('p', '', ['fishing', 'mining', 'crafting'].map(k => { const P = (d.prof || {})[k] || {lv: 1, xp: 0}; return `${ST_PROF_NAME[k]} ${P.lv} (${stProfTitle(P.lv)}, ${P.xp}/${20 + P.lv * 25} xp)`; }).join(' · ') + `. ${d.rod ? '' : 'Buy a fishing rod from Dunn in Saltmere. '}${d.pickaxe ? '' : 'Buy a pickaxe from Brann in Saltmere. '}Forge gear at Brann's, cook at any inn.`),
+    el('h3', '', 'Materials'), el('p', '', Object.entries(d.mats || {}).filter(([, n]) => n).map(([k, n]) => `${n} ${ST_MATS[k][0]}`).join(' · ') || 'None yet. Fish and mine to gather them.'),
+    ...(Object.keys(d.gear || {}).length ? [el('h3', '', 'Crafted gear'), el('p', '', Object.keys(d.gear).map(k => `${ST_GEAR[k].name} (${ST_GEAR[k].desc})`).join(' · '))] : []),
     el('h3', '', 'Cargo'), el('p', '', (Object.entries(d.cargo || {}).filter(([, n]) => n).map(([g, n]) => `${n} ${ST_GOODS[g][0]}`).join(' · ') || 'Empty') + ` (${stCargoUsed()}/${stCargoCap()}). Trade with merchants in every town; buy cheap where goods are made.`),
     el('h3', '', 'Quest'), el('p', '', ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)),
     el('h3', '', 'Side stories'), el('p', '', [
@@ -7208,6 +7372,7 @@ function stDrawWorld(now, dt = 1 / 60) {
     if (t === 'B' && !d.flags[ST_DUNGEONS[d.map].boss]) stDrawFoe(ST_DUNGEONS[d.map].boss, x * ST_TILE + 32, y * ST_TILE + 40, now, .75, Math.PI);
   }));
   const isles = dun && ST_DUNGEONS[d.map].outdoor; stAmbient(dt, now, Zs, d, dun, isles);
+  if (!dun) for (const r of ST_ROCKS) if (Math.abs(r.x * ST_TILE - ST.cam.x) < cw / Zs && Math.abs(r.y * ST_TILE - ST.cam.y) < ch / Zs) stDrawRock(r, now);
   if (dun) for (const f of ST.foes) if (f.alive) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6, f.face || 0);
   if (d.lost && d.lost.map === d.map) { ctx.fillStyle = '#ffb35a'; ctx.shadowColor = '#ff7a2a'; ctx.shadowBlur = 20; ctx.globalAlpha = .7 + Math.sin(now * 4) * .3; ctx.beginPath(); ctx.arc(d.lost.x, d.lost.y, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
   if (!dun) for (const c of ST_CHESTS) if (stChestShown(c, d)) { const x = c.x * ST_TILE + 32, y = c.y * ST_TILE + 36; ctx.fillStyle = '#7a4a1e'; ctx.fillRect(x - 16, y - 12, 32, 22); ctx.fillStyle = '#f2c14e'; ctx.fillRect(x - 16, y - 4, 32, 4); ctx.fillRect(x - 3, y - 6, 6, 8); }
@@ -7221,7 +7386,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   if (d.flags.liora) drawCharacter(ctx, stUnit('valkyrie', '#9fd8ff', d.x - 46 * (Math.cos(ST.face || 0) || 1), d.y + 6, ST.face || 0, ST.walk || 0, 31, d.lv), now);
   const ride = !dun && d.riding && ST_MOUNTS[d.mount];
   if (ride) { stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); drawCharacter(ctx, stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 4 * Math.cos(ST.face || 0), d.y - 26 - (ride.fly ? 26 + Math.sin(now * 4) * 5 : 0), ST.face || 0, 0, 30, d.lv), now); }
-  else drawCharacter(ctx, stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv), now);
+  else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); drawCharacter(ctx, pu, now); }
   stAmbientOver(dt, now);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   // light: a torch circle in dungeons, a heavy vignette above ground
@@ -7234,10 +7399,11 @@ function stDrawWorld(now, dt = 1 / 60) {
   if (sunny > .02) stSunDraw(sunny, now, Zs);
   stNightDraw(Zs, d, dun, isles);
   if (!dun || isles) stWeatherDraw(dt, stTileAt(d.x, d.y), isles);
+  if (ST.mode === 'gather') stGatherDraw(dt, now, Zs);
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
+  $('stPrompt').hidden = !near; if (near) $('stPrompt').textContent = (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach');
   $('stRide').hidden = dun || !(d.mounts || []).length; $('stRide').textContent = d.riding ? 'Dismount' : 'Ride';
 }
 function stDrawFoe(key, x, y, now, scale, face, flash) {
@@ -7313,8 +7479,9 @@ window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (ST_KEYS[k] && ST.mode === 'walk') { ST.keys[ST_KEYS[k]] = true; e.preventDefault(); }
   if ((k === 'e' || k === 'enter' || k === ' ') && ST.mode === 'walk') { e.preventDefault(); stInteract(); }
-  if (k === 'escape' || k === 'm') { e.preventDefault(); ST.mode === 'menu' ? stCloseMenu() : stOpenMenu(); }
+  if ((k === 'escape' || k === 'm') && ST.mode !== 'gather') { e.preventDefault(); ST.mode === 'menu' ? stCloseMenu() : stOpenMenu(); }
   if (k === 'r' && ST.mode === 'walk' && !e.repeat) { e.preventDefault(); stToggleRide(); }
+  if (ST.mode === 'gather' && !e.repeat) { if (k === 'escape') { e.preventDefault(); stGatherEnd(); } else if (k === 'e' || k === 'enter' || k === ' ') { e.preventDefault(); stGatherPress(); } }
 }, true);
 window.addEventListener('keyup', e => { const k = ST_KEYS[e.key.toLowerCase()]; if (k) ST.keys[k] = false; });
 for (const b of document.querySelectorAll('#stPad [data-d]')) {
@@ -7322,7 +7489,8 @@ for (const b of document.querySelectorAll('#stPad [data-d]')) {
   b.addEventListener('pointerdown', e => { e.preventDefault(); ST.keys[dir] = true; });
   for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => { ST.keys[dir] = false; });
 }
-$('stA').addEventListener('click', () => { if (ST.mode === 'walk') stInteract(); });
+$('stA').addEventListener('click', () => { if (ST.mode === 'walk') stInteract(); else if (ST.mode === 'gather') stGatherPress(); });
+$('game').addEventListener('pointerdown', e => { if (ST.on && ST.mode === 'gather' && e.target.id !== 'stA') stGatherPress(); });
 $('stRide').addEventListener('click', stToggleRide);
 function stPollPad() {
   const gp = readPad(); if (!gp) { ST.padMove = null; return; }
@@ -7332,6 +7500,7 @@ function stPollPad() {
   if (ST.mode === 'walk') {
     ST.padMove = [lx + (bt(15) ? 1 : 0) - (bt(14) ? 1 : 0), ly + (bt(13) ? 1 : 0) - (bt(12) ? 1 : 0)];
     if (hit(0)) stInteract(); if (hit(9)) stOpenMenu(); if (hit(3)) stToggleRide();
+  } else if (ST.mode === 'gather') { ST.padMove = null; if (hit(0)) stGatherPress(); if (hit(1)) stGatherEnd();
   } else {
     ST.padMove = null;
     const panel = ST.mode === 'talk' ? $('stChoices') : ST.mode === 'battle' ? $('stActions') : $('stMenu');
