@@ -7,6 +7,7 @@ const ST_CLASS_PATHS = {
   paladin: [['Radiant Smite','strike'],['Lay on Hands','heal'],['Oathguard','guard'],['Sacred Aegis','ward'],['Consecration','lightning'],['Judgment','fireball'],['Dawn Prayer','heal'],['Crusader Vow','rally']],
   gunner: [['Buckshot','rain'],['Deadeye Shot','strike'],['Incendiary Round','fireball'],['Take Cover','guard'],['Double Tap','flurry'],['Shock Round','frost'],['Suppressing Fire','quake'],['Powder Barrage','lightning']],
   necromancer: [['Bone Spear','bonespear'],['Life Drain','drain'],['Wither','wither'],['Bone Armor','guard'],['Grave Lance','bonespear'],['Soul Harvest','drain'],['Crypt Plague','wither'],['Death Shroud','ward']],
+  warlock: [['Eldritch Bolt','bonespear'],['Hellfire','fireball'],['Binding Hex','bonespear'],['Infernal Ward','ward'],['Blood Offering','guard'],['Soul Rend','drain'],['Rain of Brimstone','lightning'],['Abyssal Brand','wither']],
   monk: [['Hundred Fists','flurry'],['Stone Stance','guard'],['Palm Strike','strike'],['Breath of Life','heal'],['Pressure Point','frost'],['Dragon Kick','strike'],['Ki Wave','lightning'],['Tranquil Mind','ward']],
   druid: [['Thornlash','thornlash'],['Wild Mend','heal'],['Rootquake','quake'],['Barkskin','guard'],['Spore Cloud','wither'],['Moonbeam','bonespear'],['Briar Crown','ward'],['Grove Renewal','heal']],
   berserker: [['Rending Blow','strike'],['Blood Roar','rally'],['Groundsplitter','quake'],['Savage Rush','flurry'],['Blood Hunger','bloodfeast'],['Skull Hammer','strike'],['Iron Fury','guard'],['Ravager Sweep','rain']],
@@ -19,7 +20,8 @@ const ST_CLASS_MILESTONES = {
   rogue:['Silent Edge','Shadow Lunge','Night of Knives','Crimson Ambush','Death in the Dark'],
   paladin:['Dawnstrike','Light of Judgment','Hallowed Ground','Seraphic Grace','Heavenfall'],
   gunner:['Quickdraw','Armor Piercer','Shrapnel Storm','Dragonfire Round','Final Salvo'],
-  necromancer:['Grave Touch','Soul Lance','Legion of Ash','Devour Soul','Requiem'],
+  necromancer:['Raise Dead','Soul Lance','Legion of Ash','Devour Soul','Requiem'],
+  warlock:['Call Imp','Abyssal Lance','Hellstorm','Pact of Ruin','Gate of Cinders'],
   monk:['Flowing Palm','Rising Dragon','Thunderous Ki','Inner Sun','Thousandfold Heaven'],
   druid:['Wild Spark','Moon Lance','Wrath of Roots','Ancient Renewal','Heart of the Wild'],
   berserker:['Savage Cut','Titan Cleaver','Blood Tempest','Undying Rage','Ragnarok'],
@@ -42,7 +44,7 @@ for(const [cls,path] of Object.entries(ST_CLASS_PATHS)){
   ST_CLASS_MILESTONES[cls].forEach((name,i)=>{
     const id=stTierSkill(cls,i);
     if(cls==='mage'){ST_SKILLS[id].owner=cls;ST_SKILLS[id].level=ST_MAGIC_TIERS[i].level;return;}
-    const magic=['paladin','necromancer','druid'].includes(cls),base=magic?['bonespear','fireball','lightning','drain','lightning'][i]:['strike','strike','rain','flurry','rain'][i];
+    const magic=['paladin','necromancer','warlock','druid'].includes(cls),base=magic?['bonespear','fireball','lightning','drain','lightning'][i]:['strike','strike','rain','flurry','rain'][i];
     ST_SKILLS[id]={...ST_SKILLS[base],name,base,owner:cls,gift:true,level:ST_MAGIC_TIERS[i].level,tier:i,mp:[4,9,16,23,32][i],mult:[1.25,2.05,1.45,1.6,2.25][i],desc:`${ST_CLASSES[cls].name}-only milestone. `+ST_SKILLS[base].desc};
     SK_COLOR[id]=SK_COLOR[base]||'#d9b978';SK_SHOT[id]=SK_SHOT[base];SK_FX[id]=SK_FX[base];
   });
@@ -66,6 +68,7 @@ function stPanelBack(m){const b=el('button','','Resume exploring');b.addEventLis
 function stClassMenu(){
   const d=stData();stSyncProgress(false);const m=stSystemPanel(ST_CLASSES[d.cls].name+' ability path');
   m.append(el('p','',`Level ${d.lv} · ${d.gold} gold. ${ST_CLASSES[d.cls].role||''} Only your own class can learn these abilities. Basic attack, items and racial powers are separate.`));
+  if(d.cls==='necromancer'){const book=el('button','primary','Grimoire of the Fallen');book.addEventListener('click',stSoulBookMenu);m.appendChild(book);}
   const add=(id,auto)=>{
     const S=ST_SKILLS[id],known=d.skills.includes(id),fee=30+S.level*12,card=el('div','progressCard');
     const b=el('button','',known?'Learned':auto?'Milestone unlock':`Learn ${S.name} (${fee} gold)`);

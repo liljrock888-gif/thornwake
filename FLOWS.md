@@ -87,6 +87,11 @@
 - Phone combat: duplicate exploration HUD hidden during battle; two-column skills and scrollable controls do not overlap the scene.
 
 ## Verification notes
+- Attack/defense stacking: each stat has an independent three-stack cap with diminishing total bonuses (attack 25/40/50%, defense 40/65/80%), four-enemy-turn refresh, paid actions at cap, visible counts/expiry, no stale stacks after expiry/dispel or a fresh battle, and actual basic/named/area attack and defense calculations.
+- Necromancer: create a hero, use Raise Dead from level 1, see an allied undead attack and absorb hits alongside an existing companion, raise a defeated enemy, and verify summon limits, expiry and mana gates.
+- Grimoire of the Fallen: inspect 35% ordinary / 8% boss binding odds, successful and failed victory rolls, duplicate strengthening, search/filter/select captured souls, save/quit/continue, and migrate an old Necromancer without losing skills or mastery. Flee/loss/repeated victory must not award souls.
+- Warlock: select the actual class in creation, customize its wardrobe, learn its exclusive eight techniques/five milestones, summon an imp, apply a visible three-turn Hex, burn enemies and exchange health for mana once per battle. Reject cross-class, sealed, unaffordable and double-click casts.
+- Recheck the grimoire and combat in a fresh 375px native-touch context, plus normal story creation, menu/save/continue, castle, island mounts, housing, arena and payment regressions.
 - Purchase regression covers 34 payment/configuration/replay/refund cases; no live payment was made.
 - Browser regression covers creation, menus, lessons, spell casting, rewards, arena pause/resume and save/quit/continue.
 - High-level saves and foe health are staged only in the test response. Production has no mutable QA hook.

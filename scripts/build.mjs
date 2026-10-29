@@ -9,7 +9,8 @@ const source = readFileSync(new URL('../game/thornwake.html', import.meta.url), 
 const marker = "reset(0); resize(); show('scr-title'); requestAnimationFrame(frame);";
 if (!source.includes(marker)) throw new Error('Game startup insertion point is missing');
 const balance = readFileSync(new URL('../game/balance.js', import.meta.url), 'utf8');
-const game = source.replace(marker, expansion + '\n' + balance + '\n' + marker);
+const souls = readFileSync(new URL('../game/soul-classes.js', import.meta.url), 'utf8');
+const game = source.replace(marker, expansion + '\n' + balance + '\n' + souls + '\n' + marker);
 const hash=createHash('sha256').update(game);
 function hashAssets(dir, prefix=''){
   for(const entry of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){

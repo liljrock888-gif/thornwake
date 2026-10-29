@@ -11,6 +11,7 @@
     "test:mounts": "node test/mounts.test.mjs",
     "test:homes": "node test/homes-classes.test.mjs",
     "test:balance": "node test/balance.test.mjs",
+    "test:souls": "node test/soul-classes.test.mjs",
     "build:preview": "npm run build && node scripts/preview.mjs"
   },
   "engines": {

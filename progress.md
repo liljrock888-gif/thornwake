@@ -1,5 +1,17 @@
 Original prompt: Fix the menu overlap first. Change the menu artwork to a dark fantasy RPG direction that makes people want to play.
 
+## Necromancer souls and playable Warlock, October 29, 2026
+- Current request: make Necromancer raise the dead and collect defeated enemies by chance in a book/orb; add a real Warlock class.
+- Added `game/soul-classes.js` inside the game closure after class ownership/balance. Necromancer gains level-1 Raise Dead, a starter skeleton, and a persistent searchable/filterable/selectable soul grimoire. Existing offensive IDs, mastery, saves, companion slots and rewards are retained.
+- Victories roll once per defeated foe, 35% ordinary / 8% boss. Failures remain visible in receipts; duplicates add 3% strength up to 12%, never consume souls. Flee/loss do not roll. Summons are battle-local, attack independently, intercept some basic attacks, expire after five allied turns and coexist with companions.
+- Warlock is a registered class with eight owned techniques, five milestones, distinct attire/stats, level-1 imp, real Hex vulnerability, burn and a once-per-battle nonlethal health/mana trade.
+- Visual QA found and fixed goblins rendering as dragons in the book, mobile summon HP compression, notification overlap in the book, and stale combat submenus between encounters.
+- Verification in progress. Test fixtures and controlled rolls are injected into disposable test responses, never shipped in production. Long-term combat balance still needs player feedback. No server shutdown requested or enabled.
+- Additional request: allow three attack/defense buff stacks, but balance them. Independent pools use cumulative diminishing returns: attack +25/40/50%, defense +40/65/80%, never multiplicative per stack. Four enemy turns per application/refresh, normal mana and one action per cast, at-cap recasts refresh only. Shared damage, named/area defense, duration, dispel, status UI, descriptions and guide are updated; Defend/shields/forms remain unstacked. Regression cases cover actual sequential casts, both pools together, fourth casts, expiration and new battles.
+- Local verification completed: 294 balance checks, 73 souls/classes/buff integration checks, 106 general browser checks, 81 housing/class/guild checks, 23 castle checks, 38 mount checks, and 34 purchase cases passed. Native 375px touch QA naturally created Warlock, called its imp, built both buff pools to 3/3, searched/filtered/selected souls, and checked the mobile grimoire and summon health row; no page errors or horizontal overflow. Desktop and phone screenshots were inspected.
+- The required game-client smoke runner completed. Its static-server console contains expected 404s for `/api/config` (backend not served by the local static server) and the existing missing favicon; targeted game/browser suites reported no JavaScript runtime errors. Production config is unchanged.
+- Build awaiting GitHub/Vercel verification: `401aa7d274014780`. Follow-up: gather player feedback on summon damage/HP and buff upkeep rather than claiming combat balance is final. No live purchases, save resets or shutdown were performed.
+
 ## Mounts across islands, October 29, 2026
 - User clarified that mounts should travel to different islands, not be ridden inside every building.
 - Preserve selection, ownership and riding state through ships and outdoor map transitions. Enable mount rendering and Ride/Dismount on all outdoor lands with one shared map eligibility rule.

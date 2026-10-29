@@ -69,6 +69,40 @@ function runBalanceChecks(){
       stUseSkill(id);stUseSkill(id);
       check(before-d.mp===cost&&ST.battle.turn==='anim',id+' rapid cast spends one mana charge and locks action');
     }
+    for(const [key,id,totals]of [['rally','warrior_2',[1.25,1.4,1.5]],['guard','warrior_1',[1.4,1.65,1.8]]]){
+      setup('warrior',id);
+      const b=ST.battle;
+      for(let n=1;n<=3;n++){
+        b.turn='player';const before=d.mp,cost=stSkCost(ST_SKILLS[id]);stUseSkill(id);
+        check(stBuffStacks(b,key)===n&&stBuffMultiplier(b,key)===totals[n-1],key+' stack '+n+' has diminishing cumulative power');
+        check(before-d.mp===cost&&b.buffs[key]===4&&b.turn==='anim',key+' stack '+n+' costs mana/action and refreshes four enemy turns');
+      }
+      b.buffs[key]=1;b.turn='player';const before=d.mp;stUseSkill(id);
+      check(stBuffStacks(b,key)===3&&b.buffs[key]===4&&d.mp===before-stSkCost(ST_SKILLS[id]),key+' fourth cast refreshes only; no free mana or fourth stack');
+      const other=key==='rally'?'guard':'rally';stApplyStackBuff(b,other);
+      check(stBuffStacks(b,key)===3&&stBuffStacks(b,other)===1,key+' and '+other+' have separate pools');
+      for(let n=0;n<4;n++)stTickCombatBuffs(b);
+      check(stBuffStacks(b,key)===0&&stBuffMultiplier(b,key)===1&&b.buffStacks[key]===0,key+' expiry clears stacks and all bonus power');
+      stApplyStackBuff(b,key);check(stBuffStacks(b,key)===1,key+' reapplication after expiry starts at one');
+      b.buffs[key]=0;stApplyStackBuff(b,key);
+      check(stBuffStacks(b,key)===1,key+' reapplication after dispel cannot recover stale stacks');
+    }
+    setup('warrior','warrior_0');
+    const buffBattle=ST.battle,s0=stStats(),S0=ST_SKILLS.warrior_0;
+    const unbuffed=stAbilityPower(S0,s0,buffBattle,0);
+    for(let n=0;n<3;n++)stApplyStackBuff(buffBattle,'rally');
+    check(stAtkMul(buffBattle)===1.5&&stAbilityPower(S0,s0,buffBattle,0)===unbuffed*1.5,'three attack stacks affect real weapon-skill power without multiplying three times');
+    for(const [key,random,mult,kind]of [['wolf',.5,1,'basic'],['king',.1,1.9,'named'],['king',.4,1.3,'area']]){
+      setup('warrior','warrior_1');d.hp=9999;d.wounds=null;
+      const b=ST.battle;b.foes[0].key=key;b.foes[0].atk=200;b.foes[0].spd=999;
+      for(let n=0;n<3;n++)stApplyStackBuff(b,'guard');
+      Math.random=()=>random;
+      const hp=d.hp,expected=stDmg(200*mult,stStats().def*1.8);
+      stEnemyPhase();timers.find(t=>t.ms===0).fn();
+      if(kind!=='basic')timers.find(t=>t.ms===650).fn();
+      check(hp-d.hp===expected,kind+' enemy attack uses the actual stacked-defense multiplier');
+    }
+    Math.random=()=>.5;
     setup('mage','mage_0',2);const before=d.mp;stUseSkill('mage_0');
     check(d.mp===before&&ST.battle.turn==='player','target selection/cancellation costs no mana');
     setup('warrior','mage_0');stUseSkill('mage_0');
