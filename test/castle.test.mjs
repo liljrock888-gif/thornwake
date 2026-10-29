@@ -80,6 +80,12 @@ try{
   });
   ok(shape.rect&&shape.reachable===shape.total,'every castle floor tile is reachable');
   ok(shape.legacy&&shape.boss==='king','legacy entrance, treasure IDs, throne and boss preserved');
+  for(const [map,x,y,name]of [['world',22,8,'Sir Cedric'],['world',26,8,'Dame Ysra'],['keep',8,4,'Knight Captain Rowan'],['keep',16,5,'Dame Elara']]){
+    await stage(map,x,y);await page.keyboard.press('e');
+    ok((await page.locator('#stDialog').innerText()).includes(name),name+' is visible, reachable and has knight dialogue');
+    await dismiss();
+  }
+  ok(await page.evaluate(()=>__CASTLE_QA.maps.keep.pool.every(p=>p.includes('knight'))),'all castle patrol groups include enemy knights');
   await stage('world',24,7,{ch:1});await shot('exterior-desktop');
   await page.keyboard.press('e');
   ok((await page.locator('#stDialog').innerText()).includes('Two shards'),'locked castle still requires both shards');
@@ -115,8 +121,14 @@ try{
   await page.evaluate(()=>{for(const f of __CASTLE_QA.state.battle.foes)f.hp=1;});
   await page.locator('#stActions button[title^="Basic attack."]').click();
   await page.waitForFunction(()=>__CASTLE_QA.data().flags.king===true);
+  await page.locator('#stDialog').waitFor({state:'visible'});
+  await dismiss();
+  await page.getByRole('button',{name:'Claim rewards',exact:true}).click();
   await dismiss();
   ok(await page.evaluate(()=>__CASTLE_QA.data().ch>=4&&__CASTLE_QA.data().rewarded),'Hollow King victory still advances Act I and grants its reward once');
+  await stage('keep',8,4);await page.keyboard.press('e');
+  ok((await page.locator('#stDialog').innerText()).includes('The Hollow King has fallen'),'knights recognize the completed castle story');
+  await dismiss();
   await stage('keep',2,2);await walk(1,2);await page.keyboard.press('e');
   await page.getByRole('button',{name:'Leave the castle',exact:true}).click();await dismiss();
   ok(await page.evaluate(()=>{const d=__CASTLE_QA.data();return d.map==='world'&&Math.floor(d.x/64)===24&&Math.floor(d.y/64)===7;}),'castle exit returns to safe Castle Road');

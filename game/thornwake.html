@@ -3992,6 +3992,7 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 // What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
 const UPDATES = [
+  {id:60,date:'Oct 29',title:'Hollow Castle & the Royal Watch',items:['The Hollow King now awaits in a proper fortified castle: stone towers, battlements, an arched gatehouse, royal banners and a crimson throne-hall carpet.','Connected the entrance, galleries, both treasuries and throne. Existing castle saves, treasure IDs, the two-shard gate and boss rewards are preserved.','Meet Sir Cedric and Dame Ysra at the gate, and Knight Captain Rowan and Dame Elara inside. Their watch changes after the King falls.','Hollow knights now appear in every castle patrol group. The Hollow King remains the boss; the Hollow Knight remains an enemy.']},
   {id:59,date:'Oct 29',title:'Free paths, armor & a better first adventure',items:['Equip six armor sets, starting with free padding. Defeat drops only 10% of gold; Veteran pays 35% more XP/gold and Soulslike 75% more.','Stay independent or join Nightveil/Blackbriar fellowships. Take contracts without membership or abandonment penalties, and unlock travel clearance through levels.','Click the minimap for a resizable, zoomable atlas with boundaries. Roaming enemies have shorter detection, wall checks and home leashes.','Expanded wardrobe, faceless expressions, textured/anime hair, dawn/dusk mage spells and three infirmaries. New stories start outside Thornwake Infirmary.','Creation now ends with a welcome loading card and tips. Open Game guide & tips or Quick hint from the menu. Update checks pause play and save locally before a new build reloads.']},
   {id:58,date:'Oct 28',title:'Economy & class balance',items:['Starter cottage reduced to 250 gold. Harbor house 900, townhouse 1800, Briarwood Manor 4800 and Suncrest Estate 10000. The working farm remains 600. Existing deeds and strongboxes are unchanged.','All eleven classes now have distinct stat growth and role-focused mana costs, attack strength and utility. Later abilities offer stronger options rather than identical copies. Monk ki and healing scale with attack; druid Rootquake scales with magic.','Area spells now apply their listed poison, burning, interruption and drain effects on successful hits. Bosses resist interruption and percentage damage. Life drain heals only from damage actually dealt, not overkill.','Healing and buff actions now lock the turn immediately, preventing rapid clicks from casting repeatedly before enemies act. Class ownership and level gates still apply.']},
   {id:57,date:'Oct 28',title:'Homes, class paths & the Veiled Hand',items:['Buy a cottage, harbor house, townhouse, manor or estate with earned gold. Furnished interiors have beds, cooking hearths, strongboxes, reading shelves and customizable rugs and quilts. The two estates include private gardens. Open Housing & estates from your story menu.','Every class now has eight exclusive learnable moves and five class milestone techniques. Creation, training, level-up rewards and combat enforce class ownership. Existing mixed-class moves are archived; matching moves retain mastery.','Enter the Veiled Hand hideout west of Thornwake to join the Thieves Guild. Complete five recovery contracts, earn gold and reputation, and rise through its ranks. No cross-class ability rewards.','Limb loss and its attack penalties have been removed, including from existing saves. Bleeding, blood spray and blood pools remain.']},
@@ -6154,7 +6155,7 @@ const ST_DUNGEONS = {
     '#..X.....#.X.....c...#',
     '#........#...........#',
     '######################']},
-  keep: {name: 'Hollow Castle', castle: true, boss: 'king', lit: true, pool: [['knight'], ['knight', 'cultist'], ['cultist', 'cultist']], theme: {floor: '#686366', wall: '#36343f', glow: '#edbd72'}, exit: [24, 6], rows: [
+  keep: {name: 'Hollow Castle', castle: true, boss: 'king', lit: true, pool: [['knight'], ['knight', 'knight'], ['knight', 'cultist']], theme: {floor: '#686366', wall: '#36343f', glow: '#edbd72'}, exit: [24, 6], rows: [
     '######################',
     '#E..#..............#c#',
     '#...#..X........X..#.#',
@@ -6330,6 +6331,10 @@ const ST_BOSS_CH = {golem: 1, drake: 2, king: 3, witch: 0, mara: 0, seraphiel: 0
 const ST_MAP = stBuildMap();
 const stGrid = () => { const d = stData(); return d && d.map !== 'world' && ST_DUNGEONS[d.map] ? ST_DUNGEONS[d.map].rows : ST_MAP; };
 const ST_NPCS = [
+  {id: 'castle_cedric', name: 'Sir Cedric', x: 22, y: 7, look: 'paladin', color: '#aebed2', lv: 13},
+  {id: 'castle_ysra', name: 'Dame Ysra', x: 26, y: 7, look: 'paladin', color: '#d4b57d', lv: 13},
+  {id: 'castle_rowan', name: 'Knight Captain Rowan', map: 'keep', x: 8, y: 5, look: 'paladin', color: '#aebed2', lv: 13},
+  {id: 'castle_elara', name: 'Dame Elara', map: 'keep', x: 15, y: 5, look: 'paladin', color: '#d4b57d', lv: 13},
   // Thornwake
   {id: 'elder', name: 'Maren the Pale', x: 14, y: 10, look: 'shaman', color: '#c9a24a'},
   {id: 'merchant', name: 'Pell the Merchant', x: 15, y: 12, look: 'pirate', color: '#f2c14e'},
@@ -8667,6 +8672,15 @@ function stTalkBody(id) {
   if(clinic)return stSay([[clinic.nurse,'No one is turned away here. We can mend flesh and restore mana. What the ash takes from your memory is harder to replace.']],null,[['Receive treatment',()=>{const d=stData();d.wounds=null;const s=stStats();d.hp=s.hp;d.mp=s.mp;d.shrine={map:d.map,x:6*ST_TILE+32,y:6*ST_TILE+32};stSave();stHud();sfx('respawn');stSay([[clinic.nurse,'Your wounds are closed, your strength restored. Rest here whenever you need us. No payment is required.']]);}],['Change clothes',()=>setTimeout(stWardrobe,0)],['Leave',null]]);
   if(id==='sanctumherald')return stSay([['Iven','Three guardians keep the Ashen Seat. Defeat them, and let them choose whether you deserve their loyalty. This throne is not inherited. It is earned.']],null,[['The Ashen Dominion',()=>setTimeout(stDominionMenu,0)],['Bloodlines & spellcraft',()=>setTimeout(stProgressMenu,0)],['Farewell',null]]);
   const d = stData();
+  if(id.startsWith('castle_')){
+    const advice={
+      castle_cedric:"We guard Castle Road, not the King's madness. Bring the Ember and Frost Shards to break the gate's seal. Beyond it, hollow knights still obey the crown.",
+      castle_ysra:'The watchtowers are quiet, but the royal guard still patrols the halls. Steel alone will not save an unready adventurer. The Hollow King demands level 13.',
+      castle_rowan:'We swore to protect the people, not a hollow throne. The west and east galleries lead to the treasuries. Follow the crimson carpet south to face the King.',
+      castle_elara:'Keep your shield high. Hollow knights patrol these stone halls, and cultists wait behind them. The gatehouse remains your way back to Castle Road.'
+    };
+    return stSay([[stNpcName(id),d.flags.king?'The Hollow King has fallen. Our watch now belongs to the living. Hollow Castle will shelter travelers again.':advice[id]]]);
+  }
   if (id === 'elder') {
     if (d.ch === 0) {
       if (d.pelts >= 3) stSay([['Maren the Pale', 'So. You came back. Most do not, and the ones who do come back… wrong.'], ['Maren the Pale', 'The wolves were never the sickness. They were the cough. The Hollow King drinks this land dry from his castle, and two shards keep his gate shut.'],

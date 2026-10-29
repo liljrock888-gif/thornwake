@@ -2,6 +2,7 @@
 
 ## Hollow King's castle
 - Requested change: the Hollow King remains the boss; the Hollow Knight enemy is unchanged.
+- Added knights: Sir Cedric and Dame Ysra guard the exterior without intercepting the gate interaction; Knight Captain Rowan and Dame Elara occupy the castle's galleries. All four have usable dialogue before and after the King's defeat. Every enemy patrol group in the castle includes knights.
 - Castle Road shows a continuous stone fortress with four towers, battlements, banners and an arched sealed gate. The entry tile remains [24,6].
 - Without both shards, interact at the gate: the seal explains the requirement and does not admit the player.
 - With both shards, interact and choose Enter the castle: load Hollow Castle with masonry, carpet, banners and a throne.
