@@ -6,6 +6,7 @@ Original prompt: Fix the menu overlap first. Change the menu artwork to a dark f
 - Preserve indoor dismounting, fares, rank/level gates, water/building collision and map bounds. Save ride toggles immediately.
 - 38 mount checks pass: real ship choices through all five ports, exact displayed fares, denied low-level passage, visible mounts and Ride/Dismount on every destination, mounted movement, island save/continue, indoor restrictions, and safe flying/dismount behavior. All 23 castle checks, 248 balance checks and 34 purchase checks pass.
 - Hardened the existing welcome-card browser test against its automatic dismissal while responsive screenshots are taken. This changes the test only, not game loading behavior.
+- Full follow-up regressions passed: 106 general gameplay checks and 79 housing/class/guild checks. The updated owned preview was opened in a fresh mobile/touch context: real taps dismount/remount on Brightwater, the character menu works, and no runtime errors appear. Touch Ride is a reachable 56px control.
 
 ## Hollow King's castle, October 29, 2026
 - Current request corrected by the user to Hollow King, not Hollow Knight. Preserve both enemies and the Hollow King boss; repair and visually upgrade his castle.
