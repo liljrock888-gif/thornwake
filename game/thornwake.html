@@ -3911,6 +3911,7 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 // What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
 const UPDATES = [
+  {id:57,date:'Oct 28',title:'Homes, class paths & the Veiled Hand',items:['Buy a cottage, harbor house, townhouse, manor or estate with earned gold. Furnished interiors have beds, cooking hearths, strongboxes, reading shelves and customizable rugs and quilts. The two estates include private gardens. Open Housing & estates from your story menu.','Every class now has eight exclusive learnable moves and five class milestone techniques. Creation, training, level-up rewards and combat enforce class ownership. Existing mixed-class moves are archived; matching moves retain mastery.','Enter the Veiled Hand hideout west of Thornwake to join the Thieves Guild. Complete five recovery contracts, earn gold and reputation, and rise through its ranks. No cross-class ability rewards.','Limb loss and its attack penalties have been removed, including from existing saves. Bleeding, blood spray and blood pools remain.']},
   {id:56,date:'Oct 29',title:'Bloodlines, spellcraft & the Ashen Dominion',items:['Five magic tiers grant new spells at levels 1, 10, 25, 45 and 60. Study at the Ember Academy to practice spell mastery without bypassing level requirements.','Every race has three optional awakenings at levels 15, 35 and 60. Claim them in order at an Ashen Shrine or the Ashen Sanctum.','Three new world bosses have discoverable callouts, compass tracking and one-time trophies. Find their rumors under Menu → World bosses.','The original Ashen Dominion has a throne hall and three guardian floors. Clear trials at levels 20, 35 and 50, gain ruler ranks, and earn guardian companions. Guild expedition contracts reward the same dungeon victories.']},
   {id: 55, date: 'Oct 29', title: 'A new face for the Vale', items: ['Original ruined-kingdom title and menu artwork, with Enter the Vale as the story shortcut.', 'Storybook heroes and townsfolk, a three-step character creator, and new hair, eye and expression choices. Your existing hero and outfit still work.', 'Redrawn story enemies: masked outlaws, hollow knights, fanged wolves, jagged golems, skeletal-winged drakes and horned demons. Combat values have not changed.', 'Global and story menus now hand off cleanly. Story menus have a dimmed backdrop and separate keyboard input.']},
   {id: 54, date: 'Oct 29', title: 'The Eight Kingdoms', items: ['Eight racial kingdoms hold the Vale, each with a keep and a throne you can visit: the Vale of Ashes (humans, ruled by King Aldric Valeborn from Thornwake Keep), the Aetherfall Spireholds (Elarin), Ironpine Deep (Woodwyn), Cinderhold (Ashkin), the Korgath Warchiefs (Tuskborn), the Frostpeak Holds (Stonekin), the Sundown Caravans (Felari) and Mirehollow (Scalekin).', 'Every ruler holds audience: talk to them for their kingdom\'s story and a one-time token of the realm. Kingdoms you have visited are written up in your Journal.', 'Your race\'s homeland is now shown on the character creator.']},
@@ -6465,9 +6466,11 @@ function stSyncProgress(notify=true){
   const d=stData();if(!d)return;
   d.skills=d.skills||[];d.outfit=d.outfit||{race:d.race};d.outfit.evolution=stEvolutionStage(d);
   const tier=stMagicTier(d),old=d.magicTier;
-  if(!d.hr)for(let i=0;i<=tier;i++)if(!d.skills.includes(ST_MAGIC_TIERS[i].spell))d.skills.push(ST_MAGIC_TIERS[i].spell);
+  stSyncClass(d);
+  if(!d.hr)for(let i=0;i<=tier;i++){const id=stTierSkill(d.cls,i);if(!d.skills.includes(id))d.skills.push(id);}
+  if(d.wounds){delete d.wounds.maim;delete d.wounds.hole;if(!d.wounds.bleed)d.wounds=null;}
   d.magicTier=tier;
-  if(notify&&tier>0&&(old==null||tier>old))stAnnounce('MAGIC TIER '+ST_MAGIC_TIERS[tier].name+' UNLOCKED','#c3b2f1');
+  if(notify&&tier>0&&(old==null||tier>old))stAnnounce((d.cls==='mage'?'MAGIC TIER ':'CLASS RANK ')+ST_MAGIC_TIERS[tier].name+' UNLOCKED','#c3b2f1');
 }
 function stSystemPanel(title){
   const m=$('stMenu');ST.mode='menu';ST.keys={};ST.journal=false;m.hidden=false;
@@ -6542,7 +6545,7 @@ function stMagicLessons(){
 function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
-  const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
+  const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
   if (d.guild && stEdict() === 'wall') st.def *= 1.1;
   for (const [k, , stat, per] of ST_ATTRS) { const v = (d.attr && d.attr[k]) || 0; if (v) st[stat] += v * per; } // stat points
   st.hp = Math.round(st.hp); st.mp = Math.round(st.mp);
@@ -7374,7 +7377,7 @@ const ST_LORE = [
 const ST_GUIDE = [
   ['Controls', 'Move with WASD, the arrows, the left stick or the on-screen pad. E or A interacts. M opens the menu, J this journal, R rides your mount. In battle, pick an action with the buttons.'],
   ['Combat', 'Attack hits one enemy. Skills are stronger and cost MP; they grow stronger and evolve the more you use them. Items heal. Defend halves the damage you take. The faster fighter dodges more. Fill the Rage meter and press RAGE! for a burst of power.'],
-  ['Wounds and death', 'Hard hits can make you bleed or sever a limb. Potions stop bleeding; shrines and inns heal everything. Die, and you drop your gold where you fell: walk back to pick it up.'],
+  ['Wounds and death', 'Hard hits can make you bleed. Potions stop bleeding; shrines and inns heal everything. Die, and you drop your gold where you fell: walk back to pick it up.'],
   ['Levels and danger', 'Every region shows its level. Dungeons and bosses will not let you in below their level. The Ashen Vale runs from level 1 to 25, Valdris 26 to 40, and Aetherfall 41 to 55.'],
   ['The Guild', 'Join at the Guild Hall in Thornwake. Take one quest at a time from the board. Earn standing, then sit an exam with the Guildmaster to rise from D to S-Rank. Some lands are guild territory.'],
   ['Travel', 'Coaches run between towns. Ships sail from Saltmere to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Garth sells mounts, and breeds them in pairs.'],
@@ -7744,12 +7747,12 @@ function renderCreator() {
   stAttrUI($('crAttrs'), crSel.attr, () => Math.max(0, ST_ATTR_START - stAttrSpent(crSel.attr)), 1, renderCreator); // more come with every level
   const rec = ST_CLASSES[crSel.cls].skills;
   for (const id in ST_SKILLS) {
-    const S = ST_SKILLS[id], on = crSel.skills.includes(id); if (S.gift) continue;
+    const S = ST_SKILLS[id], on = crSel.skills.includes(id); if (S.gift || S.owner !== crSel.cls || S.level > 1) continue;
     const b = el('button', 'chip' + (on ? ' sel' : ''), S.name + (rec.includes(id) ? ' ★' : '')); b.title = `${S.desc} Costs ${S.mp} MP.`;
     b.addEventListener('click', () => { if (on) crSel.skills = crSel.skills.filter(x => x !== id); else if (crSel.skills.length < 3) crSel.skills.push(id); renderCreator(); });
     sk.appendChild(b);
   }
-  $('crSkillNote').textContent = `Pick 3 abilities (${crSel.skills.length}/3). ★ suits your class. Your tier also grants Ember Spark. More tier spells unlock at levels 10, 25, 45 and 60.`;
+  $('crSkillNote').textContent = `Pick 3 ${ST_CLASSES[crSel.cls].name} abilities (${crSel.skills.length}/3). No cross-class skills. Class milestone techniques unlock at levels 1, 10, 25, 45 and 60.`;
   $('crStart').disabled = crSel.skills.length !== 3;
   const c = $('crCv'), g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
   g.fillStyle = '#182528'; g.fillRect(0, 0, c.width, c.height);
@@ -8201,7 +8204,7 @@ function stRest() { // an Ashen Shrine: heal fully, set your return point, and t
   const d = stData(), hurt = !!d.wounds; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; d.shrine = {map: d.map, x: d.x, y: d.y + 40}; sfx('respawn');
   const opts = stAttrSpent(d.attr) ? [['Rise', null], ['Reset my stat points', () => setTimeout(stRespec, 0)]] : [['Rise', null]];
   opts.splice(1, 0, ['Bloodlines & spellcraft',()=>setTimeout(stProgressMenu,0)],[`Change difficulty (${stDiff().name})`, () => setTimeout(stDiffChange, 0)]);
-  stSay([['', (hurt ? 'The ash fills your wounds and knits them closed. Even the lost arm grows back, grey and new. ' : '') + 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']], null, opts);
+  stSay([['', (hurt ? 'The ash fills your wounds and knits them closed. ' : '') + 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']], null, opts);
 }
 function stDiffChange() { // ask the shrine how hard the Vale should be
   const d = stData();
@@ -8584,7 +8587,7 @@ function stStartBattle(foes, bossId, tile) {
     coop: stPartyMembers().filter(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 14 * ST_TILE).slice(0, 3).map((p, i) => { const sw = p.presence.sw; return {id: 'c' + i, peer: p.peer, name: sw.n, look: sw.k, color: sw.c, lv: sw.lv, atk: sw.at || 20, hp: sw.hp || 200, maxHp: sw.hp || 200}; }),
     ally: CMP ? {key: CMP.key, name: CMP.name, role: CMP.role, look: CMP.look, color: CMP.color, beast: CMP.beast, male: CMP.male, hp: Math.round(s.hp * CMP.hp), maxHp: Math.round(s.hp * CMP.hp), atk: Math.max(s.atk, s.mag * .9) * CMP.atk * (CMP.key === 'liora' && d.flags.lioraOath ? 1.1 : 1)} : null};
   ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
-  STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
+  STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
   sfx(bossId ? 'roar' : 'swing'); musicForce(bossId ? SONG_CROWN : SONG_STEEL);
   d.battles = (d.battles || 0) + 1;
   stLog(bossId ? `${ST_FOES[foes[0]].name} blocks your way!` : 'Enemies appear: ' + ST.battle.foes.map(f => f.name).join(', ') + '.');
@@ -8597,7 +8600,7 @@ function stStartBattle(foes, bossId, tile) {
   setTimeout(() => { if (ST.battle && ST.battle.turn === 'intro') { ST.battle.turn = 'player'; stRenderBattle(); } }, STFX.intro.dur * 1000);
 }
 // Battle animation: who is 'p' (you), 'a' (Liora) or a foe index. Positions are refreshed every frame.
-const STFX = {anims: [], shots: [], nums: [], parts: [], pos: {}, limbs: [], beams: [], slow: 0};
+const STFX = {anims: [], shots: [], nums: [], parts: [], pos: {}, beams: [], slow: 0};
 const stPos = who => STFX.pos[who] || [cw / 2, ch / 2];
 function stAnim(who, kind = 'lunge', dur = .32) {
   STFX.anims.push({who, kind, t: 0, dur});
@@ -8644,11 +8647,6 @@ function stFxDraw(dt) {
     if (k > .25 && !bm.hit) { bm.hit = true; ST.hurt = .3; if (bm.onHit) bm.onHit(); }
   }
   STFX.beams = STFX.beams.filter(bm => bm.t < bm.dur);
-  for (const L of STFX.limbs) { // severed limbs tumble and stay where they land
-    if (!L.down) { L.t = (L.t || 0) + dt; L.x += L.vx * dt; L.y += L.vy * dt; L.vy += 700 * dt; L.rot += L.vr * dt; if (L.y >= L.gy && L.vy > 0) { L.y = L.gy; L.down = true; STFX.pools.push({x: L.x, y: L.y + 4, r: 14, rot: 0}); } else if (Math.random() < .6) STFX.parts.push({x: L.x, y: L.y, vx: 0, vy: 0, t: 0, life: .5, color: '#a3121a', r: 2.5}); }
-    ctx.save(); ctx.translate(L.x, L.y); ctx.rotate(L.down ? 1.5 : L.rot); ctx.fillStyle = L.color; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-18, -5, 36, 10, 5) : ctx.rect(-18, -5, 36, 10); ctx.fill();
-    ctx.fillStyle = '#e0c8b0'; ctx.beginPath(); ctx.arc(-18, 0, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#7a0008'; ctx.beginPath(); ctx.arc(18, 0, 5.5, 0, 7); ctx.fill(); ctx.restore();
-  }
   for (const a of STFX.anims) a.t += dt; STFX.anims = STFX.anims.filter(a => a.t < a.dur);
   for (const sh of STFX.shots) {
     sh.t += dt; const k = Math.min(1, sh.t / sh.dur), [x0, y0] = stPos(sh.from), [x1, y1] = stPos(sh.to);
@@ -8788,15 +8786,10 @@ function stDodgeFx(who, name) {
   const [x, y] = stPos(who); for (let i = 0; i < 3; i++) STFX.parts.push({x: x + (who === 'p' || who === 'a' ? 1 : -1) * i * 14, y: y - 40, vx: 0, vy: 0, t: 0, life: .3, color: 'rgba(200,230,255,.5)', r: 14 - i * 3});
   stLog(`${name} dodges!`);
 }
-function stWound(who, u, kind, crit, rk, beam) { // u.w: {bleed, maim, hole}; the player's wounds live in the save
+function stWound(who, u, kind, crit, rk, beam) { // Bleeding is the only physical wound.
   const w = u.w || (u.w = {}), chance = beam ? .55 : kind === 'mag' ? (crit ? .3 : .05) : .14 + .1 * rk + (crit ? .4 : 0);
   if (Math.random() > chance) return;
-  const [x, y] = stPos(who), side = who === 'p' || who === 'a' ? 1 : -1;
-  if (!beam && crit && !w.maim && Math.random() < .5) {
-    w.maim = true; if (who !== 'p') u.atk *= .7;
-    STFX.limbs.push({x: x + side * 14, y: y - 55, vx: -side * rand(120, 220), vy: -rand(220, 320), rot: 0, vr: rand(-12, 12), gy: y + rand(6, 18), color: u.color || '#9a7a6a'});
-    stGore(who, 30, true); stNum(who, 'SEVERED', '#ff3a3a', true, 40); sfx('crack');
-  } else if (beam || crit) { w.bleed = 4; stGore(who, 14, true); stNum(who, 'DEEP WOUND', '#ff5a3a', true, 40); }
+  if (beam || crit) { w.bleed = 4; stGore(who, 14, true); stNum(who, 'DEEP WOUND', '#ff5a3a', true, 40); }
   else { w.bleed = 3; stNum(who, 'Bleeding', '#ff6a6a', false, 40); }
 }
 // Buffs and debuffs: what is on you or on a foe right now, with turns left
@@ -8816,7 +8809,6 @@ function stStatus(who) {
     if (b.buffs.rally) add('ATK ↑', b.buffs.rally, true, '#ff8a4a', 'War Cry: +50% attack');
     if (b.defending) add('Braced', 0, true, '#cfd8e0', 'Defending: half damage from the next hits');
     if (w.bleed) add('Bleed', w.bleed, false, '#ff4a4a', 'Losing health every turn. A potion stops it.');
-    if (w.maim) add('Severed', 0, false, '#c0392b', 'Arm severed: -20% attack until you rest');
   } else {
     const f = who, w = f.w || {};
     if (f.guard) add('Guard', f.guard, true, '#ffd75e', 'Takes half damage');
@@ -8825,7 +8817,6 @@ function stStatus(who) {
     if (f.poison) add('Poison', f.poison, false, '#9cff3a', 'Poisoned every turn');
     if (f.frozen) add('Frozen', f.frozen, false, '#9fe6ff', 'Loses its next turn');
     if (w.bleed) add('Bleed', w.bleed, false, '#ff4a4a', 'Bleeding every turn');
-    if (w.maim) add('Severed', 0, false, '#c0392b', '-30% attack');
   }
   return L;
 }
@@ -8843,13 +8834,8 @@ function stBadges(list, x, y, now) { // a row of small pills; buffs have a brigh
   });
   ctx.restore();
 }
-function stWoundDraw(w, x, y, sc, side, tall, now) { // a hole through the chest, a spurting stump, dripping blood
+function stWoundDraw(w, x, y, sc, side, tall, now) { // blood streaks and dripping blood
   if (!w) return; const ty = y - (tall ? 31 : 26) * sc;
-  if (w.maim) {
-    const sx = x + side * 13 * sc, sy = y - (tall ? 44 : 32) * sc;
-    ctx.fillStyle = '#5a0008'; ctx.beginPath(); ctx.arc(sx, sy, 6 * sc, 0, 7); ctx.fill(); ctx.fillStyle = '#d8c8b8'; ctx.beginPath(); ctx.arc(sx, sy, 2 * sc, 0, 7); ctx.fill();
-    if (Math.random() < .22) STFX.parts.push({x: sx, y: sy, vx: side * rand(30, 120), vy: -rand(30, 150), t: 0, life: rand(.4, .7), color: '#a3121a', r: rand(1.5, 3.5)});
-  }
   if (w.bleed) {
     ctx.fillStyle = 'rgba(140,8,14,.75)'; ctx.fillRect(x - 6 * sc, ty - 4 * sc, 3 * sc, 20 * sc); ctx.fillRect(x + 4 * sc, ty + 2 * sc, 2 * sc, 14 * sc);
     if (Math.random() < .18) STFX.parts.push({x: x + rand(-8, 8) * sc, y: ty + 10 * sc, vx: 0, vy: 20, t: 0, life: .6, color: '#8a0a10', r: 2});
@@ -9060,7 +9046,7 @@ function stPlayerHit(f, base, kind, extra, color) {
     else {
       if (kind !== 'mag' || sk === 'drain') stGore(f.id, crit ? 22 : 12, f.hp <= 0 ? true : undefined);
       if (f.hp <= 0) stGore(f.id, 30, true);
-      if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; if (!f.w.maim) stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
+      if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
       else if (f.hp > 0) { if (ST.battle.buffs.wolf && kind === 'phys') { f.w = f.w || {}; f.w.bleed = 3; } stWound(f.id, f, kind, crit, rk, beam); }
     }
     stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? dealt + '!' : dealt, crit ? '#ffd75e' : '#ffffff', crit);
@@ -9075,6 +9061,8 @@ function stPlayerHit(f, base, kind, extra, color) {
   else { stAnim('p', 'lunge', .32); setTimeout(land, 160); }
 }
 function stUseSkill(id) {
+  if(!ST.battle||ST.battle.turn!=='player')return;
+  if(!stOwnsSkill(stData(),id)||!stData().skills.includes(id))return;
   const S = ST_SKILLS[id], d = stData(), s = stStats(), b = ST.battle;
   if (d.mp < stSkCost(S)) return; const COST = stSkCost(S);
   const rkC = stRank(id), CPOW = 1 + rkC * .3; if (S.kind === 'mag' || S.kind === 'heal' || S.kind === 'buff') stEffect('runes', 'p', SK_COLOR[id] || (S.kind === 'heal' ? '#9fffb8' : '#ffd75e'), CPOW); // a rune circle as you begin the spell
@@ -9359,7 +9347,7 @@ function stOpenMenu() {
   m.append(el('h3', '', `${d.name} · Level ${d.lv} ${ST_CLASSES[d.cls].name}`),
     el('p', '', `HP ${Math.round(d.hp)}/${s.hp} · MP ${Math.round(d.mp)}/${s.mp} · Attack ${Math.round(s.atk)} · Magic ${Math.round(s.mag)} · Defense ${Math.round(s.def)} · XP ${d.xp}/${stXpNeed(d.lv)} · ${d.gold} gold`),
     el('h3', '', 'Abilities'), el('p', '', ['attack'].concat(d.skills).map(k => `${stSkName(k)}${k === 'attack' ? '' : ` (${stSkCost(ST_SKILLS[k])} MP)`}: ${stMasteryText(k)}`).join(' · ') + '. Use a move to master it. Mastered moves crit harder, open worse wounds, and fire magic as beams that can obliterate.'),
-    ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed (-20% attack)'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
+    ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
     el('h3', '', 'Bag'), el('p', '', `${d.items.potion} potions · ${d.items.ether} ethers` + (d.items.blade ? ' · Royal Blade' : '')),
     el('h3', '', 'Professions'), el('p', '', ['fishing', 'mining', 'crafting', 'farming'].map(k => { const P = (d.prof || {})[k] || {lv: 1, xp: 0}; return `${ST_PROF_NAME[k]} ${P.lv} (${stProfTitle(P.lv)}, ${P.xp}/${20 + P.lv * 25} xp)`; }).join(' · ') + `. ${d.rod ? '' : 'Buy a fishing rod from Dunn in Saltmere. '}${d.pickaxe ? '' : 'Buy a pickaxe from Brann in Saltmere. '}Forge gear at Brann's, cook at any inn.`),
     el('h3', '', 'Materials'), el('p', '', Object.entries(d.mats || {}).filter(([, n]) => n).map(([k, n]) => `${n} ${ST_MATS[k][0]}`).join(' · ') || 'None yet. Fish and mine to gather them.'),
@@ -9403,6 +9391,7 @@ function stOpenMenu() {
   if (!stData().race) btn('🧬 Choose race', () => stChooseRace());
   if (stData().items.sc_return) btn(`📜 Scroll of Return ×${stData().items.sc_return}`, () => stTeleport());
   btn(stAttrFree() ? `📊 Stats (${stAttrFree()} points!)` : '📊 Stats', () => stStatsMenu());
+  btn('Housing & estates',stHousingMenu);btn('Class abilities',stClassMenu);btn('Thieves Guild',stThievesMenu);
   btn('Bloodlines & spellcraft',stProgressMenu);btn('Ember Academy',stMagicLessons);btn('World bosses',stWorldBossMenu);btn('Ashen Dominion',stDominionMenu);
   btn('👥 Party', () => stPartyMenu());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
@@ -9460,6 +9449,11 @@ function stDrawWorld(now, dt = 1 / 60) {
   })(); }
   const isles = dun && ST_DUNGEONS[d.map].outdoor; stAmbient(dt, now, Zs, d, dun, isles);
   stDrawCrops(now);
+  if(ST.heistMarker&&d.map==='world'){
+    const H=ST.heistMarker,x=H.x*64+32,y=H.y*64+32;
+    ctx.fillStyle='#354d47';ctx.fillRect(x-20,y-15,40,29);ctx.strokeStyle='#b8d3a1';ctx.lineWidth=3;ctx.strokeRect(x-20,y-15,40,29);ctx.fillStyle='#e6cc8e';ctx.fillRect(x-3,y-8,6,13);
+    ctx.fillStyle='#172821';ctx.fillRect(x-90,y-43,180,22);ctx.fillStyle='#e3ddbb';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(H.name,x,y-27);ctx.textAlign='left';
+  }
   if (!dun) for (const r of ST_ROCKS) if (Math.abs(r.x * ST_TILE - ST.cam.x) < cw / Zs && Math.abs(r.y * ST_TILE - ST.cam.y) < ch / Zs) stDrawRock(r, now);
   stTutDraw(now); stDrawOthers(now);
   if (dun) for (const f of ST.foes) if (f.alive && onScr(f.x, f.y)) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6 * ST_CS, f.face || 0);
@@ -9504,7 +9498,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  const PR = $('stPrompt'); if (PR.hidden !== !near) PR.hidden = !near; if (near) stSetText(PR, (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({player: 'Meet ' + (near.p ? near.p.presence.sw.n : ''), plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach'));
+  const PR = $('stPrompt'); if (PR.hidden !== !near) PR.hidden = !near; if (near) stSetText(PR, (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({player: 'Meet ' + (near.p ? near.p.presence.sw.n : ''), plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || near.label || 'Approach'));
   const RB = $('stRide'), rh = dun || !(d.mounts || []).length; if (RB.hidden !== rh) RB.hidden = rh; stSetText(RB, d.riding ? 'Dismount' : 'Ride');
 }
 function stSetText(e, t) { if (e.textContent !== t) e.textContent = t; } // writing the same text every frame still costs a layout
@@ -9872,7 +9866,7 @@ function frame(now) {
 }
 // ---------- start screen: an animated poster, Press Start, a loading page, then the main menu ----------
 const POSTER = {on: true, t0: performance.now(), embers: [], loading: false};
-const LOAD_TIPS = ['Grind a move to evolve it. Mastered magic fires as beams that can obliterate.', 'Rest at an Ashen Shrine to heal your wounds, even a severed arm.', 'Buy goods where they are made and sell them where they are wanted.', 'Some doors only open at night. Some only open for blood.', 'The faster fighter dodges more blows.', 'Rougemarais never sees the sun. Do not go there before level 20.', 'Spend your stat points in Menu, then Stats. Shrines can reset them.', 'A Scroll of Return takes you to any town or land you have reached.', 'Every race has a power it can call on once per battle.', 'Companions join adventurers of level 45 and above.', 'Open the Party menu to invite anyone who is online.', 'Fill your Rage meter, then unleash it.'];
+const LOAD_TIPS = ['Grind a move to evolve it. Mastered magic fires as beams that can obliterate.', 'Rest at an Ashen Shrine to stop bleeding and heal your wounds.', 'Buy goods where they are made and sell them where they are wanted.', 'Some doors only open at night. Some only open for blood.', 'The faster fighter dodges more blows.', 'Rougemarais never sees the sun. Do not go there before level 20.', 'Spend your stat points in Menu, then Stats. Shrines can reset them.', 'A Scroll of Return takes you to any town or land you have reached.', 'Every race has a power it can call on once per battle.', 'Companions join adventurers of level 45 and above.', 'Open the Party menu to invite anyone who is online.', 'Fill your Rage meter, then unleash it.'];
 function drawPoster(now) { // original key art: a hero on a cliff under a blood moon, a castle, a cathedral, a dragon and a howling wolf
   const c = $('posterCv'), W = innerWidth, H = innerHeight, r = Math.min(2, devicePixelRatio || 1);
   if (c.width !== Math.round(W * r) || c.height !== Math.round(H * r)) { c.width = Math.round(W * r); c.height = Math.round(H * r); }

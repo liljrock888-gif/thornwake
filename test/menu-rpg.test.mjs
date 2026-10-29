@@ -69,6 +69,7 @@ try{
   await page.locator('#m-story').click();await page.locator('#stNew').click();
   ok(await page.locator('#crStep0').isVisible(),'Origin step visible');
   await page.locator('#crName').fill('Ash Tester');
+  await page.locator('#crClass').getByRole('button',{name:'Mage',exact:true}).click();
   await page.locator('#crNext').click();
   await page.locator('#crOutfit select[aria-label=Hair]').selectOption('braids');
   await page.locator('#crOutfit select[aria-label=Expression]').selectOption('grin');

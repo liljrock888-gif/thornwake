@@ -1,5 +1,16 @@
 # Thornwake with real payments
 
+## Homes, class paths and the Thieves Guild
+
+- **Housing & estates:** The story pause menu sells the original Harrowfield farm plus Willowbank Cottage, Saltmere Harbor House, Thornwake Townhouse, Briarwood Manor and Suncrest Estate. Deeds cost earned gold, never premium Crowns. Visit a property and interact with its front door to enter. Homes have usable beds, cooking hearths, personal gold storage, reading shelves, dining tables and furnishing colors; both estates have a private garden with a fountain.
+- **Class paths:** All eleven classes have four exclusive starter choices, eight learnable abilities and five class milestones at levels 1, 10, 25, 45 and 60. Paid training and free level-up rewards use the same ownership checks as combat. Old mixed-class abilities are archived, matching abilities retain their mastery, and racial/earned supernatural powers remain separate.
+- **The Veiled Hand:** Visit its hideout west of Thornwake through the Thieves Guild pause-menu entry. Join for 50 gold. Five single-claim, level-gated cache-recovery contracts award gold and reputation. Recover a marked cache with E, then return to the hideout to claim.
+- **Combat wounds:** Bleeding, blood spray and blood pools remain. Limb severing, detached-limb rendering and limb-loss attack penalties are removed. Existing limb flags are cleared when a save loads.
+
+`game/homes-classes.js` is inserted into the game's closure by `scripts/build.mjs`. Run `npm run build` before serving the game; do not open the source HTML directly. `npm run test:homes` runs the dedicated housing, class and guild browser checks against the same local server used by `test:browser`.
+
+`npm run build:preview` creates a separate `preview/` folder with session-only in-memory storage for Computer. The normal `public/` build retains persistent browser saves and the existing purchase integration.
+
 ## Fantasy overhaul
 
 The title and menu use original ashen-kingdom artwork. Story mode now uses outlined, expressive characters with customizable hair, eyes and expressions, distinct bandit outfits, and redesigned monsters. Character creation has three steps: Origin, Appearance and Abilities.

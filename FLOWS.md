@@ -1,5 +1,14 @@
 # Thornwake menu regression checks
 
+## Homes, class paths and the Veiled Hand
+- Housing & estates lists the farm plus five properties. Insufficient funds and repeated purchases never deduct gold.
+- Visit each exterior, buy and enter. Use beds, hearths, storage, furnishing colors and seating; leave through its world exit. Estate gardens return to the correct home.
+- Enter the Veiled Hand hideout, join once, accept one contract, recover its marked cache with E, return and claim once. Rank advances.
+- Eleven classes each show four exclusive starter choices, eight trainable moves and five class-specific milestones.
+- Creator, level-up rewards, old saves, Academy and casting enforce ownership. Earned supernatural powers remain separate.
+- Bleeding, its damage, its cures and blood effects remain. Limb loss visuals and penalties are gone, including on old saves.
+- Check desktop, phone and short-height layouts, runtime errors, blocked-door and insufficient-gold cases.
+
 ## Title and launcher
 - Press Start reaches the main menu once, including when activated repeatedly.
 - The title and launcher show original ash-grey kingdom artwork with readable text.

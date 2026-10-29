@@ -3,7 +3,11 @@
 // written to public/index.html.
 import {readFileSync, writeFileSync} from 'node:fs';
 
-const game = readFileSync(new URL('../game/thornwake.html', import.meta.url), 'utf8');
+const expansion = readFileSync(new URL('../game/homes-classes.js', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../game/thornwake.html', import.meta.url), 'utf8');
+const marker = "reset(0); resize(); show('scr-title'); requestAnimationFrame(frame);";
+if (!source.includes(marker)) throw new Error('Game startup insertion point is missing');
+const game = source.replace(marker, expansion + '\n' + marker);
 const page = `<!doctype html>
 <html lang="en">
 <head>
