@@ -2,19 +2,32 @@
 
 ## Wardrobe, infirmaries and update shutdown
 
+- **Sunny adventures and music:** Clear skies have an 82% selection chance and last longer than bad weather. A saved 30-minute adventure clock starts around 10 AM and devotes 24 minutes to daylight and six to night, independent of device time. Ashen Shrines can skip to morning or night. Two original synthesized scores, Wayfarer's Dawn and Beyond the Horizon, add brighter melodies and adventure rhythms for outdoor exploration and voyages; dungeon, battle and boss themes remain distinct. The existing volume controls still apply.
+- **Tips and a quieter HUD:** Creation ends with a skippable welcome/loading card and cycling tips. The searchable Game guide and contextual Quick hint entries explain mechanics, controls, progression and saving. Stats, objective, minimap, chat and learning notices can be minimized individually; Hide HUD clears the side panels in one action, and Show HUD restores them. Layout preferences save with the profile on normal hosting. Chat starts minimized. Learning notices are capped at two, with dismiss buttons and automatic expiry.
 - **Resizable area map:** Click or keyboard-activate the minimap, or choose Area map from the menu. Resize the atlas panel, zoom and scroll to pan, and toggle region outlines and enemy-home rings. Map outer edges are solid boundaries even for flying mounts.
 - **Tighter enemy aggro:** Dungeon/overland hunters acquire within 144 pixels (previously 300), drop pursuit beyond 208 pixels or a 192-pixel home leash, require an unobstructed line of sight and do not acquire across region or safe-zone boundaries. The RPG's world-tile random encounters are unchanged; these limits apply to visible roaming hunters.
 - **Armor:** Six equipable sets, including free Wayfarer Padding, leathers, chainmail, plate, a mana-focused mantle and Dusk Sovereign armor. Sets add defense and maximum health; Moonweave also adds mana/magic. Only one set contributes stats. Armor is visible over clothing, can be hidden cosmetically and survives defeat.
 - **Fair defeat and higher stakes:** Defeat drops only 10% of gold, rounded down, as recoverable Lost Embers. The other 90% stays in the purse. Story/Easy and Adventurer/Normal pay standard rewards; Veteran pays 1.35x and Soulslike 1.75x combat XP/gold and boss gold bounties. Crowns are unchanged. Contract gold/XP use the difficulty recorded when accepting the contract.
 - **Independent progression:** The Free paths menu offers the same contract catalog without membership, fees, quest levies or abandonment penalties. Optional Nightveil Compact and Blackbriar Company fellowships share this progression; changing affiliation does not reset it. Independent C/B/A/S travel clearance unlocks at levels 26/32/41/55. Story travel and noble titles accept this clearance. Guild political votes remain guild-specific optional activities.
 - **Character styling:** 21 hair choices including textured and original anime-inspired silhouettes, 12 expressions including Faceless, 13 skin tones, eight outfit styles, five pants styles, ties/bow ties/ribbons and ten accessory choices. Shirt, pants, shoes and trim have independent colors. Change appearance freely in the Wardrobe and save up to six outfit presets.
-- **Dawn and dusk spellcraft:** Eight new spells can be learned at Ember Academy for in-game gold at their required levels. Learning Dawn Arc and Dusk Thread at level 25 or above unlocks a ninth spell, Concord Burst. These are original light/shadow adventure motifs, not licensed Kingdom Hearts content.
+- **Dawn and dusk spellcraft:** Mages can learn eight new spells at Ember Academy for in-game gold at their required levels. Learning Dawn Arc and Dusk Thread at level 25 or above unlocks a ninth spell, Concord Burst. Other classes retain their exclusive paths and milestones. These are original light/shadow adventure motifs, not licensed Kingdom Hearts content.
 - **Infirmaries:** Thornwake, Ravenhollow and Saltmere have clinics with free health, mana and wound treatment. Treatment sets the recovery shrine. New characters begin outside Thornwake Infirmary; existing saves keep their locations.
 - **Update gate:** Connected clients running this version check the release manifest every 15 seconds. A different build pauses play, attempts a local save and reloads after five seconds only if storage succeeds. Blocked storage is reported and automatic reload is disabled. This is a client update gate, not a server-process shutdown or a new cloud-save backend.
 
 Each build creates `public/release.json` and embeds the matching content hash in the page. Deploy the entire build output together. The hash covers game source and public assets, excluding generated output and the maintenance configuration. Clients already open on versions predating this feature need to load this version once before automatic update detection works.
 
 For scheduled downtime, edit `public/maintenance.json` to `{"mode":"warn","at":"2026-12-01T01:00:00Z","msg":"Thornwake is updating"}` with your actual future UTC time, then deploy. Use `{"mode":"closed"}` for immediate closure and `{"mode":"open"}` to reopen. Warning and closure attempt a local save; reopening reloads only when storage succeeded. Network failures do not forcibly close an offline session. Browser saves remain device-specific unless the separate account/cloud-save backend is configured.
+
+## Homes, class paths and the Thieves Guild
+
+- **Housing & estates:** The story pause menu sells the original Harrowfield farm plus Willowbank Cottage, Saltmere Harbor House, Thornwake Townhouse, Briarwood Manor and Suncrest Estate. Deeds cost earned gold, never premium Crowns. Visit a property and interact with its front door to enter. Homes have usable beds, cooking hearths, personal gold storage, reading shelves, dining tables and furnishing colors; both estates have a private garden with a fountain.
+- **Class paths:** All eleven classes have four exclusive starter choices, eight learnable abilities and five class milestones at levels 1, 10, 25, 45 and 60. Paid training and free level-up rewards use the same ownership checks as combat. Old mixed-class abilities are archived, matching abilities retain their mastery, and racial/earned supernatural powers remain separate.
+- **The Veiled Hand:** Visit its hideout west of Thornwake through the Thieves Guild pause-menu entry. Join for 50 gold. Five single-claim, level-gated cache-recovery contracts award gold and reputation. Recover a marked cache with E, then return to the hideout to claim.
+- **Combat wounds:** Bleeding, blood spray and blood pools remain. Limb severing, detached-limb rendering and limb-loss attack penalties are removed. Existing limb flags are cleared when a save loads.
+
+`game/homes-classes.js` is inserted into the game's closure by `scripts/build.mjs`. Run `npm run build` before serving the game; do not open the source HTML directly. `npm run test:homes` runs the dedicated housing, class and guild browser checks against the same local server used by `test:browser`.
+
+`npm run build:preview` creates a separate `preview/` folder with session-only in-memory storage for Computer. The normal `public/` build retains persistent browser saves and the existing purchase integration.
 
 ## Fantasy overhaul
 
@@ -123,8 +136,29 @@ people start playing, and move to a paid plan if you get close to the limit.
 
 ## Updating the game
 
-`game/thornwake.html` is the same file as the Claude artifact. Replace it with a
-newer copy and redeploy; `npm run build` wraps it into `public/index.html`.
+`npm run build` combines `game/thornwake.html`, `game/homes-classes.js`, and
+`game/balance.js` into `public/index.html`. Keep these modules together when updating.
+Production uses normal browser persistence; `npm run build:preview` creates a
+separate sandbox-compatible, session-only `preview/` build.
+
+### Economy and class balance
+
+- Property gold prices: Willowbank Cottage 250; Harrowfield Homestead 600;
+  Saltmere Harbor House 900; Thornwake Townhouse 1800; Briarwood Manor 4800;
+  Suncrest Estate 10000. Farmer Odo's existing alignment discount is unchanged.
+- Existing deeds and strongbox gold are retained without repurchase or automatic
+  refunds. Existing mastery and matching legacy ability migration are preserved.
+- All eleven classes have separate stat growth, mana costs and role descriptions.
+  Every class ability retains its class owner and level gate. Monk ki/healing
+  uses attack; Druid Rootquake uses magic.
+- Area effects apply on successful hits, including Cinder Tempest burning and
+  Crypt Plague's poison plus 25% drain. Boss DoTs are 1% max health, capped at
+  `12 + player level × 3`; boss interrupt chances are 40% of the normal chance.
+- Heal/buff actions lock immediately. Drain uses actual damage, never overkill.
+  Follow-up attacks respect defense type and guarding.
+- `npm run test:balance` checks five milestone levels for all eleven classes,
+  economy targets, scaling, action locking, hit effects and boss resistance.
+  These deterministic regression envelopes do not replace full-campaign playtesting.
 
 ## Before you go live
 

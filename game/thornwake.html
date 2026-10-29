@@ -374,11 +374,11 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stChatHead{font-size:11px;color:#8fd4ff;letter-spacing:.05em;margin-bottom:2px;text-shadow:0 1px 2px #000}
 #stChatLog{max-height:180px;overflow:auto;text-shadow:0 1px 2px #000,0 0 3px #000}#stChatLog div{margin:1px 0;color:#fff3e0;word-wrap:break-word}#stChatLog b{color:#8fd4ff;cursor:pointer;pointer-events:auto}#stChatLog .party,#stChatLog .party b{color:#7fe08a}#stChatLog .sys{color:#c8b89a;font-style:italic}
 #stChatIn{width:100%;box-sizing:border-box;margin-top:4px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#0c1411;color:#fff3e0;font:inherit;font-size:16px}
-#stChatBtn{position:absolute;left:calc(268px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 10px;font:inherit;cursor:pointer}
-#stJournalBtn{position:absolute;left:calc(84px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stChatBtn{position:absolute;left:calc(282px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));width:36px;box-sizing:border-box;padding:6px 0;font:inherit;cursor:pointer}
+#stJournalBtn{position:absolute;left:calc(126px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));width:76px;box-sizing:border-box;padding:6px 8px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 #stMenu.journal p{white-space:pre-line;line-height:1.5}#stMenu.journal{width:min(94vw,640px)}
-#stRide{position:absolute;left:calc(176px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
-#stMenuBtn{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));padding:6px 12px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stRide{position:absolute;left:calc(210px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));width:68px;box-sizing:border-box;padding:6px 8px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+#stMenuBtn{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(162px + env(safe-area-inset-top,0px));width:108px;box-sizing:border-box;padding:6px 8px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 #stLoad{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 45%,#16221d,#050806 75%);opacity:0;transition:opacity .22s ease;pointer-events:auto;padding:24px}
 #stLoad.on{opacity:1}#stLoad .ldIn{text-align:center;max-width:520px;width:100%}
 #stLoad small{display:block;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
@@ -387,6 +387,35 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stLoad .ldBar{height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin:0 auto;max-width:280px}#stLoad .ldBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#c8951e,#ffd75e);border-radius:4px}
 #stLoad.on .ldBar i{animation:ldFill var(--ld,.8s) ease-out forwards}@keyframes ldFill{to{width:100%}}
 #stLoad .ldTip{margin-top:18px;color:#97a69b;font-size:13px;font-style:italic;min-height:2.8em}
+#stLoadActions{justify-content:center;gap:10px}#stLoadActions button{min-height:44px;padding:9px 16px;border:1px solid #867448;border-radius:7px;background:#22382c;color:#f2e5c8;cursor:pointer}
+#stLearnNotices{position:absolute;right:12px;top:34%;width:240px;max-width:calc(100vw - 28px);display:grid;gap:7px;z-index:16;pointer-events:none}
+.learnNotice{position:relative;padding:9px 34px 10px 11px;border:1px solid #4b5d51;border-left:3px solid var(--notice-color,#c7b4e8);border-radius:7px;background:rgba(15,27,22,.96);box-shadow:0 4px 14px #0005;font-size:12px;line-height:1.35}
+.learnNotice small{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--notice-color,#c7b4e8);margin-bottom:3px}.learnNotice span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.learnNotice button{position:absolute;right:2px;top:2px;width:30px;height:30px;border:0;background:none;color:#c3cebe;cursor:pointer;pointer-events:auto}
+@media(max-width:600px){#stLearnNotices{width:200px;top:27%;right:8px}.learnNotice{font-size:11px;padding:8px 30px 8px 9px}}
+.hudFold{position:absolute;right:2px;top:2px;width:30px;height:30px;padding:0;border:0;border-radius:5px;background:rgba(10,20,15,.85);color:#c9d5c7;font:18px sans-serif;cursor:pointer;pointer-events:auto;z-index:1}
+.hudFold:focus-visible,#stLearningFold:focus-visible,#stHudToggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#stHud,#stQuest,#stChat,#stMapDock{isolation:isolate}
+#stHud .hn{padding-right:23px}.hudFoldLabel{display:none;font-size:12px;color:#c4cdbb}
+#stHud.folded{width:112px!important;box-sizing:border-box;min-height:36px;padding:9px 36px 9px 10px}
+#stHud.folded>*:not(.hudFold):not(.hudFoldLabel){display:none}
+#stHud.folded .hudFoldLabel,#stMapDock.folded .hudFoldLabel{display:block}
+#stQuest{min-height:36px;box-sizing:border-box}#stQuestBody>b{padding-right:22px}
+#stQuest.folded .obj,#stQuest.folded .loc{display:none}#stQuest.folded{width:118px}
+#stMapDock{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px))}
+#stMapDock #stMini{position:static;display:block}
+#stMapDock.folded{width:94px;min-height:36px;box-sizing:border-box;padding:9px 34px 9px 10px;background:#101d17e8;border:1px solid var(--line);border-radius:8px}
+#stMapDock.folded #stMini{display:none}
+#stChat{padding-right:32px;box-sizing:border-box;min-height:30px;z-index:1}
+#stChat.folded{width:136px!important;padding:8px 32px 8px 8px;background:#101d17e8;border:1px solid var(--line);border-radius:7px}
+#stChat.folded #stChatLog,#stChat.folded #stChatIn{display:none}
+#stLearningFold{justify-self:end;padding:3px 8px;min-height:28px;border:1px solid #45574a;border-radius:5px;background:#101d17ed;color:#b6c4b2;font:11px sans-serif;cursor:pointer;pointer-events:auto}
+#stLearnNotices:not(:has(.learnNotice)){display:none}
+#stLearnNotices.folded .learnNotice{display:none}
+#stHudToggle{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));bottom:calc(6px + env(safe-area-inset-bottom,0px));padding:7px 12px;min-height:36px;font:12px sans-serif;color:#c4cfbc;cursor:pointer;z-index:1}
+#story:not([data-mode=walk]) #stHudToggle{display:none}
+#story.hudQuiet #stHud,#story.hudQuiet #stQuest,#story.hudQuiet #stMapDock,#story.hudQuiet #stChat,#story.hudQuiet #stLearnNotices,#story.hudQuiet #stPartyHud,#story.hudQuiet #stHint,#story.statsFolded #stPartyHud{display:none!important}
+#story[data-mode=battle] #stMapDock,#story[data-mode=sail] #stMapDock{display:none}
+@media(max-width:640px){#stQuestBody>b{font-size:10px;letter-spacing:.08em}}
 @media (prefers-reduced-motion:reduce){#stLoad{transition:none}#stLoad.on .ldBar i{animation:none;width:100%}}
 #maintBar{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;background:#3a1a10;border:1px solid #ff8a4a;color:#ffe2cc;border-radius:10px;padding:8px 16px;font-weight:600;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.5);text-align:center;max-width:calc(100vw - 32px)}
 #maintScr{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 40%,#16221d,#050806 75%);text-align:center}
@@ -541,11 +570,12 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
   <button id="menuBtn" class="panel" hidden>Menu</button>
   <div id="story" hidden>
     <div id="stJoyZone" hidden><div id="stJoyBase"><div id="stJoyKnob"></div></div></div>
-    <div id="stHud" class="panel"><b id="stHudName"></b><div class="bar hp"><i id="stHp"></i><span id="stHpT"></span></div><div class="bar mp"><i id="stMp"></i><span id="stMpT"></span></div><small id="stGold"></small></div>
-    <div id="stQuest" class="panel"></div>
+    <div id="stHud" class="panel"><span class="hudFoldLabel">Stats</span><button id="stStatsFold" class="hudFold" aria-label="Minimize stats" aria-expanded="true" aria-controls="stHud">−</button><b id="stHudName"></b><div class="bar hp"><i id="stHp"></i><span id="stHpT"></span></div><div class="bar mp"><i id="stMp"></i><span id="stMpT"></span></div><small id="stGold"></small></div>
+    <div id="stQuest" class="panel"><button id="stQuestFold" class="hudFold" aria-label="Minimize objective" aria-expanded="true" aria-controls="stQuestBody">−</button><div id="stQuestBody"></div></div>
     <button id="stMenuBtn" class="panel">Menu</button><button id="stJournalBtn" class="panel">Journal</button><button id="stRide" class="panel" hidden>Ride</button>
-    <div id="stLoad" hidden aria-live="polite"><div class="ldIn"><small id="stLoadKind"></small><h2 id="stLoadName"></h2><p id="stLoadSub"></p><div class="ldBar"><i></i></div><p class="ldTip" id="stLoadTip"></p></div></div>
-    <div id="stPrompt" hidden></div><div id="stPartyHud"></div><div id="stChat"><div id="stChatHead">Offline</div><div id="stChatLog"></div><input id="stChatIn" hidden maxlength="120" placeholder="Say something (/p for party only)" aria-label="Chat message" autocomplete="off"></div><button id="stChatBtn" class="panel" aria-label="Chat">💬</button><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas><div id="stHint"></div>
+    <div id="stLoad" hidden aria-live="polite"><div class="ldIn"><small id="stLoadKind"></small><h2 id="stLoadName"></h2><p id="stLoadSub"></p><div class="ldBar"><i></i></div><p class="ldTip" id="stLoadTip"></p><div id="stLoadActions" class="row" hidden><button id="stLoadNext">Another tip</button><button id="stLoadContinue">Enter the Vale</button></div></div></div>
+    <div id="stLearnNotices" role="status" aria-live="polite" aria-relevant="additions"><button id="stLearningFold" aria-label="Minimize learning notifications" aria-expanded="true">Learning −</button></div>
+    <div id="stPrompt" hidden></div><div id="stPartyHud"></div><div id="stChat"><button id="stChatFold" class="hudFold" aria-label="Expand chat" aria-expanded="false" aria-controls="stChatLog">+</button><div id="stChatHead">Offline</div><div id="stChatLog"></div><input id="stChatIn" hidden maxlength="120" placeholder="Say something (/p for party only)" aria-label="Chat message" autocomplete="off"></div><button id="stChatBtn" class="panel" aria-label="Chat">💬</button><div id="stMapDock"><span class="hudFoldLabel">Map</span><button id="stMapFold" class="hudFold" aria-label="Minimize minimap" aria-expanded="true" aria-controls="stMini">−</button><canvas id="stMini" width="176" height="118" aria-label="Minimap"></canvas></div><div id="stHint"></div><button id="stHudToggle" class="panel" aria-label="Hide side panels" aria-pressed="false">Hide HUD</button>
     <div id="stDialog" class="panel" hidden><button id="stBond" hidden></button><b id="stWho"></b><p id="stText"></p><div class="row" id="stChoices"></div></div>
     <div id="stBattle" hidden><div id="stLog" class="panel"></div><div id="stParty" class="panel"></div><div id="stActions" class="panel"></div></div>
     <div id="stMenu" class="panel" hidden></div>
@@ -3962,6 +3992,9 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 // What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
 const UPDATES = [
+  {id:59,date:'Oct 29',title:'Free paths, armor & a better first adventure',items:['Equip six armor sets, starting with free padding. Defeat drops only 10% of gold; Veteran pays 35% more XP/gold and Soulslike 75% more.','Stay independent or join Nightveil/Blackbriar fellowships. Take contracts without membership or abandonment penalties, and unlock travel clearance through levels.','Click the minimap for a resizable, zoomable atlas with boundaries. Roaming enemies have shorter detection, wall checks and home leashes.','Expanded wardrobe, faceless expressions, textured/anime hair, dawn/dusk mage spells and three infirmaries. New stories start outside Thornwake Infirmary.','Creation now ends with a welcome loading card and tips. Open Game guide & tips or Quick hint from the menu. Update checks pause play and save locally before a new build reloads.']},
+  {id:58,date:'Oct 28',title:'Economy & class balance',items:['Starter cottage reduced to 250 gold. Harbor house 900, townhouse 1800, Briarwood Manor 4800 and Suncrest Estate 10000. The working farm remains 600. Existing deeds and strongboxes are unchanged.','All eleven classes now have distinct stat growth and role-focused mana costs, attack strength and utility. Later abilities offer stronger options rather than identical copies. Monk ki and healing scale with attack; druid Rootquake scales with magic.','Area spells now apply their listed poison, burning, interruption and drain effects on successful hits. Bosses resist interruption and percentage damage. Life drain heals only from damage actually dealt, not overkill.','Healing and buff actions now lock the turn immediately, preventing rapid clicks from casting repeatedly before enemies act. Class ownership and level gates still apply.']},
+  {id:57,date:'Oct 28',title:'Homes, class paths & the Veiled Hand',items:['Buy a cottage, harbor house, townhouse, manor or estate with earned gold. Furnished interiors have beds, cooking hearths, strongboxes, reading shelves and customizable rugs and quilts. The two estates include private gardens. Open Housing & estates from your story menu.','Every class now has eight exclusive learnable moves and five class milestone techniques. Creation, training, level-up rewards and combat enforce class ownership. Existing mixed-class moves are archived; matching moves retain mastery.','Enter the Veiled Hand hideout west of Thornwake to join the Thieves Guild. Complete five recovery contracts, earn gold and reputation, and rise through its ranks. No cross-class ability rewards.','Limb loss and its attack penalties have been removed, including from existing saves. Bleeding, blood spray and blood pools remain.']},
   {id:56,date:'Oct 29',title:'Bloodlines, spellcraft & the Ashen Dominion',items:['Five magic tiers grant new spells at levels 1, 10, 25, 45 and 60. Study at the Ember Academy to practice spell mastery without bypassing level requirements.','Every race has three optional awakenings at levels 15, 35 and 60. Claim them in order at an Ashen Shrine or the Ashen Sanctum.','Three new world bosses have discoverable callouts, compass tracking and one-time trophies. Find their rumors under Menu → World bosses.','The original Ashen Dominion has a throne hall and three guardian floors. Clear trials at levels 20, 35 and 50, gain ruler ranks, and earn guardian companions. Guild expedition contracts reward the same dungeon victories.']},
   {id: 55, date: 'Oct 29', title: 'A new face for the Vale', items: ['Original ruined-kingdom title and menu artwork, with Enter the Vale as the story shortcut.', 'Storybook heroes and townsfolk, a three-step character creator, and new hair, eye and expression choices. Your existing hero and outfit still work.', 'Redrawn story enemies: masked outlaws, hollow knights, fanged wolves, jagged golems, skeletal-winged drakes and horned demons. Combat values have not changed.', 'Global and story menus now hand off cleanly. Story menus have a dimmed backdrop and separate keyboard input.']},
   {id: 54, date: 'Oct 29', title: 'The Eight Kingdoms', items: ['Eight racial kingdoms hold the Vale, each with a keep and a throne you can visit: the Vale of Ashes (humans, ruled by King Aldric Valeborn from Thornwake Keep), the Aetherfall Spireholds (Elarin), Ironpine Deep (Woodwyn), Cinderhold (Ashkin), the Korgath Warchiefs (Tuskborn), the Frostpeak Holds (Stonekin), the Sundown Caravans (Felari) and Mirehollow (Scalekin).', 'Every ruler holds audience: talk to them for their kingdom\'s story and a one-time token of the realm. Kingdoms you have visited are written up in your Journal.', 'Your race\'s homeland is now shown on the character creator.']},
@@ -5653,8 +5686,34 @@ function scheduleBayou(start) {
   });
   return start + ROOTS.length * bar;
 }
-const SONGS = [scheduleHiphop, scheduleMarch, scheduleEmber, scheduleDragonfire, scheduleVale, scheduleSteel, scheduleCrown, scheduleBayou];
-const SONG_VALE = 4, SONG_STEEL = 5, SONG_CROWN = 6, SONG_BAYOU = 7;
+// Wayfarer's Dawn: an original G-major adventure theme, flute, plucked strings and light marching drums.
+function scheduleWayfarer(start) {
+  const beat=60/116,bar=beat*4,chords=[[55,59,62],[62,66,69],[64,67,71],[60,64,67],[55,59,62],[59,62,66],[60,64,67],[62,66,69]];
+  const phrases=[[[0,79,1],[1,83,.5],[1.5,81,.5],[2,79,1],[3,86,1]],[[0,81,1.5],[1.5,78,.5],[2,76,1],[3,74,1]],[[0,79,.5],[.5,83,.5],[1,86,1],[2,88,1],[3,86,1]],[[0,84,1],[1,83,.5],[1.5,81,.5],[2,79,2]]];
+  for(let b=0;b<16;b++){
+    const bt=start+b*bar,c=chords[b%8];
+    for(const n of c)tone(bt,n,bar*.94,'sawtooth',.007,1100,true);
+    for(let q=0;q<8;q++)tone(bt+q*beat/2,c[[0,1,2,1,0,2,1,2][q]],beat*.38,'triangle',.028,2300);
+    for(const q of[0,2]){tone(bt+q*beat,c[0]-12,beat*.8,'triangle',.055,650);kick(bt+q*beat,.14);}
+    for(const q of[1,3]){noiseHit(bt+q*beat,.045,.08,'bandpass',2300);noiseHit(bt+q*beat,.02,.1,'highpass',6700);}
+    for(const[q,n,len]of phrases[b%4]){tone(bt+q*beat,n+(b>=12&&b%4===3?12:0),beat*len*.86,'sine',.039,3000,true);tone(bt+q*beat,n-12,beat*len*.72,'triangle',.012,1800);}
+  }
+  return start+16*bar;
+}
+// Beyond the Horizon: an original D-major 6/8 voyage with fiddle-like lead and rolling hand drums.
+function scheduleHorizon(start){
+  const step=60/118/2,bar=step*6,roots=[50,50,55,57,47,55,50,57],third=[4,4,4,4,3,4,4,4],mel=[[74,78,81,86,81,78],[76,78,81,83,81,78],[79,83,86,88,86,83],[81,85,88,90,88,85],[83,81,78,76,78,81],[79,78,76,74,76,79],[78,81,86,85,81,78],[76,78,81,85,81,76]];
+  for(let b=0;b<16;b++){
+    const i=b%8,bt=start+b*bar,r=roots[i];
+    for(const iv of[0,third[i],7])tone(bt,r+iv,bar*.9,'triangle',.022,1600);
+    for(const q of[0,3]){kick(bt+q*step,.14);tone(bt+q*step,r-12,step*2.4,'triangle',.05,650);}
+    noiseHit(bt+2*step,.035,.08,'bandpass',2100);noiseHit(bt+5*step,.04,.08,'bandpass',2400);
+    for(let q=0;q<6;q++){tone(bt+q*step,mel[i][q],step*.84,b>=8?'sine':'triangle',.036,2700,true);tone(bt+q*step,r+[12,19,24,19,12,19][q],step*.6,'triangle',.015,2300);}
+  }
+  return start+16*bar;
+}
+const SONGS = [scheduleHiphop, scheduleMarch, scheduleEmber, scheduleDragonfire, scheduleVale, scheduleSteel, scheduleCrown, scheduleBayou,scheduleWayfarer,scheduleHorizon];
+const SONG_VALE = 4, SONG_STEEL = 5, SONG_CROWN = 6, SONG_BAYOU = 7,SONG_WAYFARER=8,SONG_HORIZON=9;
 // Sound can only start after the first click, which is usually Play, so the main menu keeps the title song too.
 const onTitle = () => !overlay.hidden && (currentScreen === 'scr-title' || currentScreen === 'scr-main');
 // The title screen and main menu loop the main theme; elsewhere each other song plays three times through, then the next one starts.
@@ -5962,7 +6021,7 @@ const stRank = id => { const u = stUses(id), lv = stData().lv; let r = 0; while 
 const stSkName = id => ST_EVOLVE[id] ? ST_EVOLVE[id][stRank(id)] : ST_SKILLS[id].name;
 function stMaster(id) {
   const d = stData(), was = stRank(id), old = stSkName(id); d.mastery = d.mastery || {}; d.mastery[id] = (d.mastery[id] || 0) + 1;
-  if (stRank(id) > was) setTimeout(() => { stCallout(`${old} evolved into ${stSkName(id)}!`, '#ffd75e'); sfx('evolve'); stLog(`Mastery! ${old} evolved into ${stSkName(id)} (rank ${stRank(id)}).`); }, 900);
+  if (stRank(id) > was) setTimeout(() => { stLearnNotice(`${old} evolved into ${stSkName(id)}`, '#ffd75e'); sfx('evolve'); stLog(`Mastery! ${old} evolved into ${stSkName(id)} (rank ${stRank(id)}).`); }, 900);
 }
 const stMasteryText = id => { const r = stRank(id), nx = ST_RANK_AT[r + 1], nl = ST_RANK_LV[r + 1]; return `${'★'.repeat(r)}${r ? ' ' : ''}` + (!nx ? 'fully evolved' : stUses(id) >= nx && stData().lv < nl ? `mastered, evolves at level ${nl}` : `${Math.min(stUses(id), nx)}/${nx} to evolve${stData().lv < nl ? ` (level ${nl})` : ''}`); };
 const ST_FOES = {
@@ -6239,7 +6298,7 @@ ST_DUNGEONS.land2 = {name: 'Valdris, the Guild Commonwealth', land: true, outdoo
 ST_DUNGEONS.land3 = {name: 'Aetherfall, the Shattered Heavens', land: true, outdoor: true, lit: true, boss: 'unmaker', pool: [['voidwolf']], exit: [37, 15], ship: [20.4, 22.5], sky: 'Q', song: 2, trees: 'crystal', void: true,
   pal: {sea: '#120a26', shore: '#2a1a4a', sand: '#d8d0e8', grass: '#6a6a9a', grass2: '#62628f', road: '#b8b0c8', roof: '#e8e2ff', hut: '#c8c0e0', mount: '#8a82a8'},
   zones: [{name: 'Celestine, City of the Choir', lv: 45, r: [24, 16, 38, 28], safe: true}, {name: 'Seraph Gardens', lv: 48, r: [38, 0, 59, 21]}, {name: 'Abyssal Rift', lv: 53, r: [38, 22, 59, 43], rank: 'S'}, {name: 'Lowcloud Isles', lv: 43, r: [0, 0, 59, 43]}], rows: stBuildAether()};
-const stMapSong = () => { const m = stData() && stData().map; return ST_DUNGEONS[m] && ST_DUNGEONS[m].song != null ? ST_DUNGEONS[m].song : m === 'isles' ? 2 : m === 'rouge' ? SONG_BAYOU : SONG_VALE; };
+const stMapSong = () => {const m=stData()&&stData().map,M=ST_DUNGEONS[m];if(m==='rouge')return SONG_BAYOU;if(m==='world')return SONG_WAYFARER;if(m==='isles'||m==='land2')return SONG_HORIZON;if(M&&M.outdoor)return SONG_WAYFARER;return M&&M.song!=null?M.song:SONG_VALE;};
 ST_DUNGEONS.stair = {name: 'The Celestial Stair', lit: true, holy: true, boss: 'seraphiel', pool: [['seraph'], ['cherub', 'cherub'], ['seraph', 'cherub']], theme: {floor: '#d8d0bc', wall: '#8a8070', glow: '#ffe9a8'}, exit: [10, 2], rows: [
   '######################',
   '#E....#.......#.....c#',
@@ -6514,8 +6573,8 @@ const ST_ARCANE_SPELLS={
   starcircuit:{name:'Starfall Circuit',lv:45,mp:28,kind:'mag',mult:2.15,all:true,desc:'Linked stars cascade through every enemy.'},
   twilightrefrain:{name:'Twilight Refrain',lv:60,mp:30,kind:'mag',mult:1.65,twice:true,desc:'Light and shadow echo as two successive strikes.'},
 };
-for(const[id,S]of Object.entries(ST_ARCANE_SPELLS))ST_SKILLS[id]={...S,gift:true};
-ST_SKILLS.concordburst={name:'Concord Burst',mp:24,kind:'mag',mult:1.1,all:true,twice:true,gift:true,desc:'A learned harmony of dawn and dusk strikes every foe twice.'};
+for(const[id,S]of Object.entries(ST_ARCANE_SPELLS))ST_SKILLS[id]={...S,gift:true,owner:'mage',level:S.lv};
+ST_SKILLS.concordburst={name:'Concord Burst',mp:24,kind:'mag',mult:1.1,all:true,twice:true,gift:true,owner:'mage',level:25,desc:'A learned harmony of dawn and dusk strikes every foe twice.'};
 const ST_MAGIC_TIERS=[
   {level:1,name:'I · Initiate',spell:'emberspark'},{level:10,name:'II · Adept',spell:'flamelance'},
   {level:25,name:'III · Invoker',spell:'cindertempest'},{level:45,name:'IV · Archmage',spell:'eclipse'},{level:60,name:'V · Mythic',spell:'crownstars'},
@@ -6534,15 +6593,35 @@ function stAnnounce(text,color='#d3bd8b'){
   ST.announcements=ST.announcements||[];
   if(!ST.announcements.some(a=>a.text===text))ST.announcements.push({text,color});
 }
+function stHudLayout(){if(!PROF.hudUI||typeof PROF.hudUI!=='object'||Array.isArray(PROF.hudUI))PROF.hudUI={chat:true,quest:touchUI.on};return PROF.hudUI;}
+function stApplyHudLayout(){
+  const prefs=stHudLayout(),parts={stats:['stHud','stStatsFold','stats'],quest:['stQuest','stQuestFold','objective'],map:['stMapDock','stMapFold','minimap'],chat:['stChat','stChatFold','chat'],learning:['stLearnNotices','stLearningFold','learning notifications']};
+  for(const[key,[panel,button,label]]of Object.entries(parts)){
+    const folded=!!prefs[key],b=$(button);$(panel).classList.toggle('folded',folded);b.setAttribute('aria-expanded',String(!folded));b.setAttribute('aria-label',(folded?'Expand ':'Minimize ')+label);
+    b.textContent=key==='learning'?`Learning (${document.querySelectorAll('#stLearnNotices .learnNotice').length}) ${folded?'+':'−'}`:folded?'+':'−';
+  }
+  $('story').classList.toggle('hudQuiet',!!prefs.quiet);$('story').classList.toggle('statsFolded',!!prefs.stats);
+  $('stHudToggle').textContent=prefs.quiet?'Show HUD':'Hide HUD';$('stHudToggle').setAttribute('aria-label',prefs.quiet?'Restore side panels':'Hide side panels');$('stHudToggle').setAttribute('aria-pressed',String(!!prefs.quiet));
+}
+function stToggleHudPart(key){const prefs=stHudLayout();prefs[key]=!prefs[key];if(key==='chat'&&prefs.chat)stChatClose();stApplyHudLayout();saveProfile();}
+function stLearnNotice(text,color='#c7b4e8'){
+  const stack=$('stLearnNotices');if(!stack||!ST.on)return;
+  if([...stack.querySelectorAll('.learnNotice')].some(e=>e.dataset.notice===text))return;
+  while(stack.querySelectorAll('.learnNotice').length>=2)stack.querySelector('.learnNotice').remove();
+  const card=el('div','learnNotice'),close=el('button','','×'),remove=()=>{card.remove();stApplyHudLayout();};card.dataset.notice=text;card.style.setProperty('--notice-color',color);close.setAttribute('aria-label','Dismiss learning notification');close.addEventListener('click',remove);card.append(el('small','','Learning'),el('span','',text),close);stack.appendChild(card);stApplyHudLayout();setTimeout(remove,6000);
+}
 function stSyncProgress(notify=true){
   const d=stData();if(!d)return;
   d.skills=d.skills||[];d.outfit=d.outfit||{race:d.race};d.outfit.evolution=stEvolutionStage(d);
   d.outfit.armor=d.showArmor===false?null:d.armor||null;
   const tier=stMagicTier(d),old=d.magicTier;
-  if(!d.hr)for(let i=0;i<=tier;i++)if(!d.skills.includes(ST_MAGIC_TIERS[i].spell))d.skills.push(ST_MAGIC_TIERS[i].spell);
-  if(!d.hr&&d.lv>=25&&d.skills.includes('dawnarc')&&d.skills.includes('duskthread')&&!d.skills.includes('concordburst')){d.skills.push('concordburst');if(notify)stAnnounce('CONCORD BURST: dawn and dusk in harmony','#c7b4e8');}
+  stSyncClass(d);
+  if(!d.hr)for(let i=0;i<=tier;i++){const id=stTierSkill(d.cls,i);if(!d.skills.includes(id))d.skills.push(id);}
+  if(!d.hr&&d.cls==='mage'&&d.lv>=25&&d.skills.includes('dawnarc')&&d.skills.includes('duskthread')&&!d.skills.includes('concordburst')){d.skills.push('concordburst');if(notify)stLearnNotice('Learned Concord Burst: dawn and dusk in harmony','#c7b4e8');}
+  if(d.wounds){delete d.wounds.maim;delete d.wounds.hole;if(!d.wounds.bleed)d.wounds=null;}
+  {const s=stStats();d.hp=Math.min(d.hp,s.hp);d.mp=Math.min(d.mp,s.mp);}
   d.magicTier=tier;
-  if(notify&&tier>0&&(old==null||tier>old))stAnnounce('MAGIC TIER '+ST_MAGIC_TIERS[tier].name+' UNLOCKED','#c3b2f1');
+  if(notify&&!d.hr&&tier>0&&(old==null||tier>old))stLearnNotice((d.cls==='mage'?'Magic tier ':'Class rank ')+ST_MAGIC_TIERS[tier].name+' · '+ST_SKILLS[stTierSkill(d.cls,tier)].name+' unlocked','#c3b2f1');
 }
 function stSystemPanel(title){
   const m=$('stMenu');ST.mode='menu';ST.keys={};ST.journal=false;m.hidden=false;
@@ -6609,13 +6688,13 @@ function stMagicLessons(){
   m.append(el('p','','Patient study sharpens power earned on the road. Each lesson adds three practice uses to one spell. Mastery rank still requires its normal character level.'),el('p','',`Level ${d.lv} · ${used}/3 lessons used at this level · ${fee} gold per lesson`));
   for(const id of d.skills.filter(k=>ST_SKILLS[k]?.kind==='mag')){
     const card=el('div','progressCard'),b=el('button','',`Study ${ST_SKILLS[id].name}`);b.disabled=d.hr||used>=3||d.gold<fee;
-    b.addEventListener('click',()=>{const n=d.lessons?.level===d.lv?d.lessons.count:0;if(n>=3||d.gold<fee||d.hr)return;d.gold-=fee;d.mastery=d.mastery||{};d.mastery[id]=(d.mastery[id]||0)+3;d.lessons={level:d.lv,count:n+1};stSave();sfx('levelup');stAnnounce('LESSON COMPLETE: '+ST_SKILLS[id].name,'#c1b2e8');stMagicLessons();});
+    b.addEventListener('click',()=>{const n=d.lessons?.level===d.lv?d.lessons.count:0;if(n>=3||d.gold<fee||d.hr)return;d.gold-=fee;d.mastery=d.mastery||{};d.mastery[id]=(d.mastery[id]||0)+3;d.lessons={level:d.lv,count:n+1};stSave();sfx('levelup');stLearnNotice(ST_SKILLS[id].name+': +3 mastery practice','#c1b2e8');stMagicLessons();});
     card.append(el('h4','',stSkName(id)),el('p','',stMasteryText(id)),b);m.appendChild(card);
   }
-  m.append(el('h3','','The Dawn & Dusk Grimoire'),el('p','','Learn both Dawn Arc and Dusk Thread at level 25 to awaken Concord Burst. Original light-and-shadow spellcraft, earned through study.'));
+  m.append(el('h3','','The Dawn & Dusk Grimoire'),el('p','','Mage-only spellcraft. Learn both Dawn Arc and Dusk Thread at level 25 to awaken Concord Burst. Other classes keep their exclusive class paths and milestones.'));
   for(const[id,S]of Object.entries(ST_ARCANE_SPELLS)){
     const card=el('div','progressCard'),cost=100+S.lv*12,known=d.skills.includes(id),b=el('button','',known?'Learned':`Learn ${S.name} (${cost} gold)`);
-    b.disabled=known||d.hr||d.lv<S.lv||d.gold<cost;b.addEventListener('click',()=>{if(d.hr||d.lv<S.lv||d.gold<cost||d.skills.includes(id))return;d.gold-=cost;d.skills.push(id);stSyncProgress();stSave();stMagicLessons();});
+    b.disabled=known||d.cls!=='mage'||d.hr||d.lv<S.lv||d.gold<cost;b.addEventListener('click',()=>{if(d.cls!=='mage'||d.hr||d.lv<S.lv||d.gold<cost||d.skills.includes(id))return;d.gold-=cost;d.skills.push(id);stSyncProgress();stLearnNotice('Learned '+S.name);stSave();stMagicLessons();});
     card.append(el('h4','',S.name+' · Level '+S.lv),el('p','',S.desc+` (${S.mp} base MP)`),b);m.appendChild(card);
   }
   const close=el('button','','Return to the Vale');close.addEventListener('click',stCloseMenu);m.appendChild(close);
@@ -6644,7 +6723,8 @@ function stArmorMenu(){
 function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
-  const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
+  const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
+  if(c.growth)for(const [k,old]of Object.entries({hp:14,mp:6,atk:2,mag:2,def:1.2,spd:.4}))st[k]+=(c.growth[k]-old)*L;
   if (d.guild && stEdict() === 'wall') st.def *= 1.1;
   {const A=ST_ARMOR[d.armor];if(A){st.def+=A.def;st.hp+=A.hp;st.mp+=A.mp||0;st.mag+=A.mag||0;}}
   for (const [k, , stat, per] of ST_ATTRS) { const v = (d.attr && d.attr[k]) || 0; if (v) st[stat] += v * per; } // stat points
@@ -6734,7 +6814,7 @@ function stJail() { stRep('thornwake', -5);
   stEnterMap('jail', 1, 2);
   stSay([['', 'Iron. Straw. The smell of everyone who sat here before you.'], ['', `Three days pass in the Thornwake cells. Your skills dull from disuse (you lose ${lostXp} XP). Then the bars swing open.`], ['Warden Holt', 'Your debt to Thornwake is paid. Walk out the door, and don\'t make me see you again.']]);
 }
-function stSail(key, tx, ty, opt = {}) { const d = stData(), dest = key === 'world' ? 'Saltmere' : ST_DUNGEONS[key].name; d.riding = false; ST.mode = 'sail'; ST.sail = {t: 0, dur: opt.land ? 3.4 : 4.5, to: [key, tx, ty], home: key === 'world', land: opt.land, dark: key === 'rouge', label: opt.label || `Sailing to ${dest}`, arrive: opt.arrive || (key === 'world' ? 'Saltmere, the Drowned Harbor' : dest)}; $('stPrompt').hidden = true; sfx('blink'); }
+function stSail(key, tx, ty, opt = {}) { const d = stData(), dest = key === 'world' ? 'Saltmere' : ST_DUNGEONS[key].name; d.riding = false; ST.mode = 'sail'; ST.sail = {t: 0, dur: opt.land ? 3.4 : 4.5, to: [key, tx, ty], home: key === 'world', land: opt.land, dark: key === 'rouge', label: opt.label || `Sailing to ${dest}`, arrive: opt.arrive || (key === 'world' ? 'Saltmere, the Drowned Harbor' : dest)};musicForce(opt.land?SONG_WAYFARER:key==='rouge'?SONG_BAYOU:SONG_HORIZON); $('stPrompt').hidden = true; sfx('blink'); }
 function stDrawRoad(now, dt) { // the coach ride: hills scroll past, the horse gallops, wheels spin
   const S = ST.sail; S.t += dt; const k = Math.min(1, S.t / S.dur), C = stClock();
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -6779,18 +6859,21 @@ function stDrawSail(now, dt) { // the voyage: waves, a ship crossing the screen,
   ctx.font = '600 18px "Barlow Semi Condensed", sans-serif'; ctx.fillText(`Day ${Math.min(3, 1 + Math.floor(k * 3))} of 3`, cw / 2, ch * .1 + 48); ctx.shadowBlur = 0; ctx.textAlign = 'left';
   if (S.t >= S.dur) { ST.mode = 'walk'; ST.sail = null; stEnterMap(...S.to); musicForce(stMapSong()); stCallout(S.arrive, '#ffe9a8'); }
 }
-// Weather drifts between clear skies, rain, storms, fog and wind. Rain falls as snow on the peaks and sand in the dunes.
+// Fair weather is the norm; showers, storms and fog remain brief changes of atmosphere.
+const stWeatherKind=r=>r<.82?'clear':r<.90?'rain':r<.94?'storm':r<.97?'fog':'wind';
+const stSkyHour=phase=>{const p=((Number.isFinite(phase)?phase:.27)%1+1)%1;return p<.8?6+p/.8*12:(18+(p-.8)/.2*12)%24;};
 function stWeatherTick(dt) {
-  const W = ST.wx || (ST.wx = {kind: 'clear', t: 0, next: 70, k: 0, flash: 0, wind: .3, p: []});
+  const d=stData();if(d){if(!Number.isFinite(d.skyPhase))d.skyPhase=.27;if(ST.mode!=='menu'&&ST.mode!=='talk')d.skyPhase=(d.skyPhase+Math.max(0,Math.min(.25,dt))/1800)%1;}
+  const W = ST.wx || (ST.wx = {kind: 'clear', t: 0, next: 150, k: 0, flash: 0, wind: .3, p: []});
   W.t += dt;
-  if (W.t > W.next) { W.t = 0; W.next = rand(50, 110); const r = Math.random(); W.kind = r < .55 ? 'clear' : r < .72 ? 'rain' : r < .82 ? 'storm' : r < .92 ? 'fog' : 'wind'; }
+  if (W.t > W.next) { W.t = 0;W.kind=stWeatherKind(Math.random());W.next=W.kind==='clear'?rand(95,180):rand(45,75); }
   W.k += ((W.kind === 'clear' ? 0 : 1) - W.k) * Math.min(1, dt * .35);
   W.wind = .3 + (W.kind === 'storm' || W.kind === 'wind' ? 1.3 : W.kind === 'rain' ? .5 : 0) * W.k;
   if (W.kind === 'storm' && W.k > .6 && Math.random() < dt * .08) { W.flash = 1; W.bolt = Math.random() * cw; setTimeout(() => sfx('boom'), rand(250, 1400)); }
   W.flash = Math.max(0, W.flash - dt * 2.5);
 }
-// Day and night follow the real clock on your device.
-function stClock() { const n = new Date(), h = ST.clockOverride != null ? ST.clockOverride : n.getHours() + n.getMinutes() / 60; const sun = Math.sin((h - 6) / 12 * Math.PI), m = stData() && stData().map, night = m === 'rouge' || m === 'vcrypt'; return {h, sun, dark: Math.max(night ? .5 : 0, clamp(.12 - sun, 0, .72)), warm: night ? .1 : Math.max(0, .4 - Math.abs(sun)) * (h < 12 ? .8 : 1)}; } // Rougemarais never sees full day
+// A saved 30-minute adventure cycle gives daylight 24 minutes and night six, independent of device time.
+function stClock() { const d=stData(),h=ST.clockOverride!=null?ST.clockOverride:stSkyHour(d&&d.skyPhase); const sun = Math.sin((h - 6) / 12 * Math.PI), m = d&&d.map, night = m === 'rouge' || m === 'vcrypt'; return {h, sun, dark: Math.max(night ? .5 : 0, clamp(.12 - sun, 0, .72)), warm: night ? .1 : Math.max(0, .4 - Math.abs(sun)) * (h < 12 ? .8 : 1)}; } // Rougemarais never sees full day
 const stTimeName = h => h < 5 ? 'Night' : h < 7 ? 'Dawn' : h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 19.5 ? 'Dusk' : h < 21 ? 'Evening' : 'Night';
 const stTimeText = h => { const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 60); return `${(hh % 12) || 12}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'}`; };
 function stNightDraw(Zs, d, dun, isles) { // darkness with holes burned out by every light nearby
@@ -7488,9 +7571,11 @@ const ST_LORE = [
   ['Aetherfall', d => d.lv >= 35 || stRankAtLeast('A'), 'The Shattered Heavens: floating isles over a starry void, where the Unmaker waits at the Abyssal Rift.'],
 ];
 const ST_GUIDE = [
+  ['Sunshine, time and music','The Vale starts in a sunny morning. Clear weather is more common and lasts longer. The saved adventure clock runs independently of your device: a 30-minute cycle has 24 minutes of daylight and six of night. Ashen Shrines let you rest until morning or wait for night fishing and moonstone. Outdoor exploration and voyages have new original adventure themes; dungeons, battles and bosses keep their darker music. Music volume is in Settings.'],
+  ['A quieter screen','Use the minus buttons to minimize stats, objective, minimap, chat or learning notices. Plus restores a panel. Hide HUD clears the side panels together; Show HUD brings them back. The pause menu has the same control. Chat starts minimized, and learning notices show at most two cards. Layout preferences save on normal hosting; the Computer preview keeps them for this session only.'],
   ['Controls', 'Move with WASD, the arrows, the left stick or the on-screen pad. E or A interacts. M opens the menu, J this journal, R rides your mount. In battle, pick an action with the buttons.'],
   ['Combat', 'Attack hits one enemy. Skills are stronger and cost MP; they grow stronger and evolve the more you use them. Items heal. Defend halves the damage you take. The faster fighter dodges more. Fill the Rage meter and press RAGE! for a burst of power.'],
-  ['Wounds and death', 'Hard hits can make you bleed or sever a limb. Potions stop bleeding; shrines and inns heal everything. Die, and you drop your gold where you fell: walk back to pick it up.'],
+  ['Wounds and death', 'Hard hits can make you bleed, but limb loss is disabled. Defeat drops only 10% of gold, rounded down, as recoverable Lost Embers. You keep the other 90% and all equipment. Potions stop bleeding; shrines, inns and infirmaries heal wounds.'],
   ['Levels and danger', 'Every region shows its level. Dungeons and bosses will not let you in below their level. The Ashen Vale runs from level 1 to 25, Valdris 26 to 40, and Aetherfall 41 to 55.'],
   ['The Guild', 'Membership is optional. Join for political standing and rank exams, or use Free paths & rogue guilds in the menu for the same contracts. Independent travel clearance follows your level.'],
   ['Travel', 'Coaches run between towns. Ships sail from Saltmere to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Garth sells mounts, and breeds them in pairs.'],
@@ -7499,7 +7584,32 @@ const ST_GUIDE = [
   ['Bonds and family', 'Press ♥ while talking to someone. Talk daily, give gifts and spend time to grow close. Flirt with any adult. Court, marry with a Moonsilver Ring, and raise children at your homestead.'],
   ['Reputation and status', 'Towns remember what you do: good deeds lower prices, crimes close shops and turn the guards. Herald Aldous raises you from Commoner to Duke as you earn it.'],
   ['Alignment', 'Your choices tip you toward Light or Ash. Light makes shops cheaper and toughens you; Ash makes you hit harder. Your spouse sees what you become.'],
+  ['Armor and outfits', 'Open Armory for free Wayfarer Padding and five stronger sets. Only one set adds defense and health. Hide its appearance without losing stats. Wardrobe offers hair, faceless expressions, accessories, shirts, pants, suits and six outfit presets.'],
+  ['Infirmaries', 'Thornwake, Ravenhollow and Saltmere offer free health, mana and wound treatment. Healing sets your recovery shrine. New stories begin outside Thornwake Infirmary.'],
+  ['Difficulty rewards', 'Change difficulty at an Ashen Shrine. Story/Easy and Adventurer/Normal pay standard rewards. Veteran gives 35% more combat/contract XP and gold; Soulslike gives 75% more. Boss gold bounties scale, Crowns do not. Contracts remember difficulty when accepted.'],
+  ['Independent progression', 'Free paths & rogue guilds offers contracts without joining fees, quest levies or abandonment penalties. Nightveil Compact and Blackbriar Company are optional fellowships. C/B/A/S travel clearance unlocks at levels 26/32/41/55.'],
+  ['Map and enemy boundaries', 'Click or keyboard-activate the minimap for a resizable atlas. Zoom and scroll to pan, or toggle region and enemy-home boundaries. Hunters need clear sight, detect within 144 pixels, and return home beyond a 192-pixel leash. World-tile random encounters are separate.'],
+  ['Class paths and spellcraft', 'Each class has exclusive starter moves, training and milestones. Mages can study nine dawn/dusk spells; learning Dawn Arc and Dusk Thread at level 25 unlocks Concord Burst. Magical mastery never bypasses level requirements.'],
+  ['Racial evolution and world bosses', 'Every race can awaken at levels 15, 35 and 60, in order, at an Ashen Shrine or the Ashen Sanctum. Track world bosses from their board. Their callouts, recommended levels and unique trophies help you prepare.'],
+  ['Housing and saving', 'Housing & estates sells homes for earned gold, with beds, storage and furnishings. Browser saves are device-specific on normal hosting. The Computer preview loses progress on refresh; cloud accounts require a configured backend.'],
+  ['Game updates', 'Connected clients check for a new build every 15 seconds. Play pauses, a local save is attempted, and reload follows only if storage succeeds. If storage is blocked, automatic reload stays disabled.'],
 ];
+function stQuickHint(){
+  const d=stData(),s=stStats(),hints=[];
+  if(d.hp<s.hp*.4)hints.push('You are badly hurt. Use a potion, or seek free treatment at an infirmary before another fight.');
+  if(stAttrFree()>0)hints.push(`You have ${stAttrFree()} unspent stat points. Open Stats from the menu to improve your build.`);
+  if(!d.armor)hints.push('Claim free Wayfarer Padding in Armory. It adds defense and maximum health without a guild requirement.');
+  if(!d.guild)hints.push('You do not need the Adventurers’ Guild. Open Free paths & rogue guilds for independent contracts.');
+  if(d.map!=='world')hints.push('Click the minimap to inspect this area. Walls block enemy sight and red home rings show how far hunters pursue.');
+  hints.push(...LOAD_TIPS);ST.hintIndex=ST.hintIndex==null?0:(ST.hintIndex+1)%hints.length;
+  const m=stSystemPanel('Field hint');m.append(el('p','',hints[ST.hintIndex]));
+  for(const[name,fn]of[['Another hint',stQuickHint],['Open game guide',stGuideMenu],['Return to the Vale',stCloseMenu]]){const b=el('button','',name);b.addEventListener('click',fn);m.appendChild(b);}
+}
+function stGuideMenu(){
+  const m=stSystemPanel('Game guide & tips'),search=document.createElement('input'),list=el('div','');search.type='search';search.placeholder='Search armor, spells, travel, saving…';search.setAttribute('aria-label','Search game guide');search.style='width:100%;box-sizing:border-box;padding:10px;margin:8px 0;color:inherit;background:#17231f;border:1px solid #58695d;border-radius:6px';
+  const draw=()=>{list.innerHTML='';const q=search.value.trim().toLowerCase(),rows=ST_GUIDE.filter(r=>r.join(' ').toLowerCase().includes(q));for(const[name,text]of rows){const card=el('div','progressCard');card.append(el('h4','',name),el('p','',text));list.appendChild(card);}if(!rows.length)list.appendChild(el('p','','No matching guide entries. Try armor, spells, map or travel.'));};
+  const hint=el('button','','Show a quick hint'),back=el('button','','Return to the Vale');hint.addEventListener('click',stQuickHint);back.addEventListener('click',stCloseMenu);search.addEventListener('input',draw);m.append(el('p','','Search the field guide for practical game information, or ask for a contextual hint.'),search,list,hint,back);draw();
+}
 function stJournal(tab) {
   const d = stData(), m = $('stMenu'); if (ST.mode !== 'walk' && ST.mode !== 'menu') return;
   ST.mode = 'menu'; ST.journal = true; m.hidden = false; m.innerHTML = ''; tab = tab || ST.jTab || 'Story'; ST.jTab = tab;
@@ -7686,7 +7796,7 @@ function stChatSend(raw) {
   const msg = {i: Math.random().toString(36).slice(2, 8), t}; if (party) { if (!SW.party) return stChatSys('You are not in a party.'); msg.p = SW.party; }
   SW.myChat.push(msg); if (SW.myChat.length > 6) SW.myChat.shift(); stChatAdd(stTitledName(), t, null, party); SW.room.presence({ch: SW.myChat}).catch(() => {});
 }
-function stChatOpen() { if (PROF.chatOff) return stCallout('Chat is off. Turn it on in the menu.', '#c8b89a'); const i = $('stChatIn'); i.hidden = false; $('stChat').classList.add('open'); stChatRender(); setTimeout(() => i.focus(), 0); }
+function stChatOpen() { if (PROF.chatOff) return stCallout('Chat is off. Turn it on in the menu.', '#c8b89a');stHudLayout().chat=false;stHudLayout().quiet=false;stApplyHudLayout(); const i = $('stChatIn'); i.hidden = false; $('stChat').classList.add('open'); stChatRender(); setTimeout(() => i.focus(), 0); }
 function stChatClose() { const i = $('stChatIn'); i.value = ''; i.hidden = true; $('stChat').classList.remove('open'); i.blur(); stChatRender(); }
 const ST_COMP_LV = 45;
 const ST_COMPANIONS = { // role decides what they do on their turn; hp and atk scale from your own stats
@@ -7872,12 +7982,12 @@ function renderCreator() {
   stAttrUI($('crAttrs'), crSel.attr, () => Math.max(0, ST_ATTR_START - stAttrSpent(crSel.attr)), 1, renderCreator); // more come with every level
   const rec = ST_CLASSES[crSel.cls].skills;
   for (const id in ST_SKILLS) {
-    const S = ST_SKILLS[id], on = crSel.skills.includes(id); if (S.gift) continue;
+    const S = ST_SKILLS[id], on = crSel.skills.includes(id); if (S.gift || S.owner !== crSel.cls || S.level > 1) continue;
     const b = el('button', 'chip' + (on ? ' sel' : ''), S.name + (rec.includes(id) ? ' ★' : '')); b.title = `${S.desc} Costs ${S.mp} MP.`;
     b.addEventListener('click', () => { if (on) crSel.skills = crSel.skills.filter(x => x !== id); else if (crSel.skills.length < 3) crSel.skills.push(id); renderCreator(); });
     sk.appendChild(b);
   }
-  $('crSkillNote').textContent = `Pick 3 abilities (${crSel.skills.length}/3). ★ suits your class. Your tier also grants Ember Spark. More tier spells unlock at levels 10, 25, 45 and 60.`;
+  $('crSkillNote').textContent = `Pick 3 ${ST_CLASSES[crSel.cls].name} abilities (${crSel.skills.length}/3). No cross-class skills. Class milestone techniques unlock at levels 1, 10, 25, 45 and 60.`;
   $('crStart').disabled = crSel.skills.length !== 3;
   const c = $('crCv'), g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
   g.fillStyle = '#182528'; g.fillRect(0, 0, c.width, c.height);
@@ -8125,7 +8235,7 @@ function startStory(fresh) {
   hideMenus(); reset(0); G.started = false;
   ST.on = true; ST.mode = 'walk'; ST.keys = {}; ST.safe = 4; ST.walkDist = 0;
   document.body.classList.add('story'); $('story').hidden = false; $('stBattle').hidden = true; $('stMenu').hidden = true;
-  const d = stData(); d.map = d.map || 'world';ST.noticeRegion=null;ST.announcements=[];stSyncProgress();if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
+  const d = stData(); d.map = d.map || 'world';if(fresh){ST.wx=null;d.skyPhase=.27;}ST.noticeRegion=null;ST.announcements=[];stSyncProgress();if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
   if (d.map !== 'world') { const px = d.x, py = d.y; stEnterMap(d.map, 2, 2); d.x = px; d.y = py; }
   ST.cam.x = d.x; ST.cam.y = d.y; musicStart(); musicForce(stMapSong());
   if (d.wounds && d.wounds.hole) delete d.wounds.hole; // stab holes were removed from the game
@@ -8137,12 +8247,13 @@ function startStory(fresh) {
     ['', 'Rest at Ashen Shrines or infirmaries to heal. Defeat drops only 10% of your gold as recoverable Lost Embers. You keep the other 90% and all equipment.'],
     ['', 'Move with the arrow keys, WASD, the left stick or the on-screen pad. Interact with E, A or the A button.'],
   ], () => stTutStart());
-  stHud(); stNetJoin(); stChatRender();
+  stApplyHudLayout();stHud(); stNetJoin(); stChatRender();if(fresh)stLoadScreen(d.map,true);
 }
 function stLeave(showMenu = true) {
   stNetLeave(); stSave(); ST.on = false; document.body.classList.remove('story'); $('story').hidden = true; musicForce(null); try { speechSynthesis.cancel(); } catch (e) { /* no speech */ }
   ST.keys = {}; ST.touchMove = null; ST.padMove = null; ST.mode = 'walk'; ST.journal = false; ST.dlg = null;ST.announcements=[];STFX.callout=null;
   for (const id of ['stMenu', 'stDialog', 'stBattle', 'stLoad']) $(id).hidden = true;
+  clearTimeout(ST.loadT);clearTimeout(ST.loadT2);clearInterval(ST.loadTipTimer);document.querySelectorAll('#stLearnNotices .learnNotice').forEach(e=>e.remove());
   $('stMenu').classList.remove('journal', 'rewards'); $('stJoyBase').classList.remove('on');
   reset(0); G.started = false; if (showMenu) show('scr-main');
 }
@@ -8150,7 +8261,7 @@ function stLeave(showMenu = true) {
 // ---- tutorial: Warden Edda walks ahead through Thornwake and stops to explain each place. Paths are tile coordinates.
 const ST_TUT = [
   {path: [[12.8, 11.6]], lines: [['Warden Edda', 'Easy. Medra says you are fit to walk, not fit to fight a kingdom. The infirmary is behind you if the road leaves its mark.'], ['Warden Edda', 'I am Edda, warden of Thornwake. Walk with me and I will show you how to stay alive. Follow the gold arrow, or just follow me.']]},
-  {path: [[12.6, 12.2]], lines: [['Warden Edda', 'An Ashen Shrine. Kneel at one (press E) to heal and to set where you wake if you die.'], ['Warden Edda', 'Die, and you drop your gold where you fell. Walk back and pick it up. Die again first, and it is gone.']]},
+  {path: [[12.6, 12.2]], lines: [['Warden Edda', 'An Ashen Shrine. Kneel at one (press E) to heal and to set where you wake if you die.'], ['Warden Edda', 'Defeat drops only ten percent of your gold. Keep the rest and all your armor, then return for the dropped pouch if you want it back.']]},
   {path: [[14.6, 12.2], [14.6, 12.9]], lines: [['Warden Edda', 'Pell the merchant. Potions, ethers, and trade goods. Every town buys and sells at its own prices. Buy cheap where goods are made, sell where they are wanted.']]},
   {path: [[14, 12.9], [14, 14.6]], lines: [['Warden Edda', 'Bree\'s inn. Pay to rest and heal fully, and cook meals from the fish you catch. Meals heal far more than potions in a fight.']]},
   {path: [[14, 15.5], [16.9, 15.5]], lines: [['Warden Edda', 'The Adventurers\' Guild. Join for ranks and political standing, if that suits you.'], ['Warden Edda', 'You can also stay independent or join a rogue fellowship. Free paths in your menu offers the same paid contracts. Travel clearance follows your level; nobody makes you sign the Compact to finish your story.']]},
@@ -8327,17 +8438,24 @@ function stShowLine() {
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
 const stRockAt = (x, y) => ST_ROCKS.find(r => r.x === Math.floor(x / ST_TILE) && r.y === Math.floor(y / ST_TILE));
 const stBlocked = (x, y) => { const grid=stGrid();if(!Number.isFinite(x)||!Number.isFinite(y)||x<12||y<12||x>grid[0].length*ST_TILE-12||y>grid.length*ST_TILE-12)return true;const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && stM(d.mount) && stM(d.mount).fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && stM(d.mount) && stM(d.mount).fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
-function stLoadScreen(key) { // a short title card while you step into a new place
+function stLoadScreen(key,creation=false) { // a welcome card after creation, or short travel title card
   const D = ST_DUNGEONS[key], box = $('stLoad'); if (!box || !ST.on) return;
   const kind = key === 'world' ? 'The open road' : D.home ? 'Home' : key === 'guildhall' ? 'Guild hall' : D.land ? 'New land' : D.city ? 'City' : D.outdoor ? 'Islands' : 'Dungeon';
   const need = ST_MAP_LV[key] || (ST_PORTS[key] && ST_PORTS[key].lv) || 0, lvTxt = need ? `Recommended level ${need}+` : '';
   $('stLoadKind').textContent = kind; $('stLoadName').textContent = key === 'world' ? 'The Ashen Vale' : D.name;
   $('stLoadSub').textContent = [lvTxt, D && D.boss && !stData().flags[D.boss] && ST_FOES[D.boss] ? `Somewhere inside: ${ST_FOES[D.boss].name.split(',')[0]}` : ''].filter(Boolean).join(' · ');
-  $('stLoadTip').textContent = 'Tip: ' + LOAD_TIPS[Math.floor(Math.random() * LOAD_TIPS.length)];
-  const big = key === 'world' || (D && (D.land || D.city || D.outdoor)), hold = big ? 900 : 600; box.style.setProperty('--ld', hold / 1000 + 's');
+  ST.loadTipIndex=Math.floor(Math.random()*LOAD_TIPS.length);$('stLoadTip').textContent='Tip: '+LOAD_TIPS[ST.loadTipIndex];
+  $('stLoadActions').hidden=!creation;
+  if(creation){$('stLoadKind').textContent='Your story begins';$('stLoadName').textContent='Welcome to Thornwake';$('stLoadSub').textContent=`${stData().name} · ${ST_CLASSES[stData().cls].name} · Start outside Thornwake Infirmary. Open Game guide & tips whenever you need help.`;}
+  const big = key === 'world' || (D && (D.land || D.city || D.outdoor)), hold = creation?4200:big ? 900 : 600; box.style.setProperty('--ld', hold / 1000 + 's');
   clearTimeout(ST.loadT); clearTimeout(ST.loadT2); box.hidden = false; box.classList.remove('on'); void box.offsetWidth; box.classList.add('on');
   ST.loadUntil = performance.now() + hold + 120; ST.touchMove = null; for (const k in (ST.keys || {})) ST.keys[k] = false;
-  ST.loadT = setTimeout(() => { box.classList.remove('on'); ST.loadT2 = setTimeout(() => { box.hidden = true; }, 240); }, hold);
+  clearInterval(ST.loadTipTimer);
+  const nextTip=()=>{ST.loadTipIndex=(ST.loadTipIndex+1)%LOAD_TIPS.length;$('stLoadTip').textContent='Tip: '+LOAD_TIPS[ST.loadTipIndex];};
+  const finish=()=>{clearTimeout(ST.loadT);clearInterval(ST.loadTipTimer);ST.loadUntil=performance.now()+240;box.classList.remove('on');ST.loadT2=setTimeout(()=>{box.hidden=true;},240);};
+  $('stLoadNext').onclick=nextTip;$('stLoadContinue').onclick=finish;
+  if(creation)ST.loadTipTimer=setInterval(nextTip,2100);
+  ST.loadT = setTimeout(finish,hold);
 }
 function stFindOpen(d) { // never arrive inside a wall, on furniture or out at sea: step to the nearest open ground
   const ok = (x, y) => !stBlocked(x, y) && [[0, 24], [24, 0], [-24, 0], [0, -24]].some(([ox, oy]) => !stBlocked(x + ox, y + oy));
@@ -8358,13 +8476,15 @@ function stEnterMap(key, tx, ty) { // move between the world and a dungeon
     D.rows.forEach((row, y) => [...row].forEach((t, x) => { if (t !== 'X') return; const z = D.zones && D.zones.find(z => x >= z.r[0] && x <= z.r[2] && y >= z.r[1] && y <= z.r[3]), pool = z ? ST_LAND_POOLS(z.lv) : D.pool; ST.foes.push({x: x * ST_TILE + 32, y: y * ST_TILE + 32, group: pool[(x * 7 + y) % pool.length], alive: true, home: [x * ST_TILE + 32, y * ST_TILE + 32]}); }));
     if (D.land) for (const k in ST.dunC) if (k !== key && ST_DUNGEONS[k] && ST_DUNGEONS[k].land) delete ST.dunC[k]; // keep only one big land in memory
   }
-  stHud(); stSave();
+  musicForce(stMapSong());stHud(); stSave();
 }
+function stRestTime(night=false){const d=stData();d.skyPhase=night?.86:.27;if(!night)ST.wx={kind:'clear',t:0,next:150,k:0,flash:0,wind:.3,p:[]};stSave();stHud();}
 function stRest() { // an Ashen Shrine: heal fully, set your return point, and the dead in the dungeons rise again
   const d = stData(), hurt = !!d.wounds; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; d.shrine = {map: d.map, x: d.x, y: d.y + 40}; sfx('respawn');
   const opts = stAttrSpent(d.attr) ? [['Rise', null], ['Reset my stat points', () => setTimeout(stRespec, 0)]] : [['Rise', null]];
   opts.splice(1, 0, ['Bloodlines & spellcraft',()=>setTimeout(stProgressMenu,0)],[`Change difficulty (${stDiff().name})`, () => setTimeout(stDiffChange, 0)]);
-  stSay([['', (hurt ? 'The ash fills your wounds and knits them closed. Even the lost arm grows back, grey and new. ' : '') + 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']], null, opts);
+  opts.push(['Rest until morning',()=>stRestTime(false)],['Wait until nightfall',()=>stRestTime(true)]);
+  stSay([['', (hurt ? 'The ash fills your wounds and knits them closed. ' : '') + 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']], null, opts);
 }
 function stDiffChange() { // ask the shrine how hard the Vale should be
   const d = stData();
@@ -8756,7 +8876,7 @@ function stStartBattle(foes, bossId, tile) {
     coop: stPartyMembers().filter(p => p.presence.sw.m === d.map && SW.vis[p.peer] && Math.hypot(SW.vis[p.peer].x - d.x, SW.vis[p.peer].y - d.y) < 14 * ST_TILE).slice(0, 3).map((p, i) => { const sw = p.presence.sw; return {id: 'c' + i, peer: p.peer, name: sw.n, look: sw.k, color: sw.c, lv: sw.lv, atk: sw.at || 20, hp: sw.hp || 200, maxHp: sw.hp || 200}; }),
     ally: CMP ? {key: CMP.key, name: CMP.name, role: CMP.role, look: CMP.look, color: CMP.color, beast: CMP.beast, male: CMP.male, hp: Math.round(s.hp * CMP.hp), maxHp: Math.round(s.hp * CMP.hp), atk: Math.max(s.atk, s.mag * .9) * CMP.atk * (CMP.key === 'liora' && d.flags.lioraOath ? 1.1 : 1)} : null};
   ST.mode = 'battle'; $('stBattle').hidden = false; $('stPrompt').hidden = true; $('stRide').hidden = true;
-  STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.limbs = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
+  STFX.anims = []; STFX.shots = []; STFX.nums = []; STFX.parts = []; STFX.effects = []; STFX.pools = []; STFX.beams = []; STFX.slow = 0; STFX.callout = null;
   sfx(bossId ? 'roar' : 'swing'); musicForce(bossId ? SONG_CROWN : SONG_STEEL);
   d.battles = (d.battles || 0) + 1;
   stLog(bossId ? `${ST_FOES[foes[0]].name} blocks your way!` : 'Enemies appear: ' + ST.battle.foes.map(f => f.name).join(', ') + '.');
@@ -8769,7 +8889,7 @@ function stStartBattle(foes, bossId, tile) {
   setTimeout(() => { if (ST.battle && ST.battle.turn === 'intro') { ST.battle.turn = 'player'; stRenderBattle(); } }, STFX.intro.dur * 1000);
 }
 // Battle animation: who is 'p' (you), 'a' (Liora) or a foe index. Positions are refreshed every frame.
-const STFX = {anims: [], shots: [], nums: [], parts: [], pos: {}, limbs: [], beams: [], slow: 0};
+const STFX = {anims: [], shots: [], nums: [], parts: [], pos: {}, beams: [], slow: 0};
 const stPos = who => STFX.pos[who] || [cw / 2, ch / 2];
 function stAnim(who, kind = 'lunge', dur = .32) {
   STFX.anims.push({who, kind, t: 0, dur});
@@ -8816,11 +8936,6 @@ function stFxDraw(dt) {
     if (k > .25 && !bm.hit) { bm.hit = true; ST.hurt = .3; if (bm.onHit) bm.onHit(); }
   }
   STFX.beams = STFX.beams.filter(bm => bm.t < bm.dur);
-  for (const L of STFX.limbs) { // severed limbs tumble and stay where they land
-    if (!L.down) { L.t = (L.t || 0) + dt; L.x += L.vx * dt; L.y += L.vy * dt; L.vy += 700 * dt; L.rot += L.vr * dt; if (L.y >= L.gy && L.vy > 0) { L.y = L.gy; L.down = true; STFX.pools.push({x: L.x, y: L.y + 4, r: 14, rot: 0}); } else if (Math.random() < .6) STFX.parts.push({x: L.x, y: L.y, vx: 0, vy: 0, t: 0, life: .5, color: '#a3121a', r: 2.5}); }
-    ctx.save(); ctx.translate(L.x, L.y); ctx.rotate(L.down ? 1.5 : L.rot); ctx.fillStyle = L.color; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-18, -5, 36, 10, 5) : ctx.rect(-18, -5, 36, 10); ctx.fill();
-    ctx.fillStyle = '#e0c8b0'; ctx.beginPath(); ctx.arc(-18, 0, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#7a0008'; ctx.beginPath(); ctx.arc(18, 0, 5.5, 0, 7); ctx.fill(); ctx.restore();
-  }
   for (const a of STFX.anims) a.t += dt; STFX.anims = STFX.anims.filter(a => a.t < a.dur);
   for (const sh of STFX.shots) {
     sh.t += dt; const k = Math.min(1, sh.t / sh.dur), [x0, y0] = stPos(sh.from), [x1, y1] = stPos(sh.to);
@@ -8960,15 +9075,10 @@ function stDodgeFx(who, name) {
   const [x, y] = stPos(who); for (let i = 0; i < 3; i++) STFX.parts.push({x: x + (who === 'p' || who === 'a' ? 1 : -1) * i * 14, y: y - 40, vx: 0, vy: 0, t: 0, life: .3, color: 'rgba(200,230,255,.5)', r: 14 - i * 3});
   stLog(`${name} dodges!`);
 }
-function stWound(who, u, kind, crit, rk, beam) { // u.w: {bleed, maim, hole}; the player's wounds live in the save
+function stWound(who, u, kind, crit, rk, beam) { // Bleeding is the only physical wound.
   const w = u.w || (u.w = {}), chance = beam ? .55 : kind === 'mag' ? (crit ? .3 : .05) : .14 + .1 * rk + (crit ? .4 : 0);
   if (Math.random() > chance) return;
-  const [x, y] = stPos(who), side = who === 'p' || who === 'a' ? 1 : -1;
-  if (!beam && crit && !w.maim && Math.random() < .5) {
-    w.maim = true; if (who !== 'p') u.atk *= .7;
-    STFX.limbs.push({x: x + side * 14, y: y - 55, vx: -side * rand(120, 220), vy: -rand(220, 320), rot: 0, vr: rand(-12, 12), gy: y + rand(6, 18), color: u.color || '#9a7a6a'});
-    stGore(who, 30, true); stNum(who, 'SEVERED', '#ff3a3a', true, 40); sfx('crack');
-  } else if (beam || crit) { w.bleed = 4; stGore(who, 14, true); stNum(who, 'DEEP WOUND', '#ff5a3a', true, 40); }
+  if (beam || crit) { w.bleed = 4; stGore(who, 14, true); stNum(who, 'DEEP WOUND', '#ff5a3a', true, 40); }
   else { w.bleed = 3; stNum(who, 'Bleeding', '#ff6a6a', false, 40); }
 }
 // Buffs and debuffs: what is on you or on a foe right now, with turns left
@@ -8988,7 +9098,6 @@ function stStatus(who) {
     if (b.buffs.rally) add('ATK ↑', b.buffs.rally, true, '#ff8a4a', 'War Cry: +50% attack');
     if (b.defending) add('Braced', 0, true, '#cfd8e0', 'Defending: half damage from the next hits');
     if (w.bleed) add('Bleed', w.bleed, false, '#ff4a4a', 'Losing health every turn. A potion stops it.');
-    if (w.maim) add('Severed', 0, false, '#c0392b', 'Arm severed: -20% attack until you rest');
   } else {
     const f = who, w = f.w || {};
     if (f.guard) add('Guard', f.guard, true, '#ffd75e', 'Takes half damage');
@@ -8997,7 +9106,6 @@ function stStatus(who) {
     if (f.poison) add('Poison', f.poison, false, '#9cff3a', 'Poisoned every turn');
     if (f.frozen) add('Frozen', f.frozen, false, '#9fe6ff', 'Loses its next turn');
     if (w.bleed) add('Bleed', w.bleed, false, '#ff4a4a', 'Bleeding every turn');
-    if (w.maim) add('Severed', 0, false, '#c0392b', '-30% attack');
   }
   return L;
 }
@@ -9015,13 +9123,8 @@ function stBadges(list, x, y, now) { // a row of small pills; buffs have a brigh
   });
   ctx.restore();
 }
-function stWoundDraw(w, x, y, sc, side, tall, now) { // a hole through the chest, a spurting stump, dripping blood
+function stWoundDraw(w, x, y, sc, side, tall, now) { // blood streaks and dripping blood
   if (!w) return; const ty = y - (tall ? 31 : 26) * sc;
-  if (w.maim) {
-    const sx = x + side * 13 * sc, sy = y - (tall ? 44 : 32) * sc;
-    ctx.fillStyle = '#5a0008'; ctx.beginPath(); ctx.arc(sx, sy, 6 * sc, 0, 7); ctx.fill(); ctx.fillStyle = '#d8c8b8'; ctx.beginPath(); ctx.arc(sx, sy, 2 * sc, 0, 7); ctx.fill();
-    if (Math.random() < .22) STFX.parts.push({x: sx, y: sy, vx: side * rand(30, 120), vy: -rand(30, 150), t: 0, life: rand(.4, .7), color: '#a3121a', r: rand(1.5, 3.5)});
-  }
   if (w.bleed) {
     ctx.fillStyle = 'rgba(140,8,14,.75)'; ctx.fillRect(x - 6 * sc, ty - 4 * sc, 3 * sc, 20 * sc); ctx.fillRect(x + 4 * sc, ty + 2 * sc, 2 * sc, 14 * sc);
     if (Math.random() < .18) STFX.parts.push({x: x + rand(-8, 8) * sc, y: ty + 10 * sc, vx: 0, vy: 20, t: 0, life: .6, color: '#8a0a10', r: 2});
@@ -9220,14 +9323,14 @@ function stPlayerHit(f, base, kind, extra, color) {
     const before = f.hp; ST.curSkill = null;
     if (!sure && Math.random() < stDodgeChance(f.spd, stStats().spd, (f.boss ? -.03 : 0) - (beam ? .04 : 0))) { stDodgeFx(f.id, f.name); ST.sub = null; setTimeout(stEndTurn, 300); return; }
     if (f.hp > 0 && ((SK && SK.twice) || (sk === 'attack' && stData().hr && Math.random() < .3))) setTimeout(() => { // a second blow: Flash Step, or the Restricted body moving faster than sight
-      if (f.hp <= 0) return; const dm2 = Math.min(f.hp, stDmg(base * .7, f.def)); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
+      if (f.hp <= 0) return; const hit2=stDmg(base*.7,kind==='mag'?f.def*.5:f.def),dm2=Math.min(f.hp,f.guard?Math.round(hit2/2):hit2); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
     }, 140);
     const dealt = Math.min(total, Math.max(0, before)); f.hp -= total; if (f.hp < 0) f.hp = 0; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact'); ST.battle.pounce = false;
     if (stHasTrait('emberheart') && f.hp > 0 && Math.random() < .25) { f.burn = Math.max(f.burn || 0, 3); stNum(f.id, 'burning', '#ff9a4a'); } // the ember spirit keeps you warm
     if (stData().race === 'ashkin' && f.hp > 0 && Math.random() < .15) { f.burn = 2; stNum(f.id, 'Burning', '#ff9a4a'); } // ash-elf blood smoulders
     const fxPow = 1 + rk * .3; stEffect(SK_FX[sk] || (crit ? 'heavyslash' : 'slash'), f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'), fxPow); if (crit) STFX.slow = Math.max(STFX.slow || 0, .12); // a hit-stop on criticals
     stRageAdd(6);
-    if (ST.battle.buffs.vamp) { const dd = stData(), heal = Math.round(total * .25); dd.hp = Math.min(stStats().hp, dd.hp + heal); stNum('p', '+' + heal, '#ff6a8a'); } // vampire form drinks from every wound
+    if (ST.battle.buffs.vamp) { const dd = stData(), heal = Math.round(dealt * .25); dd.hp = Math.min(stStats().hp, dd.hp + heal); stNum('p', '+' + heal, '#ff6a8a'); } // vampire form drinks from every wound
     if (f.boss && !f.enraged && f.hp > 0 && f.hp < f.maxHp * .3) { f.enraged = true; f.atk *= 1.3; setTimeout(() => { stTransformFx(f.id, '#ff2a2a', `${f.name.split(',')[0]} is ENRAGED!`); stGrunt(ST_FOE_SEX[f.key] || 'boss', true, 'enr'); }, 300); } // bosses near death fly into a fury
     const oblit = beam && f.hp <= 0 && (total >= before + f.maxHp * .25 || total >= f.maxHp * .55);
     const lethal = !oblit && f.hp <= 0 && (crit || total >= before + f.maxHp * .3);
@@ -9235,12 +9338,12 @@ function stPlayerHit(f, base, kind, extra, color) {
     else {
       if (kind !== 'mag' || sk === 'drain') stGore(f.id, crit ? 22 : 12, f.hp <= 0 ? true : undefined);
       if (f.hp <= 0) stGore(f.id, 30, true);
-      if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; if (!f.w.maim) stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
+      if (lethal) { stCallout('LETHAL BLOW', '#ff2a2a'); stGore(f.id, 50, true); STFX.slow = .6; ST.hurt = .5; f.w = f.w || {}; stWound(f.id, Object.assign(f, {}), 'phys', true, 3, false); }
       else if (f.hp > 0) { if (ST.battle.buffs.wolf && kind === 'phys') { f.w = f.w || {}; f.w.bleed = 3; } stWound(f.id, f, kind, crit, rk, beam); }
     }
     stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? dealt + '!' : dealt, crit ? '#ffd75e' : '#ffffff', crit);
     if (crit) ST.hurt = .2;
-    if (extra) extra(f, total);
+    if (extra) extra(f, dealt);
     stLog(`${f.name} takes ${dealt} damage.` + (crit ? ' Critical hit!' : '') + (oblit ? ` ${f.name} is obliterated!` : lethal ? ` A lethal blow! ${f.name} is cut down!` : f.hp <= 0 ? ` ${f.name} is defeated!` : ''));
     ST.sub = null; setTimeout(stEndTurn, 250);
   };
@@ -9250,11 +9353,14 @@ function stPlayerHit(f, base, kind, extra, color) {
   else { stAnim('p', 'lunge', .32); setTimeout(land, 160); }
 }
 function stUseSkill(id) {
+  if(!ST.battle||ST.battle.turn!=='player')return;
+  if(!stOwnsSkill(stData(),id)||!stData().skills.includes(id))return;
   const S = ST_SKILLS[id], d = stData(), s = stStats(), b = ST.battle;
   if (d.mp < stSkCost(S)) return; const COST = stSkCost(S);
   const rkC = stRank(id), CPOW = 1 + rkC * .3; if (S.kind === 'mag' || S.kind === 'heal' || S.kind === 'buff') stEffect('runes', 'p', SK_COLOR[id] || (S.kind === 'heal' ? '#9fffb8' : '#ffd75e'), CPOW); // a rune circle as you begin the spell
   const nm = stSkName(id); stCallout(`${d.name}: "${nm}!"`, SK_COLOR[id] || '#ffe9a8');
-  const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag * (b.buffs.vamp ? 1.5 : 1) : s.atk * stAtkMul(b)) * (S.mult || 1) * (S.kind === 'heal' || S.all ? 1 + .2 * stRank(id) : 1);
+  const power = stAbilityPower(S,s,b,rkC);
+  if(S.kind==='heal'||S.kind==='buff'){b.turn='anim';stRenderBattle();}
   if (S.kind === 'heal' || S.kind === 'buff' || S.all) stMaster(id);
   if (S.kind === 'heal') {
     d.mp -= COST; const h = Math.round(power + 10); d.hp = Math.min(s.hp, d.hp + h); if (b.ally) { b.ally.hp = Math.min(b.ally.maxHp, b.ally.hp + h * .7); stNum('a', '+' + Math.round(h * .7), '#6be08a'); stBurst('a', '#6be08a', 12); }
@@ -9277,8 +9383,7 @@ function stUseSkill(id) {
           else{
             const dl=Math.min(dm,f.hp);f.hp=Math.max(0,f.hp-dm);f.flash=.25;
             if(f.hp<=0){f.deadT=0;stGore(f.id,26,true);}
-            if(S.burn)f.burn=2;if(S.poison)f.poison=3;
-            if(S.slow&&f.hp>0&&Math.random()<(S.slowP||.5)){f.frozen=1;stNum(f.id,'Frozen','#9fe6ff');}
+            stAbilityEffects(S,f,dl,s);
             stEffect(SK_FX[id]||'slash',f.id,SK_COLOR[id]||'#fff',CPOW);
             if(S.kind!=='mag'){stGore(f.id,8);if(f.hp>0)stWound(f.id,f,'phys',false,stRank(id),false);}
             stAnim(f.id,'hurt');stBurst(f.id,SK_COLOR[id]||'#fff',10);stNum(f.id,dl);
@@ -9291,10 +9396,7 @@ function stUseSkill(id) {
     }
     ST.nextShot = null; sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
-  stPick(f => { d.mp -= COST; ST.curSkill = id; stPlayerHit(f, power, S.kind, (t, dm) => {
-    if (S.burn) t.burn = 2; if (S.poison) t.poison = 3; if (S.slow && Math.random() < (S.slowP || .5)) { t.frozen = 1; stNum(t.id, 'Frozen', '#9fe6ff'); }
-    if (S.drain) { d.hp = Math.min(s.hp, d.hp + Math.round(dm / 2)); stNum('p', '+' + Math.round(dm / 2), '#6be08a'); stBurst('p', '#b06bff', 10); }
-  }, SK_COLOR[id]); });
+  stPick(f => { if(b.turn!=='player'||d.mp<COST)return;d.mp -= COST; ST.curSkill = id; stPlayerHit(f, power, S.kind, (t, dm) => stAbilityEffects(S,t,dm,s), SK_COLOR[id]); });
 }
 const ST_SCROLLS = { // read in battle from Items, except Return which you read on the road
   sc_return: {name: 'Scroll of Return', price: 40, field: true, desc: 'Teleport to any town or land you have reached.'},
@@ -9397,8 +9499,8 @@ function stEnemyPhase() {
     }
     const f = alive[i++];
     if (f.hp <= 0) return next();
-    if (f.w && f.w.bleed) { const bd = Math.min(f.hp, Math.max(3, Math.round(f.maxHp * .05))); f.hp -= bd; f.w.bleed--; stNum(f.id, bd, '#ff4a4a'); stGore(f.id, 6, false); if (f.hp <= 0) { f.deadT = 0; stLog(`${f.name} bleeds out.`); if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
-    if (f.burn || f.poison) { const dot = Math.min(f.hp, Math.round(f.maxHp * .06)); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
+    if (f.w && f.w.bleed) { const bd = stDotDamage(f,.05,3); f.hp -= bd; f.w.bleed--; stNum(f.id, bd, '#ff4a4a'); stGore(f.id, 6, false); if (f.hp <= 0) { f.deadT = 0; stLog(`${f.name} bleeds out.`); if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
+    if (f.burn || f.poison) { const dot = stDotDamage(f); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
     if (f.frozen) { f.frozen = 0; stLog(`${f.name} is frozen solid and can't move!`); return setTimeout(next, 450); }
     const moves = ST_FOE_MOVES[f.key];
     if (moves && Math.random() < (f.boss ? .45 : .5)) { // a named move: called out, then it lands
@@ -9554,7 +9656,7 @@ function stOpenMenu() {
   m.append(el('h3', '', `${d.name} · Level ${d.lv} ${ST_CLASSES[d.cls].name}`),
     el('p', '', `HP ${Math.round(d.hp)}/${s.hp} · MP ${Math.round(d.mp)}/${s.mp} · Attack ${Math.round(s.atk)} · Magic ${Math.round(s.mag)} · Defense ${Math.round(s.def)} · XP ${d.xp}/${stXpNeed(d.lv)} · ${d.gold} gold`),
     el('h3', '', 'Abilities'), el('p', '', ['attack'].concat(d.skills).map(k => `${stSkName(k)}${k === 'attack' ? '' : ` (${stSkCost(ST_SKILLS[k])} MP)`}: ${stMasteryText(k)}`).join(' · ') + '. Use a move to master it. Mastered moves crit harder, open worse wounds, and fire magic as beams that can obliterate.'),
-    ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding', d.wounds.maim && 'Arm severed (-20% attack)'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
+    ...(d.wounds ? [el('h3', '', 'Wounds'), el('p', '', [d.wounds.bleed && 'Bleeding'].filter(Boolean).join(' · ') + '. Rest at a shrine or an inn to heal.')] : []),
     el('h3', '', 'Bag'), el('p', '', `${d.items.potion} potions · ${d.items.ether} ethers` + (d.items.blade ? ' · Royal Blade' : '')),
     el('h3', '', 'Professions'), el('p', '', ['fishing', 'mining', 'crafting', 'farming'].map(k => { const P = (d.prof || {})[k] || {lv: 1, xp: 0}; return `${ST_PROF_NAME[k]} ${P.lv} (${stProfTitle(P.lv)}, ${P.xp}/${20 + P.lv * 25} xp)`; }).join(' · ') + `. ${d.rod ? '' : 'Buy a fishing rod from Dunn in Saltmere. '}${d.pickaxe ? '' : 'Buy a pickaxe from Brann in Saltmere. '}Forge gear at Brann's, cook at any inn.`),
     el('h3', '', 'Materials'), el('p', '', Object.entries(d.mats || {}).filter(([, n]) => n).map(([k, n]) => `${n} ${ST_MATS[k][0]}`).join(' · ') || 'None yet. Fish and mine to gather them.'),
@@ -9598,9 +9700,12 @@ function stOpenMenu() {
   if (!stData().race) btn('🧬 Choose race', () => stChooseRace());
   if (stData().items.sc_return) btn(`📜 Scroll of Return ×${stData().items.sc_return}`, () => stTeleport());
   btn(stAttrFree() ? `📊 Stats (${stAttrFree()} points!)` : '📊 Stats', () => stStatsMenu());
+  btn('Housing & estates',stHousingMenu);btn('Class abilities',stClassMenu);btn('Thieves Guild',stThievesMenu);
   btn('Bloodlines & spellcraft',stProgressMenu);btn('Ember Academy',stMagicLessons);btn('World bosses',stWorldBossMenu);btn('Ashen Dominion',stDominionMenu);
   btn('Armory',stArmorMenu);btn('Free paths & rogue guilds',stFreePaths);
   btn('Area map',stMapPanel);
+  btn('Game guide & tips',stGuideMenu);btn('Quick hint',stQuickHint);
+  btn(stHudLayout().quiet?'Restore side panels':'Hide side panels',()=>{stToggleHudPart('quiet');stCloseMenu();});
   btn('👥 Party', () => stPartyMenu());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
@@ -9616,7 +9721,8 @@ $('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu(
   Z.addEventListener('pointerup', end); Z.addEventListener('pointercancel', end);
 }
 $('stPrompt').addEventListener('click', () => { if (ST.mode === 'walk') stInteract(); }); // tap the prompt to act on it
-$('stQuest').addEventListener('click', () => { if (touchUI.on) $('stQuest').classList.toggle('mini'); }); // tap the tracker to fold it away on a phone
+$('stQuest').addEventListener('click',e=>{if(touchUI.on&&!e.target.closest('button'))stToggleHudPart('quest');});
+for(const[id,key]of[['stStatsFold','stats'],['stQuestFold','quest'],['stMapFold','map'],['stChatFold','chat'],['stLearningFold','learning'],['stHudToggle','quiet']])$(id).addEventListener('click',e=>{e.stopPropagation();stToggleHudPart(key);});
 $('stChatBtn').addEventListener('click', () => $('stChatIn').hidden ? stChatOpen() : stChatClose());
 $('stChatIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { stChatSend($('stChatIn').value); $('stChatIn').value = ''; if (device() === 'touch') stChatClose(); } else if (e.key === 'Escape') stChatClose(); });
 setInterval(() => { if (ST.on) stChatRender(); }, 5000); setInterval(() => { if (ST.on) stPartyHudRender(); }, 700);
@@ -9635,7 +9741,7 @@ function stHud() {
   const tl = stTileAt(d.x, d.y), zl = stZoneLv(), zn = stZoneAt(d.x, d.y), where = (zn ? zn.name : d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale') + (zl > 1 ? ` (Lv ${zl}${zl > d.lv ? ', dangerous' : ''})` : '');
   const outside = d.map === 'world' || d.map === 'isles', C = stClock(), wx = [outside ? `${stTimeName(C.h)} ${stTimeText(C.h)}` : '', ST.wx && ST.wx.k > .5 && outside ? ST_WX_NAME[ST.wx.kind] : ''].filter(Boolean).join(' · ');
   const ob = stObjective(); d.places = d.places || {}; { const pn = (zn ? zn.name : d.map !== 'world' ? ST_DUNGEONS[d.map].name : tl === 'v' ? stVillage(d.x, d.y) : ST_REGION[tl] || 'The Ashen Vale'); if (!(pn in d.places)) d.places[pn] = zl; }
-  $('stQuest').innerHTML = ''; $('stQuest').append(el('b', '', 'Objective'), el('div', 'obj', ob ? ob.text : ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)), el('span', 'loc', where + (stTownHere() && stRepOf(stTownHere()) ? ` · ${ST_TOWN_NAME[stTownHere()]}: ${stRepName(stRepOf(stTownHere()))}` : '') + (wx ? ` · ${wx}` : '')), ...(d.lost ? [el('span', 'loc', `Lost Embers: ${d.lost.gold} gold wait where you fell.`)] : []));
+  $('stQuestBody').innerHTML = ''; $('stQuestBody').append(el('b', '', 'Objective'), el('div', 'obj', ob ? ob.text : ST_QUESTS[Math.min(4, d.ch)].replace('%p', d.pelts)), el('span', 'loc', where + (stTownHere() && stRepOf(stTownHere()) ? ` · ${ST_TOWN_NAME[stTownHere()]}: ${stRepName(stRepOf(stTownHere()))}` : '') + (wx ? ` · ${wx}` : '')), ...(d.lost ? [el('span', 'loc', `Lost Embers: ${d.lost.gold} gold wait where you fell.`)] : []));
 }
 const ST_CS = .72; // how big characters are drawn on the world map, so they fit the streets and doorways
 function stDrawCh(u, now, k = 1) { drawCharacterScaled(u, now, ST_CS * k); }
@@ -9657,6 +9763,11 @@ function stDrawWorld(now, dt = 1 / 60) {
   })(); }
   const isles = dun && ST_DUNGEONS[d.map].outdoor; stAmbient(dt, now, Zs, d, dun, isles);
   stDrawCrops(now);
+  if(ST.heistMarker&&d.map==='world'){
+    const H=ST.heistMarker,x=H.x*64+32,y=H.y*64+32;
+    ctx.fillStyle='#354d47';ctx.fillRect(x-20,y-15,40,29);ctx.strokeStyle='#b8d3a1';ctx.lineWidth=3;ctx.strokeRect(x-20,y-15,40,29);ctx.fillStyle='#e6cc8e';ctx.fillRect(x-3,y-8,6,13);
+    ctx.fillStyle='#172821';ctx.fillRect(x-90,y-43,180,22);ctx.fillStyle='#e3ddbb';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(H.name,x,y-27);ctx.textAlign='left';
+  }
   if (!dun) for (const r of ST_ROCKS) if (Math.abs(r.x * ST_TILE - ST.cam.x) < cw / Zs && Math.abs(r.y * ST_TILE - ST.cam.y) < ch / Zs) stDrawRock(r, now);
   stTutDraw(now); stDrawOthers(now);
   if (dun) for (const f of ST.foes) if (f.alive && onScr(f.x, f.y)) stDrawFoe(f.group[0], f.x, f.y + 8, now, .6 * ST_CS, f.face || 0);
@@ -9701,7 +9812,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   stCalloutDraw(1 / 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
-  const PR = $('stPrompt'); if (PR.hidden !== !near) PR.hidden = !near; if (near) stSetText(PR, (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({player: 'Meet ' + (near.p ? near.p.presence.sw.n : ''), plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || 'Approach'));
+  const PR = $('stPrompt'); if (PR.hidden !== !near) PR.hidden = !near; if (near) stSetText(PR, (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({player: 'Meet ' + (near.p ? near.p.presence.sw.n : ''), plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || near.label || 'Approach'));
   const RB = $('stRide'), rh = dun || !(d.mounts || []).length; if (RB.hidden !== rh) RB.hidden = rh; stSetText(RB, d.riding ? 'Dismount' : 'Ride');
 }
 function stSetText(e, t) { if (e.textContent !== t) e.textContent = t; } // writing the same text every frame still costs a layout
@@ -10078,7 +10189,47 @@ function frame(now) {
 }
 // ---------- start screen: an animated poster, Press Start, a loading page, then the main menu ----------
 const POSTER = {on: true, t0: performance.now(), embers: [], loading: false};
-const LOAD_TIPS = ['Grind a move to evolve it. Mastered magic fires as beams that can obliterate.', 'Rest at an Ashen Shrine to heal your wounds, even a severed arm.', 'Buy goods where they are made and sell them where they are wanted.', 'Some doors only open at night. Some only open for blood.', 'The faster fighter dodges more blows.', 'Rougemarais never sees the sun. Do not go there before level 20.', 'Spend your stat points in Menu, then Stats. Shrines can reset them.', 'A Scroll of Return takes you to any town or land you have reached.', 'Every race has a power it can call on once per battle.', 'Companions join adventurers of level 45 and above.', 'Open the Party menu to invite anyone who is online.', 'Fill your Rage meter, then unleash it.'];
+const LOAD_TIPS = [
+  'Play at any real-world hour: the Vale has its own sunny adventure clock. Ashen Shrines can skip to morning or night.',
+  'Use the minus buttons to fold side panels, or Hide HUD to clear the view. Plus or Show HUD restores them.',
+  'New here? Claim free Wayfarer Padding from Menu → Armory.',
+  'Defeat drops only 10% of your gold. You keep the other 90% and every armor set.',
+  'Lost Embers mark your dropped pouch. Recover it before another defeat replaces it.',
+  'Thornwake, Ravenhollow and Saltmere infirmaries treat health, mana and wounds for free.',
+  'Resting at a shrine or receiving clinic treatment sets your recovery point.',
+  'Click the minimap to open the atlas. Resize, zoom and scroll to pan.',
+  'Toggle atlas boundaries to see regions and the home limits of visible hunters.',
+  'Roaming hunters need clear sight. Break line of sight or leave their short home leash.',
+  'World-tile random encounters are separate from visible roaming enemies.',
+  'Guild membership is optional. Free paths offers independent paid contracts.',
+  'Nightveil Compact and Blackbriar Company are optional fellowships, not mandatory allegiances.',
+  'Independent C/B/A/S travel clearance unlocks at levels 26/32/41/55.',
+  'Releasing a contract costs no standing or gold.',
+  'Veteran pays 35% more combat XP and gold; Soulslike pays 75% more.',
+  'Contract difficulty is recorded when you accept the job.',
+  'Each class has exclusive abilities and milestone techniques. Check Class abilities.',
+  'Study owned spells at Ember Academy to advance practice, not to bypass level requirements.',
+  'Mages who learn Dawn Arc and Dusk Thread at level 25 awaken Concord Burst.',
+  'Use abilities to improve mastery. New learning appears in small side notifications.',
+  'Every race can awaken at levels 15, 35 and 60 at a shrine or the Ashen Sanctum.',
+  'Track a world boss from its board to place an objective on your map.',
+  'Only one armor set adds stats. Hide its appearance without losing protection.',
+  'Your wardrobe can save six outfits. Clothing changes do not consume equipment.',
+  'Faceless is an expression option. Hair, skin and outfit choices remain independent.',
+  'Spend spare stat points in Menu → Stats. Shrines can reset them.',
+  'Defend reduces incoming damage. Save it for dangerous enemy turns.',
+  'Fill the Rage meter, then unleash it when the enemy leaves an opening.',
+  'Cooked meals can restore more health than a basic potion.',
+  'Buy goods where they are made and sell where they are wanted.',
+  'Every race has a power it can call on once per battle.',
+  'Housing & estates sells homes with earned gold, never premium Crowns.',
+  'Personal strongboxes let you store gold at home.',
+  'Open Game guide & tips for searchable information, or Quick hint for advice.',
+  'Normal-host browser saves are device-specific. The Computer preview loses progress on refresh.',
+  'During an update, automatic reload is disabled if browser storage cannot save your session.',
+  'A Scroll of Return takes you to any town or land you have reached.',
+  'Party and account features require the online backend to be configured.',
+];
 function drawPoster(now) { // original key art: a hero on a cliff under a blood moon, a castle, a cathedral, a dragon and a howling wolf
   const c = $('posterCv'), W = innerWidth, H = innerHeight, r = Math.min(2, devicePixelRatio || 1);
   if (c.width !== Math.round(W * r) || c.height !== Math.round(H * r)) { c.width = Math.round(W * r); c.height = Math.round(H * r); }

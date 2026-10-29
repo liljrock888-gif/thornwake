@@ -1,5 +1,16 @@
 Original prompt: Fix the menu overlap first. Change the menu artwork to a dark fantasy RPG direction that makes people want to play.
 
+## Homes, class paths and the Veiled Hand, October 28, 2026
+- Added `game/homes-classes.js`, inserted into the game closure during build. Five new gold-priced properties join the original farm, including two estates with separate walkable gardens. Deeds, home strongboxes and furnishing colors persist on ordinary hosting.
+- Residential exteriors now have pitched roofs, warm divided windows, shutters, flower boxes, doors and property signs. Interiors have plank floors, rugs, usable beds, kitchen counters/hearths, wardrobes, bookshelves and connected dining tables.
+- Interactions use proximity plus explicit exit/door/NPC priority. New buildings avoid the existing livestock pen, travel crystal, houses and farm plots.
+- Eleven exclusive class paths contain eight learnable abilities and five milestones each. Creator, training, level-up rewards, load migration and battle execution enforce owner/level gates. Matching old abilities retain mastery; unmatched abilities are archived. Earned supernatural powers remain separate.
+- The Veiled Hand hideout offers one-time membership, five world-cache recovery contracts, single-claim gold rewards, reputation and ranks through Guildmaster. No cross-class ability rewards.
+- Removed severing, detached-limb effects, NPC attack reduction, player attack penalties and obsolete text. Old flags are removed without clearing active bleeding. Blood spray, pools and bleeding damage/cures remain.
+- Final validation: 79 dedicated browser checks, 43 existing browser checks and 34 purchase checks passed, with no browser runtime errors. Desktop and phone checked. Covers six purchases/entrances/exits, furniture, garden return, five contracts, reward reconciliation, normal-host save reload, 143 ownership gates, legacy migration and live Warrior/Mage effects. Staged fixtures do not establish long-run combat balance.
+- `npm run build:preview` creates `preview/` with labeled session-only memory saves, leaving production storage and payments unchanged. No new multiplayer/payment service is provisioned.
+- Public repository/main and the public live deployment were not changed. Prepared locally for approval before publication.
+
 ## Scope
 - Preserve the existing game, saves, arena and purchase systems.
 - Fix global/story menu exclusivity, input ownership and story panel fit.
@@ -55,3 +66,40 @@ Verification:
 - Build and inline script parsing succeeded. Final CSS touch-scroll adjustment separately verified in the native-touch browser after the regression run.
 
 Hosting limitation remains: Vercel authorization failed earlier; no Vercel resources were created or linked. The Computer preview still blocks localStorage, so refresh persistence is not available there. Normal-origin browser persistence was verified locally; this change is not a new cloud-save backend. Live payments remain untested.
+
+## Property and class tuning, release 58
+- Cottage 250, farm 600, harbor 900, townhouse 1800, manor 4800, Suncrest 10000 gold.
+- Added class-specific base stats/growth and role copy for eleven classes. Tuned
+  eight learnable moves and five milestones per class without changing ownership,
+  mastery or unlock gates. Class menus show actual level-scaled mana costs.
+- Corrected Monk attack scaling, Druid magical Rootquake, area statuses and drain,
+  boss interruption/DoT resistance, actual-damage healing and guarded follow-ups.
+- Heal/buff casts lock immediately; rapid repeated calls cannot spend twice.
+- Existing deeds/storage remain intact. Save normalization only clamps over-cap
+  HP/MP and does not heal. Production accounts, payment and other modes untouched.
+- Added `test/balance.test.mjs`, with response-only instrumentation; production
+  has no mutable test hook. Full-campaign and player-feedback balancing remains open.
+- Final release checks: 248 balance, 79 housing/class/guild, 43 browser/progression,
+  and 34 payment regression checks passed (404 total). Desktop/phone housing and
+  class paths were visually inspected. The required game-client smoke test
+  completed; its static-server `/api/config` 404 is expected, not a runtime exception.
+- Production and preview builds contain no mutable QA exports. The preview
+  remains session-only; normal-origin save/reload is covered by the housing suite.
+
+## Sunny adventures, quieter HUD and merged release, October 29, 2026
+
+- Integrated remote `3c82876` without overwriting its estates, Veiled Hand contracts, exclusive class paths, class/economy tuning or limb-loss removal. The nine dawn/dusk spells are Mage-owned with level gates; ownership checks cover 152 techniques. Combined area effects preserve both multi-hit spell behavior and the actual-damage/status-resistance balance helpers.
+- Added the post-creation welcome/loading card, cycling tips, an Enter the Vale action, searchable Game guide, empty search state and contextual Quick hints.
+- Learned spells, mastery gains and class unlocks use compact side notifications, at most two at once, with manual dismissal, automatic expiry and a collapsible count. Major story and boss announcements stay separate.
+- Stats, objective, minimap, chat and learning notices minimize independently. Hide HUD/Show HUD clears or restores the side panels while retaining menu access. Chat starts minimized. Preferences survive normal-origin save/reload; touch controls remain usable above the joystick capture zone.
+- Corrected exploration Menu/Journal/Ride/Chat button spacing, including narrow desktop-style windows. Existing touch-specific control positioning is preserved.
+- Clear weather has an 82% selection chance, lasts 95–180 seconds, and starts with 150 seconds of clear skies. Unsettled weather is shorter. A saved 30-minute adventure clock gives 24 minutes to daylight and six to night, independently of device time; fresh adventures start around 10 AM. Shrine options skip to morning or night without changing real-time daily/economy timers.
+- Added two original synthesized scores: Wayfarer's Dawn for overland exploration and Beyond the Horizon for island/ship travel. Dungeon, bayou, ordinary battle and boss themes remain separate. Music now switches on normal map entry as well as story/combat/travel transitions; existing volume settings apply.
+
+Verification and publication:
+- 106 browser/progression, 79 housing/class/guild, 248 combat/property balance and 34 payment checks passed: 467 total. No browser page runtime errors. Staged progression victories use guaranteed-hit Concord Burst so random basic-strike evasion cannot produce false test failures; these fixtures do not establish long-term difficulty balance.
+- Both new scores were rendered through OfflineAudioContext and checked for non-silent output and unclipped peaks. Daylight/weather selection, shrine waits and saved clock phase are covered by the browser suite.
+- Separate native-touch checks covered creation/loading skip, all minimization controls, quiet mode, chat expansion, learning notice folding and phone fit. Desktop, phone, sunny-world and learning-panel screenshots were visually reviewed.
+- Updated the existing public preview asset `ce27ff70-28f9-46f5-bb6b-7ecb818705f4` in place, build `b469dbd1925c4028`. Fresh hosted native-touch context verified the new build, creation/loading tips, sunny 10 AM spawn outside the infirmary, panel collapse/restore, learning notices, searchable sunshine guide, free armor claim and the atlas. No page runtime errors; QA contexts closed.
+- Required game-client smoke rerun and canvas screenshot/text state reviewed. Its static `/api/config` 404 remains expected; live payments were not tested.
+- Vercel team discovery failed with a CLI TypeError before any write. No Vercel project was created, relinked or deployed, and no authorization retry was attempted. Normal-origin browser saving is verified; this Computer preview still loses progress on refresh, and no new cloud-save backend was provisioned.

@@ -21,7 +21,7 @@ await page.route('**/*',async route=>{
   if(route.request().resourceType()!=='document')return route.continue();
   const response=await route.fetch();
   const body=(await response.text()).replace('window.render_game_to_text=()=>{',
-    'window.__TW_QA={data:()=>stData(),stats:stStats,sync:stSyncProgress,boss:stBossFight,start:stStartBattle,end:stEndBattle,travel:stTravelRankAtLeast,fx:STFX,state:ST,hunters:stHunters,sight:stHunterSight,blocked:stBlocked,enter:stEnterMap,battle:()=>ST.battle,foes:ST_FOES,races:ST_RACES,tiers:ST_MAGIC_TIERS,evolutions:ST_EVOLUTIONS,maps:ST_DUNGEONS,bosses:ST_BOSSES,rank:()=>stDominionRank(stData()),look:drawStorybookCharacter,creature:drawDreadCreature,drawFoe:stDrawFoe,near:stNearby,skill:ST_SKILLS,maint:maintApply,maintState:MAINT};window.render_game_to_text=()=>{');
+    'window.__TW_QA={data:()=>stData(),stats:stStats,sync:stSyncProgress,boss:stBossFight,start:stStartBattle,end:stEndBattle,travel:stTravelRankAtLeast,fx:STFX,state:ST,hunters:stHunters,sight:stHunterSight,blocked:stBlocked,enter:stEnterMap,battle:()=>ST.battle,foes:ST_FOES,races:ST_RACES,tiers:ST_MAGIC_TIERS,evolutions:ST_EVOLUTIONS,maps:ST_DUNGEONS,bosses:ST_BOSSES,rank:()=>stDominionRank(stData()),look:drawStorybookCharacter,creature:drawDreadCreature,drawFoe:stDrawFoe,near:stNearby,skill:ST_SKILLS,maint:maintApply,maintState:MAINT,weatherKind:stWeatherKind,skyHour:stSkyHour,clock:stClock,rest:stRest,music:music,mapSong:stMapSong,songs:SONGS};window.render_game_to_text=()=>{');
   await route.fulfill({response,body});
 });
 let checks=0;
@@ -69,6 +69,7 @@ try{
   await page.locator('#m-story').click();await page.locator('#stNew').click();
   ok(await page.locator('#crStep0').isVisible(),'Origin step visible');
   await page.locator('#crName').fill('Ash Tester');
+  await page.locator('#crClass').getByRole('button',{name:'Mage',exact:true}).click();
   await page.locator('#crNext').click();
   await page.locator('#crOutfit select[aria-label=Hair]').selectOption('braids');
   await page.locator('#crOutfit select[aria-label=Expression]').selectOption('grin');
@@ -83,10 +84,66 @@ try{
   await page.locator('#crNext').click();
   ok(await page.locator('#crStart').isDisabled(),'Begin requires three abilities');
   for(let i=0;i<3;i++)await page.locator('#crSkills button').nth(i).click();
-  await page.locator('#crStart').click();await dismiss();
+  await page.locator('#crStart').click();
+  await page.locator('#stLoad').waitFor({state:'visible'});
+  ok((await page.locator('#stLoadKind').textContent())==='Your story begins','creation opens welcome loading card');
+  const initialTip=await page.locator('#stLoadTip').innerText();await page.getByRole('button',{name:'Another tip',exact:true}).click();
+  ok((await page.locator('#stLoadTip').innerText())!==initialTip,'loading card cycles practical tips');
+  await shot('creation-loading-desktop');await page.setViewportSize({width:375,height:812});await shot('creation-loading-phone');
+  if(await page.getByRole('button',{name:'Enter the Vale',exact:true}).isVisible())await page.getByRole('button',{name:'Enter the Vale',exact:true}).click();
+  await page.locator('#stLoad').waitFor({state:'hidden'});await page.setViewportSize({width:1440,height:900});await dismiss();
   ok((await state()).player?.name==='Ash Tester','creation reaches playable story');
   ok(await page.evaluate(()=>__TW_QA.data().skills.includes('emberspark')),'tier I spell granted');
   ok(await page.evaluate(()=>__TW_QA.data().outfit.hairType==='braids'),'appearance saved');
+  ok(await page.evaluate(()=>{const c=__TW_QA.clock();return c.h>9&&c.h<11&&c.sun>.6&&__TW_QA.state.wx.kind==='clear';}),'new adventures start in sunny morning regardless of device time');
+  ok(await page.evaluate(()=>Array.from({length:100},(_,i)=>__TW_QA.weatherKind((i+.5)/100)).filter(k=>k==='clear').length===82),'weather selection favors clear skies at 82 percent');
+  ok(await page.evaluate(()=>Array.from({length:100},(_,i)=>__TW_QA.skyHour((i+.5)/100)).filter(h=>h>=6&&h<18).length===80),'adventure clock reserves 80 percent of its cycle for daylight');
+  ok(await page.evaluate(()=>{const d=__TW_QA.data(),m=d.map;const got=['world','isles','catacomb','rouge'].map(k=>{d.map=k;return __TW_QA.mapSong();});d.map=m;return got.join() === '8,9,4,7'&&__TW_QA.music.forced===8;}),'exploration and voyage themes preserve darker dungeon and bayou music');
+  const renderedMusic=await page.evaluate(async()=>{
+    const m=__TW_QA.music,oldCtx=m.ctx,oldBus=m.bus,off=new OfflineAudioContext(1,22050*65,22050),bus=off.createGain();bus.gain.value=.6;bus.connect(off.destination);m.ctx=off;m.bus=bus;let split,end;
+    try{split=__TW_QA.songs[8](.05);end=__TW_QA.songs[9](split+.5);}finally{m.ctx=oldCtx;m.bus=oldBus;}
+    const a=(await off.startRendering()).getChannelData(0);let x=0,y=0,nx=0,ny=0,peak=0;
+    for(let i=0;i<Math.floor(end*22050);i++){const v=a[i];peak=Math.max(peak,Math.abs(v));if(i<split*22050){x+=v*v;nx++;}else{y+=v*v;ny++;}}
+    return {rmsA:Math.sqrt(x/nx),rmsB:Math.sqrt(y/ny),peak,end};
+  });
+  ok(renderedMusic.rmsA>.002&&renderedMusic.rmsB>.002&&renderedMusic.peak<1&&renderedMusic.end<65,'both new adventure scores render non-silent audio without clipping');
+  await page.evaluate(()=>__TW_QA.rest());
+  for(let i=0;i<3&&!await page.getByRole('button',{name:'Wait until nightfall',exact:true}).isVisible();i++)await page.getByRole('button',{name:'Next',exact:true}).click();
+  await page.getByRole('button',{name:'Wait until nightfall',exact:true}).click();
+  ok(await page.evaluate(()=>__TW_QA.clock().dark>.4),'shrine wait retains access to night activities');
+  await page.evaluate(()=>__TW_QA.rest());
+  for(let i=0;i<3&&!await page.getByRole('button',{name:'Rest until morning',exact:true}).isVisible();i++)await page.getByRole('button',{name:'Next',exact:true}).click();
+  await page.getByRole('button',{name:'Rest until morning',exact:true}).click();
+  ok(await page.evaluate(()=>__TW_QA.clock().sun>.6&&__TW_QA.state.wx.kind==='clear'),'morning rest restores sunshine and clear weather');
+  await shot('sunny-adventure-desktop');
+  for(const [label,id]of [['stats','stHud'],['objective','stQuest'],['minimap','stMapDock']]){
+    await page.getByRole('button',{name:'Minimize '+label,exact:true}).click();
+    ok(await page.locator('#'+id).evaluate(e=>e.classList.contains('folded')),label+' can be minimized');
+  }
+  ok(await page.locator('#stChat').evaluate(e=>e.classList.contains('folded')),'chat starts minimized to avoid offline clutter');
+  await page.getByRole('button',{name:'Expand chat',exact:true}).click();
+  ok(!await page.locator('#stChat').evaluate(e=>e.classList.contains('folded')),'chat can be expanded');
+  await page.getByRole('button',{name:'Minimize chat',exact:true}).click();
+  await shot('minimized-hud-desktop');await page.setViewportSize({width:375,height:812});await shot('minimized-hud-phone');
+  ok(await page.locator('#stHud,#stQuest,#stMapDock,#stChat').evaluateAll(es=>es.every(e=>e.getBoundingClientRect().right<=innerWidth)),'minimized side panels fit phone viewport');
+  ok(await page.evaluate(()=>document.getElementById('stMenuBtn').getBoundingClientRect().right<=document.getElementById('stJournalBtn').getBoundingClientRect().left),'Menu and Journal buttons do not overlap on phone');
+  await page.getByRole('button',{name:'Hide side panels',exact:true}).click();
+  ok(await page.locator('#stHud').isHidden()&&await page.locator('#stQuest').isHidden()&&await page.locator('#stMini').isHidden(),'one control hides side panels without hiding menu controls');
+  await shot('quiet-hud-phone');await page.getByRole('button',{name:'Restore side panels',exact:true}).click();await page.setViewportSize({width:1440,height:900});
+  await menu();await page.getByRole('button',{name:'Save and quit',exact:true}).click();await page.reload({waitUntil:'networkidle'});await page.locator('#startBtn').click();await enterStory();
+  ok(await page.locator('#stHud,#stQuest,#stMapDock').evaluateAll(es=>es.every(e=>e.classList.contains('folded'))),'minimized panel preferences survive save and reload');
+  ok(await page.evaluate(()=>__TW_QA.data().skyPhase>=.27&&__TW_QA.data().skyPhase<.3),'adventure clock survives save and reload');
+  for(const label of ['stats','objective','minimap'])await page.getByRole('button',{name:'Expand '+label,exact:true}).click();
+  ok(await page.locator('#stHpT').isVisible()&&await page.locator('#stMini').isVisible(),'panels restore after reload');
+  await menu();await page.getByRole('button',{name:'Game guide & tips',exact:true}).click();
+  await page.getByRole('searchbox',{name:'Search game guide',exact:true}).fill('armor');
+  ok(await page.locator('#stMenu .progressCard').count()>0,'game guide searches practical information');
+  await page.getByRole('searchbox',{name:'Search game guide',exact:true}).fill('zzzznomatch');
+  ok((await page.locator('#stMenu').innerText()).includes('No matching guide entries'),'guide provides a clear empty search state');
+  await page.getByRole('searchbox',{name:'Search game guide',exact:true}).fill('gold');await shot('game-guide-desktop');
+  await page.getByRole('button',{name:'Return to the Vale',exact:true}).click();await menu();await page.getByRole('button',{name:'Quick hint',exact:true}).click();
+  ok((await page.locator('#stMenu').innerText()).includes('unspent stat points'),'quick hints account for current character state');
+  await page.getByRole('button',{name:'Return to the Vale',exact:true}).click();
   await page.locator('#stMini').click();
   ok(await page.locator('#stAtlasCanvas').isVisible(),'clicking minimap opens expanded atlas');
   await page.getByRole('slider',{name:'Map panel size',exact:true}).fill('1000');await shot('expanded-map-desktop');
@@ -178,15 +235,27 @@ try{
   const before=await page.evaluate(()=>({gold:__TW_QA.data().gold,uses:__TW_QA.data().mastery?.emberspark||0}));
   await page.getByRole('button',{name:'Study Ember Spark',exact:true}).click();
   ok(await page.evaluate(before=>__TW_QA.data().gold<before.gold&&__TW_QA.data().mastery.emberspark===before.uses+3,before),'lesson charges gold and grants mastery practice');
+  const notice=page.locator('.learnNotice').filter({hasText:'mastery practice'});
+  ok(await notice.isVisible(),'mastery gains appear in a side notification');
+  const noticeSize=await notice.boundingBox();ok(noticeSize.width<=242&&noticeSize.height<=100,'learning notification stays compact');
+  await shot('learning-notice-desktop');await page.setViewportSize({width:375,height:812});await shot('learning-notice-phone');await page.setViewportSize({width:1440,height:900});
   await page.getByRole('button',{name:/Learn Dawn Arc/}).click();
   await page.getByRole('button',{name:/Learn Dusk Thread/}).click();
   ok(await page.evaluate(()=>__TW_QA.data().skills.includes('concordburst')),'dawn and dusk study unlocks Concord Burst');
+  ok(await page.locator('.learnNotice').count()===2,'learning notifications cap the stack at two');
+  await page.getByRole('button',{name:'Minimize learning notifications',exact:true}).click();
+  ok(await page.locator('.learnNotice:visible').count()===0&&await page.getByRole('button',{name:'Expand learning notifications',exact:true}).isVisible(),'learning notifications fold into a small expandable count');
+  await page.getByRole('button',{name:'Expand learning notifications',exact:true}).click();
+  await page.getByRole('button',{name:'Dismiss learning notification',exact:true}).first().click();
+  ok(await page.locator('.learnNotice').count()===1,'side notification dismiss button works');
+  await page.waitForFunction(()=>document.querySelectorAll('.learnNotice').length===0,null,{timeout:7500});
+  ok(await page.locator('.learnNotice').count()===0,'learning notifications expire automatically');
   await page.keyboard.press('Escape');await menu();await page.getByRole('button',{name:'Ashen Dominion',exact:true}).click();
   await page.getByRole('button',{name:'Enter floor 1',exact:true}).click();
   ok((await state()).player.map==='sanctum1','first guardian floor loads');
   // Stage an almost-defeated boss; normal combat input still drives victory/claim.
   await page.evaluate(()=>{__TW_QA.data().hp=5000;__TW_QA.data().mp=5000;__TW_QA.boss('cairntrial');__TW_QA.battle().foes[0].hp=1;});
-  await page.getByRole('button',{name:/Strike/}).first().click();
+  await page.getByRole('button',{name:/Skills/}).click();await page.getByRole('button',{name:/Concord Burst/}).click();
   await page.waitForFunction(()=>__TW_QA.data().flags.cairntrial===true);
   await page.waitForFunction(()=>!document.querySelector('#stDialog').hidden);
   await dismiss();await page.getByRole('button',{name:'Claim rewards',exact:true}).click();
@@ -197,7 +266,7 @@ try{
     await page.getByRole('button',{name:'Enter floor '+floor,exact:true}).click();
     ok((await state()).player.map==='sanctum'+floor,'guardian floor '+floor+' loads');
     await page.evaluate(boss=>{const s=__TW_QA.stats();__TW_QA.data().hp=s.hp;__TW_QA.data().mp=s.mp;__TW_QA.boss(boss);__TW_QA.battle().foes[0].hp=1;},boss);
-    await page.getByRole('button',{name:/Strike/}).first().click();
+    await page.getByRole('button',{name:/Skills/}).click();await page.getByRole('button',{name:/Concord Burst/}).click();
     await page.waitForFunction(boss=>__TW_QA.data().flags[boss]===true,boss);
     await page.waitForFunction(()=>!document.querySelector('#stDialog').hidden);
     await dismiss();await page.getByRole('button',{name:'Claim rewards',exact:true}).click();await dismiss();
@@ -215,7 +284,7 @@ try{
       await page.setViewportSize({width:1440,height:900});
       await page.getByRole('button',{name:/Concord Burst/}).click();
       ok(await page.evaluate(()=>__TW_QA.data().mp<__TW_QA.stats().mp),'new Concord spell consumes mana in combat');
-    }else await page.getByRole('button',{name:/Strike/}).first().click();
+    }else{await page.getByRole('button',{name:/Skills/}).click();await page.getByRole('button',{name:/Concord Burst/}).click();}
     await page.waitForFunction(boss=>__TW_QA.data().flags[boss]===true,boss);
     await page.waitForFunction(()=>!document.querySelector('#stDialog').hidden);
     await dismiss();await page.getByRole('button',{name:'Claim rewards',exact:true}).click();await dismiss();

@@ -6,7 +6,10 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node test/purchase-flow.test.mjs",
-    "test:browser": "node test/menu-rpg.test.mjs"
+    "test:browser": "node test/menu-rpg.test.mjs",
+    "test:homes": "node test/homes-classes.test.mjs",
+    "test:balance": "node test/balance.test.mjs",
+    "build:preview": "npm run build && node scripts/preview.mjs"
   },
   "engines": {
     "node": ">=18"

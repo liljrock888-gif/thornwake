@@ -1,5 +1,23 @@
 # Thornwake menu regression checks
 
+## Economy and class balance
+- Cottage costs 250 gold; farm remains 600; harbor house 900; townhouse 1800; manor 4800; Suncrest 10000. Existing deeds, stored gold and mastery remain intact.
+- Housing cards explain progression targets; Farmer Odo still sells the same 600-gold farm with existing alignment discounts.
+- Eleven classes have distinct primary-stat/mana growth and readable roles. The original eleven exclusive paths and level gates remain.
+- Later attacks offer more power or utility at a higher cost. Monk healing and Ki Wave use attack-based scaling; druid Rootquake uses magic.
+- Area poison/burn/stun/drain effects work on actual hits; bosses resist crowd control and percentage damage; drain cannot heal from overkill.
+- A buff/heal or repeated click consumes exactly one action and one mana charge; targeting cancellation does not spend mana.
+- Compare deterministic offense, mana endurance and durability at levels 1/10/25/45/60. These are regression envelopes, not a guarantee of perfect long-run balance.
+
+## Homes, class paths and the Veiled Hand
+- Housing & estates lists the farm plus five properties. Insufficient funds and repeated purchases never deduct gold.
+- Visit each exterior, buy and enter. Use beds, hearths, storage, furnishing colors and seating; leave through its world exit. Estate gardens return to the correct home.
+- Enter the Veiled Hand hideout, join once, accept one contract, recover its marked cache with E, return and claim once. Rank advances.
+- Eleven classes each show four exclusive starter choices, eight trainable moves and five class-specific milestones.
+- Creator, level-up rewards, old saves, Academy and casting enforce ownership. Earned supernatural powers remain separate.
+- Bleeding, its damage, its cures and blood effects remain. Limb loss visuals and penalties are gone, including on old saves.
+- Check desktop, phone and short-height layouts, runtime errors, blocked-door and insufficient-gold cases.
+
 ## Title and launcher
 - Press Start reaches the main menu once, including when activated repeatedly.
 - The title and launcher show original ash-grey kingdom artwork with readable text.
@@ -27,6 +45,9 @@
 - Check page errors and screenshots in title, launcher, story menu and journal states.
 
 ## New fantasy progression
+- New character creation ends with a welcome loading card, cycling tips and a skip/enter action. Search the Game guide, handle an empty search, request contextual Quick hints, and verify learned/mastery notices are compact side cards (maximum two).
+- Minimize/expand stats, objective, minimap, chat and learning notices. Hide/restore the side HUD in one click, preserve preferences on normal-origin reload, and confirm minimized panels fit on desktop and phone without blocking movement, map access, menus or combat.
+- Start in sunny morning independent of device time. Verify clear-weather bias and a daylight-heavy saved adventure cycle, shrine waits to morning/night, new original exploration/voyage music, darker dungeon/boss themes, volume controls, and non-silent unclipped audio rendering.
 - Click/keyboard activate minimap to open the atlas; resize, zoom/pan, toggle region/enemy boundaries, close/resume and fit 375px phone viewport.
 - Hard outer bounds apply even to flying mounts. Hunters acquire within 144px, lose pursuit beyond 208px, stay within a 192px home leash, respect walls and do not acquire across region/safe-zone boundaries.
 - Armory: claim starter padding, buy/equip level-gated sets, verify defense/max health, no stacking, cosmetic hiding and save persistence.
