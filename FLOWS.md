@@ -1,5 +1,14 @@
 # Thornwake menu regression checks
 
+## Economy and class balance
+- Cottage costs 250 gold; farm remains 600; harbor house 900; townhouse 1800; manor 4800; Suncrest 10000. Existing deeds, stored gold and mastery remain intact.
+- Housing cards explain progression targets; Farmer Odo still sells the same 600-gold farm with existing alignment discounts.
+- Eleven classes have distinct primary-stat/mana growth and readable roles. The original eleven exclusive paths and level gates remain.
+- Later attacks offer more power or utility at a higher cost. Monk healing and Ki Wave use attack-based scaling; druid Rootquake uses magic.
+- Area poison/burn/stun/drain effects work on actual hits; bosses resist crowd control and percentage damage; drain cannot heal from overkill.
+- A buff/heal or repeated click consumes exactly one action and one mana charge; targeting cancellation does not spend mana.
+- Compare deterministic offense, mana endurance and durability at levels 1/10/25/45/60. These are regression envelopes, not a guarantee of perfect long-run balance.
+
 ## Homes, class paths and the Veiled Hand
 - Housing & estates lists the farm plus five properties. Insufficient funds and repeated purchases never deduct gold.
 - Visit each exterior, buy and enter. Use beds, hearths, storage, furnishing colors and seating; leave through its world exit. Estate gardens return to the correct home.

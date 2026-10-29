@@ -3911,6 +3911,7 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 // What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
 const UPDATES = [
+  {id:58,date:'Oct 28',title:'Economy & class balance',items:['Starter cottage reduced to 250 gold. Harbor house 900, townhouse 1800, Briarwood Manor 4800 and Suncrest Estate 10000. The working farm remains 600. Existing deeds and strongboxes are unchanged.','All eleven classes now have distinct stat growth and role-focused mana costs, attack strength and utility. Later abilities offer stronger options rather than identical copies. Monk ki and healing scale with attack; druid Rootquake scales with magic.','Area spells now apply their listed poison, burning, interruption and drain effects on successful hits. Bosses resist interruption and percentage damage. Life drain heals only from damage actually dealt, not overkill.','Healing and buff actions now lock the turn immediately, preventing rapid clicks from casting repeatedly before enemies act. Class ownership and level gates still apply.']},
   {id:57,date:'Oct 28',title:'Homes, class paths & the Veiled Hand',items:['Buy a cottage, harbor house, townhouse, manor or estate with earned gold. Furnished interiors have beds, cooking hearths, strongboxes, reading shelves and customizable rugs and quilts. The two estates include private gardens. Open Housing & estates from your story menu.','Every class now has eight exclusive learnable moves and five class milestone techniques. Creation, training, level-up rewards and combat enforce class ownership. Existing mixed-class moves are archived; matching moves retain mastery.','Enter the Veiled Hand hideout west of Thornwake to join the Thieves Guild. Complete five recovery contracts, earn gold and reputation, and rise through its ranks. No cross-class ability rewards.','Limb loss and its attack penalties have been removed, including from existing saves. Bleeding, blood spray and blood pools remain.']},
   {id:56,date:'Oct 29',title:'Bloodlines, spellcraft & the Ashen Dominion',items:['Five magic tiers grant new spells at levels 1, 10, 25, 45 and 60. Study at the Ember Academy to practice spell mastery without bypassing level requirements.','Every race has three optional awakenings at levels 15, 35 and 60. Claim them in order at an Ashen Shrine or the Ashen Sanctum.','Three new world bosses have discoverable callouts, compass tracking and one-time trophies. Find their rumors under Menu → World bosses.','The original Ashen Dominion has a throne hall and three guardian floors. Clear trials at levels 20, 35 and 50, gain ruler ranks, and earn guardian companions. Guild expedition contracts reward the same dungeon victories.']},
   {id: 55, date: 'Oct 29', title: 'A new face for the Vale', items: ['Original ruined-kingdom title and menu artwork, with Enter the Vale as the story shortcut.', 'Storybook heroes and townsfolk, a three-step character creator, and new hair, eye and expression choices. Your existing hero and outfit still work.', 'Redrawn story enemies: masked outlaws, hollow knights, fanged wolves, jagged golems, skeletal-winged drakes and horned demons. Combat values have not changed.', 'Global and story menus now hand off cleanly. Story menus have a dimmed backdrop and separate keyboard input.']},
@@ -6469,6 +6470,7 @@ function stSyncProgress(notify=true){
   stSyncClass(d);
   if(!d.hr)for(let i=0;i<=tier;i++){const id=stTierSkill(d.cls,i);if(!d.skills.includes(id))d.skills.push(id);}
   if(d.wounds){delete d.wounds.maim;delete d.wounds.hole;if(!d.wounds.bleed)d.wounds=null;}
+  {const s=stStats();d.hp=Math.min(d.hp,s.hp);d.mp=Math.min(d.mp,s.mp);}
   d.magicTier=tier;
   if(notify&&tier>0&&(old==null||tier>old))stAnnounce((d.cls==='mage'?'MAGIC TIER ':'CLASS RANK ')+ST_MAGIC_TIERS[tier].name+' UNLOCKED','#c3b2f1');
 }
@@ -6546,6 +6548,7 @@ function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
   const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
+  if(c.growth)for(const [k,old]of Object.entries({hp:14,mp:6,atk:2,mag:2,def:1.2,spd:.4}))st[k]+=(c.growth[k]-old)*L;
   if (d.guild && stEdict() === 'wall') st.def *= 1.1;
   for (const [k, , stat, per] of ST_ATTRS) { const v = (d.attr && d.attr[k]) || 0; if (v) st[stat] += v * per; } // stat points
   st.hp = Math.round(st.hp); st.mp = Math.round(st.mp);
@@ -9031,14 +9034,14 @@ function stPlayerHit(f, base, kind, extra, color) {
     const before = f.hp; ST.curSkill = null;
     if (!sure && Math.random() < stDodgeChance(f.spd, stStats().spd, (f.boss ? -.03 : 0) - (beam ? .04 : 0))) { stDodgeFx(f.id, f.name); ST.sub = null; setTimeout(stEndTurn, 300); return; }
     if (f.hp > 0 && ((SK && SK.twice) || (sk === 'attack' && stData().hr && Math.random() < .3))) setTimeout(() => { // a second blow: Flash Step, or the Restricted body moving faster than sight
-      if (f.hp <= 0) return; const dm2 = Math.min(f.hp, stDmg(base * .7, f.def)); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
+      if (f.hp <= 0) return; const hit2=stDmg(base*.7,kind==='mag'?f.def*.5:f.def),dm2=Math.min(f.hp,f.guard?Math.round(hit2/2):hit2); f.hp -= dm2; f.flash = .25; if (f.hp <= 0) f.deadT = 0; stNum(f.id, dm2 + ' ×2', '#cfefff', true); stEffect('slash', f.id, '#cfefff'); stGore(f.id, 8); sfx('impact');
     }, 140);
     const dealt = Math.min(total, Math.max(0, before)); f.hp -= total; if (f.hp < 0) f.hp = 0; f.flash = .25; if (f.hp <= 0) f.deadT = 0; sfx(kind === 'mag' ? 'boom' : 'impact'); ST.battle.pounce = false;
     if (stHasTrait('emberheart') && f.hp > 0 && Math.random() < .25) { f.burn = Math.max(f.burn || 0, 3); stNum(f.id, 'burning', '#ff9a4a'); } // the ember spirit keeps you warm
     if (stData().race === 'ashkin' && f.hp > 0 && Math.random() < .15) { f.burn = 2; stNum(f.id, 'Burning', '#ff9a4a'); } // ash-elf blood smoulders
     const fxPow = 1 + rk * .3; stEffect(SK_FX[sk] || (crit ? 'heavyslash' : 'slash'), f.id, color || (kind === 'mag' ? '#c79bff' : '#ffffff'), fxPow); if (crit) STFX.slow = Math.max(STFX.slow || 0, .12); // a hit-stop on criticals
     stRageAdd(6);
-    if (ST.battle.buffs.vamp) { const dd = stData(), heal = Math.round(total * .25); dd.hp = Math.min(stStats().hp, dd.hp + heal); stNum('p', '+' + heal, '#ff6a8a'); } // vampire form drinks from every wound
+    if (ST.battle.buffs.vamp) { const dd = stData(), heal = Math.round(dealt * .25); dd.hp = Math.min(stStats().hp, dd.hp + heal); stNum('p', '+' + heal, '#ff6a8a'); } // vampire form drinks from every wound
     if (f.boss && !f.enraged && f.hp > 0 && f.hp < f.maxHp * .3) { f.enraged = true; f.atk *= 1.3; setTimeout(() => { stTransformFx(f.id, '#ff2a2a', `${f.name.split(',')[0]} is ENRAGED!`); stGrunt(ST_FOE_SEX[f.key] || 'boss', true, 'enr'); }, 300); } // bosses near death fly into a fury
     const oblit = beam && f.hp <= 0 && (total >= before + f.maxHp * .25 || total >= f.maxHp * .55);
     const lethal = !oblit && f.hp <= 0 && (crit || total >= before + f.maxHp * .3);
@@ -9051,7 +9054,7 @@ function stPlayerHit(f, base, kind, extra, color) {
     }
     stAnim(f.id, 'hurt', .35); stBurst(f.id, color || (kind === 'mag' ? '#c79bff' : '#ffe0c0'), crit ? 26 : 14); stNum(f.id, crit ? dealt + '!' : dealt, crit ? '#ffd75e' : '#ffffff', crit);
     if (crit) ST.hurt = .2;
-    if (extra) extra(f, total);
+    if (extra) extra(f, dealt);
     stLog(`${f.name} takes ${dealt} damage.` + (crit ? ' Critical hit!' : '') + (oblit ? ` ${f.name} is obliterated!` : lethal ? ` A lethal blow! ${f.name} is cut down!` : f.hp <= 0 ? ` ${f.name} is defeated!` : ''));
     ST.sub = null; setTimeout(stEndTurn, 250);
   };
@@ -9067,7 +9070,8 @@ function stUseSkill(id) {
   if (d.mp < stSkCost(S)) return; const COST = stSkCost(S);
   const rkC = stRank(id), CPOW = 1 + rkC * .3; if (S.kind === 'mag' || S.kind === 'heal' || S.kind === 'buff') stEffect('runes', 'p', SK_COLOR[id] || (S.kind === 'heal' ? '#9fffb8' : '#ffd75e'), CPOW); // a rune circle as you begin the spell
   const nm = stSkName(id); stCallout(`${d.name}: "${nm}!"`, SK_COLOR[id] || '#ffe9a8');
-  const power = (S.kind === 'mag' || S.kind === 'heal' ? s.mag * (b.buffs.vamp ? 1.5 : 1) : s.atk * stAtkMul(b)) * (S.mult || 1) * (S.kind === 'heal' || S.all ? 1 + .2 * stRank(id) : 1);
+  const power = stAbilityPower(S,s,b,rkC);
+  if(S.kind==='heal'||S.kind==='buff'){b.turn='anim';stRenderBattle();}
   if (S.kind === 'heal' || S.kind === 'buff' || S.all) stMaster(id);
   if (S.kind === 'heal') {
     d.mp -= COST; const h = Math.round(power + 10); d.hp = Math.min(s.hp, d.hp + h); if (b.ally) { b.ally.hp = Math.min(b.ally.maxHp, b.ally.hp + h * .7); stNum('a', '+' + Math.round(h * .7), '#6be08a'); stBurst('a', '#6be08a', 12); }
@@ -9081,14 +9085,11 @@ function stUseSkill(id) {
     d.mp -= COST; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
     for (const f of b.foes) if (f.hp > 0) {
       const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def); total += dm; left++;
-      ST.nextShot = SK_SHOT[id]; stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (id === 'lightning') stEffect('chain', f.id, SK_COLOR[id], CPOW, b.foes.filter(x => x.hp > 0).map(x => x.id)); if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } const dl = Math.min(dm, f.hp); f.hp = Math.max(0, f.hp - dm); f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff', CPOW); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dl); if (--left === 0) setTimeout(stEndTurn, 250); });
+      ST.nextShot = SK_SHOT[id]; stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (id === 'lightning') stEffect('chain', f.id, SK_COLOR[id], CPOW, b.foes.filter(x => x.hp > 0).map(x => x.id)); if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } const dl = Math.min(dm, f.hp); f.hp = Math.max(0, f.hp - dm); stAbilityEffects(S,f,dl,s); f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff', CPOW); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dl); if (--left === 0) setTimeout(stEndTurn, 250); });
     }
     ST.nextShot = null; sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
-  stPick(f => { d.mp -= COST; ST.curSkill = id; stPlayerHit(f, power, S.kind, (t, dm) => {
-    if (S.burn) t.burn = 2; if (S.poison) t.poison = 3; if (S.slow && Math.random() < (S.slowP || .5)) { t.frozen = 1; stNum(t.id, 'Frozen', '#9fe6ff'); }
-    if (S.drain) { d.hp = Math.min(s.hp, d.hp + Math.round(dm / 2)); stNum('p', '+' + Math.round(dm / 2), '#6be08a'); stBurst('p', '#b06bff', 10); }
-  }, SK_COLOR[id]); });
+  stPick(f => { if(b.turn!=='player'||d.mp<COST)return;d.mp -= COST; ST.curSkill = id; stPlayerHit(f, power, S.kind, (t, dm) => stAbilityEffects(S,t,dm,s), SK_COLOR[id]); });
 }
 const ST_SCROLLS = { // read in battle from Items, except Return which you read on the road
   sc_return: {name: 'Scroll of Return', price: 40, field: true, desc: 'Teleport to any town or land you have reached.'},
@@ -9191,8 +9192,8 @@ function stEnemyPhase() {
     }
     const f = alive[i++];
     if (f.hp <= 0) return next();
-    if (f.w && f.w.bleed) { const bd = Math.min(f.hp, Math.max(3, Math.round(f.maxHp * .05))); f.hp -= bd; f.w.bleed--; stNum(f.id, bd, '#ff4a4a'); stGore(f.id, 6, false); if (f.hp <= 0) { f.deadT = 0; stLog(`${f.name} bleeds out.`); if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
-    if (f.burn || f.poison) { const dot = Math.min(f.hp, Math.round(f.maxHp * .06)); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
+    if (f.w && f.w.bleed) { const bd = stDotDamage(f,.05,3); f.hp -= bd; f.w.bleed--; stNum(f.id, bd, '#ff4a4a'); stGore(f.id, 6, false); if (f.hp <= 0) { f.deadT = 0; stLog(`${f.name} bleeds out.`); if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
+    if (f.burn || f.poison) { const dot = stDotDamage(f); f.hp -= dot; stNum(f.id, dot, f.burn ? '#ff9a4a' : '#9cff3a'); stBurst(f.id, f.burn ? '#ff7a2a' : '#9cff3a', 8); if (f.hp <= 0) f.deadT = 0; if (f.burn) f.burn--; if (f.poison) f.poison--; stLog(`${f.name} suffers ${dot} damage over time.`); if (f.hp <= 0) { if (b.foes.every(x => x.hp <= 0)) return stEndBattle('won'); return setTimeout(next, 450); } }
     if (f.frozen) { f.frozen = 0; stLog(`${f.name} is frozen solid and can't move!`); return setTimeout(next, 450); }
     const moves = ST_FOE_MOVES[f.key];
     if (moves && Math.random() < (f.boss ? .45 : .5)) { // a named move: called out, then it lands

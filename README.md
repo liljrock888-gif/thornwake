@@ -118,8 +118,29 @@ people start playing, and move to a paid plan if you get close to the limit.
 
 ## Updating the game
 
-`game/thornwake.html` is the same file as the Claude artifact. Replace it with a
-newer copy and redeploy; `npm run build` wraps it into `public/index.html`.
+`npm run build` combines `game/thornwake.html`, `game/homes-classes.js`, and
+`game/balance.js` into `public/index.html`. Keep these modules together when updating.
+Production uses normal browser persistence; `npm run build:preview` creates a
+separate sandbox-compatible, session-only `preview/` build.
+
+### Economy and class balance
+
+- Property gold prices: Willowbank Cottage 250; Harrowfield Homestead 600;
+  Saltmere Harbor House 900; Thornwake Townhouse 1800; Briarwood Manor 4800;
+  Suncrest Estate 10000. Farmer Odo's existing alignment discount is unchanged.
+- Existing deeds and strongbox gold are retained without repurchase or automatic
+  refunds. Existing mastery and matching legacy ability migration are preserved.
+- All eleven classes have separate stat growth, mana costs and role descriptions.
+  Every class ability retains its class owner and level gate. Monk ki/healing
+  uses attack; Druid Rootquake uses magic.
+- Area effects apply on successful hits, including Cinder Tempest burning and
+  Crypt Plague's poison plus 25% drain. Boss DoTs are 1% max health, capped at
+  `12 + player level × 3`; boss interrupt chances are 40% of the normal chance.
+- Heal/buff actions lock immediately. Drain uses actual damage, never overkill.
+  Follow-up attacks respect defense type and guarding.
+- `npm run test:balance` checks five milestone levels for all eleven classes,
+  economy targets, scaling, action locking, hit effects and boss resistance.
+  These deterministic regression envelopes do not replace full-campaign playtesting.
 
 ## Before you go live
 

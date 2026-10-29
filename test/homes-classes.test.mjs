@@ -57,7 +57,7 @@ try{
     await page.getByRole('button',{name:new RegExp('^Buy '+name)}).click();
   }
   ok(await page.getByRole('button',{name:'Deed owned',exact:true}).count()===6,'all six deeds purchased once');
-  ok(await page.evaluate(()=>__TW_QA.data().gold===50000-600-450-1200-2200-6500-14000),'exact purchase total deducted');
+  ok(await page.evaluate(()=>__TW_QA.data().gold===50000-600-250-900-1800-4800-10000),'exact purchase total deducted');
   await page.setViewportSize({width:375,height:812});await shot('housing-phone');
   ok(await page.locator('#stMenu').evaluate(e=>e.scrollWidth<=e.clientWidth+2),'phone catalog has no horizontal clipping');
   await page.setViewportSize({width:1440,height:900});

@@ -65,13 +65,13 @@ function stSyncClass(d){
 function stPanelBack(m){const b=el('button','','Resume exploring');b.addEventListener('click',stCloseMenu);m.appendChild(b);}
 function stClassMenu(){
   const d=stData();stSyncProgress(false);const m=stSystemPanel(ST_CLASSES[d.cls].name+' ability path');
-  m.append(el('p','',`Level ${d.lv} · ${d.gold} gold. Only your own class can learn these abilities. Basic attack, items and racial powers are separate.`));
+  m.append(el('p','',`Level ${d.lv} · ${d.gold} gold. ${ST_CLASSES[d.cls].role||''} Only your own class can learn these abilities. Basic attack, items and racial powers are separate.`));
   const add=(id,auto)=>{
     const S=ST_SKILLS[id],known=d.skills.includes(id),fee=30+S.level*12,card=el('div','progressCard');
     const b=el('button','',known?'Learned':auto?'Milestone unlock':`Learn ${S.name} (${fee} gold)`);
     b.disabled=known||auto||d.lv<S.level||d.gold<fee||!stOwnsSkill(d,id);
     b.addEventListener('click',()=>{if(d.skills.includes(id)||!stOwnsSkill(d,id)||d.gold<fee)return;d.gold-=fee;d.skills.push(id);stSave();stClassMenu();});
-    card.append(el('h4','',S.name+' · Level '+S.level),el('p','',S.desc+` ${S.mp} MP.`),b);m.appendChild(card);
+    card.append(el('h4','',S.name+' · Level '+S.level),el('p','',S.desc+` ${stSkCost(S)} MP at your level.`),b);m.appendChild(card);
   };
   ST_CLASS_PATHS[d.cls].forEach((_,i)=>add(d.cls+'_'+i,false));
   m.append(el('h3','','Class milestones'));ST_MAGIC_TIERS.forEach((_,i)=>add(stTierSkill(d.cls,i),true));
@@ -133,9 +133,9 @@ function stHousingMenu(){
   for(const P of ST_PROPERTIES){
     const owned=stPropertyOwned(d,P.id),card=el('div','progressCard'),buy=el('button','',owned?'Deed owned':`Buy ${P.name} (${P.price} gold)`);
     buy.disabled=owned||d.gold<P.price;
-    buy.addEventListener('click',()=>{if(stPropertyOwned(d,P.id)||d.gold<P.price)return;d.gold-=P.price;d.properties=d.properties||{};d.properties[P.id]={bought:Date.now(),storedGold:0};if(P.id==='homestead'){d.farm={plots:{}};d.seeds={...(d.seeds||{}),wheat:(d.seeds?.wheat||0)+6,carrot:(d.seeds?.carrot||0)+3};}stSave();sfx('levelup');stHousingMenu();});
+    buy.addEventListener('click',()=>{if(stPropertyOwned(d,P.id)||d.gold<P.price)return;d.gold-=P.price;d.properties=d.properties||{};d.properties[P.id]={bought:Date.now(),pricePaid:P.price,storedGold:0};if(P.id==='homestead'){d.farm={plots:{}};d.seeds={...(d.seeds||{}),wheat:(d.seeds?.wheat||0)+6,carrot:(d.seeds?.carrot||0)+3};}stSave();sfx('levelup');stHousingMenu();});
     const visit=el('button','','Visit '+P.name);visit.addEventListener('click',()=>{stCloseMenu();stEnterMap('world',P.x+.5,P.y+2);});
-    card.append(el('h4','',P.name+(P.estate?' · Estate':'')),el('p','',P.desc),el('small','hint',`${P.style} · World (${P.x+1}, ${P.y+2})`),buy,visit);m.appendChild(card);
+    card.append(el('h4','',P.name+(P.estate?' · Estate':'')),el('p','',P.desc),el('p','hint',P.target||''),el('small','hint',`${P.style} · World (${P.x+1}, ${P.y+2})`),buy,visit);m.appendChild(card);
   }stPanelBack(m);
 }
 const stThiefRank=g=>['Outsider','Cutpurse','Footpad','Shadow','Nightblade','Master Thief','Guildmaster'][Math.min(6,(g?.done||[]).length+(g?1:0))];

@@ -41,3 +41,22 @@ Original prompt: Fix the menu overlap first. Change the menu artwork to a dark f
 - Reward/gate tests stage high-level saves and one-hit enemies; sustained combat balance and the full economy require longer playtesting.
 - This update does not add the older proposed boat interiors, cinematic expansion or rescue-companion questlines.
 - Production must remain free of mutable QA hooks; test-only instrumentation belongs in the browser suite.
+
+## Property and class tuning, release 58
+- Cottage 250, farm 600, harbor 900, townhouse 1800, manor 4800, Suncrest 10000 gold.
+- Added class-specific base stats/growth and role copy for eleven classes. Tuned
+  eight learnable moves and five milestones per class without changing ownership,
+  mastery or unlock gates. Class menus show actual level-scaled mana costs.
+- Corrected Monk attack scaling, Druid magical Rootquake, area statuses and drain,
+  boss interruption/DoT resistance, actual-damage healing and guarded follow-ups.
+- Heal/buff casts lock immediately; rapid repeated calls cannot spend twice.
+- Existing deeds/storage remain intact. Save normalization only clamps over-cap
+  HP/MP and does not heal. Production accounts, payment and other modes untouched.
+- Added `test/balance.test.mjs`, with response-only instrumentation; production
+  has no mutable test hook. Full-campaign and player-feedback balancing remains open.
+- Final release checks: 248 balance, 79 housing/class/guild, 43 browser/progression,
+  and 34 payment regression checks passed (404 total). Desktop/phone housing and
+  class paths were visually inspected. The required game-client smoke test
+  completed; its static-server `/api/config` 404 is expected, not a runtime exception.
+- Production and preview builds contain no mutable QA exports. The preview
+  remains session-only; normal-origin save/reload is covered by the housing suite.
