@@ -22,6 +22,9 @@ Original prompt: Fix the menu overlap first. Change the menu artwork to a dark f
 - Corrected test assumptions about default headwear and waiting for arena loading.
 - Final purchase regression: 34 passed, 0 failed. Final browser regression: 43 checks passed after compact-stage adjustment, with no page runtime errors.
 - Required game-client smoke test completed and its screenshot/state were reviewed. Static hosting returns the expected `/api/config` 404 because serverless payment endpoints are not present; live payments were not exercised.
+- Pushed feature commit f7d8756 to main and verified the remote hash. Updated the existing preview asset ce27ff70-28f9-46f5-bb6b-7ecb818705f4.
+- Fresh hosted-context checks passed for title/art, responsive creator, playable new story, three boss rumors, Help and Quick Match setup, with no page runtime errors. QA contexts were closed.
+- Hosted refresh persistence is blocked by the preview sandbox: accessing localStorage throws because the document lacks allow-same-origin. This is a hosting limitation, not a successful persistence check. The existing game has no file-export backup; use normal-origin hosting for persistent saves.
 
 ## Remaining playtesting
 - Reward/gate tests stage high-level saves and one-hit enemies; sustained combat balance and the full economy require longer playtesting.

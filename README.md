@@ -17,6 +17,8 @@ Run `npm test` for purchase-flow checks. For browser checks, run `npm run build`
 
 The browser suite uses disposable saves and response-only instrumentation to stage high-level encounters. It checks UI, rewards and persistence without shipping mutable test hooks. Staged one-hit victories do not establish full combat balance.
 
+The hosted Computer preview runs in a sandbox that blocks localStorage. Story progress works in memory there, but does not survive a page refresh. Use a normal-origin deployment such as Vercel for browser save persistence; this build does not include a file-export backup. Static previews also do not run the serverless payment endpoints below.
+
 ## Payment setup
 
 This is Thornwake set up to sell Crowns for real money through Stripe Checkout.
