@@ -118,9 +118,13 @@ try{
   ok(await page.evaluate(()=>__CASTLE_QA.state.mode==='battle'&&__CASTLE_QA.state.battle.bossId==='king'),'throne starts the actual Hollow King battle');
   await shot('boss-desktop');
   // A test-only one-hit fixture verifies the unchanged victory path, not balance.
-  await page.evaluate(()=>{for(const f of __CASTLE_QA.state.battle.foes)f.hp=1;});
-  await page.locator('#stActions button[title^="Basic attack."]').click();
-  await page.waitForFunction(()=>__CASTLE_QA.data().flags.king===true);
+  for(let attempt=0;attempt<8&&!await page.evaluate(()=>__CASTLE_QA.data().flags.king===true);attempt++){
+    await page.waitForFunction(()=>__CASTLE_QA.state.battle?.turn==='player');
+    await page.evaluate(()=>{for(const f of __CASTLE_QA.state.battle.foes)f.hp=1;});
+    await page.locator('#stActions button[title^="Basic attack."]').click();
+    await page.waitForFunction(()=>__CASTLE_QA.data().flags.king===true||__CASTLE_QA.state.battle?.turn==='player');
+  }
+  ok(await page.evaluate(()=>__CASTLE_QA.data().flags.king===true),'Hollow King can be defeated with real combat controls');
   await page.locator('#stDialog').waitFor({state:'visible'});
   await dismiss();
   await page.getByRole('button',{name:'Claim rewards',exact:true}).click();

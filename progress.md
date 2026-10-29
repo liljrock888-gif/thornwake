@@ -9,6 +9,8 @@ Original prompt: Fix the menu overlap first. Change the menu artwork to a dark f
 - Regression verification: 106 general browser checks, 79 housing/class/guild checks, 248 economy/class balance checks, and 34 purchase-flow checks pass. Castle-specific browser tests exercise real keyboard navigation, both treasure rooms, sealed/eligible entry, save/continue, the level gate, boss combat and the exit.
 - Vercel CLI access was rejected; no live production write or alternate deployment route was attempted. Update the owned Perplexity preview, not production.
 - Additional request: add knights and a castle. Add four armored, named knight NPCs with pre/post-boss dialogue and ensure all castle enemy patrol groups contain knights. Keep NPCs away from the central gate, treasure rooms and throne so interactions stay accessible.
+- All 23 castle-specific checks passed, including real keyboard navigation, all four knight conversations, boss combat, reward claiming, post-boss dialogue, save/continue and exit. Combat tests retry normal attacks to tolerate legitimate misses rather than assuming the first attack hits.
+- Updated owned preview asset ce27ff70-28f9-46f5-bb6b-7ecb818705f4. Verified in a fresh browser: launcher/new story, Sir Cedric dialogue, real castle gate entry, post-boss captain dialogue, character menu and 375px viewport without overflow. No live preview runtime errors. Production Vercel and maintenance status remain unchanged.
 
 ## Homes, class paths and the Veiled Hand, October 28, 2026
 - Added `game/homes-classes.js`, inserted into the game closure during build. Five new gold-priced properties join the original farm, including two estates with separate walkable gardens. Deeds, home strongboxes and furnishing colors persist on ordinary hosting.
