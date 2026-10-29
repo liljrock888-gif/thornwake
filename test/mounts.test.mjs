@@ -68,10 +68,13 @@ try{
     const fare=Number(label.match(/\((\d+) gold\)/)[1]),before=await page.evaluate(()=>__MOUNT_QA.data().gold);
     await button.click();
     await page.waitForFunction(key=>__MOUNT_QA.data().map===key&&__MOUNT_QA.state.mode==='walk',key);
-    await dismiss();await page.evaluate(()=>{__MOUNT_QA.state.foes=[];__MOUNT_QA.state.safe=1000;});
+    // Isolate port/ride checks before the arrival card ends and hunters resume.
+    await page.evaluate(()=>{__MOUNT_QA.state.foes=[];__MOUNT_QA.state.safe=1000;});
+    await dismiss();
     ok(await page.evaluate(()=>{const d=__MOUNT_QA.data();return d.riding&&d.mount==='mare'&&d.mounts.length===1;}),name+' preserves the selected, owned and mounted horse');
     ok(await page.evaluate(()=>__MOUNT_QA.data().gold)===before-fare,name+' charges only the displayed ship fare');
     await page.waitForFunction(key=>__MOUNT_QA.draws[key]>0,key);
+    await page.getByRole('button',{name:'Dismount',exact:true}).waitFor({state:'visible'});
     ok(await page.locator('#stRide').isVisible()&&(await page.locator('#stRide').innerText())==='Dismount',name+' draws the horse and exposes Dismount');
     await page.locator('#stRide').click();
     ok(await page.evaluate(()=>!__MOUNT_QA.data().riding),name+' allows dismounting');
@@ -115,4 +118,8 @@ try{
   ok(await page.evaluate(()=>__MOUNT_QA.data().riding),'flying mount refuses an unsafe sea dismount');
   ok(errors.length===0,'no browser runtime errors');
   console.log(`${checks} island mount checks passed`);
+}catch(error){
+  console.error('Failure state:',await page.evaluate(()=>({mode:__MOUNT_QA.state.mode,map:__MOUNT_QA.data().map,riding:__MOUNT_QA.data().riding,rideHidden:document.querySelector('#stRide').hidden,rideText:document.querySelector('#stRide').textContent})).catch(()=>null));
+  await page.screenshot({path:'test-results/mounts-failure.png'}).catch(()=>{});
+  throw error;
 }finally{await browser.close();}
