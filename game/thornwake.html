@@ -6154,20 +6154,20 @@ const ST_DUNGEONS = {
     '#..X.....#.X.....c...#',
     '#........#...........#',
     '######################']},
-  keep: {name: 'The Hollow Keep', boss: 'king', lit: true, pool: [['knight'], ['knight', 'cultist'], ['cultist', 'cultist']], theme: {floor: '#3a3036', wall: '#16121a', glow: '#b06bff'}, exit: [24, 6], rows: [
+  keep: {name: 'Hollow Castle', castle: true, boss: 'king', lit: true, pool: [['knight'], ['knight', 'cultist'], ['cultist', 'cultist']], theme: {floor: '#686366', wall: '#36343f', glow: '#edbd72'}, exit: [24, 6], rows: [
     '######################',
     '#E..#..............#c#',
     '#...#..X........X..#.#',
-    '#...#..............#.#',
-    '#...######....######.#',
-    '#.........#..#.......#',
-    '#..X......#..#....X..#',
-    '#.........#..#.......#',
-    '####..#####..#####..##',
+    '#....................#',
+    '#...####..##..####...#',
+    '#....................#',
+    '#..X..#........#..X..#',
+    '#.....#........#.....#',
+    '####..#........#..####',
     '#c....#..........#...#',
-    '#.....#....B.....#..X#',
+    '#..........B........X#',
     '#..X..#..........#...#',
-    '#.....#..........#...#',
+    '#....................#',
     '######################']},
   duskwatch: {name: 'Duskwatch Castle', boss: 'witch', lit: true, pool: [['cultist'], ['imp', 'cultist'], ['fiend'], ['knight', 'imp']], theme: {floor: '#4a3a2c', wall: '#1e1610', glow: '#ff5a1f'}, exit: [44, 9], rows: [
     '######################',
@@ -7633,7 +7633,7 @@ function stJournal(tab) {
   } else if (tab === 'Places') {
     const seen = d.places || {}, list = Object.entries(seen).sort((a, b) => a[1] - b[1]);
     sec('Visited', list.length ? list.map(([n, lv]) => `${n} · level ${lv}${lv > d.lv ? ' (dangerous)' : ''}`).join('\n') : 'Nowhere yet.');
-    sec('Rumored', [['The Sunken Catacombs', 4], ['The Ice Crypt', 7], ['The Hollow Keep', 12], ['Duskwatch Castle', 15], ['The Celestial Stair', 18], ['Rougemarais (ship, level 20)', 20], ['Valdris (ship, level 26 or C clearance)', 26], ['Aetherfall (ship, level 41 or A clearance)', 41]].filter(([n]) => !Object.keys(seen).some(k => n.startsWith(k.split(',')[0]))).map(([n, lv]) => `? ${n} · level ${lv}`).join('\n'));
+    sec('Rumored', [['The Sunken Catacombs', 4], ['The Ice Crypt', 7], ['Hollow Castle', 12], ['Duskwatch Castle', 15], ['The Celestial Stair', 18], ['Rougemarais (ship, level 20)', 20], ['Valdris (ship, level 26 or C clearance)', 26], ['Aetherfall (ship, level 41 or A clearance)', 41]].filter(([n]) => !Object.keys(seen).some(k => n.startsWith(k.split(',')[0]))).map(([n, lv]) => `? ${n} · level ${lv}`).join('\n'));
     sec('Reputation', Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t)).map(t => `${ST_TOWN_NAME[t]}: ${stRepName(stRepOf(t))}`).join('\n') || 'No town has formed an opinion of you yet.');
   } else if (tab === 'People') {
     const met = Object.entries(d.bonds || {}).filter(([k, b]) => ST_SOCIAL[k] && b.talked).sort((a, b) => b[1].pts - a[1].pts);
@@ -8135,6 +8135,20 @@ function stDrawDungeonCanvas(key) {
   const D = ST_DUNGEONS[key], rows = D.rows, c = document.createElement('canvas'); c.width = rows[0].length * ST_TILE; c.height = rows.length * ST_TILE;
   const g = c.getContext('2d'), R = mulberry(23);
   rows.forEach((row, y) => [...row].forEach((t, x) => {
+    if (D.castle && t === '#') {
+      const px=x*ST_TILE,py=y*ST_TILE;
+      g.fillStyle=D.theme.wall;g.fillRect(px,py,64,64);
+      for(let sy=0;sy<4;sy++)for(let sx=-1;sx<3;sx++){
+        const bx=px+sx*32+(sy%2)*16;
+        g.fillStyle=(sx+sy)%2?'#4d4a55':'#55515b';g.fillRect(Math.max(px,bx+1),py+sy*16+1,Math.max(0,Math.min(px+64,bx+31)-Math.max(px,bx+1)),14);
+      }
+      if(rows[y+1]&&rows[y+1][x]!=='#'){
+        g.fillStyle='#b6aaa0';g.fillRect(px,py+58,64,6);
+        if(x%3===0){g.fillStyle='#6c2637';g.fillRect(px+20,py+12,24,41);g.fillStyle='#d9b46b';g.fillRect(px+18,py+10,28,4);g.beginPath();g.moveTo(px+32,py+22);g.lineTo(px+39,py+33);g.lineTo(px+32,py+44);g.lineTo(px+25,py+33);g.closePath();g.strokeStyle='#d9b46b';g.lineWidth=2;g.stroke();}
+        else if(x%3===1){g.fillStyle='#211b1c';g.fillRect(px+28,py+28,8,23);g.fillStyle='#ffc97e';g.shadowColor='#ffb657';g.shadowBlur=22;g.beginPath();g.ellipse(px+32,py+27,5,10,0,0,7);g.fill();g.shadowBlur=0;}
+      }
+      return;
+    }
     if (D.lit && t === '#' && rows[y + 1] && rows[y + 1][x] !== '#' && R() < .45) { // castle walls facing a hall
       const px = x * ST_TILE, py = y * ST_TILE; g.fillStyle = D.theme.wall; g.fillRect(px, py, ST_TILE, ST_TILE);
       if (D.home) { if (R() < .6) { g.fillStyle = '#1a2a3a'; g.fillRect(px + 16, py + 18, 32, 30); g.fillStyle = 'rgba(160,190,220,.35)'; g.fillRect(px + 18, py + 20, 28, 26); g.fillStyle = D.theme.wall; g.fillRect(px + 31, py + 18, 3, 30); g.fillRect(px + 16, py + 32, 32, 3); } else { g.fillStyle = '#6a8a3a'; for (let i = 0; i < 4; i++) g.fillRect(px + 14 + i * 10, py + 22, 4, 18 + (i % 2) * 6); g.fillStyle = '#3a2a1a'; g.fillRect(px + 10, py + 18, 44, 4); } }
@@ -8147,6 +8161,11 @@ function stDrawDungeonCanvas(key) {
     if (t !== '#') { g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 2; g.strokeRect(px + 1, py + 1, 31, 31); g.strokeRect(px + 33, py + 33, 30, 30); if (R() < .15) { g.fillStyle = '#d8d0c0'; g.fillRect(px + R() * 50, py + R() * 50, 8, 3); }
       if (R() < .07 && !D.home && !D.holy) { g.fillStyle = 'rgba(110,10,14,.7)'; g.beginPath(); g.ellipse(px + 16 + R() * 32, py + 16 + R() * 32, 8 + R() * 14, 5 + R() * 8, R() * 3, 0, 7); g.fill(); for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(px + R() * 64, py + R() * 64, 1.5 + R() * 2, 0, 7); g.fill(); } } }
     else { g.fillStyle = 'rgba(255,255,255,.04)'; g.fillRect(px, py, ST_TILE, 10); }
+    if(D.castle && t!=='#' && ((x>=10&&x<=12&&y>=2&&y<=11)||(y===10&&x>=7&&x<=16))){
+      g.fillStyle='#702b3c';g.fillRect(px,py,64,64);g.fillStyle='#c6a56d';
+      if(x===10&&y!==10)g.fillRect(px+5,py,3,64);if(x===12&&y!==10)g.fillRect(px+56,py,3,64);
+      if(y===10){g.fillRect(px,py+5,64,3);g.fillRect(px,py+56,64,3);}
+    }
     if (t === 'f') { g.fillStyle = '#4a4440'; g.fillRect(px + 4, py + 4, 56, 56); g.fillStyle = '#1a1210'; g.fillRect(px + 14, py + 24, 36, 32); g.fillStyle = '#ff7a2a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 30; g.beginPath(); g.moveTo(px + 20, py + 56); g.lineTo(px + 32, py + 28); g.lineTo(px + 44, py + 56); g.fill(); g.shadowBlur = 0; }
     if (t === 'b') { g.fillStyle = '#4a2a18'; g.fillRect(px + 6, py + 4, 52, 58); g.fillStyle = '#8a2a2a'; g.fillRect(px + 9, py + 22, 46, 38); g.fillStyle = '#e8e0d0'; g.fillRect(px + 12, py + 8, 40, 12); }
     if (t === 't') { g.fillStyle = '#6a4424'; g.fillRect(px + 2, py + 6, 60, 52); g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(px + 2, py + 52, 60, 6); g.fillStyle = '#d8c8a0'; g.beginPath(); g.arc(px + 22, py + 26, 6, 0, 7); g.fill(); g.fillStyle = '#c9a24a'; g.fillRect(px + 40, py + 20, 6, 14); }
@@ -8202,6 +8221,7 @@ function stDrawMapCanvas() {
     if (t === 'Q') { g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(px + 32, py + 54, 18, 6, 0, 0, 7); g.fill(); g.fillStyle = '#6ad6ff'; g.beginPath(); g.moveTo(px + 32, py + 2); g.lineTo(px + 46, py + 30); g.lineTo(px + 32, py + 54); g.lineTo(px + 18, py + 30); g.closePath(); g.fill(); g.fillStyle = '#d6f4ff'; g.beginPath(); g.moveTo(px + 32, py + 6); g.lineTo(px + 38, py + 28); g.lineTo(px + 32, py + 46); g.closePath(); g.fill(); }
     if (t === 'S') { g.fillStyle = '#3a3330'; g.beginPath(); g.ellipse(px + 32, py + 48, 20, 8, 0, 0, 7); g.fill(); g.strokeStyle = '#c9c0b0'; g.lineWidth = 4; g.beginPath(); g.moveTo(px + 32, py + 48); g.lineTo(px + 36, py + 14); g.stroke(); }
   }
+  stDrawCastleExterior(g);
   // big buildings, drawn over their 2x2 tiles so they tower over the villagers
   for (let y = 0; y < ST_H; y++) for (let x = 0; x < ST_W; x++) {
     const t = ST_MAP[y][x]; if (!'HIUK'.includes(t)) continue;
@@ -8228,6 +8248,41 @@ function stDrawMapCanvas() {
   }
   for(const I of ST_INFIRMARIES){const px=I.door[0]*ST_TILE,py=I.door[1]*ST_TILE;g.fillStyle='#aeb89f';g.fillRect(px+3,py-34,58,98);g.fillStyle='#465f56';g.beginPath();g.moveTo(px-5,py-34);g.lineTo(px+32,py-60);g.lineTo(px+69,py-34);g.fill();g.fillStyle='#293b35';g.fillRect(px+22,py+22,22,42);g.fillStyle='#e6d89e';g.fillRect(px+8,py-10,12,18);g.fillRect(px+45,py-10,10,18);g.beginPath();g.arc(px+32,py+7,8,0,Math.PI*2);g.fill();g.fillStyle='#465f56';g.beginPath();g.ellipse(px+32,py+7,3,6,.6,0,Math.PI*2);g.fill();g.textAlign='center';g.font='bold 9px sans-serif';g.fillStyle='#f2e7c9';g.fillText('INFIRMARY',px+32,py-67);g.textAlign='left';}
   ST.mapC = c;
+}
+function stDrawCastleExterior(g) {
+  // The illustration follows the existing solid wall footprint; the gate stays at [24,6].
+  const T=ST_TILE,left=20*T,top=T,right=29*T,bottom=7*T;
+  const masonry=(x,y,w,h)=>{
+    g.fillStyle='#55535e';g.fillRect(x,y,w,h);
+    g.strokeStyle='#34343e';g.lineWidth=2;
+    for(let by=0;by<h;by+=16){g.beginPath();g.moveTo(x,y+by);g.lineTo(x+w,y+by);g.stroke();for(let bx=(by/16%2)*24;bx<w;bx+=48){g.beginPath();g.moveTo(x+bx,y+by);g.lineTo(x+bx,Math.min(y+by+16,y+h));g.stroke();}}
+    g.fillStyle='#aaa39d';g.fillRect(x,y,w,5);g.strokeStyle='#22232e';g.lineWidth=3;g.strokeRect(x,y,w,h);
+  };
+  const battlements=(x,y,w)=>{for(let i=0;i<w;i+=28){g.fillStyle='#8f8991';g.fillRect(x+i,y-13,18,19);g.fillStyle='#bbb1a7';g.fillRect(x+i,y-13,18,3);}};
+  masonry(left,top,right-left,T);battlements(left,top,right-left);
+  masonry(left,top,T,bottom-top);masonry(right-T,top,T,bottom-top);
+  // A rear royal hall leaves the courtyard and all collision geometry legible.
+  g.fillStyle='#756e74';g.fillRect(left+2*T,top+T,5*T,T+20);
+  g.fillStyle='#303541';g.beginPath();g.moveTo(left+2*T-12,top+T);g.lineTo(left+4.5*T,top+15);g.lineTo(left+7*T+12,top+T);g.closePath();g.fill();
+  for(let i=0;i<5;i++){g.fillStyle='#f2c47e';g.fillRect(left+(2.5+i)*T-7,top+T+22,14,24);}
+  // Front curtain wall stops on either side of the playable gate.
+  masonry(left,bottom-T,4*T,T);masonry(left+5*T,bottom-T,4*T,T);
+  battlements(left,bottom-T,4*T);battlements(left+5*T,bottom-T,4*T);
+  for(const [x,y] of [[left,top],[right-T,top],[left,bottom-T],[right-T,bottom-T]]){
+    g.fillStyle='rgba(0,0,0,.28)';g.fillRect(x+8,y+4,T+10,T+10);
+    masonry(x-7,y-30,T+14,T+30);battlements(x-7,y-30,T+14);
+    g.fillStyle='#252431';g.fillRect(x+24,y-7,16,27);g.fillStyle='#edbb75';g.fillRect(x+29,y-3,6,18);
+    g.strokeStyle='#bb9a68';g.lineWidth=3;g.beginPath();g.moveTo(x+32,y-32);g.lineTo(x+32,y-71);g.stroke();
+    g.fillStyle='#742f43';g.beginPath();g.moveTo(x+34,y-70);g.lineTo(x+64,y-60);g.lineTo(x+34,y-49);g.closePath();g.fill();
+  }
+  const gx=24*T,gy=6*T;
+  masonry(gx-10,gy-40,T+20,T+40);battlements(gx-10,gy-40,T+20);
+  g.fillStyle='#191822';g.beginPath();g.moveTo(gx+7,gy+64);g.lineTo(gx+7,gy+12);g.arc(gx+32,gy+12,25,Math.PI,0);g.lineTo(gx+57,gy+64);g.closePath();g.fill();
+  g.strokeStyle='#b68cda';g.lineWidth=2;g.stroke();
+  g.strokeStyle='#8b8588';g.lineWidth=3;for(let i=0;i<5;i++){g.beginPath();g.moveTo(gx+12+i*10,gy+12);g.lineTo(gx+12+i*10,gy+62);g.stroke();}
+  for(const dx of [-36,87]){g.fillStyle='#572439';g.fillRect(gx+dx,gy-20,18,38);g.fillStyle='#d7b36f';g.fillRect(gx+dx-2,gy-22,22,4);}
+  g.fillStyle='#292731';g.fillRect(gx-72,gy+79,208,30);g.strokeStyle='#a38a67';g.lineWidth=1;g.strokeRect(gx-72,gy+79,208,30);
+  g.fillStyle='#f0dfbd';g.font='600 16px sans-serif';g.textAlign='center';g.fillText('HOLLOW CASTLE',gx+32,gy+100);g.textAlign='left';
 }
 function startStory(fresh) {
   if (!stData()) return openStoryMenu();
@@ -8539,7 +8594,7 @@ function stInteract(pre) {
     if (L.item) { d.flags[L.item] = true; got.push(L.label); }
     const lt = ST_LETTERS[it.c.id]; if (lt && !d.flags['vletter' + lt]) { d.flags['vletter' + lt] = true; got.push('a letter sealed in red wax'); setTimeout(() => stSay([['', ['Letter I: "...the child must never learn the name Delacroix-Noir. Drown it in the Vale. Let the ash have it..."', 'Letter II, in Sister Vey\'s hand: "...I nursed the Countess\'s child for a year before they took it. I still dream of its eyes..."', 'Letter III: "...the gravedigger knows where they buried the nurse. Paid him to forget. The crypt in Rougemarais will open for the blood. Only the blood..."'][lt - 1]], ['', `Bloodline letters found: ${stLetters()} of 3.` + (stLetters() >= 3 ? ' Somewhere in Rougemarais, a crypt will open for you.' : '')]]), 50); }
     sfx('pickup'); stSay([['', 'You open the chest and find ' + got.join(' and ') + '.']]);
-  } else if (it.kind === 'gate' && d.ch >= 3) stSay([['', 'The seal shatters as the shards draw near. The gate of the Hollow Keep groans open onto a hall of cold torches.']], null, [['Enter the keep', () => stEnterMap('keep', 2, 2)], ['Not yet', null]]);
+  } else if (it.kind === 'gate' && d.ch >= 3) stSay([['Hollow Castle', "The seal shatters as the shards draw near. Beyond the gatehouse, royal banners hang above stone galleries. A crimson carpet leads to the Hollow King's throne."]], null, [['Enter the castle', () => stEnterMap('keep', 2, 2)], ['Not yet', null]]);
   else if (it.kind === 'gate') stSay([['', 'A seal of violet light bars the gate. It hums like a held breath. Two shards would break it. You carry ' + Math.max(0, d.ch - 1) + '.']]);
   else if (it.kind === 'shrine') stRest();
   else if (it.kind === 'player') stPlayerMenu(it.p);
@@ -8592,7 +8647,7 @@ function stInteract(pre) {
     if (d.lv < need) return stSay([['', `${D.name}. Required level: ${need}. You are level ${d.lv}. Whatever waits in there would make short work of you. Grow stronger first.`]]);
     stSay([['', D.infirmary?`${D.name}. Fresh linen, warm lamplight and the scent of healing herbs. Treatment is free.`:D.lit ? `The iron-bound doors of ${D.name} stand ajar. Firelight inside, and the smell of black candles.` : `Stairs fall away into the dark. A smell of old stone and older death. This is ${D.name}.`]], null,
       [[D.lit ? 'Enter' : 'Descend', () => stEnterMap(it.key,D.infirmary?6:2,D.infirmary?6:2)], ['Turn back', null]]);
-  } else if (it.kind === 'exit') { const D = ST_DUNGEONS[d.map]; if (D.home) { stEnterMap('world', D.exit[0], D.exit[1] + 1); return; } stSay([['', 'Grey light above. The surface.']], null, [['Climb out', () => stEnterMap(D.exitMap || 'world', D.exit[0], D.exit[1] + 1)], ['Stay', null]]); }
+  } else if (it.kind === 'exit') { const D = ST_DUNGEONS[d.map]; if (D.home) { stEnterMap('world', D.exit[0], D.exit[1] + 1); return; } stSay([['', D.castle ? 'Daylight spills through the gatehouse. Castle Road waits beyond the portcullis.' : 'Grey light above. The surface.']], null, [[D.castle ? 'Leave the castle' : 'Climb out', () => stEnterMap(D.exitMap || 'world', D.exit[0], D.exit[1] + 1)], ['Stay', null]]); }
   else if (it.kind === 'boss') {
     const b = it.b;
     if(ST_FOES[b.id]?.encounter)return stSay([['',ST_FOES[b.id].encounter]],null,[['Face the guardian',()=>stBossFight(b.id)],['Retreat',null]]);

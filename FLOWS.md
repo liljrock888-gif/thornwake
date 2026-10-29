@@ -1,5 +1,16 @@
 # Thornwake menu regression checks
 
+## Hollow King's castle
+- Requested change: the Hollow King remains the boss; the Hollow Knight enemy is unchanged.
+- Castle Road shows a continuous stone fortress with four towers, battlements, banners and an arched sealed gate. The entry tile remains [24,6].
+- Without both shards, interact at the gate: the seal explains the requirement and does not admit the player.
+- With both shards, interact and choose Enter the castle: load Hollow Castle with masonry, carpet, banners and a throne.
+- Walk from the existing entrance to both treasure rooms and the throne without crossing walls. Every floor tile and encounter is connected.
+- Interact with the throne to start the Hollow King fight; victory preserves the existing story flag, crown and chapter rewards.
+- Return through the entrance and choose Leave the castle: arrive on Castle Road, not inside its blocked gate.
+- Save/quit/continue inside the castle preserves map, position and opened treasure. Existing keep saves retain their map key and chest IDs.
+- Check desktop and 375px phone, locked gate, repeated treasure interaction, menu/guide/journal, arena and the existing browser/purchase suites.
+
 ## Economy and class balance
 - Cottage costs 250 gold; farm remains 600; harbor house 900; townhouse 1800; manor 4800; Suncrest 10000. Existing deeds, stored gold and mastery remain intact.
 - Housing cards explain progression targets; Farmer Odo still sells the same 600-gold farm with existing alignment discounts.
