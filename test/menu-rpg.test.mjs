@@ -90,7 +90,10 @@ try{
   const initialTip=await page.locator('#stLoadTip').innerText();await page.getByRole('button',{name:'Another tip',exact:true}).click();
   ok((await page.locator('#stLoadTip').innerText())!==initialTip,'loading card cycles practical tips');
   await shot('creation-loading-desktop');await page.setViewportSize({width:375,height:812});await shot('creation-loading-phone');
-  if(await page.getByRole('button',{name:'Enter the Vale',exact:true}).isVisible())await page.getByRole('button',{name:'Enter the Vale',exact:true}).click();
+  if(await page.getByRole('button',{name:'Enter the Vale',exact:true}).isVisible()){
+    try{await page.getByRole('button',{name:'Enter the Vale',exact:true}).click({timeout:1000});}
+    catch(error){await page.locator('#stLoad').waitFor({state:'hidden',timeout:5000});} // welcome card can finish automatically during responsive screenshots
+  }
   await page.locator('#stLoad').waitFor({state:'hidden'});await page.setViewportSize({width:1440,height:900});await dismiss();
   ok((await state()).player?.name==='Ash Tester','creation reaches playable story');
   ok(await page.evaluate(()=>__TW_QA.data().skills.includes('emberspark')),'tier I spell granted');

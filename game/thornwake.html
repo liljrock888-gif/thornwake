@@ -3992,6 +3992,7 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 // What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
 const UPDATES = [
+  {id:61,date:'Oct 29',title:'Mounts Across the Sea',items:['Take your chosen mount by ship to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Mount ownership, selection and riding state travel with you.','Ride, dismount and call your mount on every outdoor island and land. The mount is visible and retains its normal speed.','Indoor buildings and dungeons remain on foot. Ship fares, travel requirements, solid buildings and hard map boundaries are unchanged.']},
   {id:60,date:'Oct 29',title:'Hollow Castle & the Royal Watch',items:['The Hollow King now awaits in a proper fortified castle: stone towers, battlements, an arched gatehouse, royal banners and a crimson throne-hall carpet.','Connected the entrance, galleries, both treasuries and throne. Existing castle saves, treasure IDs, the two-shard gate and boss rewards are preserved.','Meet Sir Cedric and Dame Ysra at the gate, and Knight Captain Rowan and Dame Elara inside. Their watch changes after the King falls.','Hollow knights now appear in every castle patrol group. The Hollow King remains the boss; the Hollow Knight remains an enemy.']},
   {id:59,date:'Oct 29',title:'Free paths, armor & a better first adventure',items:['Equip six armor sets, starting with free padding. Defeat drops only 10% of gold; Veteran pays 35% more XP/gold and Soulslike 75% more.','Stay independent or join Nightveil/Blackbriar fellowships. Take contracts without membership or abandonment penalties, and unlock travel clearance through levels.','Click the minimap for a resizable, zoomable atlas with boundaries. Roaming enemies have shorter detection, wall checks and home leashes.','Expanded wardrobe, faceless expressions, textured/anime hair, dawn/dusk mage spells and three infirmaries. New stories start outside Thornwake Infirmary.','Creation now ends with a welcome loading card and tips. Open Game guide & tips or Quick hint from the menu. Update checks pause play and save locally before a new build reloads.']},
   {id:58,date:'Oct 28',title:'Economy & class balance',items:['Starter cottage reduced to 250 gold. Harbor house 900, townhouse 1800, Briarwood Manor 4800 and Suncrest Estate 10000. The working farm remains 600. Existing deeds and strongboxes are unchanged.','All eleven classes now have distinct stat growth and role-focused mana costs, attack strength and utility. Later abilities offer stronger options rather than identical copies. Monk ki and healing scale with attack; druid Rootquake scales with magic.','Area spells now apply their listed poison, burning, interruption and drain effects on successful hits. Bosses resist interruption and percentage damage. Life drain heals only from damage actually dealt, not overkill.','Healing and buff actions now lock the turn immediately, preventing rapid clicks from casting repeatedly before enemies act. Class ownership and level gates still apply.']},
@@ -6819,7 +6820,7 @@ function stJail() { stRep('thornwake', -5);
   stEnterMap('jail', 1, 2);
   stSay([['', 'Iron. Straw. The smell of everyone who sat here before you.'], ['', `Three days pass in the Thornwake cells. Your skills dull from disuse (you lose ${lostXp} XP). Then the bars swing open.`], ['Warden Holt', 'Your debt to Thornwake is paid. Walk out the door, and don\'t make me see you again.']]);
 }
-function stSail(key, tx, ty, opt = {}) { const d = stData(), dest = key === 'world' ? 'Saltmere' : ST_DUNGEONS[key].name; d.riding = false; ST.mode = 'sail'; ST.sail = {t: 0, dur: opt.land ? 3.4 : 4.5, to: [key, tx, ty], home: key === 'world', land: opt.land, dark: key === 'rouge', label: opt.label || `Sailing to ${dest}`, arrive: opt.arrive || (key === 'world' ? 'Saltmere, the Drowned Harbor' : dest)};musicForce(opt.land?SONG_WAYFARER:key==='rouge'?SONG_BAYOU:SONG_HORIZON); $('stPrompt').hidden = true; sfx('blink'); }
+function stSail(key, tx, ty, opt = {}) { const dest = key === 'world' ? 'Saltmere' : ST_DUNGEONS[key].name; ST.mode = 'sail'; ST.sail = {t: 0, dur: opt.land ? 3.4 : 4.5, to: [key, tx, ty], home: key === 'world', land: opt.land, dark: key === 'rouge', label: opt.label || `Sailing to ${dest}`, arrive: opt.arrive || (key === 'world' ? 'Saltmere, the Drowned Harbor' : dest)};musicForce(opt.land?SONG_WAYFARER:key==='rouge'?SONG_BAYOU:SONG_HORIZON); $('stPrompt').hidden = true; sfx('blink'); }
 function stDrawRoad(now, dt) { // the coach ride: hills scroll past, the horse gallops, wheels spin
   const S = ST.sail; S.t += dt; const k = Math.min(1, S.t / S.dur), C = stClock();
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -7583,7 +7584,7 @@ const ST_GUIDE = [
   ['Wounds and death', 'Hard hits can make you bleed, but limb loss is disabled. Defeat drops only 10% of gold, rounded down, as recoverable Lost Embers. You keep the other 90% and all equipment. Potions stop bleeding; shrines, inns and infirmaries heal wounds.'],
   ['Levels and danger', 'Every region shows its level. Dungeons and bosses will not let you in below their level. The Ashen Vale runs from level 1 to 25, Valdris 26 to 40, and Aetherfall 41 to 55.'],
   ['The Guild', 'Membership is optional. Join for political standing and rank exams, or use Free paths & rogue guilds in the menu for the same contracts. Independent travel clearance follows your level.'],
-  ['Travel', 'Coaches run between towns. Ships sail from Saltmere to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Garth sells mounts, and breeds them in pairs.'],
+  ['Travel', 'Coaches run between towns. Ships sail from Saltmere to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Your chosen mount travels with you: press R, controller Y or Ride to ride on any outdoor island or land. Buildings and dungeons are explored on foot. Garth sells mounts, and breeds them in pairs.'],
   ['Professions', 'Fishing (rod from Dunn), mining (pickaxe from Brann), farming (homestead from Farmer Odo) and crafting (forge at Brann\'s, cooking at inns). Each has its own level.'],
   ['Trade', 'Every market buys and sells at its own prices, and prices change daily. Buy where goods are made, sell where they are wanted.'],
   ['Bonds and family', 'Press ♥ while talking to someone. Talk daily, give gifts and spend time to grow close. Flirt with any adult. Court, marry with a Moonsilver Ring, and raise children at your homestead.'],
@@ -7839,17 +7840,18 @@ function stCompanionHall() {
   m.appendChild(tbl);
   const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row); stSave();
 }
+const stCanRideMap = key => key === 'world' || !!ST_DUNGEONS[key]?.outdoor;
 function stToggleRide() {
   const d = stData(), own = d.mounts || [];
   if (ST.mode !== 'walk') return;
   if (!own.length) return stCallout('No mount yet. Visit Garth\'s stable in Thornwake.', '#ffd75e');
-  if (d.map !== 'world') return stCallout('Your mount waits outside.', '#ffd75e');
+  if (!stCanRideMap(d.map)) return stCallout('Your mount waits outside.', '#ffd75e');
   if (!d.mount || !own.includes(d.mount)) d.mount = own[0];
   if (d.riding) {
     d.riding = false;
     if (stBlocked(d.x, d.y + 14)) { d.riding = true; return stCallout('You can\'t land here.', '#ffd75e'); }
   } else d.riding = true;
-  sfx(d.riding ? 'pet' : 'blink'); stCallout(d.riding ? `Riding the ${stM(d.mount).name}` : 'Dismounted', '#ffe9a8'); stHud();
+  sfx(d.riding ? 'pet' : 'blink'); stCallout(d.riding ? `Riding the ${stM(d.mount).name}` : 'Dismounted', '#ffe9a8'); stHud(); stSave();
 }
 function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // drawn under the rider; legs gallop with distance walked
   const M = stM(id), dir = Math.cos(face) < 0 ? -1 : 1, ph = walk * .045, fly = M.fly;
@@ -8528,7 +8530,7 @@ function stEnterMap(key, tx, ty) { // move between the world and a dungeon
   const floor=ST_DOMINION_FLOORS.findIndex(f=>f.key===key);
   if(floor>=0&&(stData().lv<ST_DOMINION_FLOORS[floor].level||floor>0&&!stData().flags[ST_DOMINION_FLOORS[floor-1].boss]))return stSay([['',`The ward holds. Reach level ${ST_DOMINION_FLOORS[floor].level}${floor>0?' and defeat the previous guardian':''} before entering this floor.`]]);
   if(tx==null||ty==null){tx=6;ty=6;}
-  const d = stData(); if (d.map !== key) stLoadScreen(key); if (key !== 'world') d.riding = false; d.map = key; if (ST_PORTS[key]) { d.ports = d.ports || {}; d.ports[key] = true; } /* remembered for Scrolls of Return */ d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; stFindOpen(d); ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
+  const d = stData(); if (d.map !== key) stLoadScreen(key); if (!stCanRideMap(key)) d.riding = false; d.map = key; if (ST_PORTS[key]) { d.ports = d.ports || {}; d.ports[key] = true; } /* remembered for Scrolls of Return */ d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; stFindOpen(d); ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
   if (key !== 'world') {
     if (!ST.dunC[key]) stDrawDungeonCanvas(key);
@@ -9861,7 +9863,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   { const CM = !dun || ST_DUNGEONS[d.map] ? stCompanion() : null; if (CM) { const fx = d.x - 36 * (Math.cos(ST.face || 0) || 1), fy = d.y + 4;
     if (CM.beast) { const wu = {x: fx, y: fy, face: ST.face || 0, walk: ST.walk || 0, _lw: (ST.walk || 0) - 1, hitFlash: 0, atkT: 0, atkCd: 1, id: 31, team: 0, level: 8, r: 22, fur: CM.color}; ctx.save(); ctx.translate(fx, fy); ctx.scale(ST_CS, ST_CS); ctx.translate(-fx, -fy); drawWolf(ctx, wu, now); ctx.restore(); }
     else stDrawCh(stUnit(CM.look, CM.color, fx, fy, ST.face || 0, ST.walk || 0, 31, d.lv), now); } }
-  const ride = !dun && d.riding && stM(d.mount);
+  const ride = stCanRideMap(d.map) && d.riding && stM(d.mount);
   if (ride) { ctx.save(); ctx.translate(d.x, d.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-d.x, -(d.y + 10)); stDrawMount(ctx, d.mount, d.x, d.y + 10, ST.face || 0, ST.walk || 0, now); ctx.restore(); stDrawCh(Object.assign(stUnit(ST_CLASSES[d.cls].look, d.color, d.x - 3 * Math.cos(ST.face || 0), d.y - 21 - (ride.fly ? 21 + Math.sin(now * 4) * 4 : 0), ST.face || 0, 0, 30, d.lv), {outfit: d.outfit}), now); }
   else { const pu = stUnit(ST_CLASSES[d.cls].look, d.color, d.x, d.y, ST.face || 0, ST.moving ? ST.walk : (ST.walk || 0), 30, d.lv); pu.outfit = d.outfit; if (ST.gx && ST.gx.kind === 'mine' && ST.gx.swing > .05) pu.atkT = 1; if (ST.gx) pu.face = ST.gx.kind === 'mine' ? (ST.gx.rock.x * ST_TILE + 32 < d.x ? Math.PI : 0) : (ST.gx.spot[0] < d.x ? Math.PI : 0); stDrawCh(pu, now); }
   stObjArrow(now);
@@ -9882,7 +9884,7 @@ function stDrawWorld(now, dt = 1 / 60) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const near = ST.mode === 'walk' && stNearby();
   const PR = $('stPrompt'); if (PR.hidden !== !near) PR.hidden = !near; if (near) stSetText(PR, (device() === 'pad' ? 'A' : device() === 'touch' ? 'Tap A' : 'E') + ' · ' + ({player: 'Meet ' + (near.p ? near.p.presence.sw.n : ''), plot: near.key && d.farm && d.farm.plots[near.key] ? (stCropProg(d.farm.plots[near.key]) >= 1 ? 'Harvest' : 'Check the crop') : d.farm ? 'Plant seeds' : 'Look at the field', spouse: 'Talk to ' + (d.spouse ? stNpcName(d.spouse) : ''), kid: 'Talk to ' + (near.i != null && d.family ? d.family.kids[near.i].name : ''), board: 'Read the quest board', fish: 'Cast your line', mine: 'Mine ' + (near.r ? ST_MATS[near.r.ore][0] : ''), coach: 'Take the coach', crystal: 'Touch the crystal', npc: 'Talk to ' + (near.n && near.n.name), chest: 'Open chest', gate: 'Inspect gate', shrine: 'Rest at the shrine', house: 'Enter ' + (near.h && ST_DUNGEONS[near.h.key].name), ship: 'Board the ship', door: (near.key && ST_DUNGEONS[near.key] && ST_DUNGEONS[near.key].lit ? 'Enter ' + ST_DUNGEONS[near.key].name : 'Enter the dungeon') + (near.key && ST_MAP_LV[near.key] ? ` (Lv ${ST_MAP_LV[near.key]})` : ''), boss: 'Approach' + (near.b && ST_BOSS_LV[near.b.id] ? ` (Lv ${ST_BOSS_LV[near.b.id]})` : ''), exit: ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].home ? 'Step outside' : 'Climb out'}[near.kind] || near.label || 'Approach'));
-  const RB = $('stRide'), rh = dun || !(d.mounts || []).length; if (RB.hidden !== rh) RB.hidden = rh; stSetText(RB, d.riding ? 'Dismount' : 'Ride');
+  const RB = $('stRide'), rh = !stCanRideMap(d.map) || !(d.mounts || []).length; if (RB.hidden !== rh) RB.hidden = rh; stSetText(RB, d.riding ? 'Dismount' : 'Ride');
 }
 function stSetText(e, t) { if (e.textContent !== t) e.textContent = t; } // writing the same text every frame still costs a layout
 function stDrawFoe(key, x, y, now, scale, face, flash) {

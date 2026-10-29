@@ -1,5 +1,12 @@
 Original prompt: Fix the menu overlap first. Change the menu artwork to a dark fantasy RPG direction that makes people want to play.
 
+## Mounts across islands, October 29, 2026
+- User clarified that mounts should travel to different islands, not be ridden inside every building.
+- Preserve selection, ownership and riding state through ships and outdoor map transitions. Enable mount rendering and Ride/Dismount on all outdoor lands with one shared map eligibility rule.
+- Preserve indoor dismounting, fares, rank/level gates, water/building collision and map bounds. Save ride toggles immediately.
+- 38 mount checks pass: real ship choices through all five ports, exact displayed fares, denied low-level passage, visible mounts and Ride/Dismount on every destination, mounted movement, island save/continue, indoor restrictions, and safe flying/dismount behavior. All 23 castle checks, 248 balance checks and 34 purchase checks pass.
+- Hardened the existing welcome-card browser test against its automatic dismissal while responsive screenshots are taken. This changes the test only, not game loading behavior.
+
 ## Hollow King's castle, October 29, 2026
 - Current request corrected by the user to Hollow King, not Hollow Knight. Preserve both enemies and the Hollow King boss; repair and visually upgrade his castle.
 - Keep map key `keep`, dimensions, entrance, boss coordinates, treasure IDs, shard gate and reward code unchanged for existing saves.

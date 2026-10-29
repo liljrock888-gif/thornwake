@@ -1,5 +1,14 @@
 # Thornwake menu regression checks
 
+## Mounts between islands
+- Scope corrected by the user: take and ride mounts on different islands and outdoor lands, not inside buildings or dungeons.
+- Buy or own a mount, select it, and press R / controller Y / Ride. Sail through the real port choices to Brightwater, Rougemarais, Valdris, Aetherfall and back to Saltmere.
+- Ships preserve mount ownership, selection and the mounted/unmounted state. Fares and level/rank gates remain unchanged.
+- At each outdoor destination, the mount is drawn under the rider, movement works, and Ride/Dismount remains visible and usable. Ground mounts respect water and buildings; flying mounts still respect hard map boundaries and buildings.
+- Save/quit/continue on an island restores the chosen mount and riding state. Touch-sized viewports keep the control reachable.
+- Entering an indoor home/castle/dungeon still dismounts the player and hides Ride. The owned mount remains available when returning outside.
+- Without a mount, R still explains where to buy one and no Ride button appears. Island travel must not grant or duplicate a mount.
+
 ## Hollow King's castle
 - Requested change: the Hollow King remains the boss; the Hollow Knight enemy is unchanged.
 - Added knights: Sir Cedric and Dame Ysra guard the exterior without intercepting the gate interaction; Knight Captain Rowan and Dame Elara occupy the castle's galleries. All four have usable dialogue before and after the King's defeat. Every enemy patrol group in the castle includes knights.
