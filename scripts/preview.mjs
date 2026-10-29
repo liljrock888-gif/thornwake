@@ -15,7 +15,7 @@ const html=readFileSync(new URL('index.html',output),'utf8')
   .replace('</head>',shim+'</head>')
   .replace('<body>','<body><div style="position:fixed;left:50%;transform:translateX(-50%);top:3px;z-index:9999;background:#172b25;color:#d7c79f;padding:4px 10px;border:1px solid #6b7e65;border-radius:5px;font:11px sans-serif;pointer-events:none;white-space:nowrap">Preview: saves last until refresh. No real payments.</div>');
 writeFileSync(new URL('index.html',output),html);
-for(const file of ['payments.js','sw-bridge.js']){
+for(const file of ['payments.js','online.js','sw-bridge.js']){
   const path=new URL(file,output);
   if(!existsSync(path))continue;
   writeFileSync(path,readFileSync(path,'utf8').replaceAll('localStorage','TW_PREVIEW_STORAGE'));
