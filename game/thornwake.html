@@ -1,4 +1,5 @@
 <title>Thornwake</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus+SC&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
@@ -267,7 +268,8 @@ body.tv #scr-main{grid-template-columns:minmax(340px,440px) 1fr minmax(340px,420
 .vol input{flex:1;max-width:170px;accent-color:var(--gold)}
 
 #overlay.art{background:radial-gradient(ellipse at 50% 45%,rgba(6,8,12,.35),rgba(6,8,12,0) 70%)}
-#overlay.art #card{background:rgba(12,16,22,.74);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 18px;box-shadow:0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);width:auto;max-width:min(560px,100%)}
+#overlay.art #card{background:rgba(12,16,22,.96);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 18px;box-shadow:0 12px 40px rgba(0,0,0,.5);width:auto;max-width:min(560px,100%)}
+#whatsNew{backdrop-filter:none;-webkit-backdrop-filter:none}
 
 @media (max-width:760px){
   #hud{left:8px;right:8px;transform:none;flex-wrap:wrap;justify-content:center;gap:8px;padding:6px}
@@ -447,6 +449,15 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #game.touch #stMini{width:110px;height:74px}
 #game.touch #story:not([data-mode=walk]) #stPad,#game.touch #story:not([data-mode=walk]) #stMenuBtn,#game.touch #story:not([data-mode=walk]) #stJournalBtn,#game.touch #story:not([data-mode=walk]) #stRide,#game.touch #story:not([data-mode=walk]) #stChatBtn{display:none!important}
 #story[data-mode=battle] #stPartyHud,#story[data-mode=battle] #stMini,#story[data-mode=sail] #stMini,#game.touch #story[data-mode=battle] #stQuest,#game.touch #story[data-mode=battle] #stChat{display:none!important}
+@media(max-width:640px){
+  #stQuest{width:118px;box-sizing:border-box;padding:7px 8px}
+  #stHud{width:calc(100vw - 156px);box-sizing:border-box}
+  #story[data-mode=battle] #stHud,#story[data-mode=battle] #stQuest,#story[data-mode=battle] #stMenuBtn,#story[data-mode=battle] #stJournalBtn,#story[data-mode=battle] #stChat,#story[data-mode=battle] #stChatBtn,#story[data-mode=battle] #stRide{display:none!important}
+  #stBattle,#game.touch #stBattle{grid-template-columns:1fr;max-height:68dvh;overflow-y:auto;box-sizing:border-box}
+  #stActions .row,#game.touch #stActions .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  #stActions button,#game.touch #stActions button{min-height:44px;font-size:13px}
+  #stParty{flex-direction:row;flex-wrap:wrap}#stParty .pm{flex:1 1 120px;font-size:12px}
+}
 #game.touch #story[data-mode=gather] #stPad{display:grid!important}#game.touch #story[data-mode=gather] #stPad [data-d]{display:none}
 #stPad button{border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(20,28,24,.7);color:#fff;font-size:18px;touch-action:none}
 #stPad [data-d=up]{grid-area:1/2} #stPad [data-d=left]{grid-area:2/1} #stPad [data-d=right]{grid-area:2/3} #stPad [data-d=down]{grid-area:3/2}
@@ -455,7 +466,62 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #crName{padding:10px 14px;border-radius:10px;font:inherit;font-size:16px;width:min(280px,80vw);text-align:center}
 #crColor .sw{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.3);cursor:pointer;padding:0}
 #crColor .sw[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 3px var(--gold)}
-@media (prefers-reduced-motion:reduce){#banner,#feed div{transition:none}}
+/* Each interface owns a stacking context; story panels cannot bleed into global menus. */
+#story{z-index:10;isolation:isolate}
+#overlay{z-index:30;box-sizing:border-box}
+#story[data-mode=menu]::before{content:"";position:absolute;inset:0;background:rgba(3,6,7,.88);pointer-events:auto;z-index:2}
+#stMenu{z-index:3;box-sizing:border-box;background:#11191b;max-height:calc(100dvh - 32px);overscroll-behavior:contain}
+#game.touch #stMenu{max-height:calc(100dvh - 24px)}
+/* Ash and iron: original dark-fantasy launcher, keeping the game title and controls. */
+#scr-main .homeLeft{background:linear-gradient(90deg,rgba(7,10,12,.82),rgba(7,10,12,.12));padding-left:clamp(24px,3.5vw,64px)}
+#scr-main .menuLogo{filter:none;letter-spacing:.08em;background:linear-gradient(#eee7d9,#bcb0a0);-webkit-background-clip:text;background-clip:text}
+#scr-main .menuTag{color:#d1c7b7;letter-spacing:.17em;margin-bottom:12px}
+#scr-main .homePlay{background:linear-gradient(110deg,#c8a477,#a97b48);color:#17110c;border:1px solid #dbbc91;border-radius:3px;font-family:var(--display);font-size:22px;letter-spacing:.06em;box-shadow:0 4px 28px #d58d3024;margin-bottom:5px;padding:14px 18px}
+#scr-main .homePlay:hover{filter:brightness(1.12)}
+#scr-main .menu .mbtn:not(.primary){font-size:17px;padding:8px 12px;border-radius:2px;color:#ded6c8;min-height:40px}
+#scr-main .menu .mbtn:not(.primary)::before{font-family:var(--display);font-size:16px;color:#bda47d;filter:none}
+#scr-main .menu .mbtn:disabled{opacity:.38}
+#scr-main .homeHook{max-width:250px;color:#d0c8bb;font-size:15px;line-height:1.45;margin:0 0 18px}
+#scr-main .homeEyebrow{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#c5aa80;margin:0 0 12px}
+#scr-main .homeMid{align-self:end;text-align:left;padding:0 22px 60px;pointer-events:none}
+#scr-main .homeMid p{font-family:var(--display);font-size:clamp(19px,2vw,30px);color:#e1d8c7;text-shadow:0 2px 14px #000;line-height:1.4;max-width:320px;margin:0}
+#scr-main .homeMid small{display:block;color:#d4b88b;letter-spacing:.2em;font-size:10px;text-transform:uppercase;margin-top:16px}
+#whatsNew{background:rgba(10,14,17,.86);border-color:#72604755;border-radius:3px;margin-top:32px;margin-bottom:32px}
+#whatsNew h2{font-size:17px;letter-spacing:.1em;color:#d4c2a3}
+.posterTitle{filter:drop-shadow(0 2px 12px #000);background:linear-gradient(#eee7d9,#bcb0a0);-webkit-background-clip:text;background-clip:text}
+.posterSub{color:#d4c2a3;font-size:clamp(12px,2vw,19px);letter-spacing:.23em}
+.startPrompt{font-size:clamp(18px,3vw,26px);letter-spacing:.2em;animation:startBlink 3s ease-in-out infinite}
+@media(max-width:1000px){#scr-main .homeMid{display:block;padding-bottom:48px}#scr-main .homeLeft{padding-left:28px}}
+@media(max-width:650px){#scr-main .homeMid{display:none}#scr-main .homeLeft{align-items:center;padding:24px 22px;background:linear-gradient(90deg,#070a0ce6,#070a0c88)}#scr-main .homeHook{text-align:center;max-width:290px;margin-bottom:14px}#scr-main .homeEyebrow{margin-bottom:10px}#scr-main .menuLogo{font-size:38px}#scr-main .menu{max-width:340px}#scr-main .homeSet{max-width:340px}}
+@media(max-height:760px){#scr-main .homeLeft{justify-content:flex-start}#scr-main .homeHook{margin-bottom:10px;font-size:13px}#scr-main .homeEyebrow{margin-bottom:8px}#scr-main .menu .mbtn:not(.primary){padding:5px 10px;min-height:32px}#scr-main .homePlay{padding:10px 14px}}
+#overlay.creator{padding:16px}
+#overlay.creator #card{max-width:min(1100px,100%);width:100%;max-height:calc(100dvh - 32px);box-sizing:border-box;padding:24px;text-align:left;overflow:auto;background:#111a1df5;border:1px solid #7a75604a}
+#scr-create{display:block;width:100%;padding:0;box-sizing:border-box;max-height:none}
+.creatorHeading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.creatorHeading h2{font-size:32px;margin:0}.creatorHeading .homeEyebrow{font-size:10px;color:#c6ac83;letter-spacing:.18em;margin:0 0 6px;text-transform:uppercase}
+.creatorLayout{display:grid;grid-template-columns:minmax(240px,330px) minmax(0,1fr);gap:28px;align-items:start}
+.creatorStage{position:sticky;top:0;text-align:center;background:#182528;border:1px solid #40504b;border-radius:12px;overflow:hidden;padding:0 12px 20px}
+#scr-create #crCv{display:block;width:100%;height:auto;max-height:350px;object-fit:contain;margin:0 auto}
+.creatorStage h3{font-family:var(--display);font-weight:400;font-size:20px;margin:2px 0 5px;color:#eee5cb}
+.creatorStage .status{margin:0 0 12px}.creatorStageHint{color:#b8bcaf;font-size:12px;margin:10px 0 0}
+#crName{width:min(100%,260px);box-sizing:border-box;background:#101b1e;border-color:#5b695e;text-align:center;margin:0}
+.creatorControls{min-width:0}.creatorControls>section{min-height:330px}
+.creatorControls h3{font-family:var(--display);font-weight:400;color:#e5dcc4;font-size:22px;margin:18px 0 12px}
+.creatorTabs{display:flex;gap:4px;border-bottom:1px solid #435148;padding-bottom:10px}
+.creatorTabs button{flex:1;background:transparent;border:1px solid #3b4d48;border-radius:4px;color:#c4c8bc;padding:10px 8px;font-size:15px;cursor:pointer}
+.creatorTabs button[aria-selected=true]{background:#b99a68;color:#152022;border-color:#dac294}
+.creatorNav{display:flex;align-items:center;gap:12px;justify-content:flex-end;position:sticky;bottom:-24px;background:#111a1d;border-top:1px solid #435148;padding:16px 0 4px;margin-top:20px}
+.creatorNav .status{margin-right:auto;font-size:13px}.creatorNav .mbtn{font-size:16px;min-height:42px}
+#scr-create .outfit{max-width:none}#scr-create .orow{align-items:center}.creatorControls .chip{border-radius:5px;min-height:36px}
+#scr-create .hint{display:block;line-height:1.45;color:#bcc5b5}
+.progressCard{border:1px solid #4d6258;background:#172321;padding:14px;border-radius:6px;margin:12px 0}
+.progressCard h4{margin:0 0 8px;color:#d6c39c;font-family:var(--display);font-size:18px;font-weight:400}
+.progressCard p{margin:6px 0;font-size:14px;line-height:1.4}
+.progressCard button{margin:7px 6px 0 0;padding:8px 12px;border:1px solid #85724e;background:#c5a66c;color:#182023;border-radius:4px;cursor:pointer;font-weight:600}
+.progressCard button:disabled{background:#26322f;color:#b6bdb3;border-color:#485a51;cursor:not-allowed}
+#gamePerf{position:absolute;right:6px;bottom:3px;z-index:1001;pointer-events:none;font:10px monospace;color:#c3cbb8;background:#080d10b3;padding:2px 5px;border-radius:2px}
+@media(max-width:700px){#overlay.creator #card{padding:16px}#scr-create{padding:0}.creatorLayout{grid-template-columns:1fr;gap:16px}.creatorStage{position:static;padding-bottom:14px}#scr-create #crCv{max-height:230px}.creatorHeading h2{font-size:24px}.creatorHeading .homeEyebrow{font-size:8px;max-width:180px}.creatorControls>section{min-height:0}.creatorNav{bottom:-16px}.creatorStage h3{font-size:18px}.creatorControls h3{font-size:20px}}
+@media (prefers-reduced-motion:reduce){#banner,#feed div,#startScreen{transition:none}.startPrompt{animation:none}}
 </style>
 
 <div id="game">
@@ -550,17 +616,19 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 
       <section class="screen" id="scr-main" hidden>
         <div class="homeLeft">
+        <p class="homeEyebrow">A dark fantasy role-playing game</p>
         <h1 class="menuLogo">Thornwake</h1><p class="menuTag">Legends of the Ashen Vale</p>
+        <p class="homeHook">Eight kingdoms. A crown in pieces.<br>Something beneath the ash still waits.</p>
         <div class="menu">
-          <button class="mbtn primary homePlay" id="m-new">▶ Play</button>
-          <button class="mbtn" id="m-story" data-i="📖">Story</button>
-          <button class="mbtn" id="m-ranked" data-i="🏆">Ranked</button>
-          <button class="mbtn" id="m-multi" data-i="🌐">Multiplayer</button>
+          <button class="mbtn primary homePlay" id="m-story">Enter the Vale</button>
+          <button class="mbtn" id="m-new" data-i="◇">Arena</button>
+          <button class="mbtn" id="m-ranked" data-i="♜">Ranked</button>
+          <button class="mbtn" id="m-multi" data-i="⌘">Multiplayer</button>
           <button class="mbtn" id="m-continue" data-i="⏵">Continue</button>
-          <button class="mbtn" id="m-load" data-i="💾">Load Game</button>
-          <button class="mbtn" id="m-daily" data-i="🎁">Daily</button>
-          <button class="mbtn" id="m-store" data-i="🛒">Store</button>
-          <button class="mbtn" id="m-help" data-i="❔">How to Play</button>
+          <button class="mbtn" id="m-load" data-i="▤">Load Game</button>
+          <button class="mbtn" id="m-daily" data-i="✧">Daily</button>
+          <button class="mbtn" id="m-store" data-i="◈">Store</button>
+          <button class="mbtn" id="m-help" data-i="?">How to Play</button>
         </div>
         <details class="homeSet"><summary>⚙ Settings</summary>
           <label class="vol" for="m-vol">Music volume <input type="range" id="m-vol" min="0" max="100" step="5"></label>
@@ -569,7 +637,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
         <p class="hint" id="padHint">Plug in a controller and press any button to use it.</p>
         <button class="mbtn small" id="wnBtn" aria-controls="whatsNew" aria-expanded="false">📰 What's new</button>
         </div>
-        <div class="homeMid" aria-hidden="true"></div>
+        <div class="homeMid"><p>The world has gone hollow.<br>You have not. Not yet.</p><small>Choose your path. Face the ash.</small></div>
         <aside id="whatsNew" aria-label="What's new"><div class="wnHead"><h2>What's new</h2><button id="wnClose" aria-label="Close">✕</button></div><div id="wnList"></div></aside>
       </section>
 
@@ -624,18 +692,35 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
         <button class="mbtn small back" id="stBack">Back</button>
       </section>
       <section class="screen" id="scr-create" hidden>
-        <h2>Create your hero</h2>
-        <canvas id="crCv" width="220" height="220" aria-hidden="true"></canvas>
+        <div class="creatorHeading"><div><p class="homeEyebrow">Every legend begins with someone</p><h2>Who will you become?</h2></div><button class="mbtn small back" id="crBack">Back</button></div>
+        <div class="creatorLayout">
+        <aside class="creatorStage">
+        <canvas id="crCv" width="360" height="420" role="img" aria-label="Live preview of your customized hero"></canvas>
+        <h3 id="crIdentity">Your wanderer</h3><p id="crBuild" class="status"></p>
         <input id="crName" maxlength="14" placeholder="Your name" aria-label="Hero name" autocomplete="off" spellcheck="false">
+        <p class="creatorStageHint">Make a face the Vale will remember.</p>
+        </aside>
+        <div class="creatorControls">
+        <div class="creatorTabs" role="tablist" aria-label="Character creation steps"><button id="crTab0" role="tab" aria-controls="crStep0">Origin</button><button id="crTab1" role="tab" aria-controls="crStep1">Appearance</button><button id="crTab2" role="tab" aria-controls="crStep2">Abilities</button></div>
+        <section id="crStep0" role="tabpanel" aria-labelledby="crTab0">
+        <h3>Where does your story begin?</h3>
         <p class="status">Race</p><div class="row" id="crRace"></div><small class="hint" id="crRaceNote"></small>
         <p class="status">Class</p><div class="row" id="crClass"></div>
         <p class="status">Difficulty</p><div class="row" id="crDiff"></div><small class="hint" id="crDiffNote"></small>
+        </section>
+        <section id="crStep1" role="tabpanel" aria-labelledby="crTab1" hidden>
+        <h3>Not another face in the crowd.</h3>
         <p class="status">Color</p><div class="row" id="crColor"></div>
         <p class="status">Voice</p><div class="row" id="crVoice"></div>
         <p class="status">Outfit</p><div class="outfit" id="crOutfit"></div>
+        </section>
+        <section id="crStep2" role="tabpanel" aria-labelledby="crTab2" hidden>
+        <h3>What will keep you alive?</h3>
         <p class="status">Starting stat points</p><div id="crAttrs"></div>
         <p class="status" id="crSkillNote">Pick 3 abilities</p><div class="row" id="crSkills"></div>
-        <div class="row"><button class="mbtn primary" id="crStart">Begin your story</button><button class="mbtn small back" id="crBack">Back</button></div>
+        </section>
+        <div class="creatorNav"><button class="mbtn small" id="crPrev">Previous</button><span id="crStepLabel" class="status"></span><button class="mbtn primary small" id="crNext">Next</button><button class="mbtn primary small" id="crStart" hidden>Begin your story</button></div>
+        </div></div>
       </section>
       <section class="screen" id="scr-daily" hidden>
         <h2>Daily</h2>
@@ -2242,6 +2327,25 @@ window.addEventListener('resize', resize);
 
 // ---------- main menu artwork (shown instead of the live map while in menus) ----------
 let artC = null, artKey = '', artLast = 0;
+const ashenArt = new Image();
+ashenArt.crossOrigin = 'anonymous';
+ashenArt.src = 'assets/thornwake-menu.webp';
+function drawAshenArt(g, w, h, now) {
+  if (!ashenArt.complete || !ashenArt.naturalWidth) return false;
+  const scale = Math.max(w / ashenArt.naturalWidth, h / ashenArt.naturalHeight);
+  const iw = ashenArt.naturalWidth * scale, ih = ashenArt.naturalHeight * scale;
+  g.drawImage(ashenArt, (w - iw) * (w < 650 ? .62 : .5), (h - ih) * .45, iw, ih);
+  const shade = g.createLinearGradient(0, 0, 0, h);
+  shade.addColorStop(0, 'rgba(3,6,9,.2)'); shade.addColorStop(.6, 'rgba(3,6,9,0)'); shade.addColorStop(1, 'rgba(3,6,9,.55)');
+  g.fillStyle = shade; g.fillRect(0, 0, w, h);
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (let i = 0; i < 28; i++) {
+    const x = (i * 127.7 + (still ? 0 : Math.sin(now * .2 + i) * 18)) % w;
+    const y = still ? (i * 89.3) % h : h - ((now * (9 + i % 7) + i * 89.3) % h);
+    g.fillStyle = `rgba(228,156,83,${.16 + (i % 4) * .09})`; g.fillRect(x, y, 1.5, 1.5);
+  }
+  return true;
+}
 const artFx = [];
 function buildMenuArt(w, h) {
   const c = document.createElement('canvas'); c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
@@ -2290,6 +2394,8 @@ function buildMenuArt(w, h) {
 }
 function drawMenuArt(now) {
   const w = cw, h = ch, key = `${w}x${h}@${dpr}`;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (drawAshenArt(ctx, w, h, now)) return;
   if (key !== artKey) { artC = buildMenuArt(w, h); artKey = key; }
   const dt = Math.min(.05, now - (artLast || now)); artLast = now;
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(artC, 0, 0);
@@ -2565,7 +2671,212 @@ function animState(u, stride) {
 }
 // Heroes grow 1.5% per level and pick up a new detail at every level; levels 6, 11 and 16 are full evolutions.
 const hitFlick = () => Math.floor(performance.now() / 45) % 2 ? .45 : 1; // the blink a unit gives when struck
+// Ink-and-paper story art. All paths are original, resolution-independent and share
+// the same foot anchor as the old sprites, so movement, mounts and hitboxes stay put.
+function inkOval(c, x, y, rx, ry, fill, line = '#192020', width = 1.7) {
+  c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fillStyle = fill; c.fill();
+  if (line) { c.strokeStyle = line; c.lineWidth = width; c.stroke(); }
+}
+function inkPath(c, pts, fill, line = '#192020', width = 1.7) {
+  c.beginPath(); pts.forEach(([x,y],i) => i ? c.lineTo(x,y) : c.moveTo(x,y)); c.closePath();
+  c.fillStyle = fill; c.fill(); if (line) { c.strokeStyle = line; c.lineWidth = width; c.stroke(); }
+}
+function inkLine(c, pts, color, width = 1.7) {
+  c.beginPath(); pts.forEach(([x,y],i) => i ? c.lineTo(x,y) : c.moveTo(x,y)); c.strokeStyle = color; c.lineWidth = width; c.lineCap = 'round'; c.lineJoin = 'round'; c.stroke();
+}
+function drawStorybookCharacter(c, u, now) {
+  const O = u.outfit || {}, base = LOOKS[u.look] || LOOKS.knight, E = u.enemyKey || '', F = u.foe || {};
+  const bandit = /^(bandit|brigand|corsair|mara)$/.test(E), goblin = F.draw === 'goblin';
+  const undead = /^(knight|king|thrall|vampire|marquis|countess|cultist)$/.test(E);
+  const demon = !!u.horns || /^(fiend|imp|abyssfiend|demonking)$/.test(E), royal = E === 'king' || E === 'demonking';
+  const R = ST_RACES[O.race] || {}, A = animState(u, 14), sw = A.sw, id = u.id || 0, lv = u.level || 1;
+  const skin = O.skin || (demon ? '#8c4945' : goblin ? (E === 'reefgob' ? '#648c85' : '#879661') : undead ? '#b4b7a8' : R.skin || base.skin || '#caa181');
+  const cloth = O.body || (bandit ? E === 'brigand' ? '#73523c' : '#4d4c40' : demon ? '#35272b' : base.body || '#506371');
+  const hair = O.hairColor || ['#392d28','#69503c','#bda477','#342b39','#916148'][id % 5];
+  const expression = O.expression || (E ? 'fierce' : id % 3 === 0 ? 'grin' : 'calm');
+  const hat = O.hat || base.hat || 'none', col = u.color || '#c3a46b', metal = lv > 15 ? '#c5ab72' : '#a6b2b0';
+  const s = 1 + Math.min(20, Math.max(0, lv - 1)) * .009;
+  const bob = A.moving ? Math.abs(Math.cos(A.ph)) * 1.6 : Math.sin(now * 2 + id) * .55;
+  c.save(); c.translate(u.x, u.y + 15); inkOval(c, 0, 1, 18*s, 5*s, '#00000045', null);
+  c.scale(A.dir * s, s); if (u.hitFlash > 0) c.globalAlpha *= hitFlick();
+  if(O.evolution>0){c.save();c.globalAlpha=.25;c.strokeStyle=R.col||col;c.lineWidth=1+O.evolution*.5;c.beginPath();c.ellipse(0,-1,20+O.evolution*3,5+O.evolution,0,0,Math.PI*2);c.stroke();c.restore();}
+  if (R.tail) { c.beginPath(); c.moveTo(-9,-25); c.quadraticCurveTo(-35,-12,-28,-42+Math.sin(now*3)*4); c.strokeStyle=R.tail; c.lineWidth=5; c.lineCap='round'; c.stroke(); }
+  const cape = O.cape === 'none' ? null : O.cape || base.cape || O.cloak || shade(cloth,-.25);
+  if (cape) inkPath(c,[[-11,-43],[8,-43],[12,-10],[-25+Math.sin(now*3)*2,-4],[-20,-14]],cape);
+  // Unconnected mitten hands and oversized boots create a readable storybook silhouette.
+  inkLine(c,[[-6,-22],[-8-sw*4,-7]],'#33332f',5);
+  inkLine(c,[[6,-22],[7+sw*4,-7]],'#33332f',5);
+  inkOval(c,-8-sw*4,-3,8,4,'#302a27'); inkOval(c,8+sw*4,-3,8,4,'#302a27');
+  c.translate(0,-bob);
+  inkLine(c,[[-10,-41],[-17+sw*4,-24]],shade(cloth,-.1),5);
+  inkOval(c,-17+sw*4,-22,4.5,5,skin);
+  inkPath(c,[[-12,-45],[11,-45],[13,-20],[-13,-20]],cloth);
+  inkPath(c,[[-11,-44],[-3,-44],[0,-23],[-12,-23]],shade(cloth,.15),null);
+  inkLine(c,[[-12,-26],[12,-26]],'#332b27',4);
+  inkPath(c,[[2,-29],[7,-29],[7,-23],[2,-23]],'#c4a56d','#554b36',1);
+  if (bandit) {
+    inkLine(c,[[-11,-44],[11,-29]],'#a9916b',4); inkOval(c,-10,-22,5,6,'#70533c');
+    inkPath(c,[[-11,-40],[-3,-40],[-4,-33],[-12,-34]],'#87765d');
+    inkLine(c,[[-10,-38],[-4,-37]],'#d0b98e',.8);
+    inkPath(c,[[4,-43],[10,-43],[11,-33],[5,-33]],'#6e5140');
+  } else if (base.weapon === 'sword' || base.weapon === 'hammer' || base.weapon === 'shield') {
+    inkPath(c,[[-13,-45],[-5,-47],[-5,-37],[-13,-36]],metal);
+    inkPath(c,[[5,-47],[13,-45],[13,-36],[5,-37]],metal);
+    inkLine(c,[[-7,-34],[7,-34]],shade(metal,-.2),1);
+  }
+  // Big oval face, ears and hair. Enemy faces use narrow sockets rather than friendly eyes.
+  if (O.hairType === 'long' || O.hairType === 'braids') {
+    inkPath(c,[[-18,-64],[16,-65],[19,-35],[8,-39],[4,-60],[-9,-41],[-20,-36]],hair);
+  }
+  if (R.ears || goblin) {
+    inkPath(c,[[-15,-66],[-31,-74],[-23,-57],[-14,-55]],skin);
+    inkPath(c,[[15,-66],[28,-73],[24,-56],[14,-55]],skin);
+  } else { inkOval(c,-18,-60,5,7,skin); inkOval(c,18,-60,5,7,skin); }
+  inkOval(c,0,-63,20,24,skin);
+  inkOval(c,-8,-54,4.5,2.2,shade(skin,.08),null);
+  const ht = O.hairType || ['swept','crop','curls','long'][id%4];
+  if (ht !== 'none') {
+    inkPath(c,[[-19,-64],[-21,-77],[-13,-87],[3,-89],[17,-81],[20,-67],[10,-76],[3,-73],[-5,-78],[-12,-70]],hair);
+    if (ht === 'spikes') inkPath(c,[[-20,-76],[-23,-90],[-12,-85],[-6,-98],[3,-85],[12,-93],[16,-81],[24,-81],[17,-70]],hair);
+    if (ht === 'curls') for (let i=0;i<6;i++) inkOval(c,-16+i*6,-80-Math.sin(i*.6)*5,6,6,hair,'#192020',1);
+    if (ht === 'braids') for (const sign of [-1,1]) for (let i=0;i<5;i++) inkOval(c,sign*(20+i*.2),-62+i*6,3.5,4.5,hair);
+    if (ht === 'crop') inkLine(c,[[-14,-81],[-5,-84],[6,-83]],shade(hair,.2),1);
+  }
+  if (hat === 'hood' || hat === 'cowl' || undead && E === 'cultist') {
+    inkPath(c,[[-23,-53],[-24,-77],[-16,-92],[0,-98],[18,-85],[24,-55],[15,-48],[16,-69],[10,-81],[-6,-84],[-17,-69],[-16,-49]],shade(cloth,-.18));
+  } else if (/helm|helmet|visor|crest/.test(hat)) {
+    inkPath(c,[[-21,-63],[-22,-79],[-12,-89],[8,-90],[22,-78],[21,-62],[14,-69],[12,-77],[-13,-77],[-15,-63]],metal);
+    inkLine(c,[[-15,-82],[15,-82]],shade(metal,.25),2);
+    if (hat === 'heavyhelm' || undead) { inkPath(c,[[-18,-73],[18,-73],[17,-53],[0,-47],[-17,-53]],'#656f70'); inkLine(c,[[-13,-66],[13,-66]],'#131d20',4); }
+  } else if (hat === 'pointy' || hat === 'brim' || hat === 'widehat' || hat === 'tricorn') {
+    inkPath(c,[[-24,-79],[-13,-86],[-6,-109],[7,-91],[16,-81],[28,-79],[17,-74],[-16,-74]],hat === 'tricorn' ? '#493831' : shade(cloth,-.1));
+    inkLine(c,[[-13,-82],[14,-81]],col,3);
+  }
+  if (R.cat) { for (const sign of [-1,1]) { inkPath(c,[[sign*9,-82],[sign*23,-98],[sign*24,-74]],skin); inkPath(c,[[sign*16,-83],[sign*21,-91],[sign*21,-79]],'#ac7776',null); } }
+  const blink = !E && Math.sin(now*.8 + id*1.3) > .997;
+  for (const [x,side] of [[-7,-1],[8,1]]) {
+    if (undead || demon) {
+      inkOval(c,x,-62,6.3,5,'#24272a',null); inkOval(c,x+1,-62,2.5,2.8,demon ? '#f6a359' : '#cbd9ad',null);
+    } else if (blink) inkLine(c,[[x-4,-62],[x+4,-62]],'#343030',1.8);
+    else {
+      inkOval(c,x,-62,5.8,bandit?3.6:goblin?4.8:7.1,'#f4efda','#263033',1.3);
+      inkOval(c,x+1.5,-61.5,2.9,bandit?2.5:4,O.eyeColor || (goblin ? '#b78d37' : '#795538'),null);
+      inkOval(c,x+2,-61.5,1.5,bandit?2:3,'#1d2528',null); inkOval(c,x+2,-63,bandit?.6:1,bandit?.6:1,'#fff8e6',null);
+      if(bandit)inkLine(c,[[x-5,-66+side],[x+4,-66-side]],'#42382f',2.4);
+    }
+    inkLine(c,[[x-5,-72+(expression==='fierce'?side*2:0)],[x+4,-72-(expression==='fierce'?side*2:0)]],hair,1.8);
+  }
+  // Offset nose and asymmetrical mouth make each face expressive, not a blank orb.
+  inkLine(c,[[2,-58],[4,-54],[1,-53]],shade(skin,-.25),1.2);
+  if (bandit || hat === 'ninja' || hat === 'mask') {
+    inkPath(c,[[-18,-55],[18,-54],[17,-43],[2,-38],[-16,-45]],bandit?'#403b36':shade(cloth,-.22));
+    inkLine(c,[[-13,-49],[13,-47]],'#786f5c',1);
+    if (bandit) { inkLine(c,[[-11,-58],[-7,-48]],'#b17361',1); inkPath(c,[[-20,-49],[-29,-44],[-22,-40]],'#55483b'); }
+  } else if (demon || goblin || undead) {
+    inkPath(c,[[-9,-49],[2,-46],[12,-50],[10,-40],[-3,-41]],'#302024');
+    for(let i=0;i<4;i++) inkPath(c,[[-7+i*5,-48],[-4+i*5,-47],[-5+i*5,-42]],'#e9dfbd',null,.5);
+  } else if (expression === 'grin') {
+    inkPath(c,[[-8,-49],[11,-50],[7,-43],[-2,-43]],'#eee3c9'); inkLine(c,[[-5,-47],[8,-47]],'#b5a78d',.6);
+  } else inkLine(c,[[-5,-47],[3,-46],[9,expression==='wary'?-48:-47]],'#664c40',1.3);
+  if(O.evolution>0)for(const sign of[-1,1])inkLine(c,[[sign*12,-54],[sign*15,-50],[sign*11,-47]],R.col||col,1.3);
+  if (R.tusks || E==='orcwar') for(const sign of [-1,1]) inkPath(c,[[sign*8,-44],[sign*11,-54],[sign*13,-44]],'#ede5c9');
+  if (R.beard) inkPath(c,[[-16,-51],[-13,-38],[0,-29],[14,-39],[16,-51],[7,-45],[0,-42],[-7,-46]],hair);
+  if (R.snout) { inkOval(c,7,-49,12,6,skin); inkOval(c,12,-51,1.5,1,'#344639',null); for(let i=0;i<3;i++) inkPath(c,[[-12+i*7,-82],[-8+i*7,-90],[-4+i*7,-82]],shade(skin,-.1)); }
+  if (hat === 'crown' || royal) {
+    inkPath(c,[[-20,-81],[-22,-93],[-10,-88],[0,-100],[10,-88],[22,-94],[20,-81]],royal?'#8e7751':'#c6ad70');
+    inkOval(c,0,-88,3,4,E?'#b54d39':col);
+  }
+  if (demon) for (const sign of [-1,1]) inkPath(c,[[sign*13,-80],[sign*25,-91],[sign*28,-110],[sign*19,-98],[sign*10,-92]],'#4e3c39');
+  if (E === 'stalker') { inkPath(c,[[-17,-78],[0,-85],[17,-78],[11,-49],[0,-42],[-11,-50]],'#cecab3'); inkOval(c,-7,-65,3,6,'#1a2528',null); inkOval(c,7,-65,3,6,'#1a2528',null); inkLine(c,[[0,-80],[0,-50]],'#625e51',2); }
+  if (undead) { inkLine(c,[[-14,-57],[-15,-50]],'#6e756b',1); inkLine(c,[[13,-71],[15,-53]],'#6e756b',1); }
+  // Front hand and a class-specific tool; weapons stay outside the face silhouette.
+  c.save(); c.translate(17-sw*4,-27); c.rotate(A.atk ? -.9 : Math.sin(now+id)*.025);
+  let weapon = bandit ? E==='brigand'?'axe':'daggers' : base.weapon;
+  if (demon) weapon = E==='demonking'?'greatsword':'axe';
+  if (goblin) weapon = E==='orcwar'?'axe':'daggers';
+  if (weapon === 'staff' || weapon === 'orb' || weapon === 'totem') {
+    inkLine(c,[[7,18],[8,-37]],'#705945',3.5); inkOval(c,8,-39,6,8,base.glow || col);
+    inkOval(c,6,-42,2,2,'#f5e8be',null);
+  } else if (weapon === 'bow') {
+    c.beginPath(); c.moveTo(9,-27); c.quadraticCurveTo(34,-9,9,15); c.strokeStyle='#907449'; c.lineWidth=3; c.stroke(); inkLine(c,[[9,-27],[7,-7],[9,15]],'#c9c1a1',1);
+  } else if (weapon === 'axe' || weapon === 'hammer') {
+    inkLine(c,[[7,15],[8,-25]],'#6f5140',3);
+    inkPath(c,weapon==='axe'?[[8,-28],[23,-34],[26,-18],[9,-18]]:[[0,-31],[21,-31],[21,-20],[0,-20]],demon?'#8d7770':metal);
+  } else if (weapon === 'rifle' || weapon === 'sniper' || weapon === 'minigun') {
+    inkLine(c,[[0,-4],[29,-8]],'#404c4c',6); inkLine(c,[[23,-8],[36,-10]],'#293333',3); inkLine(c,[[9,-2],[9,6]],'#654c3d',4);
+  } else if (weapon !== 'fists') {
+    const len = weapon==='greatsword'?40:weapon==='daggers'?19:30;
+    inkPath(c,[[4,-8],[5,-len],[9,-len-8],[13,-len],[12,-8]],bandit?'#b0aca0':demon?'#a37465':metal);
+    inkLine(c,[[1,-8],[15,-8]],'#a68b59',3); inkLine(c,[[8,-6],[8,4]],'#654b3a',4);
+  }
+  inkOval(c,1,-1,4.5,5,skin); c.restore();
+  if (E === 'seraphiel' || E === 'archon') { c.save(); c.globalAlpha=.55; for(const sign of [-1,1]) for(let i=0;i<3;i++) inkPath(c,[[sign*12,-38],[sign*(40+i*8),-90+i*17],[sign*(35+i*7),-44+i*10]],'#ded6b9','#8a8171'); c.restore(); }
+  c.restore();
+}
+function drawDreadCreature(c, F, u, now, key) {
+  const dir = Math.cos(u.face) >= 0 ? 1 : -1, p = Math.sin(now*2), small = F.small ? .65 : 1;
+  const isVoid = /void|unmaker/.test(key), ember = F.species === 'ember';
+  const glow = isVoid ? '#d2a3ff' : F.draw==='golem' ? '#f3b56a' : F.fire || '#e3c78f';
+  c.save(); c.translate(u.x,u.y+14); inkOval(c,0,0,F.draw==='drake'?65:45,9,'#00000055',null);
+  c.scale(dir*small,small); if(u.hitFlash>0)c.globalAlpha*=hitFlick();
+  if(F.draw==='wolf') {
+    const fur=F.fur || '#5b6460', bone='#b8b8a4', were=/werewolf|ysolde/.test(key);
+    // Long forelimbs, a broken fur outline, sunken sockets and a visible jaw.
+    inkPath(c,[[-29,-28],[-24,-14],[-28,0],[-17,0],[-15,-18],[-8,-28]],shade(fur,-.2));
+    inkPath(c,[[13,-28],[20,-15+p],[24,0],[35,0],[29,-19],[31,-36]],shade(fur,-.2));
+    inkPath(c,[[-30,-22],[-42,-34],[-54,-28],[-49,-42],[-35,-45],[-20,-42],[-14,-54],[-4,-48],[5,-59],[15,-49],[24,-48],[35,-34],[28,-20],[10,-16]],fur);
+    inkPath(c,[[14,-43],[20,-61],[24,-79],[34,-67],[46,-70],[54,-56],[66,-45],[58,-35],[42,-31],[30,-33]],fur);
+    inkPath(c,[[27,-67],[23,-87],[38,-75]],shade(fur,-.1));
+    inkPath(c,[[42,-67],[48,-82],[51,-61]],shade(fur,-.1));
+    inkPath(c,[[40,-46],[67,-45],[62,-35],[43,-33],[34,-39]],'#24292a');
+    for(let i=0;i<6;i++) inkPath(c,[[39+i*4,-44],[42+i*4,-43],[41+i*4,-35]],'#e6dec5',null);
+    inkOval(c,44,-56,9,5,'#20292a',null); inkLine(c,[[39,-57],[47,-58]],isVoid?'#d3b0ff':'#e3bd79',2);
+    inkOval(c,66,-47,5,3,'#1c2527',null);
+    for(let i=0;i<4;i++) inkLine(c,[[-16+i*8,-37],[-18+i*8,-25]],shade(fur,.22),1);
+    for(const x of [-22,29]) for(let i=0;i<3;i++) inkLine(c,[[x+i*3,-2],[x+3+i*3,1]],bone,1);
+    if(were) { inkPath(c,[[-14,-45],[-23,-70],[-13,-81],[-3,-74],[8,-54]],fur); inkLine(c,[[-19,-71],[-31,-55],[-35,-32]],fur,8); for(let i=0;i<4;i++) inkLine(c,[[-36+i*2,-33],[-39+i*3,-23]],bone,1.5); }
+    if(isVoid) for(let i=0;i<4;i++) inkPath(c,[[-28+i*12,-40],[-32+i*12,-65],[-20+i*12,-45]],'#45405c');
+    if(key==='briarmat'){for(const sign of[-1,1]){inkLine(c,[[25,-71],[25+sign*12,-98],[25+sign*27,-116]],'#a59b76',4);inkLine(c,[[25+sign*10,-95],[25+sign*30,-93]],'#a59b76',2);inkLine(c,[[25+sign*18,-107],[25+sign*14,-125]],'#a59b76',2);}for(let i=0;i<4;i++)inkPath(c,[[-26+i*11,-41],[-30+i*11,-70],[-15+i*11,-44]],'#737d4f');}
+  } else if(F.draw==='golem') {
+    const rock=isVoid?'#383743':'#626d66', outline='#202729';
+    const slab=(x,y,w,h,fill)=>inkPath(c,[[x+4,y],[x+w-6,y-3],[x+w,y+7],[x+w-3,y+h],[x+3,y+h+3],[x-3,y+h-5],[x,y+7]],fill,outline,2.8);
+    slab(-29,-34,24,32,shade(rock,-.2)); slab(9,-34,24,32,shade(rock,-.1));
+    slab(-34,-92,68,65,rock); slab(-59,-84,26,60,shade(rock,-.08)); slab(35,-85,26,63,shade(rock,-.1));
+    slab(-22,-121,44,35,shade(rock,.07));
+    inkPath(c,[[-23,-112],[-35,-132],[-10,-124]],rock); inkPath(c,[[19,-115],[37,-137],[25,-107]],rock);
+    inkLine(c,[[-15,-107],[-5,-106]],glow,3); inkLine(c,[[6,-106],[16,-108]],glow,3);
+    inkPath(c,[[-6,-63],[2,-78],[10,-64],[2,-49]],glow,'#292b2b',2);
+    for(const pts of [[[-18,-88],[-13,-74],[-19,-64],[-12,-48]],[[15,-87],[11,-76],[19,-68]],[[43,-71],[50,-61],[44,-48]]]) inkLine(c,pts,glow,1.4);
+    inkLine(c,[[-12,-94],[0,-97],[12,-94]],'#262e2e',3);
+    if(isVoid) { c.save(); c.globalAlpha=.5; inkOval(c,0,-67,18+Math.sin(now*3)*3,21,'#7c5b9d',null); c.restore(); inkOval(c,0,-67,7,14,'#10151c'); }
+    if(key==='ossuary'){for(let i=0;i<4;i++){inkLine(c,[[-22,-84+i*11],[-10,-78+i*11],[-4,-80+i*11]],'#c5bda6',3);inkLine(c,[[22,-84+i*11],[10,-78+i*11],[4,-80+i*11]],'#c5bda6',3);}for(const x of[-48,45]){inkOval(c,x,-84,9,11,'#bab49e');inkOval(c,x-3,-85,2,3,'#242a29',null);inkOval(c,x+3,-85,2,3,'#242a29',null);}}
+  } else {
+    const body=ember?'#5b4140':isVoid?'#4d4263':'#546d78', membrane=ember?'#775142':'#596577';
+    // Torn wings have exposed spars, while the neck and tail remain serpentine.
+    for(const sign of [-1,1]) {
+      inkPath(c,[[sign*6,-53],[sign*30,-105],[sign*83,-131],[sign*63,-89],[sign*76,-65],[sign*49,-78],[sign*37,-57],[sign*23,-66]],membrane);
+      inkLine(c,[[sign*7,-53],[sign*30,-105],[sign*83,-131]],'#aba596',2.6);
+      inkLine(c,[[sign*30,-105],[sign*63,-89]],'#aba596',1.7);
+      inkLine(c,[[sign*30,-105],[sign*37,-57]],'#aba596',1.7);
+    }
+    inkPath(c,[[-21,-30],[-38,-21],[-59,-29],[-77,-43],[-61,-19],[-41,-6],[-12,-12]],body);
+    inkOval(c,0,-38,32,25,body,'#1c272c',2.5);
+    inkPath(c,[[5,-45],[17,-76],[25,-98],[42,-95],[46,-74],[55,-60],[72,-57],[77,-45],[61,-40],[40,-49],[22,-26]],body);
+    inkPath(c,[[31,-93],[29,-113],[42,-98]],'#b7b09b');
+    inkPath(c,[[43,-87],[57,-104],[51,-79]],'#b7b09b');
+    inkPath(c,[[53,-56],[77,-56],[73,-43],[55,-43],[46,-49]],'#23262b');
+    for(let i=0;i<6;i++) inkPath(c,[[51+i*4,-54],[54+i*4,-53],[53+i*4,-45]],'#e1d5b7',null);
+    inkOval(c,46,-69,8,5,'#20272c',null); inkLine(c,[[42,-70],[49,-71]],glow,2.5);
+    for(let i=0;i<6;i++) inkPath(c,[[-21+i*8,-52],[-20+i*8,-65],[-12+i*8,-51]],'#a9ac9b');
+    inkLine(c,[[-17,-22],[-24,-10],[-20,-2]],body,9); inkLine(c,[[19,-20],[29,-9],[34,-2]],body,9);
+    for(const x of [-22,32]) for(let i=0;i<3;i++) inkPath(c,[[x+i*4,-4],[x+4+i*4,1],[x+i*4,1]],'#ded4b7',null);
+    inkLine(c,[[12,-27],[27,-51],[29,-74]],shade(body,.25),3);
+    if(key==='vael'){inkLine(c,[[-80,-117],[-63,-100],[-69,-88],[-51,-74]],'#c8b6ff',2);inkLine(c,[[78,-123],[60,-99],[68,-93],[48,-77]],'#c8b6ff',2);inkLine(c,[[26,-91],[38,-74],[31,-66],[43,-52]],'#c8b6ff',1.2);}
+  }
+  c.restore();
+}
 function drawCharacter(c, u, now) {
+  if (u.storybook || document.body.classList.contains('story')) return drawStorybookCharacter(c, u, now);
   if (LOOKS[u.look].monster) return drawMonsterHero(c, u, now, LOOKS[u.look]);
   const O = u.outfit, L = O ? Object.assign({}, LOOKS[u.look], O.hat ? {hat: O.hat} : {}, O.body ? {body: O.body} : {}, O.skin ? {skin: O.skin} : {}, O.cape ? {cape: O.cape === 'none' ? null : O.cape} : {}) : LOOKS[u.look], A = animState(u, 13), lv = u.level || 1, form = formOf(lv);
   const metal = form >= 3 ? '#e8c25a' : form >= 2 ? '#d7dde6' : '#9aa3ae';
@@ -3600,6 +3911,8 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 // What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
 const UPDATES = [
+  {id:56,date:'Oct 29',title:'Bloodlines, spellcraft & the Ashen Dominion',items:['Five magic tiers grant new spells at levels 1, 10, 25, 45 and 60. Study at the Ember Academy to practice spell mastery without bypassing level requirements.','Every race has three optional awakenings at levels 15, 35 and 60. Claim them in order at an Ashen Shrine or the Ashen Sanctum.','Three new world bosses have discoverable callouts, compass tracking and one-time trophies. Find their rumors under Menu → World bosses.','The original Ashen Dominion has a throne hall and three guardian floors. Clear trials at levels 20, 35 and 50, gain ruler ranks, and earn guardian companions. Guild expedition contracts reward the same dungeon victories.']},
+  {id: 55, date: 'Oct 29', title: 'A new face for the Vale', items: ['Original ruined-kingdom title and menu artwork, with Enter the Vale as the story shortcut.', 'Storybook heroes and townsfolk, a three-step character creator, and new hair, eye and expression choices. Your existing hero and outfit still work.', 'Redrawn story enemies: masked outlaws, hollow knights, fanged wolves, jagged golems, skeletal-winged drakes and horned demons. Combat values have not changed.', 'Global and story menus now hand off cleanly. Story menus have a dimmed backdrop and separate keyboard input.']},
   {id: 54, date: 'Oct 29', title: 'The Eight Kingdoms', items: ['Eight racial kingdoms hold the Vale, each with a keep and a throne you can visit: the Vale of Ashes (humans, ruled by King Aldric Valeborn from Thornwake Keep), the Aetherfall Spireholds (Elarin), Ironpine Deep (Woodwyn), Cinderhold (Ashkin), the Korgath Warchiefs (Tuskborn), the Frostpeak Holds (Stonekin), the Sundown Caravans (Felari) and Mirehollow (Scalekin).', 'Every ruler holds audience: talk to them for their kingdom\'s story and a one-time token of the realm. Kingdoms you have visited are written up in your Journal.', 'Your race\'s homeland is now shown on the character creator.']},
   {id: 53, date: 'Oct 29', title: 'Difficulty: Story to Soulslike', items: ['Four ways to play, chosen when you make your hero and changeable at any Ashen Shrine: Story (softer enemies), Adventurer (the Vale as intended), Veteran (harder fights) and Soulslike (the Vale does not want you here).', 'Difficulty changes enemy health and attack only. Rewards, XP and story are identical in every mode, and the Lost Embers rule — your gold stays where you fall — applies in all of them.']},
   {id: 52, date: 'Oct 29', title: 'The Demon King', items: ['Malduun, the Demon King: a level 60 epilogue boss waiting on a throne of fused armor in a fiery fissure in the Ashfall Dunes. Only those who have silenced the Unmaker may approach him.', 'Defeat him to be crowned with the Crown of the King Below and gain DEMONBORN, a ninth trait: +10% attack, magic and defense. His dying kingdom-hoard also pays out 10,000 gold and 600 crowns.', 'Fixed a bug where enemies could start battles already wounded.']},
@@ -3633,12 +3946,15 @@ function renderWhatsNew() {
 }
 function markUpdatesSeen() { store.set(WN_KEY, UPDATES[0].id); }
 function show(id) {
+  overlay.classList.toggle('creator', id === 'scr-create');
+  // Global menus and the story interface are mutually exclusive.
+  if (document.body.classList.contains('story')) stLeave(false);
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
   overlay.hidden = false; currentScreen = id; musicScene(); overlay.classList.toggle('home', id === 'scr-main');
   if (id === 'scr-main') refreshMain();
   setTimeout(() => { const b = $(id).querySelector('button:not(:disabled)'); if (b) b.focus({preventScroll: true}); }, 0);
 }
-function hideMenus() { overlay.hidden = true; overlay.classList.remove('home'); musicScene(); }
+function hideMenus() { overlay.hidden = true; overlay.classList.remove('home','creator'); musicScene(); }
 function refreshMain() { renderWhatsNew(); clearTimeout(refreshMain.seenT); refreshMain.seenT = setTimeout(() => { if (currentScreen === 'scr-main' && !overlay.hidden && $('whatsNew').offsetParent) { markUpdatesSeen(); } }, 5000); // on wide screens the panel is always visible
   $('m-continue').disabled = !store.get(AUTO_KEY); $('m-daily').textContent = dailyReady() ? 'Daily  •  rewards ready' : 'Daily'; }
 $('wnBtn').addEventListener('click', () => { const w = $('whatsNew'), open = !w.classList.contains('open'); w.classList.toggle('open', open); $('wnBtn').setAttribute('aria-expanded', open); if (open) { markUpdatesSeen(); setTimeout(() => $('wnClose').focus(), 0); } });
@@ -5531,6 +5847,11 @@ const stRace = () => ST_RACES[stData().race] || ST_RACES.human;
 const ST_COLORS = ['#f2c14e', '#7fd1c7', '#e0405a', '#8f7bd8', '#7fe08a', '#ff8a4a', '#8fd4ff', '#ff9ccf'];
 // kind: phys uses attack, mag uses magic; all hits every enemy
 const ST_SKILLS = {
+  emberspark: {name: 'Ember Spark', mp: 4, kind: 'mag', mult: 1.25, burn: true, gift: true, tier: 0, desc: 'Tier I. A focused ember that ignites one foe.'},
+  flamelance: {name: 'Flame Lance', mp: 9, kind: 'mag', mult: 2.05, burn: true, gift: true, tier: 1, desc: 'Tier II. A piercing lance of flame.'},
+  cindertempest: {name: 'Cinder Tempest', mp: 16, kind: 'mag', mult: 1.45, all: true, gift: true, tier: 2, desc: 'Tier III. Ash and fire lash every enemy.'},
+  eclipse: {name: 'Eclipse of Ash', mp: 23, kind: 'mag', mult: 2.7, drain: true, gift: true, tier: 3, desc: 'Tier IV. Steal life through a collapsing shadow.'},
+  crownstars: {name: 'Crown of Stars', mp: 32, kind: 'mag', mult: 2.25, all: true, gift: true, tier: 4, desc: 'Tier V. Celestial fire strikes the entire enemy line.'},
   strike:    {name: 'Power Strike', mp: 6, kind: 'phys', mult: 1.8, desc: 'A heavy blow.'},
   fireball:  {name: 'Fireball', mp: 8, kind: 'mag', mult: 1.9, burn: true, desc: 'Fire damage that keeps burning.'},
   frost:     {name: 'Frost Bolt', mp: 7, kind: 'mag', mult: 1.5, slow: true, desc: 'Ice that may freeze the enemy for a turn.'},
@@ -5594,6 +5915,12 @@ function stMaster(id) {
 }
 const stMasteryText = id => { const r = stRank(id), nx = ST_RANK_AT[r + 1], nl = ST_RANK_LV[r + 1]; return `${'★'.repeat(r)}${r ? ' ' : ''}` + (!nx ? 'fully evolved' : stUses(id) >= nx && stData().lv < nl ? `mastered, evolves at level ${nl}` : `${Math.min(stUses(id), nx)}/${nx} to evolve${stData().lv < nl ? ` (level ${nl})` : ''}`); };
 const ST_FOES = {
+  briarmat: {name: 'The Briar Matriarch', hp: 1500, atk: 64, def: 23, spd: 17, xp: 1700, gold: 650, draw: 'wolf', fur: '#484e40', boss: true, worldBoss: true, encounter: 'Antlers scrape the pines. A wolf with branches growing through its spine rises over a circle of empty armor. The forest has a mother, and she has been waiting.'},
+  ossuary: {name: 'Ossuary Colossus', hp: 3300, atk: 96, def: 33, spd: 7, xp: 3300, gold: 1000, draw: 'golem', boss: true, worldBoss: true, encounter: 'The marsh floor rises. Burial stones and rib cages grind together into a towering body. Hundreds of names are carved into its arms. It has room for yours.'},
+  vael: {name: 'Vael, the Storm-Eater', hp: 5100, atk: 128, def: 36, spd: 22, xp: 5000, gold: 1600, draw: 'drake', fire: '#bdb2ff', boss: true, worldBoss: true, encounter: 'Lightning bends toward the mountaintop instead of the earth. A skeletal-winged drake drinks it from the clouds, then turns its burning eyes toward you.'},
+  cairntrial: {name: 'Cairn, the Gatewarden', hp: 950, atk: 43, def: 17, spd: 10, xp: 900, gold: 250, draw: 'hero', look: 'knight', color: '#8a8b79', boss: true, encounter: 'A shield the size of a door scrapes the floor. \"A ruler must first learn to stand,\" says the Gatewarden. \"Show me.\"'},
+  vestrial: {name: 'Vesper, the Veiled Keeper', hp: 2200, atk: 72, def: 22, spd: 19, xp: 2200, gold: 500, draw: 'hero', look: 'warlock', color: '#81749b', boss: true, encounter: 'Vesper closes a book bound in silver thread. \"Power without judgment is another kind of ruin. Let us see what you would build.\"'},
+  soltrial: {name: 'Solenne, the Last Luminary', hp: 4100, atk: 112, def: 31, spd: 19, xp: 4000, gold: 850, draw: 'hero', look: 'valkyrie', color: '#d0b985', boss: true, encounter: 'A fallen star hangs above the empty throne. Beneath it waits Solenne. \"Do not ask for loyalty,\" she says. \"Give us a reason to believe.\"'},
   wolf:    {name: 'Thornwolf', hp: 42, atk: 9, def: 2, spd: 9, xp: 12, gold: 6, draw: 'wolf'},
   pup:     {name: 'Wolf Pup', hp: 22, atk: 6, def: 1, spd: 10, xp: 6, gold: 3, draw: 'wolf', small: true},
   goblin:  {name: 'Ruin Goblin', hp: 55, atk: 12, def: 4, spd: 7, xp: 18, gold: 10, draw: 'goblin'},
@@ -5960,7 +6287,7 @@ const ST_CHESTS = [{id: 'c1', x: 3, y: 9, loot: {potion: 2}}, {id: 'c2', x: 20, 
   {id: 'c5', x: 37, y: 23, loot: {gold: 120, ether: 1}}, {id: 'c6', x: 2, y: 23, loot: {potion: 3}},
   {id: 'c7', x: 14, y: 29, loot: {gold: 90}}, {id: 'c8', x: 45, y: 4, loot: {ether: 2, gold: 70}},
   {id: 'bell', x: 13, y: 28, need: 'bellQuest', loot: {item: 'bell', label: 'the Drowned Bell, green with age'}}];
-const ST_BOSSES = [{id: 'stalker', x: 36, y: 20, side: 'corinQuest', map: 'world'}, {id: 'brother', x: 4, y: 29, side: 'lioraQuest', map: 'world'}, {id: 'demonking', x: 43, y: 7, side: 'unmaker', map: 'world'}];
+const ST_BOSSES = [{id: 'stalker', x: 36, y: 20, side: 'corinQuest', map: 'world'}, {id: 'brother', x: 4, y: 29, side: 'lioraQuest', map: 'world'}, {id: 'demonking', x: 43, y: 7, side: 'unmaker', map: 'world'}, {id: 'briarmat', x: 6, y: 11, ch: 0, region: 'The Thornwood', map: 'world'}, {id: 'ossuary', x: 9, y: 27, ch: 0, region: 'The Bone Marsh', map: 'world'}, {id: 'vael', x: 8, y: 3, ch: 0, region: 'Frost Peaks', map: 'world'}];
 // ---- the eight racial kingdoms: each race holds a keep somewhere in the Vale, with a throne you can visit
 const ST_KINGDOMS = {
   valekeep:  {race: 'human',  kingdom: 'The Vale of Ashes', seat: 'Thornwake Keep', ruler: 'King Aldric Valeborn', look: 'paladin', color: '#e8e2d0', theme: {floor: '#3a3630', wall: '#141210', glow: '#ffd75e'}, door: [17, 10],
@@ -5994,6 +6321,25 @@ for (const [key, K] of Object.entries(ST_KINGDOMS)) { // the keeps are built fro
   ST_NPCS.push({id: 'kg_' + key, name: K.ruler, map: key, x: 6, y: 4, look: K.look, color: K.color});
   ST_DOOR_AT[K.door[0] + ',' + K.door[1]] = key;
   ST_MAP[K.door[1]][K.door[0]] = 'D';
+}
+// An original guardian stronghold: a throne hall and three fully walkable trial floors.
+const ST_DOMINION_FLOORS = [
+  {key:'sanctum1', boss:'cairntrial', companion:'cairn', level:20, name:'The Iron Vestibule', title:'Warden'},
+  {key:'sanctum2', boss:'vestrial', companion:'vesper', level:35, name:'The Veiled Archive', title:'Regent'},
+  {key:'sanctum3', boss:'soltrial', companion:'solenne', level:50, name:'The Starless Throne', title:'Sovereign'},
+];
+ST_DUNGEONS.sanctum = {name:'The Ashen Sanctum', home:true, lit:true, pool:[], exit:[19,10], theme:{floor:'#343b3c',wall:'#182126',glow:'#bba97f'}, rows:['#############','#...........#','#.....D.....#','#...........#','#...........#','#...........#','#...........#','#.....E.....#','#############']};
+ST_NPCS.push({id:'sanctumherald',name:'Iven, Keeper of the Ashen Seat',look:'warlock',color:'#bba97f',map:'sanctum',x:6,y:4});
+ST_DOOR_AT['19,10']='sanctum'; ST_MAP[10][19]='D'; ST_DOOR_AT['sanctum:6,2']='sanctum1';
+for(const [i,F] of ST_DOMINION_FLOORS.entries()){
+  const rows=['#############', i<2?'#.....D.....#':'#############','#...........#','#..#.....#..#','#.....B.....#','#...........#','#...........#','#.....E.....#','#############'];
+  ST_DUNGEONS[F.key]={name:F.name,boss:F.boss,lit:true,pool:[],exit:[19,10],theme:{floor:i===1?'#3c3547':'#343c3a',wall:'#151b22',glow:i===1?'#9b8ac4':'#ceb887'},rows};
+  if(i<2) ST_DOOR_AT[F.key+':6,1']=ST_DOMINION_FLOORS[i+1].key;
+}
+for(const b of ST_BOSSES.filter(b=>ST_FOES[b.id].worldBoss)){
+  // Boss arenas must be reachable even if their chosen tile was water or mountain.
+  ST_MAP[b.y][b.x]=b.id==='vael'?'*':b.id==='ossuary'?'b':'T';
+  ST_MAP[b.y+1][b.x]=ST_MAP[b.y][b.x];
 }
 // Guild contracts: clear groups in a region (tile) for a reward; one at a time
 const ST_BOUNTIES = [
@@ -6097,6 +6443,102 @@ function stRespec() { // at a shrine: get every point back
   const d = stData(), fee = 50 + d.lv * 20; if (!stAttrSpent(d.attr)) return stSay([['', 'You have no stat points spent yet.']]);
   stSay([['', `The shrine can unmake what you have become and let you choose again. It asks ${fee} gold.`]], null, [[`Reset stat points (${fee} gold)`, () => { if (d.gold < fee) return stSay([['', 'You do not have enough gold.']]); d.gold -= fee; d.attr = {}; const s = stStats(); d.hp = Math.min(d.hp, s.hp); d.mp = Math.min(d.mp, s.mp); sfx('respawn'); stSave(); setTimeout(stStatsMenu, 0); }], ['Not now', null]]);
 }
+const ST_MAGIC_TIERS=[
+  {level:1,name:'I · Initiate',spell:'emberspark'},{level:10,name:'II · Adept',spell:'flamelance'},
+  {level:25,name:'III · Invoker',spell:'cindertempest'},{level:45,name:'IV · Archmage',spell:'eclipse'},{level:60,name:'V · Mythic',spell:'crownstars'},
+];
+const ST_EVOLUTION_LEVELS=[15,35,60];
+const ST_EVOLUTIONS={
+  human:['Ashbound','Valeborn','Legend of Ash'],elarin:['Star-Touched','Moonweaver','Aetherborn'],
+  woodwyn:['Briarheart','Thornwarden','Elderwild'],ashkin:['Cinderkin','Ashen Herald','Phoenixborn'],
+  tuskborn:['Ironblood','Warborn','Stormtusk'],stonekin:['Deepforged','Runebound','Mountainheart'],
+  felari:['Moonclaw','Nightstalker','Celestial Lynx'],scalekin:['Scaletouched','Drakekin','Ancient Wyrmblood'],
+};
+const stMagicTier=d=>Math.max(0,ST_MAGIC_TIERS.filter(t=>d.lv>=t.level).length-1);
+const stEvolutionStage=d=>Math.max(0,Math.min(3,Math.floor(Number(d.raceStage)||0)));
+const stEvolutionName=d=>stEvolutionStage(d)?(ST_EVOLUTIONS[d.race]||ST_EVOLUTIONS.human)[stEvolutionStage(d)-1]:(ST_RACES[d.race]||ST_RACES.human).name;
+function stAnnounce(text,color='#d3bd8b'){
+  ST.announcements=ST.announcements||[];
+  if(!ST.announcements.some(a=>a.text===text))ST.announcements.push({text,color});
+}
+function stSyncProgress(notify=true){
+  const d=stData();if(!d)return;
+  d.skills=d.skills||[];d.outfit=d.outfit||{race:d.race};d.outfit.evolution=stEvolutionStage(d);
+  const tier=stMagicTier(d),old=d.magicTier;
+  if(!d.hr)for(let i=0;i<=tier;i++)if(!d.skills.includes(ST_MAGIC_TIERS[i].spell))d.skills.push(ST_MAGIC_TIERS[i].spell);
+  d.magicTier=tier;
+  if(notify&&tier>0&&(old==null||tier>old))stAnnounce('MAGIC TIER '+ST_MAGIC_TIERS[tier].name+' UNLOCKED','#c3b2f1');
+}
+function stSystemPanel(title){
+  const m=$('stMenu');ST.mode='menu';ST.keys={};ST.journal=false;m.hidden=false;
+  m.classList.remove('journal','rewards');m.innerHTML='';m.appendChild(el('h3','',title));return m;
+}
+function stProgressMenu(){
+  if(!stData().race)return stChooseRace();
+  const d=stData(),m=stSystemPanel('Bloodlines & spellcraft'),tier=stMagicTier(d),stage=stEvolutionStage(d);
+  m.appendChild(el('p','',`Level ${d.lv} · ${stEvolutionName(d)} · ${ST_MAGIC_TIERS[tier].name} magic`));
+  for(const T of ST_MAGIC_TIERS){
+    const card=el('div','progressCard');card.append(el('h4','',T.name+' · Level '+T.level),el('p','',ST_SKILLS[T.spell].name+': '+ST_SKILLS[T.spell].desc));
+    card.appendChild(el('small','hint',d.hr?'Sealed by your restriction':d.lv>=T.level?'Unlocked automatically':'Locked until level '+T.level));m.appendChild(card);
+  }
+  m.append(el('h3','','Racial evolution'),el('p','',`Your base race stays ${ST_RACES[d.race].name}. Each awakening adds 4% maximum health, 3% mana, and a bloodline bonus. Existing gear, traits and relationships are preserved.`));
+  const detail={human:'+2 attack, +2 magic',elarin:'+5 magic',woodwyn:'+2 speed',ashkin:'+3 magic, +2 attack',tuskborn:'+5 attack',stonekin:'+4 defense',felari:'+2 speed, +1 attack',scalekin:'+2 defense, +2 magic'};
+  const canAwaken=d.map==='sanctum'||stNearby()?.kind==='shrine';
+  for(const [i,level]of ST_EVOLUTION_LEVELS.entries()){
+    const name=(ST_EVOLUTIONS[d.race]||ST_EVOLUTIONS.human)[i],card=el('div','progressCard'),b=el('button','',stage>i?'Awakened':`Awaken as ${name}`);
+    b.disabled=stage!==i||d.lv<level||!canAwaken;
+    b.addEventListener('click',()=>{if(stEvolutionStage(d)!==i||d.lv<level)return;const before=stStats();d.raceStage=i+1;stSyncProgress(false);const after=stStats();d.hp=Math.min(after.hp,d.hp+after.hp-before.hp);d.mp=Math.min(after.mp,d.mp+after.mp-before.mp);stSave();sfx('levelup');stAnnounce('BLOODLINE AWAKENED: '+name,'#a5d0a1');stProgressMenu();stHud();});
+    card.append(el('h4','',name+' · Level '+level),el('p','',`Stage ${i+1}: ${detail[d.race]||detail.human} per stage, plus health and mana growth.`),b);m.appendChild(card);
+  }
+  m.appendChild(el('small','hint','Awaken at an Ashen Shrine or in the Ashen Sanctum. Stages must be claimed in order.'));
+  const close=el('button','','Return to the Vale');close.addEventListener('click',stCloseMenu);m.appendChild(close);
+}
+function stWorldBossMenu(){
+  const d=stData(),m=stSystemPanel('The world remembers its monsters');
+  m.appendChild(el('p','','Track a rumor to place a waypoint on your compass and minimap. World bosses are one-time challenges with unique trophies; difficulty still applies.'));
+  for(const B of ST_BOSSES.filter(b=>ST_FOES[b.id].worldBoss)){
+    const F=ST_FOES[B.id],card=el('div','progressCard'),b=el('button','',d.flags[B.id]?'Defeated':d.trackBoss===B.id?'Tracked':'Track this boss');b.disabled=!!d.flags[B.id];
+    card.append(el('h4','',F.name+' · Level '+ST_BOSS_LV[B.id]),el('p','',B.region+' · '+(d.flags['seen_'+B.id]?'Discovered':'A whispered rumor')),el('p','',F.encounter));
+    b.addEventListener('click',()=>{d.trackBoss=B.id;stSave();stHud();stCloseMenu();stAnnounce('HUNT TRACKED: '+F.name,'#deb786');});card.appendChild(b);m.appendChild(card);
+  }
+  const clear=el('button','','Clear hunt waypoint');clear.addEventListener('click',()=>{delete d.trackBoss;stSave();stHud();stCloseMenu();});
+  const back=el('button','','Return to the Vale');back.addEventListener('click',stCloseMenu);m.append(clear,back);
+}
+const stDominionRank=d=>['Unclaimed','Warden','Regent','Sovereign'][ST_DOMINION_FLOORS.filter(f=>d.flags[f.boss]).length];
+function stDominionMenu(){
+  const d=stData(),m=stSystemPanel('The Ashen Dominion');
+  m.append(el('p','',`Ruler rank: ${stDominionRank(d)}. This broken stronghold answers to deeds, not blood. Its guardians may choose to follow you after their trials.`),el('p','','Find the Ashen Sanctum east of Thornwake Keep. Explore each floor, defeat its guardian, then climb to the next. Nothing here requires a purchase.'));
+  for(const [i,F]of ST_DOMINION_FLOORS.entries()){
+    const won=!!d.flags[F.boss],locked=i>0&&!d.flags[ST_DOMINION_FLOORS[i-1].boss],card=el('div','progressCard'),b=el('button','',won?'Visit cleared floor':`Enter floor ${i+1}`);
+    b.disabled=locked||d.lv<F.level;b.addEventListener('click',()=>{stCloseMenu();stEnterMap(F.key);});
+    card.append(el('h4','',`Floor ${i+1}: ${F.name}`),el('p','',`${ST_FOES[F.boss].name} · Level ${F.level} · ${won?'Loyal guardian earned':locked?'Defeat the previous guardian first':'Trial awaits'}`),el('p','',`Victory earns the title ${F.title} and unlocks ${ST_COMPANIONS[F.companion].name} as a companion.`),b);m.appendChild(card);
+  }
+  const hall=el('button','','Enter the Ashen Sanctum');hall.addEventListener('click',()=>{stCloseMenu();stEnterMap('sanctum');});
+  const back=el('button','','Return to the Vale');back.addEventListener('click',stCloseMenu);m.append(hall,back);
+}
+function stWorldNotices(dt){
+  if(ST.mode!=='walk')return;
+  const d=stData();ST.noticeClock=(ST.noticeClock||0)-dt;
+  if(ST.noticeClock<=0){
+    ST.noticeClock=.6;
+    const name=d.map==='world'?(ST_REGION[stTileAt(d.x,d.y)]||'The Ashen Vale'):ST_DUNGEONS[d.map]?.name;
+    if(name&&name!==ST.noticeRegion){ST.noticeRegion=name;stAnnounce(name.toUpperCase(),'#d3c7a9');}
+    if(d.map==='world')for(const B of ST_BOSSES.filter(b=>ST_FOES[b.id].worldBoss)){
+      if(!d.flags[B.id]&&!d.flags['seen_'+B.id]&&Math.hypot(d.x/ST_TILE-B.x,d.y/ST_TILE-B.y)<4){d.flags['seen_'+B.id]=true;stAnnounce('WORLD BOSS: '+ST_FOES[B.id].name+' · Lv '+ST_BOSS_LV[B.id],'#e0a38b');stSave();}
+    }
+  }
+  if(!STFX.callout&&ST.announcements?.length){const n=ST.announcements.shift();stCallout(n.text,n.color);}
+}
+function stMagicLessons(){
+  const d=stData(),m=stSystemPanel('The Ember Academy'),fee=20+d.lv*8,used=d.lessons?.level===d.lv?d.lessons.count:0;
+  m.append(el('p','','Patient study sharpens power earned on the road. Each lesson adds three practice uses to one spell. Mastery rank still requires its normal character level.'),el('p','',`Level ${d.lv} · ${used}/3 lessons used at this level · ${fee} gold per lesson`));
+  for(const id of d.skills.filter(k=>ST_SKILLS[k]?.kind==='mag')){
+    const card=el('div','progressCard'),b=el('button','',`Study ${ST_SKILLS[id].name}`);b.disabled=d.hr||used>=3||d.gold<fee;
+    b.addEventListener('click',()=>{const n=d.lessons?.level===d.lv?d.lessons.count:0;if(n>=3||d.gold<fee||d.hr)return;d.gold-=fee;d.mastery=d.mastery||{};d.mastery[id]=(d.mastery[id]||0)+3;d.lessons={level:d.lv,count:n+1};stSave();sfx('levelup');stAnnounce('LESSON COMPLETE: '+ST_SKILLS[id].name,'#c1b2e8');stMagicLessons();});
+    card.append(el('h4','',stSkName(id)),el('p','',stMasteryText(id)),b);m.appendChild(card);
+  }
+  const close=el('button','','Return to the Vale');close.addEventListener('click',stCloseMenu);m.appendChild(close);
+}
 function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
@@ -6115,6 +6557,7 @@ function stStats() { // base class stats grown by level, plus gear and alignment
     if (tr.includes('oathbound')) st.def *= 1.12;
     if (tr.includes('fleetfoot')) st.spd += 3;
     if (tr.includes('demonborn')) { st.atk *= 1.1; st.mag *= 1.1; st.def *= 1.1; } }
+  {const stage=stEvolutionStage(d);st.hp=Math.round(st.hp*(1+stage*.04));st.mp=Math.round(st.mp*(1+stage*.03));const boosts={human:{atk:2,mag:2},elarin:{mag:5},woodwyn:{spd:2},ashkin:{mag:3,atk:2},tuskborn:{atk:5},stonekin:{def:4},felari:{spd:2,atk:1},scalekin:{def:2,mag:2}};for(const[k,v]of Object.entries(boosts[d.race]||boosts.human))st[k]+=v*stage;}
   if (d.hr) { st.hp = Math.round(st.hp * 1.25); st.atk = st.atk * 1.3 + 4; st.def += 5; st.spd += 5; st.mag = 0; st.mp = Math.round(st.mp * .7); } // Heavenly Restriction: a perfect body, no magic at all
   if (d.pact) { st.atk *= 1.08; st.mag *= 1.08; st.atk += 4; st.mag += 4; }
   const outside = d.map === 'world' || (ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].outdoor), C = typeof stClock === 'function' ? stClock() : {dark: 0};
@@ -6489,6 +6932,9 @@ const ST_ROCKS = [ // ore rocks out in the regions; each refills a few minutes a
 ];
 const ST_ORE_LV = {copper: 1, iron: 2, silver: 3, gold: 4, sunsteel: 6, moonstone: 5};
 const ST_GEAR = { // forged at Brann's smithy
+  briarCrown:{drop:true,name:'Crown of the Briar Mother',lv:20,atk:6,def:3,desc:'+6 attack, +3 defense. The Thornwood remembers.'},
+  ossuarySigil:{drop:true,name:'Ossuary Sigil',lv:35,def:8,mag:5,desc:'+8 defense, +5 magic. A name the dead will not forget.'},
+  stormFang:{drop:true,name:'Storm-Eater Fang',lv:50,mag:10,spd:2,desc:'+10 magic, +2 speed. Lightning sleeps inside the tooth.'},
   copperRing: {name: 'Copper Ring', need: {copper: 3}, lv: 1, def: 2, desc: '+2 defense'},
   ironPlate: {name: 'Iron Breastplate', need: {iron: 4, copper: 1}, lv: 2, def: 5, desc: '+5 defense'},
   silverEdge: {name: 'Silver Edge', need: {silver: 3, iron: 2}, lv: 3, atk: 7, desc: '+7 attack'},
@@ -6509,6 +6955,8 @@ Object.assign(ST_GEAR, {
   demonHorn: {drop: true, name: 'Crown of the King Below', atk: 35, mag: 35, def: 20, desc: '+35 attack, +35 magic, +20 defense'},
 });
 const ST_BOSS_REWARD = {
+  briarmat:[1500,120,'briarCrown'],ossuary:[3000,220,'ossuarySigil'],vael:[5000,350,'stormFang'],
+  cairntrial:[800,75,null],vestrial:[1800,140,null],soltrial:[3500,250,null],
   golem: [150, 20, 'emberCore'], drake: [220, 30, 'frostHeart'], brother: [200, 25, 'oathShield'], stalker: [250, 30, 'facelessMask'], king: [500, 100, 'hollowCrown'], mara: [400, 60, 'corsairCutlass'],
   ysolde: [350, 50, 'moonfangPelt'], garrick: [350, 50, 'silverCrossbow'], witch: [500, 80, 'ashenVeil'], seraphiel: [600, 100, 'seraphFeather'], marquis: [800, 120, 'crimsonSignet'], countess: [900, 150, 'elderRose'],
   ignaroth: [3000, 250, 'wyrmscale'], unmaker: [8000, 500, 'aetherHeart'], demonking: [10000, 600, 'demonHorn'],
@@ -6537,6 +6985,9 @@ const stEdict = () => (stData().guild || {}).edict || 'bounty';
 const ST_EDICTS = {bounty: ['Edict of the Bounty', 'Guild quests pay 30% more'], road: ['Edict of the Open Road', 'Coach and ship fares are halved'], wall: ['Edict of the Iron Wall', '+10% defense for all members'], market: ['Edict of the Market', 'Fish, ore and gems sell for 15% more']};
 const ST_GQ_PAY = {D: [60, 30, 60], C: [130, 45, 150], B: [240, 70, 320], A: [420, 100, 700], S: [800, 150, 1500]}; // gold, guild points, xp
 const ST_GQUESTS = [
+  {id:'guardianC',rank:'C',kind:'boss',boss:'cairntrial',name:'Expedition: The Iron Vestibule',text:'Clear the first guardian floor of the Ashen Sanctum'},
+  {id:'guardianA',rank:'A',kind:'boss',boss:'vestrial',name:'Expedition: The Veiled Archive',text:'Defeat Vesper in the second guardian trial'},
+  {id:'guardianS',rank:'S',kind:'boss',boss:'soltrial',name:'Expedition: The Starless Throne',text:'Earn Solenne’s loyalty in the final trial'},
   {id: 'd1', rank: 'D', kind: 'hunt', zone: 'world:T', need: 4, name: 'Thornwood Cull', text: 'Defeat 4 groups in the Thornwood'},
   {id: 'd2', rank: 'D', kind: 'hunt', zone: 'world::', need: 3, name: 'Ruin Rats', text: 'Defeat 3 groups in the Sunken Ruins'},
   {id: 'd3', rank: 'D', kind: 'gather', mat: 'trout', need: 3, name: 'Fish for the Hall', text: 'Bring 3 River Trout'},
@@ -7123,6 +7574,9 @@ function stChatOpen() { if (PROF.chatOff) return stCallout('Chat is off. Turn it
 function stChatClose() { const i = $('stChatIn'); i.value = ''; i.hidden = true; $('stChat').classList.remove('open'); i.blur(); stChatRender(); }
 const ST_COMP_LV = 45;
 const ST_COMPANIONS = { // role decides what they do on their turn; hp and atk scale from your own stats
+  cairn:{name:'Cairn',title:'Gatewarden of the Iron Vestibule',trial:'cairntrial',minLv:20,look:'knight',color:'#8a8b79',role:'tank',hp:1.4,atk:.5,male:true,desc:'Draws attacks and guards the ruler he chose.',lines:['I stand because you stood.','Behind my shield.']},
+  vesper:{name:'Vesper',title:'Keeper of the Veiled Archive',trial:'vestrial',minLv:35,look:'warlock',color:'#81749b',role:'mage',hp:.7,atk:.6,desc:'Unleashes arcane storms across the enemy line.',lines:['Wisdom walks beside power.','The archive remembers.']},
+  solenne:{name:'Solenne',title:'Luminary of the Starless Throne',trial:'soltrial',minLv:50,look:'valkyrie',color:'#d0b985',role:'healer',hp:.8,atk:.45,desc:'Mends wounds and keeps her sovereign standing.',lines:['Give them a dawn worth guarding.','Not while I draw breath.']},
   liora:  {name: 'Liora', title: 'Shieldmaiden of Thornwake', look: 'valkyrie', color: '#9fd8ff', role: 'guard', hp: .9, atk: .75, fee: 0, desc: 'Fights beside you, and shields and heals you when you are badly hurt.', lines: ['Stay close!', 'Watch my back.', 'Together, then.']},
   garm:   {name: 'Garm the Ironwall', title: 'Mercenary of Valdris', look: 'brute', color: '#8a6a4a', role: 'tank', hp: 1.5, atk: .6, fee: 2500, male: true, desc: 'Draws enemy attacks onto himself and shrugs them off.', lines: ['Hit me, not them!', 'Come on, then.']},
   sylwen: {name: 'Sylwen of the Choir', title: 'Healer of Celestine', look: 'magicgirl', color: '#e8e2ff', role: 'healer', hp: .75, atk: .45, fee: 3000, desc: 'Heals you every turn and closes bleeding wounds.', lines: ['I have you.', 'Light keep us.']},
@@ -7130,7 +7584,7 @@ const ST_COMPANIONS = { // role decides what they do on their turn; hp and atk s
   orrin:  {name: 'Orrin Stormcaller', title: 'Hedge Mage of Saltmere', look: 'mage', color: '#4a7aff', role: 'mage', hp: .65, atk: .6, fee: 2800, male: true, desc: 'Calls lightning down on every enemy at once.', lines: ['Mind the thunder.', 'Stand back!']},
   fang:   {name: 'Fang', title: 'Direwolf of the Ironpine', beast: true, color: '#6a6a70', role: 'beast', hp: .95, atk: .55, fee: 2000, male: true, desc: 'A loyal direwolf that bites twice every turn.', lines: []},
 };
-const stCompanion = () => { const d = stData(); const C = d.lv >= ST_COMP_LV && d.companion && (d.companions || []).includes(d.companion) && ST_COMPANIONS[d.companion]; return C ? Object.assign({key: d.companion}, C) : null; };
+const stCompanion = () => {const d=stData(),C=d.companion&&(d.companions||[]).includes(d.companion)&&ST_COMPANIONS[d.companion];return C&&d.lv>=(C.minLv||ST_COMP_LV)?Object.assign({key:d.companion},C):null;};
 function stChooseRace() { // for heroes made before races existed: a one-time choice
   const d = stData(), m = $('stMenu'); ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
   m.appendChild(el('h3', '', '🧬 Your bloodline')); m.appendChild(el('p', '', 'Who were you before the Vale? You can choose only once.'));
@@ -7143,13 +7597,13 @@ function stCompanionHall() {
   const d = stData(), m = $('stMenu'); d.companions = d.companions || []; if (d.flags.liora && !d.companions.includes('liora')) d.companions.push('liora');
   ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
   m.appendChild(el('h3', '', '🤝 Companions'));
-  m.appendChild(el('p', '', d.lv >= ST_COMP_LV ? `Choose one companion to fight beside you. Active: ${stCompanion() ? stCompanion().name : 'none'}.` : `Companions only fight beside seasoned adventurers. Reach level ${ST_COMP_LV} to take one into battle. You are level ${d.lv}. You can still meet and recruit them now.`));
+  m.appendChild(el('p', '', `Choose one companion to fight beside you. Most require level ${ST_COMP_LV}; guardians can join after their own trials at levels 20, 35 and 50. Active: ${stCompanion()?stCompanion().name:'none'}.`));
   const tbl = el('div', 'trade comp');
   for (const k in ST_COMPANIONS) { const C = ST_COMPANIONS[k], have = d.companions.includes(k), act = el('span', 'tbtn');
     const b = (l, fn, dis) => { const x = el('button', '', l); x.disabled = !!dis; x.addEventListener('click', () => { fn(); stCompanionHall(); }); act.appendChild(x); };
-    if (!have) { if (k === 'liora') b('Meet her through Maren', () => {}, true); else b(`Recruit (${C.fee} gold)`, () => { if (d.gold < C.fee) return; d.gold -= C.fee; d.companions.push(k); sfx('levelup'); stCallout(`${C.name} joins you`, '#ffd75e'); }, d.gold < C.fee); }
+    if (!have) {if(C.trial)b('Earn loyalty in the Sanctum',()=>{},true);else if (k === 'liora') b('Meet her through Maren', () => {}, true); else b(`Recruit (${C.fee} gold)`, () => { if (d.gold < C.fee) return; d.gold -= C.fee; d.companions.push(k); sfx('levelup'); stCallout(`${C.name} joins you`, '#ffd75e'); }, d.gold < C.fee); }
     else if (d.companion === k) b('Dismiss', () => { d.companion = null; });
-    else b(d.lv >= ST_COMP_LV ? 'Take into battle' : `Take (level ${ST_COMP_LV})`, () => { d.companion = k; sfx('pet'); stCallout(`${C.name} will fight beside you`, '#ffd75e'); }, d.lv < ST_COMP_LV);
+    else b(d.lv >= (C.minLv||ST_COMP_LV) ? 'Take into battle' : `Take (level ${C.minLv||ST_COMP_LV})`, () => { d.companion = k; sfx('pet'); stCallout(`${C.name} will fight beside you`, '#ffd75e'); }, d.lv < (C.minLv||ST_COMP_LV));
     tbl.append(el('span', '', `${C.name}${d.companion === k ? ' ★' : ''}`), el('span', 'hint', `${C.title}. ${C.desc}`), act); }
   m.appendChild(tbl);
   const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row); stSave();
@@ -7198,6 +7652,26 @@ function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // draw
 
 // ---- story menu and character creator
 let crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}, attr: {}};
+let crStep = 0;
+function creatorStep(step) {
+  crStep = Math.max(0, Math.min(2, step));
+  for (let i = 0; i < 3; i++) {
+    $('crStep' + i).hidden = i !== crStep;
+    $('crTab' + i).setAttribute('aria-selected', String(i === crStep));
+    $('crTab' + i).tabIndex = i === crStep ? 0 : -1;
+  }
+  $('crPrev').hidden = crStep === 0; $('crNext').hidden = crStep === 2; $('crStart').hidden = crStep !== 2;
+  $('crNext').textContent = crStep === 0 ? 'Design your look' : 'Choose abilities';
+  $('crStepLabel').textContent = `${crStep + 1} of 3`;
+}
+for (let i = 0; i < 3; i++) {
+  $('crTab' + i).addEventListener('click', () => creatorStep(i));
+  $('crTab' + i).addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); creatorStep((crStep + (e.key === 'ArrowRight' ? 1 : 2)) % 3); $('crTab' + crStep).focus(); }
+  });
+}
+$('crPrev').addEventListener('click', () => creatorStep(crStep - 1));
+$('crNext').addEventListener('click', () => creatorStep(crStep + 1));
 const ST_HATS = [['', 'Class default'], ['helm', 'Knight\'s helm'], ['heavyhelm', 'Great helm'], ['winghelm', 'Winged helm'], ['visor', 'Visor'], ['crest', 'Crested helm'], ['hood', 'Hood'], ['cowl', 'Cowl'], ['ninja', 'Shinobi wrap'], ['mask', 'Mask'],
   ['pointy', 'Wizard hat'], ['brim', 'Witch\'s brim'], ['widehat', 'Wide hat'], ['tricorn', 'Tricorn'], ['boonie', 'Ranger\'s cap'], ['helmet', 'Soldier\'s helmet'], ['crown', 'Crown'], ['feathers', 'Feathers'], ['horns', 'Horns'],
   ['longhair', 'Long hair'], ['twintails', 'Twin tails'], ['topknot', 'Topknot'], ['spiky', 'Spiky hair'], ['scruffy', 'Scruffy hair']];
@@ -7228,6 +7702,13 @@ function stOutfitUI(box, O, onChange, cls) { // headwear, tunic, cloak, cape, sc
     for (const [v, n] of extra) { const b = el('button', 'chip' + ((O[key] || '') === v ? ' sel' : ''), n); b.addEventListener('click', () => { set(key, v); stOutfitUI(box, O, onChange, cls); }); w.appendChild(b); }
     for (const c of list) { const b = el('button', 'sw'); b.style.background = c; b.setAttribute('aria-label', `${label} ${c}`); b.setAttribute('aria-pressed', O[key] === c); b.addEventListener('click', () => { set(key, c); stOutfitUI(box, O, onChange, cls); }); w.appendChild(b); }
     r.appendChild(w); box.appendChild(r); };
+  const pick = (label, key, values) => { const r = el('div', 'orow'), s = el('select'); s.setAttribute('aria-label', label);
+    for (const [v, text] of values) { const o = el('option', '', text); o.value = v; o.selected = (O[key] || values[0][0]) === v; s.appendChild(o); }
+    s.addEventListener('change', () => set(key, s.value)); r.append(el('span', 'olab', label), s); box.appendChild(r); };
+  pick('Hair', 'hairType', [['swept','Side swept'],['crop','Short crop'],['curls','Curls'],['long','Long hair'],['braids','Twin braids'],['spikes','Spikes'],['none','Shaved']]);
+  pick('Expression', 'expression', [['calm','Quiet resolve'],['grin','Crooked grin'],['fierce','Determined'],['wary','World weary']]);
+  row('Hair color', 'hairColor', ['#30231f','#78513b','#b69b69','#be6b42','#dedcd3','#64647c','#9d689b'], []);
+  row('Eyes', 'eyeColor', ['#795538','#5d9ba9','#768452','#b68a36','#8271a8'], []);
   row(cls === 'mage' ? 'Robe' : cls === 'warrior' || cls === 'paladin' ? 'Tabard' : cls === 'rogue' ? 'Jerkin' : cls === 'gunner' ? 'Coat' : 'Tunic', 'body', CL, [['', 'Default']]); row('Cloak', 'cloak', CL, [['', 'Default']]); row(cls === 'paladin' || cls === 'warrior' ? 'Cape' : cls === 'mage' ? 'Mantle' : 'Cape', 'cape', CL, [['', 'Default'], ['none', 'None']]);
   row(cls === 'rogue' ? 'Face scarf' : cls === 'gunner' ? 'Bandana' : 'Scarf', 'scarf', CL, [['', 'Default'], ['none', 'None']]); row('Skin', 'skin', ST_SKINS, [['', 'Default']]);
 }
@@ -7268,11 +7749,18 @@ function renderCreator() {
     b.addEventListener('click', () => { if (on) crSel.skills = crSel.skills.filter(x => x !== id); else if (crSel.skills.length < 3) crSel.skills.push(id); renderCreator(); });
     sk.appendChild(b);
   }
-  $('crSkillNote').textContent = `Pick 3 abilities (${crSel.skills.length}/3). ★ suits your class. You learn more as you level up.`;
+  $('crSkillNote').textContent = `Pick 3 abilities (${crSel.skills.length}/3). ★ suits your class. Your tier also grants Ember Spark. More tier spells unlock at levels 10, 25, 45 and 60.`;
   $('crStart').disabled = crSel.skills.length !== 3;
   const c = $('crCv'), g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
-  g.setTransform(2.4, 0, 0, 2.4, c.width / 2, c.height * .85);
-  drawCharacter(g, {look: ST_CLASSES[crSel.cls].look, color: crSel.color, outfit: crSel.outfit, team: 0, level: 3, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, 0);
+  g.fillStyle = '#182528'; g.fillRect(0, 0, c.width, c.height);
+  const halo = g.createRadialGradient(180, 185, 20, 180, 185, 200); halo.addColorStop(0, '#384742'); halo.addColorStop(1, '#182528'); g.fillStyle = halo; g.fillRect(0, 0, c.width, c.height);
+  g.strokeStyle = '#546253'; g.lineWidth = 1; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(180, 192, 65 + i * 32, 0, Math.PI * 2); g.stroke(); }
+  g.fillStyle = '#10181a'; g.beginPath(); g.ellipse(180, 384, 105, 17, 0, 0, 7); g.fill();
+  g.setTransform(3.6, 0, 0, 3.6, c.width / 2, 350);
+  drawStorybookCharacter(g, {look: ST_CLASSES[crSel.cls].look, color: crSel.color, outfit: crSel.outfit, team: 0, level: 1, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, 0);
+  $('crIdentity').textContent = ST_RACES[crSel.race].name + ' ' + ST_CLASSES[crSel.cls].name;
+  $('crBuild').textContent = ST_DIFFS[crSel.diff == null ? 1 : crSel.diff].name + ' · ' + crSel.skills.length + '/3 abilities';
+  creatorStep(crStep);
 }
 function stPreviewVoice(sex) { // speaks with the chosen voice, before a story exists
   musicStart(); if (!window.speechSynthesis) return;
@@ -7283,7 +7771,7 @@ $('stBack').addEventListener('click', () => show('scr-main'));
 $('stContinue').addEventListener('click', () => startStory());
 $('stNew').addEventListener('click', () => {
   if (stData() && !confirm('Start a new story? Your current story progress will be replaced.')) return;
-  crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}, attr: {}, diff: 1}; $('crName').value = ''; renderCreator(); show('scr-create');
+  crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}, attr: {}, diff: 1}; crStep = 0; $('crName').value = ''; renderCreator(); show('scr-create');
 });
 $('crBack').addEventListener('click', openStoryMenu);
 $('crStart').addEventListener('click', () => {
@@ -7508,7 +7996,7 @@ function startStory(fresh) {
   hideMenus(); reset(0); G.started = false;
   ST.on = true; ST.mode = 'walk'; ST.keys = {}; ST.safe = 4; ST.walkDist = 0;
   document.body.classList.add('story'); $('story').hidden = false; $('stBattle').hidden = true; $('stMenu').hidden = true;
-  const d = stData(); d.map = d.map || 'world'; if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
+  const d = stData(); d.map = d.map || 'world';ST.noticeRegion=null;ST.announcements=[];stSyncProgress();if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
   if (d.map !== 'world') { const px = d.x, py = d.y; stEnterMap(d.map, 2, 2); d.x = px; d.y = py; }
   ST.cam.x = d.x; ST.cam.y = d.y; musicStart(); musicForce(stMapSong());
   if (d.wounds && d.wounds.hole) delete d.wounds.hole; // stab holes were removed from the game
@@ -7522,9 +8010,12 @@ function startStory(fresh) {
   ], () => stTutStart());
   stHud(); stNetJoin(); stChatRender();
 }
-function stLeave() {
+function stLeave(showMenu = true) {
   stNetLeave(); stSave(); ST.on = false; document.body.classList.remove('story'); $('story').hidden = true; musicForce(null); try { speechSynthesis.cancel(); } catch (e) { /* no speech */ }
-  reset(0); G.started = false; show('scr-main');
+  ST.keys = {}; ST.touchMove = null; ST.padMove = null; ST.mode = 'walk'; ST.journal = false; ST.dlg = null;ST.announcements=[];STFX.callout=null;
+  for (const id of ['stMenu', 'stDialog', 'stBattle', 'stLoad']) $(id).hidden = true;
+  $('stMenu').classList.remove('journal', 'rewards'); $('stJoyBase').classList.remove('on');
+  reset(0); G.started = false; if (showMenu) show('scr-main');
 }
 
 // ---- tutorial: Warden Edda walks ahead through Thornwake and stops to explain each place. Paths are tile coordinates.
@@ -7595,6 +8086,7 @@ const ST_ACT_TALK = { // what Maren says at each step of the shard quest
   9: [['Maren the Pale', 'The fires are steady for the first time in my life. The sky is whole. I do not know what to do with hope, Shardbreaker. Teach me.'], ['Maren the Pale', 'But listen — shepherds in the Ashfall Dunes say the sand has split open on a fissure that breathes red light, and a crowned thing sits beside it feeding a fire with its own hand. If the world is to have one more war in it, better it ends at your hands than anyone else\'s.']],
 };
 function stObjective() {
+  {const d=stData();if(d.trackBoss&&!d.flags[d.trackBoss]){const b=ST_BOSSES.find(b=>b.id===d.trackBoss);if(b)return{text:`Hunt: ${ST_FOES[b.id].name} · Level ${ST_BOSS_LV[b.id]}`,x:b.x*ST_TILE+32,y:b.y*ST_TILE+32,map:b.map};}}
   const d = stData(), T = (x, y, map = 'world') => ({x: x * ST_TILE + 32, y: y * ST_TILE + 32, map});
   if (ST.tut && d.map === 'world') return Object.assign({text: 'Follow Warden Edda through Thornwake', x: ST.tut.x, y: ST.tut.y, map: 'world'});
   if (d.map !== 'world') { const D = ST_DUNGEONS[d.map]; let b = null; if (D.boss && !d.flags[D.boss]) D.rows.forEach((r, y) => { const x = r.indexOf('B'); if (x >= 0) b = T(x, y, d.map); });
@@ -7692,6 +8184,9 @@ function stFindOpen(d) { // never arrive inside a wall, on furniture or out at s
     if (best) { d.x = best[0]; d.y = best[1]; return; } }
 }
 function stEnterMap(key, tx, ty) { // move between the world and a dungeon
+  const floor=ST_DOMINION_FLOORS.findIndex(f=>f.key===key);
+  if(floor>=0&&(stData().lv<ST_DOMINION_FLOORS[floor].level||floor>0&&!stData().flags[ST_DOMINION_FLOORS[floor-1].boss]))return stSay([['',`The ward holds. Reach level ${ST_DOMINION_FLOORS[floor].level}${floor>0?' and defeat the previous guardian':''} before entering this floor.`]]);
+  if(tx==null||ty==null){tx=6;ty=6;}
   const d = stData(); if (d.map !== key) stLoadScreen(key); if (key !== 'world') d.riding = false; d.map = key; if (ST_PORTS[key]) { d.ports = d.ports || {}; d.ports[key] = true; } /* remembered for Scrolls of Return */ d.x = tx * ST_TILE + 32; d.y = ty * ST_TILE + 32; stFindOpen(d); ST.cam.x = d.x; ST.cam.y = d.y; ST.safe = 4;
   ST.foes = [];
   if (key !== 'world') {
@@ -7705,7 +8200,7 @@ function stEnterMap(key, tx, ty) { // move between the world and a dungeon
 function stRest() { // an Ashen Shrine: heal fully, set your return point, and the dead in the dungeons rise again
   const d = stData(), hurt = !!d.wounds; d.wounds = null; const s = stStats(); d.hp = s.hp; d.mp = s.mp; d.shrine = {map: d.map, x: d.x, y: d.y + 40}; sfx('respawn');
   const opts = stAttrSpent(d.attr) ? [['Rise', null], ['Reset my stat points', () => setTimeout(stRespec, 0)]] : [['Rise', null]];
-  opts.splice(1, 0, [`Change difficulty (${stDiff().name})`, () => setTimeout(stDiffChange, 0)]);
+  opts.splice(1, 0, ['Bloodlines & spellcraft',()=>setTimeout(stProgressMenu,0)],[`Change difficulty (${stDiff().name})`, () => setTimeout(stDiffChange, 0)]);
   stSay([['', (hurt ? 'The ash fills your wounds and knits them closed. Even the lost arm grows back, grey and new. ' : '') + 'You kneel in the ash. Warmth returns to your bones. Somewhere far below, the dead stir again.']], null, opts);
 }
 function stDiffChange() { // ask the shrine how hard the Vale should be
@@ -7817,6 +8312,7 @@ function stInteract(pre) {
   } else if (it.kind === 'exit') { const D = ST_DUNGEONS[d.map]; if (D.home) { stEnterMap('world', D.exit[0], D.exit[1] + 1); return; } stSay([['', 'Grey light above. The surface.']], null, [['Climb out', () => stEnterMap(D.exitMap || 'world', D.exit[0], D.exit[1] + 1)], ['Stay', null]]); }
   else if (it.kind === 'boss') {
     const b = it.b;
+    if(ST_FOES[b.id]?.encounter)return stSay([['',ST_FOES[b.id].encounter]],null,[['Face the guardian',()=>stBossFight(b.id)],['Retreat',null]]);
     if (b.side ? !d.flags[b.side] : d.ch < b.ch) stSay([['', b.side ? (b.id === 'demonking' ? 'The fissure breathes red light, but the King Below does not stir. "The sky still has its singer," he says without turning. "Silence it first, then we will talk about thrones." (Defeat The Unmaker first.)' : 'A shape watches you from between the trees, then is simply not there. Something here is waiting for a reason to show itself.') : b.id === 'king' ? 'A voice like dry leaves: "Not yet, little candle. Bring me what they stole."' : 'Something vast sleeps here. Your hands will not stop shaking. Not yet.']]);
     else stSay([['', b.id === 'marquis' ? 'On the cathedral steps, a man in a red coat rises from a chair made of bones. "You may kneel," he says, "or you may bleed. I enjoy both."' : b.id === 'seraphiel' ? 'At the top of the stair, a figure of white fire unfolds six wings. "The Restriction is not given. It is earned. Show me the body you would perfect."' : b.id === 'mara' ? 'A woman in a red coat lounges on a throne of lashed driftwood, a cutlass across her knees. "Oh good," she says. "Entertainment."' : b.id === 'witch' ? 'A woman sits among a ring of candles that burn black. "Another pilgrim," she sighs. "I always hope it will be someone new. It is always the same ash."' : b.id === 'brother' ? 'A knight kneels in the mud, sword planted, waiting. When he lifts his head, he has Liora\'s eyes, and nothing behind them.' : b.id === 'stalker' ? 'It steps out of the gloom wearing a hunter\'s coat and no face. It has been hunting Corin\'s family for three generations.' : b.id === 'demonking' ? 'The dunes split open on a fissure breathing red light. On its lip, a horned giant in a crown of black glass sits on a throne of fused armor, feeding a fire with his own hand. "So," says Malduun, the King Below. "The one who silenced the sky. I wondered what you would smell like."' : b.id === 'golem' ? 'Bones crunch beneath a shape of fused stone. It was a guardian once. Now it only remembers how to crush. The Ember Shard burns in its chest.' : b.id === 'drake' ? 'Frozen corpses line the hall like offerings. Wings of rime unfold. The drake has not tasted warm blood in a century.' : 'The Hollow King does not rise. He unfolds. "Another candle," he whispers, "come to gutter in my hall."'],
       ['', `There is no turning back once you draw steel. Required level: ${ST_BOSS_LV[b.id] || 1}. You are level ${d.lv}.`]], null, [['Draw steel', () => stBossFight(b.id)], ['Not yet', null]]);
@@ -7829,6 +8325,7 @@ function stTalk(id) {
   stTalkBody(id);
 }
 function stTalkBody(id) {
+  if(id==='sanctumherald')return stSay([['Iven','Three guardians keep the Ashen Seat. Defeat them, and let them choose whether you deserve their loyalty. This throne is not inherited. It is earned.']],null,[['The Ashen Dominion',()=>setTimeout(stDominionMenu,0)],['Bloodlines & spellcraft',()=>setTimeout(stProgressMenu,0)],['Farewell',null]]);
   const d = stData();
   if (id === 'elder') {
     if (d.ch === 0) {
@@ -8415,6 +8912,12 @@ const ST_HERO_LINES = {
 };
 const stLine = k => ST_HERO_LINES[k][Math.floor(Math.random() * ST_HERO_LINES[k].length)];
 const ST_INTRO = { // boss title cards and their opening words
+  briarmat:['Mother of the Thornwood','The forest remembers every bone.'],
+  ossuary:['A Thousand Unburied','Another name. Another stone.'],
+  vael:['The Storm-Eater','Let the sky break upon me.'],
+  cairntrial:['First Guardian of the Ashen Seat','Show me that you can stand.'],
+  vestrial:['Second Guardian of the Ashen Seat','Let wisdom walk beside power.'],
+  soltrial:['Last Guardian of the Ashen Seat','Give them a dawn worth guarding.'],
   king: ['Lord of Hollows', 'Kneel, little candle. Kneel, and be hollow.'],
   golem: ['Guardian of the Ember Shard', 'Intruder. Return. To. Stone.'],
   drake: ['Wyrm of the Frozen Heart', 'Your warmth. I will drink it.'],
@@ -8435,6 +8938,12 @@ const ST_INTRO = { // boss title cards and their opening words
 const ST_LIORA_LINES = ['Stay close!', 'Watch my back.', 'Another one for the ash.', 'Together, then.'];
 // Named moves: [name, effect, damage multiplier, color, extra]. extra: all (hits you and Liora), heal, guard, slow
 const ST_FOE_MOVES = {
+  briarmat:[['Thorn-Crowned Howl','aura',0,'#a5b57b','guard'],['Briar Rend','slash',1.6,'#a5b57b'],['Roots of the Mother','shards',1.15,'#7d9d66','all']],
+  ossuary:[['Graveyard Collapse','shards',1.45,'#d2c7aa','all'],['Name on the Stone','hammer',1.8,'#a6b0a2']],
+  vael:[['Stolen Thunder','zap',1.65,'#c4b0ff','all'],['Storm-Eater Breath','shards',1.9,'#b3a4fa'],['Eye of the Storm','aura',0,'#c4b0ff','guard']],
+  cairntrial:[['The Gate Holds','aura',0,'#cabd95','guard'],['Iron Verdict','hammer',1.5,'#cabd95']],
+  vestrial:[['Archive Unbound','shards',1.4,'#aa9cce','all'],['Veiled Sentence','zap',1.7,'#aa9cce']],
+  soltrial:[['Last Light','pillar',1.65,'#e5d3a0','all'],['Luminary’s Oath','aura',0,'#e5d3a0','guard']],
   king: [['Crown of Ash', 'zap', 1.9, '#b06bff'], ['Hollow Reign', 'cloud', 1.3, '#7a1fff', 'all'], ['Benediction of Rot', 'pillar', 0, '#7a1fff', 'heal']],
   golem: [['Earthsplitter', 'slash', 1.8, '#b89a6a'], ['Stone Skin', 'aura', 0, '#b89a6a', 'guard']],
   drake: [['Glacial Breath', 'shards', 1.5, '#9fe6ff', 'all'], ['Rime Fang', 'slash', 1.8, '#cfefff', 'slow']],
@@ -8460,15 +8969,17 @@ const ST_FOE_MOVES = {
 };
 function stCallout(text, color) { STFX.callout = {text, color, t: 0}; }
 function stCalloutDraw(dt) {
-  const c = STFX.callout; if (!c) return; c.t += dt; if (c.t > 1.4) { STFX.callout = null; return; }
-  const a = Math.min(1, c.t / .15) * Math.min(1, (1.4 - c.t) / .3), sc = 1 + Math.max(0, .25 - c.t) * 1.5;
+  const c = STFX.callout; if (!c || ST.mode==='menu') return; c.t += dt; const duration=c.text.length>55?2.6:1.8;if (c.t > duration) { STFX.callout = null; return; }
+  const a = Math.min(1, c.t / .15) * Math.min(1, (duration - c.t) / .3), sc = 1 + Math.max(0, .25 - c.t) * 1.5;
   ctx.save(); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = a; ctx.translate(cw / 2, ch * .22); ctx.scale(sc, sc); ctx.textAlign = 'center';
-  let fs = Math.round(Math.min(cw / 18, 40)); ctx.font = `${fs}px "Marcellus SC", Georgia, serif`; const tw = ctx.measureText(c.text).width; if (tw > cw * .84) { fs = Math.max(13, Math.floor(fs * cw * .84 / tw)); ctx.font = `${fs}px "Marcellus SC", Georgia, serif`; }
-  ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(-cw * .45, -fs * .85, cw * .9, fs * 1.3);
-  ctx.shadowColor = c.color; ctx.shadowBlur = 24; ctx.fillStyle = '#fff3e0'; ctx.fillText(c.text, 0, 4);
+  const fs=Math.max(16,Math.round(Math.min(cw/18,36))),lines=[];ctx.font=`${fs}px "Marcellus SC", Georgia, serif`;
+  let line='';for(const word of c.text.split(' ')){const next=line?line+' '+word:word;if(line&&ctx.measureText(next).width>cw*.79){lines.push(line);line=word;}else line=next;}if(line)lines.push(line);
+  ctx.fillStyle = 'rgba(0,0,0,.78)'; ctx.fillRect(-cw*.45,-fs*.9,cw*.9,fs*(lines.length*1.3+.2));
+  ctx.shadowColor=c.color;ctx.shadowBlur=12;ctx.fillStyle='#fff3e0';lines.forEach((text,i)=>ctx.fillText(text,0,4+i*fs*1.3));
   ctx.restore();
 }
 const SK_SHOT = {fireball: 'fire', frost: 'ice', venom: 'venom', drain: 'dark', rain: 'arrow', lightning: 'holy', bonespear: 'dark', thornlash: 'venom'};
+Object.assign(SK_SHOT,{emberspark:'fire',flamelance:'fire',cindertempest:'fire',eclipse:'dark',crownstars:'holy'});
 const SK_FX = {flash: 'afterimage', crush: 'hammer', bloodfeast: 'bite', fireball: 'explode', frost: 'shatter', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril', strike: 'heavyslash'};
 const SK_COLOR = {ward: '#8fd4ff', bonespear: '#e8e2d0', wither: '#8ac34a', flurry: '#ffd75e', thornlash: '#6be08a', quake: '#c9a26a', flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
 function stLog(t) { if (ST.battle) ST.battle.log = t; $('stLog').textContent = t; }
@@ -8521,6 +9032,8 @@ function stRenderBattle(picking) {
   if (!picking && !ST.sub && (d.battles || 0) < 4) act.appendChild(el('small', 'acthint', 'Tip: Attack hits one enemy. Skills are stronger but cost MP. Items heal. Defend halves the damage you take this turn.'));
   setTimeout(() => { const x = act.querySelector('button:not(:disabled)'); if (x) x.focus({preventScroll: true}); }, 0);
 }
+Object.assign(SK_FX,{emberspark:'explode',flamelance:'pillar',cindertempest:'rain',eclipse:'tendril',crownstars:'shards'});
+Object.assign(SK_COLOR,{emberspark:'#e3a464',flamelance:'#ffbd73',cindertempest:'#dc8b67',eclipse:'#a58bd7',crownstars:'#e6d5a2'});
 function stPick(fn) { const alive = ST.battle.foes.filter(f => f.hp > 0); if (alive.length === 1) fn(alive[0]); else stRenderBattle(fn); }
 function stPlayerHit(f, base, kind, extra, color) {
   const sk = ST.curSkill || 'attack', rk = stRank(sk), beam = kind === 'mag' && rk >= 2 && ST_BEAMS[sk];
@@ -8768,8 +9281,12 @@ function stEndBattle(result) {
   while (d.xp >= stXpNeed(d.lv)) { d.xp -= stXpNeed(d.lv); d.lv++; const s = stStats(); d.hp = s.hp; d.mp = s.mp; lines.push(['', `Level up! You are now level ${d.lv}. Health and mana fully restored. +${ST_ATTR_PER_LV} stat points: spend them in Menu → Stats.`]); if (d.lv % 2 === 1 && d.skills.length < Object.keys(ST_SKILLS).length) learn = true; }
   for (const id in ranksWas) if (stRank(id) > ranksWas[id]) { lines.push(['', `Your mastery is finally ready: ${ST_EVOLVE[id] ? ST_EVOLVE[id][ranksWas[id]] : stSkName(id)} evolved into ${stSkName(id)}!`]); sfx('evolve'); }
   if (d.lv >= ST_COMP_LV && !d.flags.compTold) { d.flags.compTold = true; lines.push(['', `You are level ${ST_COMP_LV}. Companions can now fight beside you. Open Companions from the menu or the guild hall.`]); }
+  stSyncProgress();
   if (b.bossId) {
     d.flags[b.bossId] = true;
+    const trial=ST_DOMINION_FLOORS.find(f=>f.boss===b.bossId);
+    if(trial){d.companions=d.companions||[];if(!d.companions.includes(trial.companion))d.companions.push(trial.companion);lines.push(['',`${ST_COMPANIONS[trial.companion].name} offers their loyalty. You are now ${stDominionRank(d)} of the Ashen Dominion. Find your guardian in Menu → Companions.`]);stAnnounce('DOMINION RANK: '+stDominionRank(d).toUpperCase());}
+    if(ST_FOES[b.bossId]?.worldBoss){lines.push(['',`WORLD BOSS DEFEATED: ${ST_FOES[b.bossId].name}. Your trophy is waiting in the reward claim.`]);stAnnounce('WORLD BOSS DEFEATED: '+ST_FOES[b.bossId].name,'#e3bc85');if(d.trackBoss===b.bossId)delete d.trackBoss;}
     if (ST_INTRO[b.bossId]) setTimeout(() => stVoice({king: 'The dark... is coming.', golem: 'Stone... remembers...', drake: 'So... warm...', stalker: 'At last... a face...', brother: 'Liora... I\'m sorry.', witch: 'Thank you.', demonking: 'Rule... better... than I did...'}[b.bossId], ST_FOE_SEX[b.bossId] === 'f' ? 'bossF' : 'boss'), 300);
     lines.unshift(['', b.bossId === 'king' ? 'LORD OF HOLLOWS FELLED' : b.bossId === 'stalker' ? 'NAMELESS HUNTER FELLED' : 'GUARDIAN FELLED']);
     if (b.bossId === 'witch') { d.mounts = d.mounts || []; if (!d.mounts.includes('nightmare')) d.mounts.push('nightmare'); lines.push(['', 'Her black mare, the Cinder Nightmare, steps out of the smoke and kneels to you. Its mane is still burning. (New mount!)']); }
@@ -8807,6 +9324,8 @@ function stEndBattle(result) {
 const ST_ZONE_LV = {'.': 1, '=': 1, v: 1, T: 2, F: 1, B: 1, ':': 4, '*': 7, b: 9, g: 11, C: 12, a: 15};
 const ST_MAP_LV = {catacomb: 4, crypt: 7, keep: 12, duskwatch: 15, stair: 18, isles: 10, rouge: 20, vcrypt: 23};
 const ST_BOSS_LV = {golem: 4, drake: 7, brother: 9, stalker: 10, king: 13, mara: 12, ysolde: 14, garrick: 14, witch: 16, seraphiel: 19, marquis: 22, countess: 25, ignaroth: 40, unmaker: 55, demonking: 60, examC: 8, examB: 18, examA: 30, examS: 42};
+Object.assign(ST_BOSS_LV,{briarmat:20,ossuary:35,vael:50,cairntrial:20,vestrial:35,soltrial:50});
+Object.assign(ST_MAP_LV,{sanctum1:20,sanctum2:35,sanctum3:50});
 const ST_BOSS_SCALE = {golem: [1.4, 1.2], drake: [1.65, 1.15], brother: [2.4, 1.6], stalker: [2.8, 1.85], king: [2.6, 1.6], mara: [2.05, 1.75], ysolde: [2.75, 1.8], garrick: [3.1, 1.95], witch: [4.4, 2.8], seraphiel: [3.4, 2.65], marquis: [2.55, 2.5], countess: [3.9, 2.6]}; // [health, attack] // the old bosses toughened to match their new levels
 const stZoneAt = (x, y) => { const D = ST_DUNGEONS[stData().map]; if (!D || !D.zones) return null; const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE); return D.zones.find(z => tx >= z.r[0] && tx <= z.r[2] && ty >= z.r[1] && ty <= z.r[3]) || D.zones[D.zones.length - 1]; };
 const stZoneLv = () => { const d = stData(), z = stZoneAt(d.x, d.y); return z ? z.lv : d.map === 'world' ? ST_ZONE_LV[stTileAt(d.x, d.y)] || 1 : ST_MAP_LV[d.map] || 1; };
@@ -8828,7 +9347,7 @@ function stTrialChoice() { // the Heavenly Restriction: trade every spark of mag
     ['Refuse, and keep your magic', () => { d.flags.hrDone = true; d.seraphBless = true; stShift(2); stSay([['Seraphiel', 'Wise, or afraid. The heavens cannot tell the difference either. Take my blessing instead.'], ['', 'Seraph\'s Blessing: +5 defense.']]); }]]);
 }
 function stLearnSkill() {
-  const d = stData(), opts = Object.keys(ST_SKILLS).filter(k => !d.skills.includes(k) && !ST_SKILLS[k].gift).slice(0, 3);
+  const d = stData(), opts = Object.keys(ST_SKILLS).filter(k => !d.skills.includes(k) && !ST_SKILLS[k].gift && (ST_SKILLS[k].tier==null||ST_SKILLS[k].tier<=stMagicTier(d))).slice(0, 3);
   if (!opts.length) return;
   stSay([['', 'You feel new power stir. Choose an ability to learn.']], null, opts.map(k => [`${ST_SKILLS[k].name} (${stSkCost(ST_SKILLS[k])} MP)`, () => { d.skills.push(k); }]));
 }
@@ -8884,6 +9403,7 @@ function stOpenMenu() {
   if (!stData().race) btn('🧬 Choose race', () => stChooseRace());
   if (stData().items.sc_return) btn(`📜 Scroll of Return ×${stData().items.sc_return}`, () => stTeleport());
   btn(stAttrFree() ? `📊 Stats (${stAttrFree()} points!)` : '📊 Stats', () => stStatsMenu());
+  btn('Bloodlines & spellcraft',stProgressMenu);btn('Ember Academy',stMagicLessons);btn('World bosses',stWorldBossMenu);btn('Ashen Dominion',stDominionMenu);
   btn('👥 Party', () => stPartyMenu());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
@@ -8955,8 +9475,10 @@ function stDrawWorld(now, dt = 1 / 60) {
   }
   for (const n of ST_NPCS) if ((n.map || 'world') === d.map && onScr(n.x * ST_TILE + 32, n.y * ST_TILE + 30) && stNpcShown(n, d)) {
     const x = n.x * ST_TILE + 32, y = n.y * ST_TILE + 30, u = stUnit(n.look, n.color, x, y, Math.PI, 0, 20 + n.x); if (n.horns) { u.horns = true; u.level = 12; } if (n.lv) { u.level = n.lv; u.noHalo = true; }
+    const realm = n.id.startsWith('kg_') && ST_KINGDOMS[n.id.slice(3)];
+    if (realm) u.outfit = {race: realm.race, hat: 'crown'};
     stDrawCh(u, now, n.kid ? .65 : 1);
-    ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n.name, x, y - (n.kid ? 40 : 56)); ctx.textAlign = 'left';
+    ctx.fillStyle = '#fff3c9'; ctx.font = '600 13px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n.name, x, y - (n.kid ? 50 : 74)); ctx.textAlign = 'left';
   }
   if (!dun) for (const h of ST_HOUSES) { const x = (h.x + 1) * ST_TILE, y = (h.y + 2) * ST_TILE - 4; ctx.fillStyle = '#2a1a10'; ctx.fillRect(x - 12, y - 30, 24, 30); ctx.fillStyle = '#ffb35a'; ctx.globalAlpha = .5 + Math.sin(now * 2 + h.x) * .15; ctx.fillRect(x - 8, y - 26, 16, 10); ctx.globalAlpha = 1; } // lit doorways
   { const CM = !dun || ST_DUNGEONS[d.map] ? stCompanion() : null; if (CM) { const fx = d.x - 36 * (Math.cos(ST.face || 0) || 1), fy = d.y + 4;
@@ -8989,11 +9511,11 @@ function stSetText(e, t) { if (e.textContent !== t) e.textContent = t; } // writ
 function stDrawFoe(key, x, y, now, scale, face, flash) {
   const F = ST_FOES[key] || ST_FOES.wolf, u = {x, y, face, walk: now * 30, _lw: 0, hitFlash: flash || 0, atkT: 0, atkCd: 1, id: 5, team: 1, level: 8};
   ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.translate(-x, -y);
-  if (F.draw === 'wolf') { u.r = F.small ? 20 : F.boss ? 40 : 30; u.fur = F.fur; drawWolf(ctx, u, now); }
-  else if (F.draw === 'golem') { u.r = 46; drawGolem(ctx, u, now); }
-  else if (F.draw === 'drake') { u.species = F.species || 'frost'; u.fire = F.fire || '#9fe3ff'; u.sc = .9; u.r = 52; drawDragon(ctx, u, now); }
-  else if (F.draw === 'goblin') { u.type = 'melee'; u.tier = 2; u.big = 1.3; drawMinion(ctx, u, now); }
-  else { u.look = F.look; u.color = F.color || '#b33a3a'; u.level = F.lv || (F.boss ? 18 : 6); u.horns = F.horns; u.noHalo = F.horns || F.unholy; drawCharacter(ctx, u, now); }
+  if (F.draw === 'wolf' || F.draw === 'golem' || F.draw === 'drake') drawDreadCreature(ctx, F, u, now, key);
+  else {
+    u.look = F.look || 'rogue'; u.color = F.color || '#4c6451'; u.level = F.lv || (F.boss ? 18 : 6); u.horns = F.horns; u.enemyKey = key; u.foe = F;
+    drawStorybookCharacter(ctx, u, now);
+  }
   ctx.restore();
 }
 function stDrawBattle(now, dt) {
@@ -9002,12 +9524,13 @@ function stDrawBattle(now, dt) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const g = ctx.createLinearGradient(0, 0, 0, ch); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]); ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
   if (d.map === 'world' || d.map === 'isles') { const C = stClock(); if (C.dark > .02) { ctx.fillStyle = `rgba(6,10,32,${C.dark * .6})`; ctx.fillRect(0, 0, cw, ch); } if (C.warm > .02) { ctx.fillStyle = `rgba(255,130,80,${C.warm * .3})`; ctx.fillRect(0, 0, cw, ch); } }
-  ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(cw / 2, ch * .62, cw * .45, ch * .12, 0, 0, 7); ctx.fill();
+  const compact = cw <= 640, stageY = compact ? .40 : .55;
+  ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(cw / 2, ch * (compact ? .44 : .62), cw * .45, ch * .12, 0, 0, 7); ctx.fill();
   if (STFX.slow > 0) { STFX.slow -= dt; dt *= .3; } // slow motion after a lethal blow
-  const k = Math.max(.8, Math.min(1.6, Math.min(cw, ch) / 500)), shake = ST.hurt > 0 ? rand(-6, 6) : 0; ST.hurt = Math.max(0, (ST.hurt || 0) - dt);
+  const k = compact ? Math.max(.5,Math.min(.8,cw/550)) : Math.max(.8, Math.min(1.6, Math.min(cw, ch) / 500)), shake = ST.hurt > 0 ? rand(-6, 6) : 0; ST.hurt = Math.max(0, (ST.hurt || 0) - dt);
   ctx.setTransform(dpr, 0, 0, dpr, dpr * shake, 0);
   for (const pl of STFX.pools || []) { ctx.fillStyle = pl.scorch ? 'rgba(10,8,6,.8)' : 'rgba(90,8,12,.75)'; ctx.beginPath(); ctx.ellipse(pl.x, pl.y, pl.r, pl.r * .45, pl.rot * .2, 0, 7); ctx.fill(); }
-  const px = cw * .28, py = ch * .55, bob = Math.sin(now * 3) * 2;
+  const px = cw * .28, py = ch * stageY, bob = Math.sin(now * 3) * 2;
   STFX.pos.p = [px, py]; STFX.pos.a = [px - 70 * k, py + 30 * k];
   const [pox, poy] = stFxOffset('p'), atkP = STFX.anims.some(a => a.who === 'p' && a.kind === 'lunge');
   const pu = stUnit(ST_CLASSES[d.cls].look, d.color, px + pox, py + poy + bob, 0, 0, 30, d.lv); pu.outfit = d.outfit; if (atkP) pu.atkT = 1;
@@ -9031,7 +9554,7 @@ function stDrawBattle(now, dt) {
     if (b.ally.beast) { const wu = {x: ax, y: ay, face: 0, walk: now * 20, _lw: 0, hitFlash: 0, atkT: 0, atkCd: 1, id: 31, team: 0, level: 10, r: 30, fur: b.ally.color}; ctx.save(); ctx.translate(ax, ay); ctx.scale(k * 1.3, k * 1.3); ctx.translate(-ax, -ay); drawWolf(ctx, wu, now); ctx.restore(); }
     else { const au = stUnit(b.ally.look || 'valkyrie', b.ally.color || '#9fd8ff', ax, ay, 0, 0, 31, d.lv); if (STFX.anims.some(a => a.who === 'a' && a.kind === 'lunge')) au.atkT = 1; drawCharacterScaled(au, now, k * 1.2); } }
   b.foes.forEach((f, i) => {
-    const n = b.foes.length, fx0 = cw * (.66 + (n > 1 ? (i - (n - 1) / 2) * .12 : 0)), fy0 = ch * (.55 + (i % 2) * .05);
+    const n = b.foes.length, fx0 = cw * (.66 + (n > 1 ? (i - (n - 1) / 2) * .12 : 0)), fy0 = ch * (stageY + (i % 2) * .05);
     STFX.pos[f.id] = [fx0, fy0];
     if (f.hp <= 0 && f.oblit) { // obliterated: burned away from the top down into drifting ash
       if (f.deadT == null || f.deadT > 1.1) return; f.deadT += dt;
@@ -9063,13 +9586,15 @@ function drawCharacterScaled(u, now, sc) { ctx.save(); ctx.translate(u.x, u.y); 
 // ---- input: keyboard, controller and the on-screen pad
 const ST_KEYS = {arrowup: 'up', w: 'up', arrowdown: 'down', s: 'down', arrowleft: 'left', a: 'left', arrowright: 'right', d: 'right'};
 window.addEventListener('keydown', e => {
-  if (!ST.on || (e.target && e.target.tagName === 'INPUT')) return;
+  if (!ST.on || !overlay.hidden || (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) return;
   const k = e.key.toLowerCase();
+  // Let a focused button receive Enter/Space, not a simultaneous world action.
+  if ((k === 'enter' || k === ' ') && e.target && e.target.closest('button')) return;
   if (ST_KEYS[k] && ST.mode === 'walk') { ST.keys[ST_KEYS[k]] = true; e.preventDefault(); }
   if ((k === 'e' || k === 'enter' || k === ' ') && ST.mode === 'walk') { e.preventDefault(); stInteract(); }
   if ((k === 't' || k === '/') && !e.repeat && ST.mode === 'walk') { e.preventDefault(); stChatOpen(); if (k === '/') $('stChatIn').value = '/'; return; }
   if (k === 'j' && !e.repeat && (ST.mode === 'walk' || ST.mode === 'menu')) { e.preventDefault(); ST.journal && ST.mode === 'menu' ? stCloseMenu() : stJournal(); }
-  if ((k === 'escape' || k === 'm') && ST.mode !== 'gather') { e.preventDefault(); ST.mode === 'menu' ? stCloseMenu() : stOpenMenu(); }
+  if ((k === 'escape' || k === 'm') && !e.repeat && ST.mode !== 'gather') { e.preventDefault(); e.stopImmediatePropagation(); ST.mode === 'menu' ? stCloseMenu() : stOpenMenu(); }
   if (k === 'r' && ST.mode === 'walk' && !e.repeat) { e.preventDefault(); stToggleRide(); }
   if (ST.mode === 'gather' && !e.repeat) { if (k === 'escape') { e.preventDefault(); stGatherEnd(); } else if (k === 'e' || k === 'enter' || k === ' ') { e.preventDefault(); stGatherPress(); } }
 }, true);
@@ -9113,6 +9638,7 @@ function stPerfWatch(dt) {
 }
 function stLiteMode() { if (PERF.lite) return; PERF.lite = true; try { Object.defineProperty(ctx, 'shadowBlur', {get: () => 0, set: () => {}, configurable: true}); } catch (e) { /* older browser */ } }
 function storyFrame(now, dt) {
+  stWorldNotices(dt);
   stPollPad();
   if (ST.mode === 'walk') { stWalk(dt); stTutTick(dt); }
   stNetTick(dt);
@@ -9321,8 +9847,15 @@ function maintClose(m) {
   for (const ev of ['keydown', 'keyup', 'pointerdown', 'touchstart', 'wheel']) addEventListener(ev, e => { if (MAINT.closed) { e.stopPropagation(); e.preventDefault(); } }, {capture: true, passive: false});
 }
 if (location.protocol.startsWith('http') && !/claude\.ai|claudeusercontent/.test(location.hostname)) maintCheck();
+const gamePerf=el('span','','FPS: --');gamePerf.id='gamePerf';$('game').appendChild(gamePerf);
+let perfFrames=0,perfStamp=performance.now();
+window.render_game_to_text=()=>{
+  const d=stData(),b=ST.battle;
+  return JSON.stringify({screen:!$('startScreen').hidden?'title':!overlay.hidden?[...document.querySelectorAll('.screen')].find(s=>!s.hidden)?.id:'story',mode:ST.on?ST.mode:'menu',coordinates:'world pixels, origin top-left, +x right, +y down',player:ST.on&&d?{name:d.name,map:d.map,x:Math.round(d.x),y:Math.round(d.y),level:d.lv,hp:Math.round(d.hp),mp:Math.round(d.mp),race:d.race,evolution:stEvolutionName(d),magicTier:stMagicTier(d)+1,dominion:stDominionRank(d)}:null,objective:ST.on?stObjective():null,foes:ST.on&&b&&ST.mode==='battle'?b.foes.map(f=>({name:f.name,hp:Math.max(0,Math.round(f.hp)),maxHp:f.maxHp})):[],callout:STFX.callout?.text||null});
+};
 function frame(now) {
-  if (MAINT.closed) { requestAnimationFrame(frame); return; } // nothing runs behind the maintenance screen
+  if(++perfFrames && now-perfStamp>=1000){gamePerf.textContent='FPS: '+Math.round(perfFrames*1000/(now-perfStamp));perfFrames=0;perfStamp=now;}
+  if (MAINT.closed || POSTER.on) { requestAnimationFrame(frame); return; } // no duplicate render behind the title or maintenance screen
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   if (TR.on) { trailerFrame(now, dt); requestAnimationFrame(frame); return; }
   if (ST.on) { storyFrame(now, dt); requestAnimationFrame(frame); return; }
@@ -9342,8 +9875,9 @@ const POSTER = {on: true, t0: performance.now(), embers: [], loading: false};
 const LOAD_TIPS = ['Grind a move to evolve it. Mastered magic fires as beams that can obliterate.', 'Rest at an Ashen Shrine to heal your wounds, even a severed arm.', 'Buy goods where they are made and sell them where they are wanted.', 'Some doors only open at night. Some only open for blood.', 'The faster fighter dodges more blows.', 'Rougemarais never sees the sun. Do not go there before level 20.', 'Spend your stat points in Menu, then Stats. Shrines can reset them.', 'A Scroll of Return takes you to any town or land you have reached.', 'Every race has a power it can call on once per battle.', 'Companions join adventurers of level 45 and above.', 'Open the Party menu to invite anyone who is online.', 'Fill your Rage meter, then unleash it.'];
 function drawPoster(now) { // original key art: a hero on a cliff under a blood moon, a castle, a cathedral, a dragon and a howling wolf
   const c = $('posterCv'), W = innerWidth, H = innerHeight, r = Math.min(2, devicePixelRatio || 1);
-  if (c.width !== Math.round(W * r)) { c.width = Math.round(W * r); c.height = Math.round(H * r); }
+  if (c.width !== Math.round(W * r) || c.height !== Math.round(H * r)) { c.width = Math.round(W * r); c.height = Math.round(H * r); }
   const g = c.getContext('2d'), t = (now - POSTER.t0) / 1000, M = Math.min(W, H); g.setTransform(r, 0, 0, r, 0, 0);
+  if (drawAshenArt(g, W, H, t)) return;
   const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#08051a'); sky.addColorStop(.42, '#3a0f32'); sky.addColorStop(.66, '#c4502a'); sky.addColorStop(.8, '#4a1418'); sky.addColorStop(1, '#0a0508'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
   for (let i = 0; i < 70; i++) { g.fillStyle = `rgba(255,250,235,${(.3 + Math.sin(t * 1.5 + i) * .25) * (1 - (i * 61 % 100) / 140)})`; g.fillRect((i * 197.3) % W, (i * 83.1) % (H * .4), 1.6, 1.6); } // stars
   const mx = W * .5, my = H * .38, mr = M * .24, glow = g.createRadialGradient(mx, my, mr * .6, mx, my, mr * 2.4); glow.addColorStop(0, 'rgba(255,190,140,.5)'); glow.addColorStop(1, 'rgba(255,120,80,0)'); g.fillStyle = glow; g.fillRect(0, 0, W, H);
@@ -9386,7 +9920,8 @@ function pressStart() { // Press Start: play a sound, show the loading page, the
     const k = Math.min(1, (performance.now() - t0) / dur), p = fontsOk ? k : Math.min(k, .9); $('lbarFill').style.width = (p * 100) + '%'; $('loadPct').textContent = `Loading ${Math.round(p * 100)}%`;
     if (k > .5 && tip >= 0) { tip = -1; $('loadTip').textContent = 'Tip: ' + LOAD_TIPS[(Math.floor(Math.random() * LOAD_TIPS.length))]; }
     if (p < 1) return requestAnimationFrame(step);
-    show('scr-main'); $('startScreen').classList.add('gone'); setTimeout(() => { POSTER.on = false; $('startScreen').hidden = true; }, 750);
+    // Finish the one-shot transition before underlying controls can be activated.
+    POSTER.on = false; show('scr-main'); $('startScreen').classList.add('gone'); setTimeout(() => { $('startScreen').hidden = true; }, 750);
   };
   requestAnimationFrame(step);
 }

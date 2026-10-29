@@ -4,12 +4,17 @@
   "version": "1.0.0",
   "description": "Thornwake with real-money purchases through Stripe Checkout.",
   "scripts": {
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "test": "node test/purchase-flow.test.mjs",
+    "test:browser": "node test/menu-rpg.test.mjs"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
     "stripe": "^17.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
   }
 }

@@ -1,5 +1,24 @@
 # Thornwake with real payments
 
+## Fantasy overhaul
+
+The title and menu use original ashen-kingdom artwork. Story mode now uses outlined, expressive characters with customizable hair, eyes and expressions, distinct bandit outfits, and redesigned monsters. Character creation has three steps: Origin, Appearance and Abilities.
+
+- **Bloodlines & spellcraft:** Magic tiers unlock at levels 1, 10, 25, 45 and 60. Racial awakenings become available at levels 15, 35 and 60, claimed in order at an Ashen Shrine or in the Ashen Sanctum.
+- **World bosses:** Track the Briar Matriarch, Ossuary Colossus and Vael Storm-Eater from the pause menu. Victories grant unique gear and appear on the boss board.
+- **Ashen Dominion:** Clear three level-gated guardian floors to unlock companions and ruler ranks. The guild also offers guardian contracts.
+- **Ember Academy:** Buy up to three spell-practice lessons per character level with in-game gold. Lessons advance mastery practice, not spell-tier level requirements.
+
+These are original Thornwake systems inspired by dark fantasy, dungeon-adventure and magic-school progression, not licensed anime characters or locations. Existing saves retain their base race, equipment and relationships.
+
+### Regression checks
+
+Run `npm test` for purchase-flow checks. For browser checks, run `npm run build`, install Chromium once with `npx playwright install chromium`, serve `public` on port 3000, then run `npm run test:browser`. Set `TEST_BASE_URL` for a different local URL.
+
+The browser suite uses disposable saves and response-only instrumentation to stage high-level encounters. It checks UI, rewards and persistence without shipping mutable test hooks. Staged one-hit victories do not establish full combat balance.
+
+## Payment setup
+
 This is Thornwake set up to sell Crowns for real money through Stripe Checkout.
 Stripe's hosted checkout page accepts cards, Apple Pay and Google Pay, so you
 never handle card numbers yourself.
