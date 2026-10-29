@@ -3,4 +3,5 @@ node_modules/
 .env.local
 .vercel/
 public/index.html
+public/release.json
 test-results/

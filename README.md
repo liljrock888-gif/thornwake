@@ -1,5 +1,21 @@
 # Thornwake with real payments
 
+## Wardrobe, infirmaries and update shutdown
+
+- **Resizable area map:** Click or keyboard-activate the minimap, or choose Area map from the menu. Resize the atlas panel, zoom and scroll to pan, and toggle region outlines and enemy-home rings. Map outer edges are solid boundaries even for flying mounts.
+- **Tighter enemy aggro:** Dungeon/overland hunters acquire within 144 pixels (previously 300), drop pursuit beyond 208 pixels or a 192-pixel home leash, require an unobstructed line of sight and do not acquire across region or safe-zone boundaries. The RPG's world-tile random encounters are unchanged; these limits apply to visible roaming hunters.
+- **Armor:** Six equipable sets, including free Wayfarer Padding, leathers, chainmail, plate, a mana-focused mantle and Dusk Sovereign armor. Sets add defense and maximum health; Moonweave also adds mana/magic. Only one set contributes stats. Armor is visible over clothing, can be hidden cosmetically and survives defeat.
+- **Fair defeat and higher stakes:** Defeat drops only 10% of gold, rounded down, as recoverable Lost Embers. The other 90% stays in the purse. Story/Easy and Adventurer/Normal pay standard rewards; Veteran pays 1.35x and Soulslike 1.75x combat XP/gold and boss gold bounties. Crowns are unchanged. Contract gold/XP use the difficulty recorded when accepting the contract.
+- **Independent progression:** The Free paths menu offers the same contract catalog without membership, fees, quest levies or abandonment penalties. Optional Nightveil Compact and Blackbriar Company fellowships share this progression; changing affiliation does not reset it. Independent C/B/A/S travel clearance unlocks at levels 26/32/41/55. Story travel and noble titles accept this clearance. Guild political votes remain guild-specific optional activities.
+- **Character styling:** 21 hair choices including textured and original anime-inspired silhouettes, 12 expressions including Faceless, 13 skin tones, eight outfit styles, five pants styles, ties/bow ties/ribbons and ten accessory choices. Shirt, pants, shoes and trim have independent colors. Change appearance freely in the Wardrobe and save up to six outfit presets.
+- **Dawn and dusk spellcraft:** Eight new spells can be learned at Ember Academy for in-game gold at their required levels. Learning Dawn Arc and Dusk Thread at level 25 or above unlocks a ninth spell, Concord Burst. These are original light/shadow adventure motifs, not licensed Kingdom Hearts content.
+- **Infirmaries:** Thornwake, Ravenhollow and Saltmere have clinics with free health, mana and wound treatment. Treatment sets the recovery shrine. New characters begin outside Thornwake Infirmary; existing saves keep their locations.
+- **Update gate:** Connected clients running this version check the release manifest every 15 seconds. A different build pauses play, attempts a local save and reloads after five seconds only if storage succeeds. Blocked storage is reported and automatic reload is disabled. This is a client update gate, not a server-process shutdown or a new cloud-save backend.
+
+Each build creates `public/release.json` and embeds the matching content hash in the page. Deploy the entire build output together. The hash covers game source and public assets, excluding generated output and the maintenance configuration. Clients already open on versions predating this feature need to load this version once before automatic update detection works.
+
+For scheduled downtime, edit `public/maintenance.json` to `{"mode":"warn","at":"2026-12-01T01:00:00Z","msg":"Thornwake is updating"}` with your actual future UTC time, then deploy. Use `{"mode":"closed"}` for immediate closure and `{"mode":"open"}` to reopen. Warning and closure attempt a local save; reopening reloads only when storage succeeded. Network failures do not forcibly close an offline session. Browser saves remain device-specific unless the separate account/cloud-save backend is configured.
+
 ## Fantasy overhaul
 
 The title and menu use original ashen-kingdom artwork. Story mode now uses outlined, expressive characters with customizable hair, eyes and expressions, distinct bandit outfits, and redesigned monsters. Character creation has three steps: Origin, Appearance and Abilities.

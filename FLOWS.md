@@ -27,6 +27,16 @@
 - Check page errors and screenshots in title, launcher, story menu and journal states.
 
 ## New fantasy progression
+- Click/keyboard activate minimap to open the atlas; resize, zoom/pan, toggle region/enemy boundaries, close/resume and fit 375px phone viewport.
+- Hard outer bounds apply even to flying mounts. Hunters acquire within 144px, lose pursuit beyond 208px, stay within a 192px home leash, respect walls and do not acquire across region/safe-zone boundaries.
+- Armory: claim starter padding, buy/equip level-gated sets, verify defense/max health, no stacking, cosmetic hiding and save persistence.
+- Defeat: retain 90% of gold and all armor; only the rounded-down 10% becomes recoverable Lost Embers.
+- Difficulty: Veteran gives 1.35x combat XP/gold and Soulslike 1.75x; boss bounties and contracts scale, Crowns do not.
+- Free paths: no membership required for contracts, hunting progress, turn-in, travel or story objectives. Optional Nightveil/Blackbriar affiliation changes preserve progress. C/B/A/S independent clearance unlocks at 26/32/41/55.
+- Update shutdown: changed build manifest freezes input, reports save status honestly, reloads once the replacement build is ready; manual warning/closed/open still works.
+- Expanded creator and wardrobe: faceless option, new expressions, textured/anime hair, accessory choices, independent shirt/pants colors, suits/ties and saved outfit presets.
+- New story begins outside Thornwake Infirmary; its door is reachable, healer restores health/mana and wounds, exit returns outdoors; old saves keep their positions.
+- Original light/shadow spellcraft is learnable in the Academy and works in combat with level/mana requirements.
 - Origin → Appearance → Abilities preserves name, outfit and three starting skills.
 - Bloodlines & spellcraft: low-level awakening disabled; three stages claimed in order at a shrine or Sanctum; all eight races have three stages.
 - Ember Academy: a lesson deducts gold and adds mastery practice; lessons are capped at three per level.

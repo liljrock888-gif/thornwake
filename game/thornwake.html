@@ -15,6 +15,7 @@
 [hidden]{display:none!important}
 html,body{height:100%;margin:0;background:var(--night);color:var(--ink);overflow:hidden;font-family:var(--ui)}
 #game{position:relative;width:100%;height:100%;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+#game:has(#overlay:not([hidden])),#game:has(#stMenu:not([hidden])){touch-action:pan-x pan-y}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:default}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.45)}
 button{font-family:var(--ui);color:var(--ink)}
@@ -353,7 +354,11 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #stQuest{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(138px + env(safe-area-inset-top,0px));padding:8px 12px;width:min(46vw,300px);font-size:14px;border-left:3px solid var(--gold)!important}
 #stQuest b{color:var(--gold);display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
 #stQuest .obj{font-size:15px;font-weight:600;line-height:1.3;margin:2px 0 4px;color:#fff3e0}#stQuest .loc{display:block;font-size:12px;color:#c8b89a}
-#stMini{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));width:176px;height:118px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.5);pointer-events:none}
+#stMini{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));width:176px;height:118px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.5);pointer-events:auto;cursor:zoom-in}
+#stMini:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+#stMenu.atlas{width:var(--atlas-width,900px);max-width:calc(100vw - 24px)}
+.atlasControls{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:12px 0}.atlasControls label{display:flex;gap:8px;align-items:center;font-size:14px}.atlasControls input[type=range]{width:130px}
+.atlasViewport{width:100%;max-height:60vh;overflow:auto;border:1px solid #927945;border-radius:8px;background:#131c17;overscroll-behavior:contain}.atlasViewport canvas{display:block;max-width:none}
 #stHint{position:absolute;left:50%;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:12px;color:rgba(255,243,224,.7);background:rgba(5,7,10,.5);padding:3px 12px;border-radius:999px;pointer-events:none;white-space:nowrap}
 #stHud .hn{display:flex;align-items:center;gap:6px;flex-wrap:wrap}#stHud .badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid currentColor}#stHud .lvb{color:#ffd75e}#stHud .rkb{color:#7fe0c7}#stHud .alb{color:#c8b89a}
 #stHud .bar.xp{height:5px}#stHud .bar.xp i{background:linear-gradient(90deg,#8a5a1a,#ffd75e)}#stHud .bl{font-size:10px;letter-spacing:.1em;color:#c8b89a;margin-bottom:-2px}
@@ -387,6 +392,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
 #maintScr{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 40%,#16221d,#050806 75%);text-align:center}
 #maintScr h1{margin:0 0 8px;font-family:var(--display);font-size:clamp(30px,7vw,52px);background:linear-gradient(#fff3c9,#e8b04a 60%,#8a5a1a);-webkit-background-clip:text;background-clip:text;color:transparent}
 #maintScr p{color:#d8c8a8;font-size:16px;margin:6px auto;max-width:440px;line-height:1.5}#maintScr .small{color:#97a69b;font-size:13px}
+#maintReload{min-height:44px;margin-top:20px;padding:10px 24px;border:1px solid #ae8c47;border-radius:8px;background:#26372b;color:#fff0c9;font-size:16px;cursor:pointer}#maintReload:hover{background:#354936}
 #stPrompt{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(5,7,10,.75);border:1px solid var(--gold);color:var(--gold);font-weight:600}
 #stDialog{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(94vw,720px);padding:14px 18px}
 #stBond{position:absolute;right:12px;top:10px;padding:4px 12px;border-radius:999px;border:1px solid #ff8aa8;background:rgba(255,138,168,.12);color:#ff8aa8;font:inherit;font-size:13px;font-weight:700;cursor:pointer}#stBond:focus{outline:2px solid #ff8aa8}
@@ -2691,7 +2697,7 @@ function drawStorybookCharacter(c, u, now) {
   const demon = !!u.horns || /^(fiend|imp|abyssfiend|demonking)$/.test(E), royal = E === 'king' || E === 'demonking';
   const R = ST_RACES[O.race] || {}, A = animState(u, 14), sw = A.sw, id = u.id || 0, lv = u.level || 1;
   const skin = O.skin || (demon ? '#8c4945' : goblin ? (E === 'reefgob' ? '#648c85' : '#879661') : undead ? '#b4b7a8' : R.skin || base.skin || '#caa181');
-  const cloth = O.body || (bandit ? E === 'brigand' ? '#73523c' : '#4d4c40' : demon ? '#35272b' : base.body || '#506371');
+  const cloth = ((!O.outfitStyle||O.outfitStyle==='class')&&O.shirtColor) || O.body || (bandit ? E === 'brigand' ? '#73523c' : '#4d4c40' : demon ? '#35272b' : base.body || '#506371');
   const hair = O.hairColor || ['#392d28','#69503c','#bda477','#342b39','#916148'][id % 5];
   const expression = O.expression || (E ? 'fierce' : id % 3 === 0 ? 'grin' : 'calm');
   const hat = O.hat || base.hat || 'none', col = u.color || '#c3a46b', metal = lv > 15 ? '#c5ab72' : '#a6b2b0';
@@ -2700,13 +2706,15 @@ function drawStorybookCharacter(c, u, now) {
   c.save(); c.translate(u.x, u.y + 15); inkOval(c, 0, 1, 18*s, 5*s, '#00000045', null);
   c.scale(A.dir * s, s); if (u.hitFlash > 0) c.globalAlpha *= hitFlick();
   if(O.evolution>0){c.save();c.globalAlpha=.25;c.strokeStyle=R.col||col;c.lineWidth=1+O.evolution*.5;c.beginPath();c.ellipse(0,-1,20+O.evolution*3,5+O.evolution,0,0,Math.PI*2);c.stroke();c.restore();}
+  if(O.accessory==='wings')for(const sign of[-1,1])inkPath(c,[[sign*10,-38],[sign*36,-61],[sign*32,-28],[sign*18,-24]],'#81799d','#343344');
   if (R.tail) { c.beginPath(); c.moveTo(-9,-25); c.quadraticCurveTo(-35,-12,-28,-42+Math.sin(now*3)*4); c.strokeStyle=R.tail; c.lineWidth=5; c.lineCap='round'; c.stroke(); }
   const cape = O.cape === 'none' ? null : O.cape || base.cape || O.cloak || shade(cloth,-.25);
   if (cape) inkPath(c,[[-11,-43],[8,-43],[12,-10],[-25+Math.sin(now*3)*2,-4],[-20,-14]],cape);
   // Unconnected mitten hands and oversized boots create a readable storybook silhouette.
-  inkLine(c,[[-6,-22],[-8-sw*4,-7]],'#33332f',5);
-  inkLine(c,[[6,-22],[7+sw*4,-7]],'#33332f',5);
-  inkOval(c,-8-sw*4,-3,8,4,'#302a27'); inkOval(c,8+sw*4,-3,8,4,'#302a27');
+  const pants=O.pantsColor||'#33332f',shoe=O.shoeColor||'#302a27',wide=O.pantsStyle==='wide'?8:O.pantsStyle==='fitted'?4:6;
+  for(const sign of[-1,1]){const x=sign*(7+sw*3);if(O.pantsStyle==='shorts'){inkLine(c,[[sign*6,-22],[x,-13]],pants,wide);inkLine(c,[[x,-12],[x,-7]],skin,4);}else inkLine(c,[[sign*6,-22],[x,-7]],pants,wide);}
+  if(O.pantsStyle==='skirt'){inkPath(c,[[-12,-25],[12,-25],[18,-10],[-18,-10]],pants);for(const x of[-7,0,7])inkLine(c,[[x,-23],[x*1.6,-11]],shade(pants,-.2),1);}
+  inkOval(c,-8-sw*4,-3,8,4,shoe); inkOval(c,8+sw*4,-3,8,4,shoe);
   c.translate(0,-bob);
   inkLine(c,[[-10,-41],[-17+sw*4,-24]],shade(cloth,-.1),5);
   inkOval(c,-17+sw*4,-22,4.5,5,skin);
@@ -2719,13 +2727,30 @@ function drawStorybookCharacter(c, u, now) {
     inkPath(c,[[-11,-40],[-3,-40],[-4,-33],[-12,-34]],'#87765d');
     inkLine(c,[[-10,-38],[-4,-37]],'#d0b98e',.8);
     inkPath(c,[[4,-43],[10,-43],[11,-33],[5,-33]],'#6e5140');
-  } else if (base.weapon === 'sword' || base.weapon === 'hammer' || base.weapon === 'shield') {
+  } else if ((!O.outfitStyle||O.outfitStyle==='class') && (base.weapon === 'sword' || base.weapon === 'hammer' || base.weapon === 'shield')) {
     inkPath(c,[[-13,-45],[-5,-47],[-5,-37],[-13,-36]],metal);
     inkPath(c,[[5,-47],[13,-45],[13,-36],[5,-37]],metal);
     inkLine(c,[[-7,-34],[7,-34]],shade(metal,-.2),1);
   }
+  if(O.outfitStyle && O.outfitStyle!=='class'){
+    const shirt=O.shirtColor||'#e8e2d0',trim=O.trimColor||col,style=O.outfitStyle;
+    inkPath(c,[[-12,-45],[11,-45],[13,-21],[-13,-21]],style==='shirt'?shirt:cloth);
+    if(['suit','waistcoat','longcoat'].includes(style)){
+      inkPath(c,[[-7,-45],[7,-45],[5,-22],[-5,-22]],shirt);
+      inkPath(c,[[-12,-45],[-5,-46],[0,-38],[-8,-24]],shade(cloth,.2));inkPath(c,[[12,-45],[5,-46],[0,-38],[8,-24]],shade(cloth,.1));
+      for(const y of[-32,-26])inkOval(c,1,y,1,1,trim,null);
+      if(style==='longcoat')for(const sign of[-1,1])inkPath(c,[[sign*5,-27],[sign*13,-30],[sign*19,-7],[sign*7,-12]],cloth);
+    }else if(style==='hoodie'){inkLine(c,[[-6,-43],[-4,-34]],'#e2d9c6',1);inkLine(c,[[5,-43],[4,-34]],'#e2d9c6',1);inkPath(c,[[-7,-30],[7,-30],[8,-24],[-8,-24]],shade(cloth,-.2));}
+    else if(style==='robe')inkPath(c,[[-11,-32],[11,-32],[18,-8],[-18,-8]],cloth);
+    else if(style==='festival'){inkLine(c,[[-10,-42],[8,-23]],trim,3);inkLine(c,[[-12,-26],[12,-26]],trim,3);}
+  }
+  if(O.neckwear==='tie')inkPath(c,[[-2,-44],[2,-44],[1,-40],[3,-29],[0,-25],[-3,-29],[-1,-40]],O.trimColor||'#97464e');
+  if(O.neckwear==='bowtie'||O.neckwear==='ribbon'){inkPath(c,[[-7,-44],[0,-41],[-7,-38]],O.trimColor||col);inkPath(c,[[7,-44],[0,-41],[7,-38]],O.trimColor||col);if(O.neckwear==='ribbon')inkPath(c,[[-1,-41],[2,-41],[5,-30],[0,-32],[-4,-29]],O.trimColor||col);}
+  if(O.armor){const A=ST_ARMOR[O.armor];if(A){const color=A.color;inkPath(c,[[-12,-45],[12,-45],[11,-24],[0,-20],[-11,-24]],color);for(const sign of[-1,1]){inkPath(c,[[sign*10,-47],[sign*19,-44],[sign*17,-36],[sign*9,-38]],shade(color,.14));inkLine(c,[[sign*8,-17],[sign*8,-6]],shade(color,-.1),6);}inkLine(c,[[-8,-38],[8,-38]],A.trim,2);inkLine(c,[[0,-43],[0,-26]],A.trim,1.5);if(A.lv>=25)inkPath(c,[[-4,-35],[0,-40],[4,-35],[0,-30]],A.trim);}}
+  if(O.accessory==='satchel'){inkLine(c,[[-11,-44],[12,-23]],'#ad8e58',3);inkPath(c,[[7,-26],[18,-26],[18,-15],[7,-15]],'#73523d');}
+  if(O.accessory==='pendant'){inkLine(c,[[-7,-46],[0,-33],[7,-46]],'#c7ac72',1);inkOval(c,0,-32,3,4,O.trimColor||'#a2d5d1');}
   // Big oval face, ears and hair. Enemy faces use narrow sockets rather than friendly eyes.
-  if (O.hairType === 'long' || O.hairType === 'braids') {
+  if (['long','braids','locs','wavy','twintails'].includes(O.hairType)) {
     inkPath(c,[[-18,-64],[16,-65],[19,-35],[8,-39],[4,-60],[-9,-41],[-20,-36]],hair);
   }
   if (R.ears || goblin) {
@@ -2741,6 +2766,19 @@ function drawStorybookCharacter(c, u, now) {
     if (ht === 'curls') for (let i=0;i<6;i++) inkOval(c,-16+i*6,-80-Math.sin(i*.6)*5,6,6,hair,'#192020',1);
     if (ht === 'braids') for (const sign of [-1,1]) for (let i=0;i<5;i++) inkOval(c,sign*(20+i*.2),-62+i*6,3.5,4.5,hair);
     if (ht === 'crop') inkLine(c,[[-14,-81],[-5,-84],[6,-83]],shade(hair,.2),1);
+    if(ht==='afro'||ht==='coils'){for(let i=0;i<12;i++){const a=Math.PI+i*Math.PI/11;inkOval(c,Math.cos(a)*21,-70+Math.sin(a)*22,ht==='afro'?10:7,ht==='afro'?11:8,hair);}for(let i=0;i<9;i++)inkOval(c,-17+(i%5)*8,-82-Math.floor(i/5)*7,4,4,shade(hair,.12),'#252327',.6);}
+    if(ht==='locs')for(let i=0;i<7;i++){const x=-18+i*6;inkLine(c,[[x,-82],[x+(i%2?3:-3),-64],[x+(i<3?-4:4),-42]],hair,5);inkLine(c,[[x,-80],[x+1,-62]],shade(hair,.25),.7);}
+    if(ht==='cornrows'){inkPath(c,[[-19,-69],[-18,-81],[-7,-87],[8,-87],[18,-77],[19,-67],[10,-74],[-5,-75]],shade(hair,-.1));for(let i=0;i<6;i++)inkLine(c,[[-15+i*6,-79],[-12+i*5,-70]],shade(hair,.32),2);}
+    if(ht==='fade'){inkPath(c,[[-17,-73],[-16,-91],[14,-91],[18,-72],[10,-77],[-9,-77]],hair);inkLine(c,[[-16,-70],[-16,-64]],shade(hair,.35),2);inkLine(c,[[17,-70],[17,-64]],shade(hair,.35),2);}
+    if(ht==='bun'){inkOval(c,3,-94,12,11,hair);inkLine(c,[[-5,-88],[11,-88]],O.trimColor||col,2);}
+    if(ht==='pony')inkPath(c,[[-13,-84],[-27,-93],[-32,-78],[-29,-47],[-19,-58],[-22,-78]],hair);
+    if(ht==='twintails')for(const sign of[-1,1])inkPath(c,[[sign*14,-79],[sign*29,-84],[sign*34,-49],[sign*23,-39],[sign*24,-65]],hair);
+    if(ht==='bob')for(const sign of[-1,1])inkPath(c,[[sign*13,-79],[sign*23,-74],[sign*24,-47],[sign*15,-47]],hair);
+    if(ht==='wavy')for(const sign of[-1,1])for(let i=0;i<4;i++)inkOval(c,sign*(20+Math.sin(i)*3),-70+i*8,6,8,hair);
+    if(ht==='starspikes')inkPath(c,[[-20,-76],[-33,-91],[-17,-88],[-19,-108],[-5,-92],[2,-115],[9,-92],[25,-108],[21,-87],[34,-91],[20,-69]],hair);
+    if(ht==='stormfringe')inkPath(c,[[-19,-78],[-12,-97],[2,-88],[23,-102],[20,-84],[10,-66],[8,-79],[-1,-61],[-6,-79]],hair);
+    if(ht==='comet')inkPath(c,[[-20,-74],[-19,-91],[2,-101],[29,-99],[14,-91],[27,-84],[7,-80],[-6,-64],[-5,-78]],hair);
+    if(ht==='moonbangs')inkPath(c,[[-20,-79],[-6,-93],[14,-88],[21,-74],[8,-66],[13,-81],[1,-73],[-9,-61],[-6,-78]],hair);
   }
   if (hat === 'hood' || hat === 'cowl' || undead && E === 'cultist') {
     inkPath(c,[[-23,-53],[-24,-77],[-16,-92],[0,-98],[18,-85],[24,-55],[15,-48],[16,-69],[10,-81],[-6,-84],[-17,-69],[-16,-49]],shade(cloth,-.18));
@@ -2753,7 +2791,8 @@ function drawStorybookCharacter(c, u, now) {
     inkLine(c,[[-13,-82],[14,-81]],col,3);
   }
   if (R.cat) { for (const sign of [-1,1]) { inkPath(c,[[sign*9,-82],[sign*23,-98],[sign*24,-74]],skin); inkPath(c,[[sign*16,-83],[sign*21,-91],[sign*21,-79]],'#ac7776',null); } }
-  const blink = !E && Math.sin(now*.8 + id*1.3) > .997;
+  if(expression!=='faceless'){
+  const blink = !E && (Math.sin(now*.8 + id*1.3) > .997 || expression==='joy'||expression==='sleepy');
   for (const [x,side] of [[-7,-1],[8,1]]) {
     if (undead || demon) {
       inkOval(c,x,-62,6.3,5,'#24272a',null); inkOval(c,x+1,-62,2.5,2.8,demon ? '#f6a359' : '#cbd9ad',null);
@@ -2764,7 +2803,8 @@ function drawStorybookCharacter(c, u, now) {
       inkOval(c,x+2,-61.5,1.5,bandit?2:3,'#1d2528',null); inkOval(c,x+2,-63,bandit?.6:1,bandit?.6:1,'#fff8e6',null);
       if(bandit)inkLine(c,[[x-5,-66+side],[x+4,-66-side]],'#42382f',2.4);
     }
-    inkLine(c,[[x-5,-72+(expression==='fierce'?side*2:0)],[x+4,-72-(expression==='fierce'?side*2:0)]],hair,1.8);
+    const anger=expression==='fierce'||expression==='angry',sorrow=expression==='sad'||expression==='shy';
+    inkLine(c,[[x-5,-72+(anger?side*2:sorrow?-side*2:0)],[x+4,-72-(anger?side*2:sorrow?-side*2:0)]],hair,1.8);
   }
   // Offset nose and asymmetrical mouth make each face expressive, not a blank orb.
   inkLine(c,[[2,-58],[4,-54],[1,-53]],shade(skin,-.25),1.2);
@@ -2775,13 +2815,24 @@ function drawStorybookCharacter(c, u, now) {
   } else if (demon || goblin || undead) {
     inkPath(c,[[-9,-49],[2,-46],[12,-50],[10,-40],[-3,-41]],'#302024');
     for(let i=0;i<4;i++) inkPath(c,[[-7+i*5,-48],[-4+i*5,-47],[-5+i*5,-42]],'#e9dfbd',null,.5);
-  } else if (expression === 'grin') {
+  } else if(expression==='surprised')inkOval(c,2,-47,3.5,4.5,'#67483e');
+  else if(expression==='sad')inkLine(c,[[-6,-45],[1,-49],[8,-45]],'#67483e',1.4);
+  else if(expression==='angry')inkLine(c,[[-6,-47],[8,-47]],'#67483e',2);
+  else if(expression==='shy'){for(const sign of[-1,1])inkOval(c,sign*13,-52,3,1.5,'#c98276',null);inkLine(c,[[-3,-47],[5,-47]],'#67483e',1);}
+  else if(expression==='smirk')inkLine(c,[[-4,-47],[3,-46],[10,-50]],'#67483e',1.5);
+  else if (expression === 'grin'||expression==='joy') {
     inkPath(c,[[-8,-49],[11,-50],[7,-43],[-2,-43]],'#eee3c9'); inkLine(c,[[-5,-47],[8,-47]],'#b5a78d',.6);
   } else inkLine(c,[[-5,-47],[3,-46],[9,expression==='wary'?-48:-47]],'#664c40',1.3);
   if(O.evolution>0)for(const sign of[-1,1])inkLine(c,[[sign*12,-54],[sign*15,-50],[sign*11,-47]],R.col||col,1.3);
   if (R.tusks || E==='orcwar') for(const sign of [-1,1]) inkPath(c,[[sign*8,-44],[sign*11,-54],[sign*13,-44]],'#ede5c9');
   if (R.beard) inkPath(c,[[-16,-51],[-13,-38],[0,-29],[14,-39],[16,-51],[7,-45],[0,-42],[-7,-46]],hair);
   if (R.snout) { inkOval(c,7,-49,12,6,skin); inkOval(c,12,-51,1.5,1,'#344639',null); for(let i=0;i<3;i++) inkPath(c,[[-12+i*7,-82],[-8+i*7,-90],[-4+i*7,-82]],shade(skin,-.1)); }
+  }
+  if(['glasses','goggles'].includes(O.accessory)&&expression!=='faceless'){for(const x of[-7,8]){c.strokeStyle=O.accessory==='goggles'?'#ad925e':'#c5c8c0';c.lineWidth=O.accessory==='goggles'?2.5:1.3;c.beginPath();c.ellipse(x,-62,7,7,0,0,Math.PI*2);c.stroke();}inkLine(c,[[0,-62],[2,-62]],'#bdbeb2',1.5);}
+  if(O.accessory==='earrings')for(const x of[-21,21]){c.strokeStyle='#d1b56e';c.lineWidth=1.4;c.beginPath();c.ellipse(x,-51,3,4,0,0,Math.PI*2);c.stroke();}
+  if(O.accessory==='earcuff')inkLine(c,[[20,-65],[24,-65],[24,-59]],'#d7dedb',2);
+  if(O.accessory==='starclip')inkPath(c,[[15,-81],[17,-86],[19,-81],[24,-80],[20,-77],[21,-72],[17,-75],[13,-73],[14,-78],[10,-81]],'#dbc47f');
+  if(O.accessory==='moonpin'){inkOval(c,17,-81,5,6,'#e1d5a2');inkOval(c,19,-83,4,5,hair,null);}
   if (hat === 'crown' || royal) {
     inkPath(c,[[-20,-81],[-22,-93],[-10,-88],[0,-100],[10,-88],[22,-94],[20,-81]],royal?'#8e7751':'#c6ad70');
     inkOval(c,0,-88,3,4,E?'#b54d39':col);
@@ -4836,7 +4887,7 @@ let PROF = Object.assign(freshProfile(), store.get(PROFILE_KEY) || {});
 const ensureFreeHeroes = () => { for (const [i, r] of ROSTER.entries()) if (r.free && !PROF.heroes.includes(i)) PROF.heroes.push(i); };
 ensureFreeHeroes();
 const saveHooks = [];
-const saveProfile = () => { store.set(PROFILE_KEY, PROF); for (const f of saveHooks) f(); };
+const saveProfile = () => { const saved=store.set(PROFILE_KEY, PROF); for (const f of saveHooks) f(); return saved; };
 const owns = (list, id) => PROF[list].includes(id);
 function grant(r) {
   if (r.crowns) PROF.crowns += r.crowns;
@@ -6322,6 +6373,16 @@ for (const [key, K] of Object.entries(ST_KINGDOMS)) { // the keeps are built fro
   ST_DOOR_AT[K.door[0] + ',' + K.door[1]] = key;
   ST_MAP[K.door[1]][K.door[0]] = 'D';
 }
+const ST_INFIRMARIES=[
+  {key:'infirmary',name:'Thornwake Infirmary',door:[11,10],healer:'medra',nurse:'Healer Medra'},
+  {key:'infirmary_raven',name:'Ravenhollow Infirmary',door:[10,21],healer:'elin',nurse:'Healer Elin'},
+  {key:'infirmary_salt',name:'Saltmere Infirmary',door:[29,11],healer:'tavi',nurse:'Healer Tavi'}
+];
+for(const I of ST_INFIRMARIES){
+  ST_DUNGEONS[I.key]={name:I.name,home:true,lit:true,infirmary:true,pool:[],exit:I.door,theme:{floor:'#716651',wall:'#2a3833',glow:'#d5d5a0'},rows:['#############','#...........#','#.bb.....bb.#','#...........#','#.bb.....bb.#','#...........#','#...........#','#.....E.....#','#############']};
+  ST_DOOR_AT[I.door.join(',')]=I.key;ST_MAP[I.door[1]][I.door[0]]='D';ST_MAP[I.door[1]+1][I.door[0]]='v';
+  ST_NPCS.push({id:I.healer,name:I.nurse,map:I.key,x:6,y:3,look:'valkyrie',color:'#b2d2b7'});
+}
 // An original guardian stronghold: a throne hall and three fully walkable trial floors.
 const ST_DOMINION_FLOORS = [
   {key:'sanctum1', boss:'cairntrial', companion:'cairn', level:20, name:'The Iron Vestibule', title:'Warden'},
@@ -6443,6 +6504,18 @@ function stRespec() { // at a shrine: get every point back
   const d = stData(), fee = 50 + d.lv * 20; if (!stAttrSpent(d.attr)) return stSay([['', 'You have no stat points spent yet.']]);
   stSay([['', `The shrine can unmake what you have become and let you choose again. It asks ${fee} gold.`]], null, [[`Reset stat points (${fee} gold)`, () => { if (d.gold < fee) return stSay([['', 'You do not have enough gold.']]); d.gold -= fee; d.attr = {}; const s = stStats(); d.hp = Math.min(d.hp, s.hp); d.mp = Math.min(d.mp, s.mp); sfx('respawn'); stSave(); setTimeout(stStatsMenu, 0); }], ['Not now', null]]);
 }
+const ST_ARCANE_SPELLS={
+  dawnarc:{name:'Dawn Arc',lv:1,mp:6,kind:'mag',mult:1.45,sure:true,desc:'A precise ribbon of light that cannot miss.'},
+  auroramend:{name:'Aurora Mend',lv:10,mp:12,kind:'heal',mult:3,desc:'Mending starlight restores you and your companion.'},
+  icebloom:{name:'Ice Bloom',lv:10,mp:14,kind:'mag',mult:1.1,all:true,slow:true,desc:'Frost petals damage every foe and may freeze them.'},
+  stormring:{name:'Storm Ring',lv:15,mp:17,kind:'mag',mult:1.45,all:true,desc:'An orbit of lightning strikes the entire enemy line.'},
+  duskthread:{name:'Dusk Thread',lv:25,mp:18,kind:'mag',mult:2.1,drain:true,desc:'A thread of shadow steals life from one foe.'},
+  reverieward:{name:'Reverie Ward',lv:25,mp:13,kind:'buff',buff:'ward',desc:'Dreamlight blocks 60% of incoming damage for two turns.'},
+  starcircuit:{name:'Starfall Circuit',lv:45,mp:28,kind:'mag',mult:2.15,all:true,desc:'Linked stars cascade through every enemy.'},
+  twilightrefrain:{name:'Twilight Refrain',lv:60,mp:30,kind:'mag',mult:1.65,twice:true,desc:'Light and shadow echo as two successive strikes.'},
+};
+for(const[id,S]of Object.entries(ST_ARCANE_SPELLS))ST_SKILLS[id]={...S,gift:true};
+ST_SKILLS.concordburst={name:'Concord Burst',mp:24,kind:'mag',mult:1.1,all:true,twice:true,gift:true,desc:'A learned harmony of dawn and dusk strikes every foe twice.'};
 const ST_MAGIC_TIERS=[
   {level:1,name:'I · Initiate',spell:'emberspark'},{level:10,name:'II · Adept',spell:'flamelance'},
   {level:25,name:'III · Invoker',spell:'cindertempest'},{level:45,name:'IV · Archmage',spell:'eclipse'},{level:60,name:'V · Mythic',spell:'crownstars'},
@@ -6464,14 +6537,16 @@ function stAnnounce(text,color='#d3bd8b'){
 function stSyncProgress(notify=true){
   const d=stData();if(!d)return;
   d.skills=d.skills||[];d.outfit=d.outfit||{race:d.race};d.outfit.evolution=stEvolutionStage(d);
+  d.outfit.armor=d.showArmor===false?null:d.armor||null;
   const tier=stMagicTier(d),old=d.magicTier;
   if(!d.hr)for(let i=0;i<=tier;i++)if(!d.skills.includes(ST_MAGIC_TIERS[i].spell))d.skills.push(ST_MAGIC_TIERS[i].spell);
+  if(!d.hr&&d.lv>=25&&d.skills.includes('dawnarc')&&d.skills.includes('duskthread')&&!d.skills.includes('concordburst')){d.skills.push('concordburst');if(notify)stAnnounce('CONCORD BURST: dawn and dusk in harmony','#c7b4e8');}
   d.magicTier=tier;
   if(notify&&tier>0&&(old==null||tier>old))stAnnounce('MAGIC TIER '+ST_MAGIC_TIERS[tier].name+' UNLOCKED','#c3b2f1');
 }
 function stSystemPanel(title){
   const m=$('stMenu');ST.mode='menu';ST.keys={};ST.journal=false;m.hidden=false;
-  m.classList.remove('journal','rewards');m.innerHTML='';m.appendChild(el('h3','',title));return m;
+  m.classList.remove('journal','rewards','atlas');m.innerHTML='';m.appendChild(el('h3','',title));return m;
 }
 function stProgressMenu(){
   if(!stData().race)return stChooseRace();
@@ -6537,13 +6612,41 @@ function stMagicLessons(){
     b.addEventListener('click',()=>{const n=d.lessons?.level===d.lv?d.lessons.count:0;if(n>=3||d.gold<fee||d.hr)return;d.gold-=fee;d.mastery=d.mastery||{};d.mastery[id]=(d.mastery[id]||0)+3;d.lessons={level:d.lv,count:n+1};stSave();sfx('levelup');stAnnounce('LESSON COMPLETE: '+ST_SKILLS[id].name,'#c1b2e8');stMagicLessons();});
     card.append(el('h4','',stSkName(id)),el('p','',stMasteryText(id)),b);m.appendChild(card);
   }
+  m.append(el('h3','','The Dawn & Dusk Grimoire'),el('p','','Learn both Dawn Arc and Dusk Thread at level 25 to awaken Concord Burst. Original light-and-shadow spellcraft, earned through study.'));
+  for(const[id,S]of Object.entries(ST_ARCANE_SPELLS)){
+    const card=el('div','progressCard'),cost=100+S.lv*12,known=d.skills.includes(id),b=el('button','',known?'Learned':`Learn ${S.name} (${cost} gold)`);
+    b.disabled=known||d.hr||d.lv<S.lv||d.gold<cost;b.addEventListener('click',()=>{if(d.hr||d.lv<S.lv||d.gold<cost||d.skills.includes(id))return;d.gold-=cost;d.skills.push(id);stSyncProgress();stSave();stMagicLessons();});
+    card.append(el('h4','',S.name+' · Level '+S.lv),el('p','',S.desc+` (${S.mp} base MP)`),b);m.appendChild(card);
+  }
   const close=el('button','','Return to the Vale');close.addEventListener('click',stCloseMenu);m.appendChild(close);
+}
+const ST_ARMOR={
+  padded:{name:'Wayfarer Padding',lv:1,price:0,def:2,hp:12,color:'#62594b',trim:'#b6a282'},
+  leather:{name:'Ranger Leathers',lv:5,price:120,def:6,hp:25,color:'#71513b',trim:'#c1a16c'},
+  chain:{name:'Ashguard Chainmail',lv:12,price:420,def:12,hp:45,color:'#899596',trim:'#c4ceca'},
+  plate:{name:'Dawnwarden Plate',lv:25,price:1000,def:22,hp:80,color:'#b0b9b5',trim:'#d6b46f'},
+  moonweave:{name:'Moonweave Battlemantle',lv:35,price:1600,def:14,hp:45,mp:50,mag:8,color:'#665b86',trim:'#b8dce3'},
+  duskplate:{name:'Dusk Sovereign Armor',lv:50,price:2600,def:35,hp:140,color:'#414454',trim:'#c49b69'}
+};
+function stArmorMenu(){
+  const d=stData(),m=stSystemPanel('The Armory');d.ownedArmor=d.ownedArmor||{};
+  m.append(el('p','',`${d.gold} gold. One armor set can be equipped at a time. No guild membership, repair costs or movement penalties. Your wardrobe remains underneath.`));
+  for(const[id,A]of Object.entries(ST_ARMOR)){
+    const owned=!!d.ownedArmor[id],wearing=d.armor===id,card=el('div','progressCard'),b=el('button','',wearing?'Equipped':owned?'Equip '+A.name:(A.price?'Buy ':'Claim ')+A.name+(A.price?` (${A.price} gold)`:''));
+    b.disabled=wearing||d.lv<A.lv||(!owned&&d.gold<A.price);
+    b.addEventListener('click',()=>{if(d.lv<A.lv||(!d.ownedArmor[id]&&d.gold<A.price))return;if(!d.ownedArmor[id]){d.gold-=A.price;d.ownedArmor[id]=true;}d.armor=id;stSyncProgress(false);const s=stStats();d.hp=Math.min(d.hp,s.hp);d.mp=Math.min(d.mp,s.mp);stSave();stHud();stArmorMenu();});
+    card.append(el('h4','',A.name+' · Level '+A.lv),el('p','',`+${A.def} defense · +${A.hp} maximum health${A.mp?` · +${A.mp} mana · +${A.mag} magic`:''}`),b);m.appendChild(card);
+  }
+  const unequip=el('button','','Unequip armor');unequip.disabled=!d.armor;unequip.addEventListener('click',()=>{delete d.armor;stSyncProgress(false);const s=stStats();d.hp=Math.min(d.hp,s.hp);d.mp=Math.min(d.mp,s.mp);stSave();stHud();stArmorMenu();});
+  const show=el('button','',d.showArmor===false?'Show armor appearance':'Hide armor appearance');show.addEventListener('click',()=>{d.showArmor=d.showArmor===false;stSyncProgress(false);stSave();stArmorMenu();});
+  const close=el('button','','Return to the Vale');close.addEventListener('click',stCloseMenu);m.append(unequip,show,close);
 }
 function stStats() { // base class stats grown by level, plus gear and alignment
   const d = stData(), c = ST_CLASSES[d.cls], L = d.lv - 1, a = d.align || 0;
   const W = d.wounds || {};
   const st = {hp: c.hp + 14 * L, mp: c.mp + 6 * L, atk: (c.atk + 2 * L + (d.items.blade ? 6 : 0) + ST_WEAPONS[d.weapon || 0].atk + (a <= -3 ? 3 : 0) + (d.silver ? 5 : 0)) * (W.maim ? .8 : 1), mag: c.mag + 2 * L + (d.blessed ? 3 : 0) + (d.hollowPower ? 5 : 0) + (d.signet ? 3 : 0), def: (c.def + 1.2 * L + (d.charm ? 4 : 0) + (a >= 3 ? 3 : 0) + (d.seraphBless ? 5 : 0) + (d.signet ? 3 : 0)) * (1), spd: c.spd + .4 * L};
   if (d.guild && stEdict() === 'wall') st.def *= 1.1;
+  {const A=ST_ARMOR[d.armor];if(A){st.def+=A.def;st.hp+=A.hp;st.mp+=A.mp||0;st.mag+=A.mag||0;}}
   for (const [k, , stat, per] of ST_ATTRS) { const v = (d.attr && d.attr[k]) || 0; if (v) st[stat] += v * per; } // stat points
   st.hp = Math.round(st.hp); st.mp = Math.round(st.mp);
   { const R = ST_RACES[d.race] || ST_RACES.human; st.hp = Math.round(st.hp * (1 + (R.hp || 0))); st.mp = Math.round(st.mp * (1 + (R.mp || 0))); st.atk *= 1 + (R.atk || 0); st.mag *= 1 + (R.mag || 0); st.def *= 1 + (R.def || 0); st.spd += R.spd || 0;
@@ -6591,9 +6694,9 @@ const ST_STATUS = [ // [name for him, name for her, requirement text, check, pat
   ['Commoner', 'Commoner', '', () => true, 0, 0],
   ['Freeholder', 'Freeholder', 'Own land (the Harrowfield homestead)', d => !!d.farm, 0, 0],
   ['Sir', 'Dame', 'Free the Vale from the Hollow King and be Liked in Thornwake', d => d.flags.king && stRepOf('thornwake') >= 25, 1000, 50],
-  ['Baron', 'Baroness', 'B-Rank in the Guild and Liked in two towns', d => stRankAtLeast('B') && Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t) >= 25).length >= 2, 3000, 150],
-  ['Count', 'Countess', 'A-Rank, Ignaroth slain, and Liked in four towns', d => stRankAtLeast('A') && d.flags.ignaroth && Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t) >= 25).length >= 4, 8000, 400],
-  ['Duke', 'Duchess', 'S-Rank and the Unmaker destroyed', d => stRankAtLeast('S') && d.flags.unmaker, 20000, 1000],
+  ['Baron', 'Baroness', 'B-Rank clearance and Liked in two towns', d => stTravelRankAtLeast('B') && Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t) >= 25).length >= 2, 3000, 150],
+  ['Count', 'Countess', 'A-Rank clearance, Ignaroth slain, and Liked in four towns', d => stTravelRankAtLeast('A') && d.flags.ignaroth && Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t) >= 25).length >= 4, 8000, 400],
+  ['Duke', 'Duchess', 'S-Rank clearance and the Unmaker destroyed', d => stTravelRankAtLeast('S') && d.flags.unmaker, 20000, 1000],
 ];
 const stClass = () => (stData().status || 0);
 const stTitle = (i = stClass()) => ST_STATUS[i][stData().voice === 'f' ? 1 : 0];
@@ -6967,13 +7070,14 @@ function stShowRewards(id, then) { // the trophy screen after a boss falls
   ST.mode = 'menu'; m.hidden = false; m.innerHTML = ''; m.classList.add('rewards');
   m.append(el('p', 'rwTop', 'BOSS DEFEATED'), el('h3', '', F.name));
   const list = el('div', 'rwList'), add = (ic, t, sub) => { const r = el('div', 'rw'); r.append(el('span', 'rwIc', ic), el('b', '', t), el('small', '', sub || '')); list.appendChild(r); };
-  add('✦', `${F.xp} XP`, 'Experience'); add('◎', `${F.gold + R[0]} gold`, `${F.gold} spoils + ${R[0]} bounty`);
+  const receipt=d.lastSpoils?.id===id?d.lastSpoils:null,bonus=Math.round(R[0]*(receipt?.reward||stDiff().reward||1));
+  add('✦', `${receipt?.xp||F.xp} XP`, 'Experience already earned'); add('◎', `${(receipt?.gold??F.gold) + bonus} gold`, `${receipt?.gold??F.gold} spoils already earned + ${bonus} bounty to claim`);
   if (first) { add('♛', `${R[1]} Crowns`, 'First victory bonus'); if (G) add('⚔', G.name, G.desc + ' · trophy, worn at once'); }
   if (d.guild) add('▲', `+50 guild points`, `${d.guild.rank}-Rank standing`);
   m.appendChild(list);
   const row = el('div', 'row'), claim = el('button', 'primary', 'Claim rewards'); row.appendChild(claim); m.appendChild(row); setTimeout(() => claim.focus({preventScroll: true}), 0);
   claim.addEventListener('click', () => {
-    d.gold += R[0]; if (first) { PROF.crowns += R[1]; if (G) { d.gear = d.gear || {}; d.gear[R[2]] = true; } d.bossPaid[id] = true; } if (d.guild) d.guild.pts += 50;
+    d.gold += bonus; if (first) { PROF.crowns += R[1]; if (G) { d.gear = d.gear || {}; d.gear[R[2]] = true; } d.bossPaid[id] = true; } if (d.guild) d.guild.pts += 50;
     sfx('levelup'); m.classList.remove('rewards'); m.hidden = true; ST.mode = 'walk'; stHud(); stSave(); if (then) then();
   });
 }
@@ -6981,6 +7085,17 @@ const ST_RANKS = ['D', 'C', 'B', 'A', 'S'];
 const ST_RANK_PTS = {D: 120, C: 320, B: 650, A: 1100}; // standing needed to sit the exam for the next rank
 const ST_EXAM = {D: 'examC', C: 'examB', B: 'examA', A: 'examS'};
 const stRankAtLeast = r => { const g = stData().guild; return !!g && ST_RANKS.indexOf(g.rank) >= ST_RANKS.indexOf(r); };
+const ST_FREE_RANK_LEVEL={D:1,C:26,B:32,A:41,S:55};
+const stFreeRank=()=>ST_RANKS.filter(r=>stData().lv>=ST_FREE_RANK_LEVEL[r]).at(-1)||'D';
+const stTravelRankAtLeast=r=>stRankAtLeast(r)||stData().lv>=ST_FREE_RANK_LEVEL[r];
+const ST_ROGUE_GUILDS={nightveil:['Nightveil Compact','Scouts, treasure-seekers and dusk-mages. A quiet fellowship with no compulsory crimes.'],blackbriar:['Blackbriar Company','Free blades and monster hunters. No levy, initiation fee or mandatory allegiance.']};
+function stFreePaths(){
+  const d=stData(),m=stSystemPanel('Free paths & rogue guilds');
+  m.append(el('p','',`Travel clearance ${stFreeRank()} · Level ${d.lv}. Membership is optional. Everyone can take contracts, equip armor and finish the story. Independent clearance: C at 26, B at 32, A at 41, S at 55.`),el('p','',`Current fellowship: ${ST_ROGUE_GUILDS[d.rogueGuild]?.[0]||'Independent adventurer'}. Changing fellowship never resets levels, contracts or equipment.`));
+  const board=el('button','','Open independent contracts');board.addEventListener('click',()=>stGuildBoard(true));m.appendChild(board);
+  for(const[id,[name,desc]]of Object.entries(ST_ROGUE_GUILDS)){const card=el('div','progressCard'),b=el('button','',d.rogueGuild===id?'Current fellowship':'Join '+name);b.disabled=d.rogueGuild===id;b.addEventListener('click',()=>{d.rogueGuild=id;stSave();stHud();stFreePaths();});card.append(el('h4','',name),el('p','',desc+' Shared contract rewards and story access; joining is free.'),b);m.appendChild(card);}
+  const alone=el('button','','Remain independent');alone.addEventListener('click',()=>{delete d.rogueGuild;stSave();stHud();stFreePaths();});const close=el('button','','Return to the Vale');close.addEventListener('click',stCloseMenu);m.append(alone,close);
+}
 const stEdict = () => (stData().guild || {}).edict || 'bounty';
 const ST_EDICTS = {bounty: ['Edict of the Bounty', 'Guild quests pay 30% more'], road: ['Edict of the Open Road', 'Coach and ship fares are halved'], wall: ['Edict of the Iron Wall', '+10% defense for all members'], market: ['Edict of the Market', 'Fish, ore and gems sell for 15% more']};
 const ST_GQ_PAY = {D: [60, 30, 60], C: [130, 45, 150], B: [240, 70, 320], A: [420, 100, 700], S: [800, 150, 1500]}; // gold, guild points, xp
@@ -7020,12 +7135,12 @@ const ST_GQUESTS = [
   {id: 's6', rank: 'S', kind: 'boss', boss: 'unmaker', name: 'The End of All Things', text: 'Destroy the Unmaker in the Abyssal Rift'},
 ];
 const stGQ = id => ST_GQUESTS.find(q => q.id === id);
-const stGQDone = q => { const d = stData(), a = (d.guild.quests || []).find(x => x.id === q.id); return q.kind === 'hunt' ? a && a.prog >= q.need : q.kind === 'gather' ? ((d.mats || {})[q.mat] || 0) >= q.need : !!d.flags[q.boss]; };
+const stGQDone = (q,g=stData().guild) => { const d = stData(), a = (g?.quests || []).find(x => x.id === q.id); return q.kind === 'hunt' ? a && a.prog >= q.need : q.kind === 'gather' ? ((d.mats || {})[q.mat] || 0) >= q.need : !!d.flags[q.boss]; };
 function stGuildJoin(name) {
   const d = stData();
   stSay([[name, 'The Adventurers\' Guild is no tavern club. It is a government. The Free Guild Compact rules every road and wild place beyond the town walls, and all of Valdris across the sea.'],
     [name, 'Its law is short: merit is the only crown. Members rise from D-Rank to S-Rank by work done and exams passed. The Council of S-Ranks issues edicts that bind every member; A-Ranks vote on them.'],
-    [name, 'Members may travel guild territory, like the Gloamwood and the Ashfall Dunes. The Compact takes a 10% levy on quest pay until you reach A-Rank. Crimes cost you standing. The joining fee is 20 gold.']], null,
+    [name, 'Membership is optional. Independent adventurers and rogue fellowships can take the same contracts and earn travel clearance through levels. Members earn political standing and sit rank exams. The joining fee is 20 gold.']], null,
     [['Join the Guild (20 gold)', () => { if (d.gold < 20) return stSay([[name, 'Twenty gold. The Compact does not run on promises.']]); d.gold -= 20; d.guild = {rank: 'D', pts: 0, quests: [], edict: 'bounty'}; sfx('levelup'); stCallout('D-RANK ADVENTURER', '#ffd75e'); stSay([[name, 'Welcome to the Compact, D-Rank. Take work from the quest board. Earn standing, then sit your exam with the Guildmaster.']]); }], ['Not yet', null]]);
 }
 function stGuildDesk(name) { // the front desk in any guild hall
@@ -7040,23 +7155,24 @@ function stEdictMenu() {
   stSay([['', d.guild.rank === 'S' ? 'The Council chamber. Your seal is as good as law. Choose the edict that binds the Compact.' : 'The ballot box of the Compact. Your vote tips the Council. Choose an edict.']], null,
     Object.entries(ST_EDICTS).map(([k, E]) => [`${E[0]}: ${E[1]}${k === stEdict() ? ' (in force)' : ''}`, () => { d.guild.edict = k; sfx('shield'); stCallout(`${E[0]} is now law`, '#ffd75e'); }]).concat([['Leave it as it is', null]]));
 }
-function stGuildBoard() { // take, track and turn in guild quests
-  const d = stData(), g = d.guild, m = $('stMenu'); if (!g) return; g.quests = g.quests || []; g.done = g.done || [];
+function stGuildBoard(free=false) { // the same paid work is open to independent adventurers
+  const d = stData(), g = free?(d.freeProgress=d.freeProgress||{pts:0,quests:[],done:[]}):d.guild, m = $('stMenu'); if (!g) return stGuildBoard(true);if(free)g.rank=stFreeRank();g.quests = g.quests || []; g.done = g.done || [];
   ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
-  const nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], need = ST_RANK_PTS[g.rank], pay = q => { const P = ST_GQ_PAY[q.rank], mul = (q.kind === 'boss' ? 2 : 1); return [Math.round(P[0] * mul * (stEdict() === 'bounty' ? 1.3 : 1)), P[1] * mul, P[2] * mul]; };
-  m.append(el('h3', '', `Quest board · ${g.rank}-Rank`), el('p', '', nx ? `Standing ${g.pts}/${need} toward your ${nx}-Rank exam.` : 'S-Rank. There is no higher rank.'));
+  const nx = ST_RANKS[ST_RANKS.indexOf(g.rank) + 1], need = ST_RANK_PTS[g.rank], pay = q => { const P = ST_GQ_PAY[q.rank], mul = (q.kind === 'boss' ? 2 : 1),reward=g.quests.find(a=>a.id===q.id)?.reward||stDiff().reward||1; return [Math.round(P[0] * mul * (stEdict()==='bounty'?1.3:1) * reward), P[1] * mul, Math.round(P[2] * mul * reward)]; };
+  m.append(el('h3', '', `Quest board · ${g.rank}-Rank`), el('p', '',free?`Independent clearance ${g.rank}. Contract standing ${g.pts}.`:nx ? `Standing ${g.pts}/${need} toward your ${nx}-Rank exam.` : 'S-Rank. There is no higher rank.'));
+  if(free)m.appendChild(el('p','','Independent contracts: no membership fee, levy or abandonment penalty. Clearance follows your level; standing records your completed work.'));
   const bar = el('div', 'bar rankbar'), fill = el('i'); fill.style.width = (nx ? Math.min(100, g.pts / need * 100) : 100) + '%'; bar.appendChild(fill); m.appendChild(bar);
   m.appendChild(el('h3', '', g.quests.length ? 'Your current quest' : 'Your current quest: none'));
   if (g.quests.length > 1) g.quests = g.quests.slice(0, 1); // the Compact allows one contract per member at a time
   const mine = el('div', 'trade gq');
   if (!g.quests.length) mine.append(el('span', 'hint', 'None taken. Pick one from the board below. You can hold one quest at a time: finish or abandon it before taking another.'));
-  for (const a of g.quests) { const q = stGQ(a.id); if (!q) continue; const ok = stGQDone(q), P = pay(q);
+  for (const a of g.quests) { const q = stGQ(a.id); if (!q) continue; const ok = stGQDone(q,g), P = pay(q);
     const prog = q.kind === 'hunt' ? `${a.prog}/${q.need}` : q.kind === 'gather' ? `${Math.min(q.need, (d.mats || {})[q.mat] || 0)}/${q.need}` : ok ? 'done' : 'not yet';
     const act = el('span', 'tbtn'), tb = el('button', ok ? 'primary' : '', ok ? 'Turn in' : 'Abandon');
     tb.addEventListener('click', () => {
-      if (ok) { if (q.kind === 'gather') d.mats[q.mat] -= q.need; const tax = stRankAtLeast('A') ? 0 : Math.round(P[0] * .1); d.gold += P[0] - tax; g.pts += P[1]; d.xp += P[2]; g.done.push(q.id); sfx('levelup'); stCallout(`${q.name}: +${P[0] - tax} gold · +${P[1]} standing`, '#ffd75e'); if (tax) setTimeout(() => stCallout(`The Compact levies ${tax} gold (10%)`, '#c8b89a'), 1500); }
-      if (!ok) { g.pts = Math.max(0, g.pts - 10); stCallout('Abandoned: -10 standing. The Compact frowns on broken contracts.', '#c8b89a'); }
-      g.quests = g.quests.filter(x => x !== a); stGuildBoard();
+      if (ok) { if (q.kind === 'gather') d.mats[q.mat] -= q.need; d.gold += P[0]; g.pts += P[1]; d.xp += P[2]; g.done.push(q.id);while(d.xp>=stXpNeed(d.lv)){d.xp-=stXpNeed(d.lv);d.lv++;const s=stStats();d.hp=s.hp;d.mp=s.mp;}stSyncProgress();sfx('levelup'); stCallout(`${q.name}: +${P[0]} gold · +${P[1]} standing`, '#ffd75e'); }
+      if (!ok) stCallout('Contract released. No standing or gold lost.', '#c8b89a');
+      g.quests = g.quests.filter(x => x !== a);stSave();stGuildBoard(free);
     });
     act.appendChild(tb); mine.append(el('span', '', `[${q.rank}] ${q.name}`), el('span', 'hint', q.text), el('span', '', prog), act); }
   m.appendChild(mine);
@@ -7064,7 +7180,7 @@ function stGuildBoard() { // take, track and turn in guild quests
   const avail = el('div', 'trade gq');
   for (const q of ST_GQUESTS) { if (ST_RANKS.indexOf(q.rank) > ST_RANKS.indexOf(g.rank) || g.quests.some(a => a.id === q.id) || (q.kind === 'boss' && g.done.includes(q.id))) continue;
     const P = pay(q), b = el('button', '', g.quests.length ? 'One at a time' : 'Take'); b.disabled = g.quests.length >= 1;
-    b.addEventListener('click', () => { g.quests.push({id: q.id, prog: 0}); sfx('pickup'); stGuildBoard(); });
+    b.addEventListener('click', () => { g.quests.push({id: q.id, prog: 0,reward:stDiff().reward||1});stSave();sfx('pickup');stGuildBoard(free); });
     const act = el('span', 'tbtn'); act.appendChild(b); avail.append(el('span', '', `[${q.rank}] ${q.name}`), el('span', 'hint', q.text), el('span', '', `${P[0]}g · +${P[1]}`), act); }
   m.appendChild(avail);
   const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row); setTimeout(() => x.focus({preventScroll: true}), 0);
@@ -7368,7 +7484,7 @@ const ST_LORE = [
   ['The Moon Pack', d => d.flags.wolfQuest, 'Werewolves of the Gloamwood, led by Ysolde. They walk only when the moon is up.'],
   ['The Heavenly Restriction', d => d.flags.hrQuest, 'An old rite above the Frost Peaks: give up every spark of magic, forever, for a body made perfect.'],
   ['The Delacroix-Noir', () => stLetters() > 0, 'An old vampire house of Rougemarais. Its letters speak of a child drowned in the Vale, whom the ash gave back.'],
-  ['Valdris', d => d.lv >= 20 || stRankAtLeast('C'), 'Across the sea, a land with no king, governed by the Guild Compact from Highmarch. Only ranked adventurers may land.'],
+  ['Valdris', d => d.lv >= 20 || stRankAtLeast('C'), 'Across the sea, a land with no king, governed by the Guild Compact from Highmarch. Level 26 earns independent travel clearance; joining the Compact is optional.'],
   ['Aetherfall', d => d.lv >= 35 || stRankAtLeast('A'), 'The Shattered Heavens: floating isles over a starry void, where the Unmaker waits at the Abyssal Rift.'],
 ];
 const ST_GUIDE = [
@@ -7376,7 +7492,7 @@ const ST_GUIDE = [
   ['Combat', 'Attack hits one enemy. Skills are stronger and cost MP; they grow stronger and evolve the more you use them. Items heal. Defend halves the damage you take. The faster fighter dodges more. Fill the Rage meter and press RAGE! for a burst of power.'],
   ['Wounds and death', 'Hard hits can make you bleed or sever a limb. Potions stop bleeding; shrines and inns heal everything. Die, and you drop your gold where you fell: walk back to pick it up.'],
   ['Levels and danger', 'Every region shows its level. Dungeons and bosses will not let you in below their level. The Ashen Vale runs from level 1 to 25, Valdris 26 to 40, and Aetherfall 41 to 55.'],
-  ['The Guild', 'Join at the Guild Hall in Thornwake. Take one quest at a time from the board. Earn standing, then sit an exam with the Guildmaster to rise from D to S-Rank. Some lands are guild territory.'],
+  ['The Guild', 'Membership is optional. Join for political standing and rank exams, or use Free paths & rogue guilds in the menu for the same contracts. Independent travel clearance follows your level.'],
   ['Travel', 'Coaches run between towns. Ships sail from Saltmere to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Garth sells mounts, and breeds them in pairs.'],
   ['Professions', 'Fishing (rod from Dunn), mining (pickaxe from Brann), farming (homestead from Farmer Odo) and crafting (forge at Brann\'s, cooking at inns). Each has its own level.'],
   ['Trade', 'Every market buys and sells at its own prices, and prices change daily. Buy where goods are made, sell where they are wanted.'],
@@ -7396,7 +7512,7 @@ function stJournal(tab) {
     for (const [h, ok, p] of ST_LORE) if (ok(d)) sec(h, p);
   } else if (tab === 'Quests') {
     sec('Main quest', ob ? ob.text : 'Complete.');
-    const g = d.guild, a = g && (g.quests || [])[0] && stGQ(g.quests[0].id); sec('Guild quest', a ? `[${a.rank}] ${a.name}: ${a.text}.${a.kind === 'hunt' ? ` ${g.quests[0].prog}/${a.need}.` : ''} Turn in at a guild board.` : g ? 'None. Take one from a guild quest board.' : 'Join the Adventurers\' Guild in Thornwake to take quests.');
+    const g = d.guild||d.freeProgress, a = g && (g.quests || [])[0] && stGQ(g.quests[0].id); sec('Contract', a ? `[${a.rank}] ${a.name}: ${a.text}.${a.kind === 'hunt' ? ` ${g.quests[0].prog}/${a.need}.` : ''} Turn in at its contract board.` : 'Open Free paths & rogue guilds for independent contracts. Membership is optional.');
     const side = [
       d.flags.bellQuest && !d.flags.bellDone && 'The Drowned Bell: find it in the Bone Marsh, return it to Dunn in Saltmere.', d.flags.wrenQuest && !d.flags.hessaDone && 'Wren\'s Mother: search the Ashfall Dunes.',
       d.flags.corinQuest && !d.flags.stalker && 'Corin\'s Hunter: find what stalks the Gloamwood.', d.flags.lioraQuest && !d.flags.brother && 'Liora\'s Oath: find her brother in the Bone Marsh.',
@@ -7407,7 +7523,7 @@ function stJournal(tab) {
   } else if (tab === 'Places') {
     const seen = d.places || {}, list = Object.entries(seen).sort((a, b) => a[1] - b[1]);
     sec('Visited', list.length ? list.map(([n, lv]) => `${n} · level ${lv}${lv > d.lv ? ' (dangerous)' : ''}`).join('\n') : 'Nowhere yet.');
-    sec('Rumored', [['The Sunken Catacombs', 4], ['The Ice Crypt', 7], ['The Hollow Keep', 12], ['Duskwatch Castle (guild members)', 15], ['The Celestial Stair', 18], ['Rougemarais (ship, level 20)', 20], ['Valdris (ship, C-Rank)', 26], ['Aetherfall (ship, A-Rank)', 41]].filter(([n]) => !Object.keys(seen).some(k => n.startsWith(k.split(',')[0]))).map(([n, lv]) => `? ${n} · level ${lv}`).join('\n'));
+    sec('Rumored', [['The Sunken Catacombs', 4], ['The Ice Crypt', 7], ['The Hollow Keep', 12], ['Duskwatch Castle', 15], ['The Celestial Stair', 18], ['Rougemarais (ship, level 20)', 20], ['Valdris (ship, level 26 or C clearance)', 26], ['Aetherfall (ship, level 41 or A clearance)', 41]].filter(([n]) => !Object.keys(seen).some(k => n.startsWith(k.split(',')[0]))).map(([n, lv]) => `? ${n} · level ${lv}`).join('\n'));
     sec('Reputation', Object.keys(ST_TOWN_NAME).filter(t => stRepOf(t)).map(t => `${ST_TOWN_NAME[t]}: ${stRepName(stRepOf(t))}`).join('\n') || 'No town has formed an opinion of you yet.');
   } else if (tab === 'People') {
     const met = Object.entries(d.bonds || {}).filter(([k, b]) => ST_SOCIAL[k] && b.talked).sort((a, b) => b[1].pts - a[1].pts);
@@ -7651,7 +7767,7 @@ function stDrawMount(g, id, x, y, face, walk, now, moving = ST.moving) { // draw
 }
 
 // ---- story menu and character creator
-let crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}, attr: {}};
+let crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human',hat:'none'}, attr: {}};
 let crStep = 0;
 function creatorStep(step) {
   crStep = Math.max(0, Math.min(2, step));
@@ -7676,7 +7792,11 @@ const ST_HATS = [['', 'Class default'], ['helm', 'Knight\'s helm'], ['heavyhelm'
   ['pointy', 'Wizard hat'], ['brim', 'Witch\'s brim'], ['widehat', 'Wide hat'], ['tricorn', 'Tricorn'], ['boonie', 'Ranger\'s cap'], ['helmet', 'Soldier\'s helmet'], ['crown', 'Crown'], ['feathers', 'Feathers'], ['horns', 'Horns'],
   ['longhair', 'Long hair'], ['twintails', 'Twin tails'], ['topknot', 'Topknot'], ['spiky', 'Spiky hair'], ['scruffy', 'Scruffy hair']];
 const ST_CLOTH = ['#7d8a9b', '#5d4392', '#3f5a2e', '#6a3f2a', '#8a2a2a', '#2a4a6a', '#c9a24a', '#2a2a2a', '#e8e2d0', '#4a7a8a', '#7a3a6a', '#b85a2a'];
-const ST_SKINS = ['#f1c9a5', '#e8b894', '#d9a07a', '#c98d6a', '#8a5a3a', '#5a3a2a', '#d7e8c8'];
+const ST_SKINS = ['#ffe1c5','#f1c9a5','#e8b894','#d9a07a','#c98d6a','#b67b52','#99623f','#8a5a3a','#70462f','#5a3a2a','#38271f','#d7e8c8','#9cabbf'];
+const ST_HAIR_OPTIONS=[['swept','Side swept'],['crop','Short crop'],['curls','Curls'],['long','Long hair'],['braids','Twin braids'],['spikes','Spikes'],['afro','Rounded afro'],['coils','Coily crown'],['locs','Locs'],['cornrows','Cornrows'],['fade','High-top fade'],['bun','High bun'],['pony','High ponytail'],['twintails','Twin tails'],['bob','Blunt bob'],['wavy','Long waves'],['starspikes','Starburst spikes'],['stormfringe','Storm fringe'],['comet','Comet sweep'],['moonbangs','Moon bangs'],['none','Shaved']];
+const ST_EXPRESSIONS=[['calm','Quiet resolve'],['grin','Crooked grin'],['fierce','Determined'],['wary','World weary'],['joy','Joyful'],['sad','Melancholy'],['surprised','Surprised'],['sleepy','Sleepy'],['smirk','Confident smirk'],['angry','Angry'],['shy','Shy'],['faceless','Faceless']];
+const ST_OUTFITS=[['class','Class attire'],['shirt','Everyday shirt'],['suit','Tailored suit'],['waistcoat','Scholar waistcoat'],['hoodie','Wayfarer hoodie'],['longcoat','Starlit longcoat'],['robe','Spellweaver robe'],['festival','Festival tunic']];
+const ST_ACCESSORIES=[['none','None'],['glasses','Round glasses'],['goggles','Explorer goggles'],['earrings','Hoop earrings'],['earcuff','Silver ear cuff'],['starclip','Star hair clip'],['moonpin','Crescent pin'],['pendant','Dawn pendant'],['satchel','Traveler satchel'],['wings','Duskwing ornament']];
 const ST_CLASS_WEAR = { // each class dresses differently
   warrior: {hats: ['helm', 'heavyhelm', 'winghelm', 'visor', 'crest', 'horns', 'topknot', 'scruffy', 'longhair'], cloth: ['#7d8a9b', '#5a5f6a', '#8a2a2a', '#6a3f2a', '#3a3a42', '#b85a2a', '#c9a24a', '#2a4a6a'], note: 'Steel, leather and war banners'},
   mage:    {hats: ['pointy', 'brim', 'widehat', 'hood', 'cowl', 'crown', 'feathers', 'longhair', 'twintails'], cloth: ['#5d4392', '#2a4a8a', '#7a3a6a', '#1a1a3a', '#4a7a8a', '#9a3a8a', '#e8e2d0', '#3a2a5a'], note: 'Robes of starlight and spellsilk'},
@@ -7693,8 +7813,7 @@ Object.assign(ST_CLASS_WEAR, {
   blademaster: {hats: ['topknot', 'longhair', 'ninja', 'widehat', 'helm', 'crest', 'scruffy'], cloth: ['#3a4a6a', '#1a1a2a', '#8a2a2a', '#e8e2d0', '#4a3a5a', '#2a4a3a', '#6a6a7a', '#c9a24a'], note: 'Lacquered plate and silk'},
 });
 function stOutfitUI(box, O, onChange, cls) { // headwear, tunic, cloak, cape, scarf and skin, chosen from what your class wears
-  const W = ST_CLASS_WEAR[cls] || ST_CLASS_WEAR.warrior, HATS = [['', 'Class default']].concat(ST_HATS.filter(([v]) => W.hats.includes(v))), CL = W.cloth;
-  if (O.hat && !W.hats.includes(O.hat)) delete O.hat; for (const k of ['body', 'cloak', 'cape', 'scarf']) if (O[k] && O[k] !== 'none' && !CL.includes(O[k])) delete O[k]; // a new class keeps only what fits it
+  const W = ST_CLASS_WEAR[cls] || ST_CLASS_WEAR.warrior, HATS = [['', 'Class default'],['none','No headwear']].concat(ST_HATS.filter(([v]) => W.hats.includes(v))), CL = [...new Set([...W.cloth,...ST_CLOTH])];
   box.innerHTML = ''; box.appendChild(el('small', 'onote', `${ST_CLASSES[cls] ? ST_CLASSES[cls].name : ''} attire: ${W.note}.`)); const set = (k, v) => { if (v === '' || v == null) delete O[k]; else O[k] = v; onChange(); };
   const sel = el('select'); sel.setAttribute('aria-label', 'Headwear'); for (const [v, n] of HATS) { const o = el('option', '', n); o.value = v; if ((O.hat || '') === v) o.selected = true; sel.appendChild(o); }
   sel.addEventListener('change', () => set('hat', sel.value)); const hr = el('div', 'orow'); hr.append(el('span', 'olab', 'Headwear'), sel); box.appendChild(hr);
@@ -7705,12 +7824,17 @@ function stOutfitUI(box, O, onChange, cls) { // headwear, tunic, cloak, cape, sc
   const pick = (label, key, values) => { const r = el('div', 'orow'), s = el('select'); s.setAttribute('aria-label', label);
     for (const [v, text] of values) { const o = el('option', '', text); o.value = v; o.selected = (O[key] || values[0][0]) === v; s.appendChild(o); }
     s.addEventListener('change', () => set(key, s.value)); r.append(el('span', 'olab', label), s); box.appendChild(r); };
-  pick('Hair', 'hairType', [['swept','Side swept'],['crop','Short crop'],['curls','Curls'],['long','Long hair'],['braids','Twin braids'],['spikes','Spikes'],['none','Shaved']]);
-  pick('Expression', 'expression', [['calm','Quiet resolve'],['grin','Crooked grin'],['fierce','Determined'],['wary','World weary']]);
-  row('Hair color', 'hairColor', ['#30231f','#78513b','#b69b69','#be6b42','#dedcd3','#64647c','#9d689b'], []);
+  pick('Hair', 'hairType', ST_HAIR_OPTIONS);
+  pick('Expression', 'expression', ST_EXPRESSIONS);
+  pick('Outfit', 'outfitStyle', ST_OUTFITS);
+  pick('Pants', 'pantsStyle', [['straight','Straight trousers'],['wide','Wide-leg trousers'],['shorts','Traveler shorts'],['fitted','Fitted trousers'],['skirt','Pleated skirt']]);
+  pick('Neckwear','neckwear',[['none','None'],['tie','Necktie'],['bowtie','Bow tie'],['ribbon','Ribbon']]);
+  pick('Accessory','accessory',ST_ACCESSORIES);
+  row('Hair color', 'hairColor', ['#161a20','#30231f','#78513b','#b69b69','#be6b42','#dedcd3','#64647c','#9d689b','#c63b57','#368fa6','#6d59bb','#b4e1dc','#f09cb8'], []);
   row('Eyes', 'eyeColor', ['#795538','#5d9ba9','#768452','#b68a36','#8271a8'], []);
   row(cls === 'mage' ? 'Robe' : cls === 'warrior' || cls === 'paladin' ? 'Tabard' : cls === 'rogue' ? 'Jerkin' : cls === 'gunner' ? 'Coat' : 'Tunic', 'body', CL, [['', 'Default']]); row('Cloak', 'cloak', CL, [['', 'Default']]); row(cls === 'paladin' || cls === 'warrior' ? 'Cape' : cls === 'mage' ? 'Mantle' : 'Cape', 'cape', CL, [['', 'Default'], ['none', 'None']]);
   row(cls === 'rogue' ? 'Face scarf' : cls === 'gunner' ? 'Bandana' : 'Scarf', 'scarf', CL, [['', 'Default'], ['none', 'None']]); row('Skin', 'skin', ST_SKINS, [['', 'Default']]);
+  row('Shirt','shirtColor',CL,[['','Default']]);row('Pants color','pantsColor',CL,[['','Default']]);row('Shoes','shoeColor',CL,[['','Default']]);row('Trim / tie','trimColor',CL,[['','Default']]);
 }
 function stWardrobe() { // change your clothes any time, free
   const d = stData(), m = $('stMenu'); d.outfit = d.outfit || {}; ST.mode = 'menu'; m.hidden = false; m.innerHTML = '';
@@ -7718,6 +7842,10 @@ function stWardrobe() { // change your clothes any time, free
   const draw = () => { const g = cv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 200, 200); g.setTransform(1.35, 0, 0, 1.35, 100, 180); drawCharacter(g, {look: ST_CLASSES[d.cls].look, color: d.color, outfit: d.outfit, team: 0, level: d.lv, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, performance.now() / 1000); };
   const box = el('div', 'outfit'); m.appendChild(box); stOutfitUI(box, d.outfit, () => { draw(); stSave(); stNetPush && stNetPush(true); }, d.cls); draw();
   const anim = setInterval(() => { if (m.hidden || !m.contains(cv)) return clearInterval(anim); draw(); }, 80);
+  d.outfitPresets=d.outfitPresets||[];
+  const presets=el('div','row'),save=el('button','','Save outfit preset');
+  save.disabled=d.outfitPresets.length>=6;save.addEventListener('click',()=>{d.outfitPresets.push(JSON.parse(JSON.stringify(d.outfit)));stSave();stWardrobe();});presets.appendChild(save);
+  d.outfitPresets.forEach((O,i)=>{const b=el('button','','Wear outfit '+(i+1));b.addEventListener('click',()=>{d.outfit=JSON.parse(JSON.stringify(O));stSyncProgress(false);stSave();stNetPush(true);stWardrobe();});presets.appendChild(b);const del=el('button','','Delete outfit '+(i+1));del.addEventListener('click',()=>{d.outfitPresets.splice(i,1);stSave();stWardrobe();});presets.appendChild(del);});m.appendChild(presets);
   const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row);
 }
 function openStoryMenu() {
@@ -7771,13 +7899,13 @@ $('stBack').addEventListener('click', () => show('scr-main'));
 $('stContinue').addEventListener('click', () => startStory());
 $('stNew').addEventListener('click', () => {
   if (stData() && !confirm('Start a new story? Your current story progress will be replaced.')) return;
-  crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human'}, attr: {}, diff: 1}; crStep = 0; $('crName').value = ''; renderCreator(); show('scr-create');
+  crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human',hat:'none'}, attr: {}, diff: 1}; crStep = 0; $('crName').value = ''; renderCreator(); show('scr-create');
 });
 $('crBack').addEventListener('click', openStoryMenu);
 $('crStart').addEventListener('click', () => {
   const name = ($('crName').value.trim() || 'Wanderer').slice(0, 14), c = ST_CLASSES[crSel.cls];
   PROF.story = {name, cls: crSel.cls, race: crSel.race, attr: Object.assign({}, crSel.attr), color: crSel.color, voice: crSel.voice, outfit: Object.assign({}, crSel.outfit), skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30, diff: crSel.diff == null ? 1 : crSel.diff,
-    items: {potion: 3, ether: 1}, x: 11 * ST_TILE, y: 11 * ST_TILE + 32, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false, tut: 1,
+    items: {potion: 3, ether: 1}, x: 11 * ST_TILE+32, y: 11 * ST_TILE+8, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false, tut: 1,
     map: 'world', shrine: {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64}, lost: null};
   stSave(); startStory(true);
 });
@@ -7988,6 +8116,7 @@ function stDrawMapCanvas() {
     if (t === 'I') { g.fillStyle = '#ffb35a'; g.shadowColor = '#ffb35a'; g.shadowBlur = 14; g.beginPath(); g.arc(px + 16, py + 98, 5, 0, 7); g.fill(); g.shadowBlur = 0; }
     if (t === 'K') { g.fillStyle = '#ff7a2a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 16; g.fillRect(px + 20, py + 90, 16, 10); g.shadowBlur = 0; }
   }
+  for(const I of ST_INFIRMARIES){const px=I.door[0]*ST_TILE,py=I.door[1]*ST_TILE;g.fillStyle='#aeb89f';g.fillRect(px+3,py-34,58,98);g.fillStyle='#465f56';g.beginPath();g.moveTo(px-5,py-34);g.lineTo(px+32,py-60);g.lineTo(px+69,py-34);g.fill();g.fillStyle='#293b35';g.fillRect(px+22,py+22,22,42);g.fillStyle='#e6d89e';g.fillRect(px+8,py-10,12,18);g.fillRect(px+45,py-10,10,18);g.beginPath();g.arc(px+32,py+7,8,0,Math.PI*2);g.fill();g.fillStyle='#465f56';g.beginPath();g.ellipse(px+32,py+7,3,6,.6,0,Math.PI*2);g.fill();g.textAlign='center';g.font='bold 9px sans-serif';g.fillStyle='#f2e7c9';g.fillText('INFIRMARY',px+32,py-67);g.textAlign='left';}
   ST.mapC = c;
 }
 function startStory(fresh) {
@@ -8003,9 +8132,9 @@ function startStory(fresh) {
   if (d.tut == null) { d.tut = 99; d.flags.tutDone = true; } // stories begun before the tutorial skip it
   if (d.tut > 0 && d.tut < 99 && !fresh) { ST.tut = Object.assign(stTutPos(d.tut), {seg: 0, wait: false}); }
   if (fresh) stSay([
-    ['', `You wake face-down in cold ash. You remember dying. You remember nothing before it. Only a name, scratched into the hilt of your weapon: ${d.name}.`],
-    ['', 'The sky is the color of a bruise. To the east, one village still keeps its fires lit. Everything else has gone hollow.'],
-    ['', 'Rest at Ashen Shrines (the swords in the ash) to heal. If you die, you drop your gold where you fall. Return for it, or lose it forever.'],
+    ['', `The door of Thornwake Infirmary closes gently behind you. Clean bandages cover wounds you cannot remember receiving. Healer Medra called you ${d.name}; it was the only name you could give her.`],
+    ['', 'You stand outside the infirmary beneath a pale lantern. Beyond the village walls, the ash moves like a living thing. Behind you, the healers are still tending those who came back from it.'],
+    ['', 'Rest at Ashen Shrines or infirmaries to heal. Defeat drops only 10% of your gold as recoverable Lost Embers. You keep the other 90% and all equipment.'],
     ['', 'Move with the arrow keys, WASD, the left stick or the on-screen pad. Interact with E, A or the A button.'],
   ], () => stTutStart());
   stHud(); stNetJoin(); stChatRender();
@@ -8020,11 +8149,11 @@ function stLeave(showMenu = true) {
 
 // ---- tutorial: Warden Edda walks ahead through Thornwake and stops to explain each place. Paths are tile coordinates.
 const ST_TUT = [
-  {path: [[12.8, 11.6]], lines: [['Warden Edda', 'Easy. Breathe. You died out there in the ash, and the ash spat you back. It happens here. Not often.'], ['Warden Edda', 'I am Edda, warden of Thornwake. Walk with me and I will show you how to stay alive. Follow the gold arrow, or just follow me.']]},
+  {path: [[12.8, 11.6]], lines: [['Warden Edda', 'Easy. Medra says you are fit to walk, not fit to fight a kingdom. The infirmary is behind you if the road leaves its mark.'], ['Warden Edda', 'I am Edda, warden of Thornwake. Walk with me and I will show you how to stay alive. Follow the gold arrow, or just follow me.']]},
   {path: [[12.6, 12.2]], lines: [['Warden Edda', 'An Ashen Shrine. Kneel at one (press E) to heal and to set where you wake if you die.'], ['Warden Edda', 'Die, and you drop your gold where you fell. Walk back and pick it up. Die again first, and it is gone.']]},
   {path: [[14.6, 12.2], [14.6, 12.9]], lines: [['Warden Edda', 'Pell the merchant. Potions, ethers, and trade goods. Every town buys and sells at its own prices. Buy cheap where goods are made, sell where they are wanted.']]},
   {path: [[14, 12.9], [14, 14.6]], lines: [['Warden Edda', 'Bree\'s inn. Pay to rest and heal fully, and cook meals from the fish you catch. Meals heal far more than potions in a fight.']]},
-  {path: [[14, 15.5], [16.9, 15.5]], lines: [['Warden Edda', 'The Adventurers\' Guild. They govern every road beyond the walls: the Free Guild Compact. Join them, take quests from the board inside, and climb from D-Rank to S-Rank.'], ['Warden Edda', 'Some wild lands are guild territory, members only. And the ships to far lands only carry ranked adventurers. Walk in through the door below the sign.']]},
+  {path: [[14, 15.5], [16.9, 15.5]], lines: [['Warden Edda', 'The Adventurers\' Guild. Join for ranks and political standing, if that suits you.'], ['Warden Edda', 'You can also stay independent or join a rogue fellowship. Free paths in your menu offers the same paid contracts. Travel clearance follows your level; nobody makes you sign the Compact to finish your story.']]},
   {path: [[15, 15.5], [15, 12.4], [17.3, 12.4]], lines: [['Warden Edda', 'The coach post. Coaches run between the towns for a fare. Ships sail from Saltmere, east of here, to the isles and the lands beyond, once you are strong enough.']]},
   {path: [[14.5, 12.4], [14.5, 9.2]], lines: [['Warden Edda', 'Garth\'s stables. A horse makes the road short. Buy one and press R to ride.']]},
   {path: [[14.5, 10.6], [10.6, 10.6]], lines: [['Warden Edda', 'West of here is the Thornwood. The wolves have gone hollow. Talk to Maren the Pale in the square first; she has work for you.'], ['Warden Edda', 'In a fight, pick Attack or a Skill. Items heal. Defend halves the next blows. The faster fighter dodges more. Every move you use grows stronger and evolves.'],
@@ -8081,7 +8210,7 @@ const ST_ACT_TALK = { // what Maren says at each step of the shard quest
   4: [['Maren the Pale', 'So he spoke, at the end. "The last thing holding the dark at bay." I hoped he was lying. Kings always lie.'], ['Maren the Pale', 'Listen. The Hollow Crown was forged from five shards. Ember and Frost you carry. The other three were scattered when the crown broke, so no one could ever make it whole.'], ['Maren the Pale', 'Something has been gathering them. The Tide Shard went down with a merchant ship thirty years ago, and the corsairs of the Brightwater Isles have been diving that wreck ever since.'], ['Maren the Pale', 'Their queen, Mara, wears it. Take a ship from Saltmere. Take the shard before whoever is buying them does.']],
   5: [['Maren the Pale', 'The Tide Shard is in the Brightwater Isles, around the Corsair Queen\'s neck. Saltmere\'s harbor will carry you.']],
   6: [['Maren the Pale', 'Valcourt. The Crimson Prince. Of course it was a vampire; they are the only ones patient enough for a thousand-year errand.'], ['Maren the Pale', 'Rougemarais lies across the water, a city where the sun never quite rises. Be at least level 20 before you dock there. End him and take back the map.']],
-  7: [['Maren the Pale', 'Valdris. Ignaroth. I had hoped I would be dead before anyone said those two words to me in the same breath.'], ['Maren the Pale', 'The guilds of Valdris do not let just anyone ashore. Reach C rank in the Adventurers\' Guild and level 26, then sail from Saltmere. The Wyrm is far beyond that. Grow strong in Valdris before you climb the Wyrmspine.']],
+  7: [['Maren the Pale', 'Valdris. Ignaroth. I had hoped I would be dead before anyone said those two words to me in the same breath.'], ['Maren the Pale', 'Reach level 26, then sail from Saltmere. Your deeds earn independent clearance, with no guild membership required. Grow strong in Valdris before you climb the Wyrmspine.']],
   8: [['Maren the Pale', 'Aetherfall. I used to watch the crack in the sky as a girl and think it was a star that had fallen asleep.'], ['Maren the Pale', 'Whatever waits there was the crown\'s heart. Do not let it have the shards. Do not let it have you.']],
   9: [['Maren the Pale', 'The fires are steady for the first time in my life. The sky is whole. I do not know what to do with hope, Shardbreaker. Teach me.'], ['Maren the Pale', 'But listen — shepherds in the Ashfall Dunes say the sand has split open on a fissure that breathes red light, and a crowned thing sits beside it feeding a fire with its own hand. If the world is to have one more war in it, better it ends at your hands than anyone else\'s.']],
 };
@@ -8098,13 +8227,13 @@ function stObjective() {
   if (d.ch === 4) return Object.assign({text: 'Act II: Tell Maren the Pale what the Hollow King said'}, T(14, 10));
   if (d.ch === 5) return Object.assign({text: 'Sail from Saltmere to the Brightwater Isles and take the Tide Shard from Mara, the Corsair Queen (level 12)'}, T(37, 16));
   if (d.ch === 6) return Object.assign({text: 'Sail to Rougemarais (level 20) and stop Marquis Valcourt, the Crimson Prince (level 22)'}, T(37, 16));
-  if (d.ch === 7) return Object.assign({text: !d.guild ? 'Join the Adventurers\' Guild in Thornwake: only guild members may sail to Valdris' : stRankAtLeast('C') && d.lv >= 26 ? 'Act III: Sail to Valdris and slay Ignaroth, Tyrant of the Wyrmspine (level 40)' : 'Reach guild rank C and level 26 to sail for Valdris and the Wyrm Shard'}, !d.guild || !(stRankAtLeast('C') && d.lv >= 26) ? T(17, 15) : T(37, 16));
+  if (d.ch === 7) return Object.assign({text:d.lv>=26?'Act III: Sail to Valdris and slay Ignaroth, Tyrant of the Wyrmspine (level 40)':'Reach level 26 for Valdris travel clearance. Guild membership is optional.'},T(37,16));
   if (d.ch === 8) return Object.assign({text: 'Sail to Aetherfall, the Shattered Heavens, and end the Unmaker (level 55)'}, T(37, 16));
   if (d.flags.unmaker && !d.flags.demonking) return Object.assign({text: 'Epilogue: a fissure breathes red light in the Ashfall Dunes. Malduun, the Demon King, waits on his throne (level 60)'}, T(43, 7));
-  if (!d.guild) return Object.assign({text: 'Join the Adventurers\' Guild in Thornwake'}, T(17, 15));
+  if (!d.guild) return {text:'Explore freely, hunt world bosses or take independent contracts from Free paths & rogue guilds.'};
   const a = (d.guild.quests || []).map(a => stGQ(a.id)).find(Boolean);
   if (a) return Object.assign({text: `Guild quest: ${a.name}. ${a.text}`}, T(17, 15));
-  return Object.assign({text: stRankAtLeast('C') && d.lv >= 26 ? 'Sail from Saltmere to Valdris, the Guild Commonwealth' : 'Take quests from the guild board and climb the ranks'}, stRankAtLeast('C') && d.lv >= 26 ? T(37, 16) : T(17, 15));
+  return Object.assign({text: stTravelRankAtLeast('C') && d.lv >= 26 ? 'Sail from Saltmere to Valdris, the Guild Commonwealth' : 'Take contracts from any board or the independent paths menu'}, stTravelRankAtLeast('C') && d.lv >= 26 ? T(37, 16) : T(17, 15));
 }
 function stObjArrow(now) { // a gold chevron circling you, pointing the way
   const d = stData(), o = stObjective(); if (!o || o.x == null || o.map !== d.map) return;
@@ -8136,6 +8265,40 @@ function stMiniDraw(now) {
   const px = (ptx - x0) * pxs, py = (pty - y0) * pxs; g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.arc(px, py, 4, 0, 7); g.fill(); g.stroke();
   g.strokeStyle = 'rgba(255,215,94,.6)'; g.lineWidth = 2; g.strokeRect(1, 1, W - 2, H - 2);
 }
+function stMapPanel(){
+  if(!ST.on||!['walk','menu'].includes(ST.mode))return;
+  const d=stData(),m=stSystemPanel('Atlas of the Vale'),base=stMiniBase(d.map),grid=stGrid(),D=ST_DUNGEONS[d.map];
+  m.classList.add('atlas');m.style.setProperty('--atlas-width',(d.mapPanelSize||900)+'px');
+  m.appendChild(el('p','',`${D?.name||'The Ashen Vale'} · White: you · Gold: objective · Green: infirmary · Dashed amber: region borders · Red rings: enemy home boundaries. Scroll to pan when zoomed.`));
+  const controls=el('div','atlasControls'),size=document.createElement('input'),zoom=document.createElement('input'),show=document.createElement('input');
+  size.type='range';size.min=360;size.max=1100;size.step=10;size.value=d.mapPanelSize||900;size.setAttribute('aria-label','Map panel size');
+  zoom.type='range';zoom.min=1;zoom.max=3;zoom.step=.25;zoom.value=1;zoom.setAttribute('aria-label','Map zoom');
+  show.type='checkbox';show.checked=true;show.setAttribute('aria-label','Show region and enemy boundaries');
+  for(const[text,input]of[['Map size',size],['Zoom',zoom],['Boundaries',show]]){const label=el('label','',text);label.appendChild(input);controls.appendChild(label);}
+  const view=el('div','atlasViewport'),cv=document.createElement('canvas');cv.id='stAtlasCanvas';cv.setAttribute('aria-label','Area map with region boundaries');view.appendChild(cv);m.append(controls,view);
+  const draw=()=>{
+    if(!cv.isConnected)return;const w=Math.max(100,Math.round(view.clientWidth*Number(zoom.value))),h=Math.round(w*base.height/base.width),ratio=Math.min(devicePixelRatio||1,2);cv.width=Math.round(w*ratio);cv.height=Math.round(h*ratio);cv.style.width=w+'px';cv.style.height=h+'px';
+    const g=cv.getContext('2d');g.scale(ratio,ratio);g.imageSmoothingEnabled=false;g.drawImage(base,0,0,w,h);const sx=w/base.width,sy=h/base.height;
+    if(show.checked){
+      g.strokeStyle='rgba(245,199,108,.55)';g.lineWidth=1;g.setLineDash([3,3]);g.beginPath();
+      if(d.map==='world')for(let y=0;y<base.height;y++)for(let x=0;x<base.width;x++){const t=grid[y][x],norm=t==='='?'.':t;if(x+1<base.width&&norm!==(grid[y][x+1]==='='?'.':grid[y][x+1])){g.moveTo((x+1)*sx,y*sy);g.lineTo((x+1)*sx,(y+1)*sy);}if(y+1<base.height&&norm!==(grid[y+1][x]==='='?'.':grid[y+1][x])){g.moveTo(x*sx,(y+1)*sy);g.lineTo((x+1)*sx,(y+1)*sy);}}
+      g.stroke();
+      for(const z of D?.zones||[]){g.strokeStyle=z.safe?'#9ad3aa':'#ebbd73';g.strokeRect(z.r[0]*sx,z.r[1]*sy,(z.r[2]-z.r[0]+1)*sx,(z.r[3]-z.r[1]+1)*sy);}
+      g.strokeStyle='#e99781';for(const f of ST.foes.filter(f=>f.alive)){g.beginPath();g.ellipse(f.home[0]/ST_TILE*sx,f.home[1]/ST_TILE*sy,ST_HUNTER_LEASH/ST_TILE*sx,ST_HUNTER_LEASH/ST_TILE*sy,0,0,7);g.stroke();}g.setLineDash([]);
+    }
+    const text=(label,x,y,color='#f5e4be')=>{g.font='600 12px '+getComputedStyle(document.body).fontFamily;g.textAlign='center';g.lineWidth=3;g.strokeStyle='#18211b';g.strokeText(label,x,y);g.fillStyle=color;g.fillText(label,x,y);};
+    if(d.map==='world'){for(const t of['T','g','b','a','*']){let xsum=0,ysum=0,n=0;grid.forEach((row,y)=>[...row].forEach((v,x)=>{if(v===t){xsum+=x+.5;ysum+=y+.5;n++;}}));if(n)text((ST_REGION[t]||t)+` · Lv ${ST_ZONE_LV[t]||1}`,xsum/n*sx,ysum/n*sy);}
+      for(const C of ST_INFIRMARIES){const x=(C.door[0]+.5)*sx,y=(C.door[1]+.5)*sy;g.fillStyle='#a8dfb6';g.fillRect(x-4,y-4,8,8);text('Infirmary',x,y-9,'#c5f0cc');}
+    }else for(const z of D?.zones||[])text(z.name+` · Lv ${z.lv}`,((z.r[0]+z.r[2]+1)/2)*sx,((z.r[1]+z.r[3]+1)/2)*sy);
+    const o=stObjective();if(o?.map===d.map&&o.x!=null)text('★',o.x/ST_TILE*sx,o.y/ST_TILE*sy,'#ffdf75');
+    g.fillStyle='#fff';g.strokeStyle='#172018';g.lineWidth=2;g.beginPath();g.arc(d.x/ST_TILE*sx,d.y/ST_TILE*sy,5,0,7);g.fill();g.stroke();g.strokeStyle='#d6b973';g.lineWidth=3;g.strokeRect(1.5,1.5,w-3,h-3);
+  };
+  size.addEventListener('input',()=>{m.style.setProperty('--atlas-width',size.value+'px');draw();});size.addEventListener('change',()=>{d.mapPanelSize=Number(size.value);stSave();});zoom.addEventListener('input',draw);show.addEventListener('change',draw);
+  const close=el('button','','Close map');close.addEventListener('click',stCloseMenu);m.appendChild(close);draw();
+  const observer=new ResizeObserver(()=>{if(cv.isConnected)draw();else observer.disconnect();});observer.observe(view);
+}
+$('stMini').setAttribute('role','button');$('stMini').setAttribute('tabindex','0');$('stMini').setAttribute('aria-label','Open area map');$('stMini').title='Click to enlarge and resize the map';
+$('stMini').addEventListener('click',stMapPanel);$('stMini').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopImmediatePropagation();stMapPanel();}});
 
 // ---- dialogue: lines of [speaker, text]; an optional last entry with choices
 function stSay(lines, onDone, choices) {
@@ -8163,7 +8326,7 @@ function stShowLine() {
 // ---- the world: movement, interaction and random encounters
 const stTileAt = (x, y) => { const tx = Math.floor(x / ST_TILE), ty = Math.floor(y / ST_TILE), r = stGrid()[ty]; return (r && r[tx]) || '#'; };
 const stRockAt = (x, y) => ST_ROCKS.find(r => r.x === Math.floor(x / ST_TILE) && r.y === Math.floor(y / ST_TILE));
-const stBlocked = (x, y) => { const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && stM(d.mount) && stM(d.mount).fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && stM(d.mount) && stM(d.mount).fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
+const stBlocked = (x, y) => { const grid=stGrid();if(!Number.isFinite(x)||!Number.isFinite(y)||x<12||y<12||x>grid[0].length*ST_TILE-12||y>grid.length*ST_TILE-12)return true;const d = stData(), t = stTileAt(x, y), dun = d.map !== 'world'; if (!dun && stRockAt(x, y)) return true; if (dun && ST_DUNGEONS[d.map].outdoor && d.riding && stM(d.mount) && stM(d.mount).fly && t === '#') return false; if (dun) return ST_DUNGEONS[d.map].outdoor ? '#HIAaLYWJ^'.includes(t) : '#fbtkjHq'.includes(t); if (d.riding && stM(d.mount) && stM(d.mount).fly && (t === '~' || t === '^')) return false; return ST_BLOCKED.has(t) || t === 'G'; };
 function stLoadScreen(key) { // a short title card while you step into a new place
   const D = ST_DUNGEONS[key], box = $('stLoad'); if (!box || !ST.on) return;
   const kind = key === 'world' ? 'The open road' : D.home ? 'Home' : key === 'guildhall' ? 'Guild hall' : D.land ? 'New land' : D.city ? 'City' : D.outdoor ? 'Islands' : 'Dungeon';
@@ -8264,7 +8427,7 @@ function stInteract(pre) {
   else if (it.kind === 'plot') { if (!d.farm) stSay([['', 'A plowed field with a FOR SALE sign. Farmer Odo in Harrowfield holds the deed.']]); else stPlot(it.key); }
   else if (it.kind === 'spouse') stSpouseHome();
   else if (it.kind === 'kid') stKidTalk(it.i);
-  else if (it.kind === 'board') { if (d.guild) stGuildBoard(); else stSay([['', 'Contracts, bounties and pleas, pinned three deep. Only guild members may take them. Talk to Clerk Lyra at the desk.']]); }
+  else if (it.kind === 'board') stGuildBoard(!d.guild);
   else if (it.kind === 'mine') {
     const r = it.r, need = ST_ORE_LV[r.ore];
     if (!d.pickaxe) stSay([['', `A rock seamed with ${ST_MATS[r.ore][0].toLowerCase()}. You need a pickaxe. Brann the Smith in Saltmere sells them.`]]);
@@ -8278,14 +8441,14 @@ function stInteract(pre) {
       ['Captain Isolde', `You have ${d.gold} gold.`]], null,
       Object.keys(ST_PORTS).filter(k => k !== d.map).map(k => { const P = ST_PORTS[k]; return [`Sail to ${P.name} (${fare(k)} gold)${P.lv ? `, level ${P.lv}+` : ''}${P.rank ? `, ${P.rank}-Rank` : ''}`, () => {
         if (P.lv && d.lv < P.lv) return stSay([['Captain Isolde', `${P.name}? At your level? No. I don\'t ferry corpses. Come back when you\'re level ${P.lv}. (You are level ${d.lv}.)`]]);
-        if (P.rank && !stRankAtLeast(P.rank)) return stSay([['Captain Isolde', `${P.name} is Guild Compact land. Only ${P.rank}-Rank adventurers or higher may land there. ${d.guild ? `You are ${d.guild.rank}-Rank.` : 'You are not even a guild member.'} Climb the ranks at the Adventurers\' Guild.`]]);
+        if (P.rank && !stTravelRankAtLeast(P.rank)) return stSay([['Captain Isolde', `${P.name} needs ${P.rank} clearance: guild rank ${P.rank} or level ${ST_FREE_RANK_LEVEL[P.rank]}. Membership is not required.`]]);
         if (d.gold < fare(k)) return stSay([['Captain Isolde', 'No coin, no passage. The sea doesn\'t take favors.']]);
         d.gold -= fare(k); stSail(k, P.at[0], P.at[1]); }]; }).concat([['Not today', null]]));
   }
   else if (it.kind === 'coach' && it.c) {
     const here = it.c, cost = c => Math.round(stPrice(Math.max(8, Math.round(Math.hypot(c.x - here.x, c.y - here.y) * .9))) * (stEdict() === 'road' && d.guild ? .5 : 1));
     stSay([['Coach Driver', `Coach leaves on the hour, ash or no ash. Where to? You have ${d.gold} gold.`]], null,
-      ST_COACHES.filter(c => c !== here).map(c => [`${c.name} (${cost(c)} gold)`, () => { if (c.id === 'dunes' && !d.guild) return stSay([['Coach Driver', 'The Waystation is guild territory. Members only. Join the Guild in Thornwake first.']]); if (d.gold < cost(c)) return stSay([['Coach Driver', 'Fare first. The horses don\'t eat promises.']]); d.gold -= cost(c); stSail('world', c.x, c.y + 1, {land: true, label: `Riding the coach to ${c.name}`, arrive: c.name}); }]).concat([['Not today', null]]));
+      ST_COACHES.filter(c => c !== here).map(c => [`${c.name} (${cost(c)} gold)`, () => { if (d.gold < cost(c)) return stSay([['Coach Driver', 'Fare first. The horses don\'t eat promises.']]); d.gold -= cost(c); stSail('world', c.x, c.y + 1, {land: true, label: `Riding the coach to ${c.name}`, arrive: c.name}); }]).concat([['Not today', null]]));
   }
   else if (it.kind === 'crystal') {
     d.crystals = d.crystals || [];
@@ -8307,8 +8470,8 @@ function stInteract(pre) {
   else if (it.kind === 'door') {
     const D = ST_DUNGEONS[it.key], need = ST_MAP_LV[it.key] || 1;
     if (d.lv < need) return stSay([['', `${D.name}. Required level: ${need}. You are level ${d.lv}. Whatever waits in there would make short work of you. Grow stronger first.`]]);
-    stSay([['', D.lit ? `The iron-bound doors of ${D.name} stand ajar. Firelight inside, and the smell of black candles.` : `Stairs fall away into the dark. A smell of old stone and older death. This is ${D.name}.`]], null,
-      [[D.lit ? 'Enter' : 'Descend', () => stEnterMap(it.key, 2, 2)], ['Turn back', null]]);
+    stSay([['', D.infirmary?`${D.name}. Fresh linen, warm lamplight and the scent of healing herbs. Treatment is free.`:D.lit ? `The iron-bound doors of ${D.name} stand ajar. Firelight inside, and the smell of black candles.` : `Stairs fall away into the dark. A smell of old stone and older death. This is ${D.name}.`]], null,
+      [[D.lit ? 'Enter' : 'Descend', () => stEnterMap(it.key,D.infirmary?6:2,D.infirmary?6:2)], ['Turn back', null]]);
   } else if (it.kind === 'exit') { const D = ST_DUNGEONS[d.map]; if (D.home) { stEnterMap('world', D.exit[0], D.exit[1] + 1); return; } stSay([['', 'Grey light above. The surface.']], null, [['Climb out', () => stEnterMap(D.exitMap || 'world', D.exit[0], D.exit[1] + 1)], ['Stay', null]]); }
   else if (it.kind === 'boss') {
     const b = it.b;
@@ -8325,6 +8488,8 @@ function stTalk(id) {
   stTalkBody(id);
 }
 function stTalkBody(id) {
+  const clinic=ST_INFIRMARIES.find(I=>I.healer===id);
+  if(clinic)return stSay([[clinic.nurse,'No one is turned away here. We can mend flesh and restore mana. What the ash takes from your memory is harder to replace.']],null,[['Receive treatment',()=>{const d=stData();d.wounds=null;const s=stStats();d.hp=s.hp;d.mp=s.mp;d.shrine={map:d.map,x:6*ST_TILE+32,y:6*ST_TILE+32};stSave();stHud();sfx('respawn');stSay([[clinic.nurse,'Your wounds are closed, your strength restored. Rest here whenever you need us. No payment is required.']]);}],['Change clothes',()=>setTimeout(stWardrobe,0)],['Leave',null]]);
   if(id==='sanctumherald')return stSay([['Iven','Three guardians keep the Ashen Seat. Defeat them, and let them choose whether you deserve their loyalty. This throne is not inherited. It is earned.']],null,[['The Ashen Dominion',()=>setTimeout(stDominionMenu,0)],['Bloodlines & spellcraft',()=>setTimeout(stProgressMenu,0)],['Farewell',null]]);
   const d = stData();
   if (id === 'elder') {
@@ -8517,13 +8682,20 @@ function stTalkBody(id) {
       given ? [['Farewell', null]] : [[`Accept the ruler's token`, () => { d.flags['gift_' + key] = true; d.gold += 150; d.items.potion += 2; sfx('pickup'); stSave(); stSay([['', '150 gold and 2 potions. ' + K.gift]]); }], ['Farewell', null]]);
   }
 }
-function stHunters(dt) { // dungeon enemies wander home, and charge when they see you
+const ST_HUNTER_DETECT=144,ST_HUNTER_LOSE=208,ST_HUNTER_LEASH=192;
+function stHunterSight(x,y,tx,ty){const steps=Math.ceil(Math.hypot(tx-x,ty-y)/16);for(let i=1;i<steps;i++){const px=x+(tx-x)*i/steps,py=y+(ty-y)*i/steps;if(stTileAt(px,py)==='#'||stBlocked(px,py))return false;}return true;}
+function stHunterZone(x,y){return ST_DUNGEONS[stData().map]?.zones?.find(z=>x/ST_TILE>=z.r[0]&&x/ST_TILE<z.r[2]+1&&y/ST_TILE>=z.r[1]&&y/ST_TILE<z.r[3]+1)||null;}
+function stHunters(dt) { // compact detection, solid-wall sight and strict home/region leashes
   const d = stData();
   for (const f of ST.foes) {
     if (!f.alive) continue;
-    const dist = Math.hypot(d.x - f.x, d.y - f.y), tx = dist < 300 ? d.x : f.home[0], ty = dist < 300 ? d.y : f.home[1], a = Math.atan2(ty - f.y, tx - f.x);
+    const dist=Math.hypot(d.x-f.x,d.y-f.y),homeDist=Math.hypot(f.x-f.home[0],f.y-f.home[1]),playerHome=Math.hypot(d.x-f.home[0],d.y-f.home[1]),zone=stHunterZone(d.x,d.y),sameZone=zone===stHunterZone(...f.home);
+    if(f.returning&&homeDist<8)f.returning=false;
+    if(f.aggro&&(dist>ST_HUNTER_LOSE||playerHome>ST_HUNTER_LEASH||homeDist>ST_HUNTER_LEASH||!sameZone||zone?.safe||!stHunterSight(f.x,f.y,d.x,d.y))){f.aggro=false;f.returning=true;}
+    if(!f.aggro&&!f.returning&&sameZone&&!zone?.safe&&dist<ST_HUNTER_DETECT&&playerHome<ST_HUNTER_LEASH&&stHunterSight(f.x,f.y,d.x,d.y))f.aggro=true;
+    const tx=f.aggro?d.x:f.home[0],ty=f.aggro?d.y:f.home[1],a=Math.atan2(ty-f.y,tx-f.x);
     if (Math.hypot(tx - f.x, ty - f.y) > 4) { const nx = f.x + Math.cos(a) * 95 * dt, ny = f.y + Math.sin(a) * 95 * dt; if (!stBlocked(nx, f.y)) f.x = nx; if (!stBlocked(f.x, ny)) f.y = ny; f.walk = (f.walk || 0) + 3; f.face = Math.cos(a) < 0 ? Math.PI : 0; }
-    if (dist < 44 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : d.map === 'keep' ? 'C' : d.map === 'duskwatch' ? 'a' : d.map === 'isles' ? ',' : d.map === 'stair' ? 'L' : d.map === 'rouge' || d.map === 'vcrypt' ? 'R' : ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].sky || ':'); return; }
+    if (f.aggro&&dist < 36 && ST.mode === 'walk') { ST.fighting = f; stStartBattle(f.group.slice(), null, d.map === 'crypt' ? '*' : d.map === 'keep' ? 'C' : d.map === 'duskwatch' ? 'a' : d.map === 'isles' ? ',' : d.map === 'stair' ? 'L' : d.map === 'rouge' || d.map === 'vcrypt' ? 'R' : ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].sky || ':'); return; }
   }
 }
 function stWalk(dt) {
@@ -8538,8 +8710,8 @@ function stWalk(dt) {
   if (!ST.moving) return;
   const sp = 230 * (d.riding && stM(d.mount) ? stM(d.mount).speed : 1) * dt / Math.max(1, m), nx = d.x + dx * sp, ny = d.y + dy * sp;
   const rule = stAreaRule(nx, ny + 14), here = stAreaRule(d.x, d.y + 14);
-  if (rule && !stRankAtLeast(rule.rank) && !(here && here.name === rule.name)) { // guild territory
-    if (!ST.ruleT || performance.now() - ST.ruleT > 3500) { ST.ruleT = performance.now(); stCallout(`Guild territory: ${rule.name}. ${rule.rank === 'D' ? 'Members only. Join at the Guild Hall in Thornwake.' : `${rule.rank}-Rank or higher.`}`, '#ffd75e'); }
+  if (rule && !stTravelRankAtLeast(rule.rank) && !(here && here.name === rule.name)) {
+    if (!ST.ruleT || performance.now() - ST.ruleT > 3500) { ST.ruleT = performance.now(); stCallout(`${rule.name}: ${rule.rank} clearance or level ${ST_FREE_RANK_LEVEL[rule.rank]}. No membership required.`, '#ffd75e'); }
     ST.moving = false; return;
   }
   if (!stBlocked(nx, d.y + 14)) d.x = nx; if (!stBlocked(d.x, ny + 14)) d.y = ny;
@@ -8569,10 +8741,10 @@ function stWalk(dt) {
 
 // ---- turn-based battles
 const ST_DIFFS = [ // how the Vale treats you, chosen at creation, changeable at any Ashen Shrine
-  {name: 'Story', desc: 'Enemies are softer and hit lighter. For seeing the tale through.', hp: .75, atk: .75},
-  {name: 'Adventurer', desc: 'The Vale as it is. The intended way to play.', hp: 1, atk: 1},
-  {name: 'Veteran', desc: 'Enemies hit harder and take more killing. Rewards are unchanged.', hp: 1.3, atk: 1.3},
-  {name: 'Soulslike', desc: 'The Vale does not want you here. Every fight can be your last. (The Lost Embers rule — your gold stays where you fall — applies in every mode.)', hp: 1.75, atk: 1.75},
+  {name: 'Story', desc: 'Easy: softer enemies, standard rewards. Defeat drops only 10% of gold.', hp: .75, atk: .75,reward:1},
+  {name: 'Adventurer', desc: 'Normal: standard enemies and rewards. Defeat drops only 10% of gold.', hp: 1, atk: 1,reward:1},
+  {name: 'Veteran', desc: 'Harder enemies. Earn 35% more combat/contract XP and gold, including boss bounties. Defeat drops only 10% of gold.', hp: 1.3, atk: 1.3,reward:1.35},
+  {name: 'Soulslike', desc: 'Brutal enemies. Earn 75% more combat/contract XP and gold, including boss bounties. Defeat drops only 10% of gold.', hp: 1.75, atk: 1.75,reward:1.75},
 ];
 const stDiff = () => { const n = stData().diff; return ST_DIFFS[typeof n === 'number' ? n : 1] || ST_DIFFS[1]; };
 function stStartBattle(foes, bossId, tile) {
@@ -8980,6 +9152,7 @@ function stCalloutDraw(dt) {
 }
 const SK_SHOT = {fireball: 'fire', frost: 'ice', venom: 'venom', drain: 'dark', rain: 'arrow', lightning: 'holy', bonespear: 'dark', thornlash: 'venom'};
 Object.assign(SK_SHOT,{emberspark:'fire',flamelance:'fire',cindertempest:'fire',eclipse:'dark',crownstars:'holy'});
+Object.assign(SK_SHOT,{dawnarc:'holy',icebloom:'ice',stormring:'holy',duskthread:'dark',starcircuit:'holy',twilightrefrain:'dark',concordburst:'holy'});
 const SK_FX = {flash: 'afterimage', crush: 'hammer', bloodfeast: 'bite', fireball: 'explode', frost: 'shatter', lightning: 'zap', rain: 'rain', venom: 'cloud', drain: 'tendril', strike: 'heavyslash'};
 const SK_COLOR = {ward: '#8fd4ff', bonespear: '#e8e2d0', wither: '#8ac34a', flurry: '#ffd75e', thornlash: '#6be08a', quake: '#c9a26a', flash: '#cfefff', crush: '#fff3c9', bloodfeast: '#c0102a', wolfform: '#cfd8e0', howl: '#c0102a', mist: '#c08a9a', fireball: '#ff7a2a', frost: '#9fe6ff', lightning: '#c8b8ff', drain: '#b06bff', venom: '#9cff3a', rain: '#fff3c9', strike: '#ffffff'};
 function stLog(t) { if (ST.battle) ST.battle.log = t; $('stLog').textContent = t; }
@@ -9034,6 +9207,8 @@ function stRenderBattle(picking) {
 }
 Object.assign(SK_FX,{emberspark:'explode',flamelance:'pillar',cindertempest:'rain',eclipse:'tendril',crownstars:'shards'});
 Object.assign(SK_COLOR,{emberspark:'#e3a464',flamelance:'#ffbd73',cindertempest:'#dc8b67',eclipse:'#a58bd7',crownstars:'#e6d5a2'});
+Object.assign(SK_FX,{dawnarc:'zap',auroramend:'shards',icebloom:'shatter',stormring:'zap',duskthread:'tendril',reverieward:'shards',starcircuit:'rain',twilightrefrain:'afterimage',concordburst:'explode'});
+Object.assign(SK_COLOR,{dawnarc:'#f3d997',auroramend:'#a8dec9',icebloom:'#abdce8',stormring:'#beb5ea',duskthread:'#a08acb',reverieward:'#c2c8ea',starcircuit:'#e2d5ae',twilightrefrain:'#b599d2',concordburst:'#e3c7f0'});
 function stPick(fn) { const alive = ST.battle.foes.filter(f => f.hp > 0); if (alive.length === 1) fn(alive[0]); else stRenderBattle(fn); }
 function stPlayerHit(f, base, kind, extra, color) {
   const sk = ST.curSkill || 'attack', rk = stRank(sk), beam = kind === 'mag' && rk >= 2 && ST_BEAMS[sk];
@@ -9092,8 +9267,27 @@ function stUseSkill(id) {
   if (S.all) {
     d.mp -= COST; let total = 0, left = 0; b.turn = 'anim'; stRenderBattle(); stAnim('p', S.kind === 'mag' ? 'cast' : 'lunge');
     for (const f of b.foes) if (f.hp > 0) {
-      const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def); total += dm; left++;
-      ST.nextShot = SK_SHOT[id]; stShot('p', f.id, SK_COLOR[id] || '#fff', 9, () => { if (id === 'lightning') stEffect('chain', f.id, SK_COLOR[id], CPOW, b.foes.filter(x => x.hp > 0).map(x => x.id)); if (Math.random() < stDodgeChance(f.spd, s.spd, -.02)) { stDodgeFx(f.id, f.name); if (--left === 0) setTimeout(stEndTurn, 250); return; } const dl = Math.min(dm, f.hp); f.hp = Math.max(0, f.hp - dm); f.flash = .25; if (f.hp <= 0) { f.deadT = 0; stGore(f.id, 26, true); } stEffect(SK_FX[id] || 'slash', f.id, SK_COLOR[id] || '#fff', CPOW); if (S.kind !== 'mag') { stGore(f.id, 8); if (f.hp > 0) stWound(f.id, f, 'phys', false, stRank(id), false); } stAnim(f.id, 'hurt'); stBurst(f.id, SK_COLOR[id] || '#fff', 10); stNum(f.id, dl); if (--left === 0) setTimeout(stEndTurn, 250); });
+      const dm = stDmg(power, S.kind === 'mag' ? f.def * .5 : f.def), strikes=S.twice?2:1; total += dm*strikes; left++;
+      const hit=(remaining)=>{
+        ST.nextShot=SK_SHOT[id];
+        stShot('p',f.id,SK_COLOR[id]||'#fff',9,()=>{
+          if(MAINT.closed)return;
+          if(id==='lightning')stEffect('chain',f.id,SK_COLOR[id],CPOW,b.foes.filter(x=>x.hp>0).map(x=>x.id));
+          if(!S.sure&&Math.random()<stDodgeChance(f.spd,s.spd,-.02))stDodgeFx(f.id,f.name);
+          else{
+            const dl=Math.min(dm,f.hp);f.hp=Math.max(0,f.hp-dm);f.flash=.25;
+            if(f.hp<=0){f.deadT=0;stGore(f.id,26,true);}
+            if(S.burn)f.burn=2;if(S.poison)f.poison=3;
+            if(S.slow&&f.hp>0&&Math.random()<(S.slowP||.5)){f.frozen=1;stNum(f.id,'Frozen','#9fe6ff');}
+            stEffect(SK_FX[id]||'slash',f.id,SK_COLOR[id]||'#fff',CPOW);
+            if(S.kind!=='mag'){stGore(f.id,8);if(f.hp>0)stWound(f.id,f,'phys',false,stRank(id),false);}
+            stAnim(f.id,'hurt');stBurst(f.id,SK_COLOR[id]||'#fff',10);stNum(f.id,dl);
+          }
+          if(remaining>1&&f.hp>0)setTimeout(()=>{if(!MAINT.closed)hit(remaining-1);},160);
+          else if(--left===0)setTimeout(stEndTurn,250);
+        });
+        ST.nextShot=null;
+      };hit(strikes);
     }
     ST.nextShot = null; sfx(S.kind === 'mag' ? 'zap' : 'shot'); stLog(`${S.name} hits every enemy for ${total} total damage.`); ST.sub = null; return;
   }
@@ -9256,21 +9450,22 @@ function stEndBattle(result) {
   const done = () => { $('stBattle').hidden = true; ST.battle = null; ST.mode = 'walk'; musicForce(stMapSong()); stHud(); stSave(); };
   if (result === 'fled') { if (ST.fighting) { const f = ST.fighting; f.x = f.home[0]; f.y = f.home[1]; ST.fighting = null; } return setTimeout(done, 500); }
   if (result === 'lost') {
-    const s = stStats(), lostGold = d.gold;
-    d.lost = lostGold > 0 ? {map: d.map, x: d.x, y: d.y, gold: lostGold} : null; d.gold = 0;
+    const s = stStats(), lostGold = Math.floor(Math.max(0,d.gold)*.1);
+    d.lost = lostGold > 0 ? {map: d.map, x: d.x, y: d.y, gold: lostGold} : null; d.gold -= lostGold;
     d.wounds = null; d.hp = s.hp; d.mp = s.mp; $('stBattle').hidden = true; ST.battle = null; musicForce(stMapSong());
     const sh = d.shrine || {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
     stEnterMap(sh.map, Math.floor(sh.x / ST_TILE), Math.floor(sh.y / ST_TILE)); d.x = sh.x; d.y = sh.y; ST.cam.x = d.x; ST.cam.y = d.y;
-    return stSay([['', 'YOU PERISHED'], ['', 'You wake at the shrine, gasping, ash in your mouth.' + (lostGold ? ` Your ${lostGold} gold lies where you fell, as Lost Embers. Die again before you reach it and it is gone.` : '')]], () => stSave());
+    return stSay([['', 'YOU PERISHED'], ['', `You wake at the shrine. You kept ${d.gold} gold and all your equipment.` + (lostGold ? ` Only ${lostGold} gold (10%) lies where you fell as recoverable Lost Embers. A second defeat replaces that dropped pouch, not the money you kept.` : ' Your small purse lost no gold.')]], () => stSave());
   }
   if (ST.fighting) { ST.fighting.alive = false; ST.fighting = null; }
   if (d.spouse) { const s0 = stStats(); d.hp = Math.min(s0.hp, d.hp + Math.round(s0.hp * .1)); } // your spouse tends your wounds
   d.kills = d.kills || {}; for (const f of b.foes) d.kills[f.key] = (d.kills[f.key] || 0) + 1;
-  const rb = d.race === 'human' || !d.race ? 1.1 : 1, xp = Math.round(b.foes.reduce((a, f) => a + f.xp, 0) * rb * (stHasTrait('secondsight') ? 1.1 : 1)), gold = Math.round(b.foes.reduce((a, f) => a + f.gold, 0) * rb);
+  const rb = d.race === 'human' || !d.race ? 1.1 : 1,reward=b.diff.reward||1, xp = Math.round(b.foes.reduce((a, f) => a + f.xp, 0) * rb * (stHasTrait('secondsight') ? 1.1 : 1)*reward), gold = Math.round(b.foes.reduce((a, f) => a + f.gold, 0) * rb*reward);
+  d.lastSpoils={id:b.bossId,xp,gold,reward};
   const coopN = (b.coop || []).length, xpB = Math.round(xp * .15 * coopN); if (coopN) { d.xp += xpB; }
   d.xp += xp; d.gold += gold; sfx('levelup');
   const lines = [['', `Victory! You earn ${xp} XP and ${gold} gold.` + (coopN ? ` Party bonus: +${xpB} XP.` : '')]];
-  if (!b.bossId && d.guild) { const zk = stZoneKey(); for (const a of d.guild.quests || []) { const q = stGQ(a.id); if (q && q.kind === 'hunt' && q.zone === zk && a.prog < q.need) { a.prog++; lines.push(['', `Guild quest "${q.name}": ${a.prog} of ${q.need}.` + (a.prog >= q.need ? ' Turn it in at a guild hall.' : '')]); } } }
+  if (!b.bossId) { const zk = stZoneKey();for(const g of[d.guild,d.freeProgress].filter(Boolean))for (const a of g.quests || []) { const q = stGQ(a.id); if (q && q.kind === 'hunt' && q.zone === zk && a.prog < q.need) { a.prog++; lines.push(['', `Contract "${q.name}": ${a.prog} of ${q.need}.` + (a.prog >= q.need ? ' Turn in at its contract board.' : '')]); } } }
   if (b.foes.some(f => f.key === 'guard')) { stRep(stTownHere(), -25); d.crime = (d.crime || 0) + 60; d.align = clamp((d.align || 0) - 2, -10, 10); ST.guardCd = 40; lines.push(['', `The guards lie still in the road. Your bounty climbs to ${d.crime} gold. Every watchman in the vale knows your face now.`]); }
   if (!b.bossId && d.bounty && b.tile === ST_BOUNTIES.find(x => x.id === d.bounty.id).tile && d.bounty.prog < ST_BOUNTIES.find(x => x.id === d.bounty.id).need) {
     const B = ST_BOUNTIES.find(x => x.id === d.bounty.id); d.bounty.prog++; lines.push(['', `Contract "${B.name}": ${d.bounty.prog} of ${B.need}.` + (d.bounty.prog >= B.need ? ' Return to Guildmaster Oskar.' : '')]);
@@ -9390,7 +9585,7 @@ function stOpenMenu() {
     m.append(el('h3', '', 'Bonds'), el('p', '', (d.spouse ? `Married to ${stNpcName(d.spouse)}. ` : d.romance ? `Courting ${stNpcName(d.romance)}. ` : '') + (known.length ? known.map(([k, b]) => `${stNpcName(k)}: ${stBondName(k)} (${Math.round(b.pts)})`).join(' · ') : 'No bonds yet. Talk to people every day, give gifts, and spend time with them. Press ♥ while talking to someone.')));
     if (d.flags.liora && ST_SOCIAL.liora && !(d.companion === 'liora' && d.lv >= ST_COMP_LV) && false) { const lb = el('button', '', '♥ Talk with Liora'); lb.addEventListener('click', () => { stCloseMenu(); stBondDaily('liora'); stSocial('liora'); }); m.appendChild(lb); }
     const TAB = {Status: 'Hero', Reputation: 'Quests', Bonds: 'Bonds', Abilities: 'Hero', Wounds: 'Hero', Alignment: 'Hero', Mounts: 'Hero', Gear: 'Hero', 'Crafted gear': 'Hero', Quest: 'Quests', 'Side stories': 'Quests', Contract: 'Quests', Bag: 'Bag', Materials: 'Bag', Cargo: 'Bag', Professions: 'Skills', Guild: 'Guild'};
-    const g = d.guild; m.append(el('h3', '', 'Guild'), el('p', '', g ? `${g.rank}-Rank of the Free Guild Compact. Standing ${g.pts}${ST_RANK_PTS[g.rank] ? ` of ${ST_RANK_PTS[g.rank]} for your next exam` : ''}. Edict in force: ${ST_EDICTS[stEdict()][0]} (${ST_EDICTS[stEdict()][1]}). Active quests: ${(g.quests || []).map(a => stGQ(a.id) && stGQ(a.id).name).filter(Boolean).join(', ') || 'none'}.` : 'Not a member. Join at the Guild Hall in Thornwake to travel guild territory and take paid quests.'));
+    const g = d.guild; m.append(el('h3', '', 'Guild'), el('p', '', g ? `${g.rank}-Rank of the Free Guild Compact. Standing ${g.pts}${ST_RANK_PTS[g.rank] ? ` of ${ST_RANK_PTS[g.rank]} for your next exam` : ''}. Edict in force: ${ST_EDICTS[stEdict()][0]} (${ST_EDICTS[stEdict()][1]}). Active quests: ${(g.quests || []).map(a => stGQ(a.id) && stGQ(a.id).name).filter(Boolean).join(', ') || 'none'}.` : `Guild membership is optional. ${ST_ROGUE_GUILDS[d.rogueGuild]?.[0]||'Independent adventurer'} · ${stFreeRank()} travel clearance. Open Free paths & rogue guilds for paid contracts.`));
     let cur = 'Hero'; const kids = [...m.children]; for (const k of kids) { if (k.tagName === 'H3' && TAB[k.textContent]) cur = TAB[k.textContent]; k.dataset.tab = cur; }
     const bar = el('div', 'tabs'), showTab = t => { ST.menuTab = t; for (const k of kids) k.hidden = k.dataset.tab !== t; for (const b of bar.children) b.classList.toggle('on', b.textContent === t); };
     for (const t of ['Hero', 'Quests', 'Bag', 'Skills', 'Bonds', 'Guild']) { const b = el('button', '', t); b.addEventListener('click', () => showTab(t)); bar.appendChild(b); }
@@ -9404,12 +9599,14 @@ function stOpenMenu() {
   if (stData().items.sc_return) btn(`📜 Scroll of Return ×${stData().items.sc_return}`, () => stTeleport());
   btn(stAttrFree() ? `📊 Stats (${stAttrFree()} points!)` : '📊 Stats', () => stStatsMenu());
   btn('Bloodlines & spellcraft',stProgressMenu);btn('Ember Academy',stMagicLessons);btn('World bosses',stWorldBossMenu);btn('Ashen Dominion',stDominionMenu);
+  btn('Armory',stArmorMenu);btn('Free paths & rogue guilds',stFreePaths);
+  btn('Area map',stMapPanel);
   btn('👥 Party', () => stPartyMenu());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
   m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
 }
-function stCloseMenu() { $('stMenu').hidden = true; $('stMenu').classList.remove('journal'); ST.journal = false; ST.mode = 'walk'; stHud(); }
+function stCloseMenu() { $('stMenu').hidden = true; $('stMenu').classList.remove('journal','atlas'); ST.journal = false; ST.mode = 'walk'; stHud(); }
 $('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu() : stOpenMenu());
 { // the thumbstick: touch anywhere on the left side and drag
   const Z = $('stJoyZone'), B = $('stJoyBase'), K = $('stJoyKnob'), R = 56; let id = null, ox = 0, oy = 0;
@@ -9428,7 +9625,7 @@ $('stJournalBtn').addEventListener('click', () => ST.mode === 'menu' && ST.journ
 // ---- HUD and drawing
 function stHud() {
   const d = stData(); if (!d) return; const s = stStats();
-  const hn = $('stHudName'); hn.textContent = ''; hn.className = 'hn'; $('stMenuBtn').textContent = stAttrFree() ? `Menu · ${stAttrFree()} pts` : 'Menu'; hn.append(document.createTextNode(stTitledName()), el('span', 'badge lvb', `Lv ${d.lv}`), el('span', 'badge rkb', d.guild ? `${d.guild.rank}-Rank` : 'No guild'));
+  const hn = $('stHudName'); hn.textContent = ''; hn.className = 'hn'; $('stMenuBtn').textContent = stAttrFree() ? `Menu · ${stAttrFree()} pts` : 'Menu'; hn.append(document.createTextNode(stTitledName()), el('span', 'badge lvb', `Lv ${d.lv}`), el('span', 'badge rkb', d.guild ? `${d.guild.rank}-Rank` : ST_ROGUE_GUILDS[d.rogueGuild]?.[0]||'Independent'));
   if (!$('stXpBar')) { const xb = el('div', 'bar xp'); xb.id = 'stXpBar'; xb.appendChild(el('i')); xb.title = 'Experience'; $('stHud').insertBefore(xb, $('stGold')); for (const [id, lb] of [['stHp', 'HEALTH'], ['stMp', 'MANA']]) $('stHud').insertBefore(el('small', 'bl', lb), $(id).parentNode); }
   $('stXpBar').firstChild.style.width = Math.min(100, d.xp / stXpNeed(d.lv) * 100) + '%';
   $('stHint').textContent = device() === 'pad' ? 'Left stick: move · A: interact · Start: menu · Back: journal · Y: ride' : 'WASD or arrows: move · E: interact · M: menu · J: journal · R: ride';
@@ -9589,7 +9786,7 @@ window.addEventListener('keydown', e => {
   if (!ST.on || !overlay.hidden || (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) return;
   const k = e.key.toLowerCase();
   // Let a focused button receive Enter/Space, not a simultaneous world action.
-  if ((k === 'enter' || k === ' ') && e.target && e.target.closest('button')) return;
+  if ((k === 'enter' || k === ' ') && e.target && e.target.closest('button,[role="button"]')) return;
   if (ST_KEYS[k] && ST.mode === 'walk') { ST.keys[ST_KEYS[k]] = true; e.preventDefault(); }
   if ((k === 'e' || k === 'enter' || k === ' ') && ST.mode === 'walk') { e.preventDefault(); stInteract(); }
   if ((k === 't' || k === '/') && !e.repeat && ST.mode === 'walk') { e.preventDefault(); stChatOpen(); if (k === '/') $('stChatIn').value = '/'; return; }
@@ -9816,35 +10013,44 @@ if (location.hash === '#trailer') {
 }
 // Maintenance: the site's /maintenance.json can warn players and then close the game for an update.
 // {"mode": "open"} | {"mode": "warn", "at": "<ISO time it closes>"} | {"mode": "closed"}; an optional "msg" replaces the default text.
-const MAINT = {m: null, closed: false, timer: 0};
+const MAINT = {m: null, closed: false, timer: 0, tickTimer:0, update:false, saved:false};
 async function maintCheck() {
-  try { const r = await fetch('/maintenance.json?t=' + Date.now(), {cache: 'no-store'}); if (!r.ok) return; maintApply(await r.json()); } catch (e) { /* no file here, as in the Claude artifact */ }
-  clearTimeout(MAINT.timer); MAINT.timer = setTimeout(maintCheck, MAINT.m && MAINT.m.mode === 'warn' ? 20000 : 60000);
+  try {
+    const r=await fetch('maintenance.json?t='+Date.now(),{cache:'no-store'});if(r.ok)maintApply(await r.json());
+    const current=document.querySelector('meta[name="thornwake-build"]')?.content;
+    if(current&&!MAINT.closed&&(!MAINT.m||MAINT.m.mode==='open')){const v=await fetch('release.json?t='+Date.now(),{cache:'no-store'});if(v.ok){const next=await v.json();if(typeof next.build==='string'&&/^[a-f0-9]{16}$/.test(next.build)&&next.build!==current)maintClose({reload:true,msg:'A new version of Thornwake is ready. Play is paused while the game updates.'});}}
+  } catch (e) { /* network errors never shut down a healthy game */ }
+  clearTimeout(MAINT.timer);MAINT.timer=setTimeout(maintCheck,MAINT.closed||MAINT.m?.mode==='warn'?5000:15000);
 }
 function maintApply(m) {
+  clearTimeout(MAINT.tickTimer);
   MAINT.m = m; const closeAt = m && m.mode === 'warn' ? Date.parse(m.at) : NaN;
   if (m && (m.mode === 'closed' || (m.mode === 'warn' && Date.now() >= closeAt))) return maintClose(m);
-  if (MAINT.closed && (!m || m.mode === 'open')) { location.reload(); return; } // back from the update: load the new version
+  if (MAINT.closed && !MAINT.update && (!m || m.mode === 'open')) { if(MAINT.saved)location.reload(); return; } // never silently discard a save when storage is blocked
   let bar = document.getElementById('maintBar');
-  if (m && m.mode === 'warn' && closeAt) { if (!bar) { bar = document.createElement('div'); bar.id = 'maintBar'; bar.setAttribute('role', 'status'); document.body.appendChild(bar); } maintTick(); }
+  if (m && m.mode === 'warn' && Number.isFinite(closeAt)) { MAINT.saved=saveProfile();if (!bar) { bar = document.createElement('div'); bar.id = 'maintBar'; bar.setAttribute('role', 'status'); document.body.appendChild(bar); } maintTick(); }
   else if (bar) bar.remove();
 }
 function maintTick() {
   const bar = document.getElementById('maintBar'), m = MAINT.m; if (!bar || !m || m.mode !== 'warn') return;
   const left = Math.max(0, Date.parse(m.at) - Date.now()), mins = Math.floor(left / 60000), secs = Math.floor(left / 1000) % 60;
-  bar.textContent = `⚠ The server is shutting down for an update in ${mins ? mins + ' min ' : ''}${secs}s. Your progress is saved.`;
-  if (left <= 0) return maintClose(m); setTimeout(maintTick, 1000);
+  bar.textContent = `${m.msg||'Thornwake is closing for an update'} in ${mins ? mins + ' min ' : ''}${secs}s. ${MAINT.saved?'Progress saved on this device.':'Browser storage unavailable; do not refresh if you need to keep this session.'}`;
+  if (left <= 0) return maintClose(m); MAINT.tickTimer=setTimeout(maintTick, 1000);
 }
 function maintClose(m) {
   if (MAINT.closed) return; MAINT.closed = true;
-  try { saveProfile(); } catch (e) { /* storage blocked */ }
+  MAINT.update=!!m?.reload;try { MAINT.saved=saveProfile(); } catch (e) { MAINT.saved=false; }
+  clearTimeout(MAINT.tickTimer);ST.keys={};ST.touchMove=null;ST.padMove=null;
   try { if (typeof stNetLeave === 'function') stNetLeave(); } catch (e) { /* already offline */ }
   const bar = document.getElementById('maintBar'); if (bar) bar.remove();
   const scr = document.createElement('div'); scr.id = 'maintScr'; scr.setAttribute('role', 'alert');
-  scr.innerHTML = '<div><h1>Down for an update</h1><p></p><p class="small">Your progress is saved. This page reloads by itself when the game is back.</p></div>';
+  scr.innerHTML = '<div><h1>Down for an update</h1><p></p><p class="small"></p><button id="maintReload">Reload game</button></div>';
   scr.querySelector('p').textContent = (m && m.msg) || 'Thornwake is getting an update. We will be back soon.';
+  scr.querySelector('.small').textContent=MAINT.saved?(MAINT.update?'Your progress is saved on this device. The new build loads in five seconds.':'Your progress is saved on this device. This page reloads when the game reopens.'):'Browser storage is blocked. This session could not be saved. Reloading will lose changes from this session; automatic reload is disabled.';
+  scr.querySelector('button').addEventListener('click',()=>{if(!MAINT.saved&&!confirm('Browser storage is unavailable. Reload and lose this session?'))return;location.reload();});
   document.body.appendChild(scr); try { music.vol = 0; if (music.ctx) music.ctx.suspend(); } catch (e) { /* no audio yet */ }
-  for (const ev of ['keydown', 'keyup', 'pointerdown', 'touchstart', 'wheel']) addEventListener(ev, e => { if (MAINT.closed) { e.stopPropagation(); e.preventDefault(); } }, {capture: true, passive: false});
+  for (const ev of ['keydown', 'keyup', 'pointerdown', 'touchstart', 'click', 'wheel']) addEventListener(ev, e => { if (MAINT.closed&&!e.target?.closest?.('#maintReload')) { e.stopImmediatePropagation(); e.preventDefault(); } }, {capture: true, passive: false});
+  if(MAINT.update&&MAINT.saved)setTimeout(()=>location.reload(),5000);
 }
 if (location.protocol.startsWith('http') && !/claude\.ai|claudeusercontent/.test(location.hostname)) maintCheck();
 const gamePerf=el('span','','FPS: --');gamePerf.id='gamePerf';$('game').appendChild(gamePerf);
