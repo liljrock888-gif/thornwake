@@ -50,7 +50,9 @@ const resume=async()=>{
 };
 const fixture=async values=>{
   await page.evaluate(values=>{
-    const d=__TW_QA.data();Object.assign(d,values);__TW_QA.sync(false);
+    // This legacy suite exercises retained classic combat; the refresh, frontier
+    // and advanced suites separately exercise default real-time combat.
+    const d=__TW_QA.data();Object.assign(d,{storyCombat:'classic'},values);__TW_QA.sync(false);
   },values);
 };
 const enterStory=async()=>{
@@ -72,6 +74,7 @@ try{
   await page.locator('#crClass').getByRole('button',{name:'Mage',exact:true}).click();
   await page.locator('#crNext').click();
   await page.locator('#crOutfit select[aria-label=Hair]').selectOption('braids');
+  await page.locator('#crOutfit .srMore summary').click();
   await page.locator('#crOutfit select[aria-label=Expression]').selectOption('grin');
   await page.locator('#crOutfit select[aria-label=Headwear]').selectOption('');
   ok(await page.locator('#crStep1').isVisible(),'Appearance step visible');
@@ -167,6 +170,7 @@ try{
   await menu();await page.getByRole('button',{name:/Wardrobe/}).click();
   await page.locator('#stMenu select[aria-label=Headwear]').selectOption('none');
   await page.locator('#stMenu select[aria-label=Hair]').selectOption('starspikes');
+  await page.locator('#stMenu .srMore summary').click();
   await page.locator('#stMenu select[aria-label=Expression]').selectOption('faceless');
   await page.locator('#stMenu select[aria-label=Outfit]').selectOption('suit');
   await page.locator('#stMenu select[aria-label=Pants]').selectOption('wide');

@@ -5947,7 +5947,7 @@ function drawPortrait(now) {
 let last = performance.now();
 // ---------- Story mode: The Thornwake Chronicles, a grim turn-based RPG with an open world and dungeons ----------
 // Death drops your gold as Lost Embers where you fell; rest at Ashen Shrines to heal and set where you return.
-const ST_TILE = 64, ST_W = 48, ST_H = 32;
+const ST_TILE = 64, ST_W = 64, ST_H = 44;
 const ST_CLASSES = {
   warrior: {name: 'Warrior', look: 'knight', hp: 120, mp: 30, atk: 14, mag: 4, def: 8, spd: 6, skills: ['strike', 'guard', 'rally']},
   mage:    {name: 'Mage', look: 'mage', hp: 92, mp: 70, atk: 6, mag: 16, def: 5, spd: 7, skills: ['fireball', 'frost', 'lightning', 'ward']},
@@ -9812,7 +9812,7 @@ function stOpenMenu() {
   btn('👥 Party', () => stPartyMenu());
   btn('📖 Journal', () => stJournal()); btn('🤝 Companions', () => stCompanionHall()); btn('👘 Wardrobe', () => stWardrobe());
   btn('Resume', stCloseMenu); btn('Save and quit', () => { stCloseMenu(); stLeave(); });
-  m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus(), 0);
+  m.appendChild(row); setTimeout(() => row.querySelector('button:last-child').previousSibling.focus({preventScroll:true}), 0);
 }
 function stCloseMenu() { $('stMenu').hidden = true; $('stMenu').classList.remove('journal','atlas'); ST.journal = false; ST.mode = 'walk'; stHud(); }
 $('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu() : stOpenMenu());
@@ -9856,8 +9856,8 @@ function stDrawWorld(now, dt = 1 / 60) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = ST_DUNGEONS[d.map] && ST_DUNGEONS[d.map].pal ? ST_DUNGEONS[d.map].pal.sea : d.map === 'isles' ? '#1f6a8a' : d.map === 'rouge' ? '#1a2e28' : '#0c1411'; ctx.fillRect(0, 0, cw, ch);
   ctx.setTransform(dpr * Zs, 0, 0, dpr * Zs, dpr * (cw / 2 - ST.cam.x * Zs), dpr * (ch / 2 - ST.cam.y * Zs));
   const dun = d.map !== 'world';
-  { const img = dun ? ST.dunC[d.map] : ST.mapC, x0 = Math.max(0, Math.floor(ST.cam.x - vwH(Zs))), y0 = Math.max(0, Math.floor(ST.cam.y - vhH(Zs))), w = Math.min(img.width - x0, Math.ceil(vwH(Zs) * 2)), h = Math.min(img.height - y0, Math.ceil(vhH(Zs) * 2));
-    if (w > 0 && h > 0) ctx.drawImage(img, x0, y0, w, h, x0, y0, w, h); } // drawing the whole land each frame wastes most of the work
+  { const img = dun ? ST.dunC[d.map] : ST.mapC, scale = img._worldScale || 1, x0 = Math.max(0, Math.floor(ST.cam.x - vwH(Zs))), y0 = Math.max(0, Math.floor(ST.cam.y - vhH(Zs))), w = Math.min(img.width * scale - x0, Math.ceil(vwH(Zs) * 2)), h = Math.min(img.height * scale - y0, Math.ceil(vhH(Zs) * 2));
+    if (w > 0 && h > 0) { const smoothing = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false; ctx.drawImage(img, x0 / scale, y0 / scale, w / scale, h / scale, x0, y0, w, h); ctx.imageSmoothingEnabled = smoothing; } } // cull offscreen terrain; half-resolution pixel maps use one quarter of the backing memory
   const vw2 = cw / Zs / 2 + 140, vh2 = ch / Zs / 2 + 160, onScr = (x, y) => Math.abs(x - ST.cam.x) < vw2 && Math.abs(y - ST.cam.y) < vh2; // skip what is off screen
   ST.marks = ST.marks || {}; if (dun && !ST.marks[d.map]) { const L = []; stGrid().forEach((row, y) => { for (let x = 0; x < row.length; x++) if (row[x] === 'c' || row[x] === 'B') L.push([row[x], x, y]); }); ST.marks[d.map] = L; }
   if (dun) for (const [t, x, y] of ST.marks[d.map]) { if (!onScr(x * ST_TILE + 32, y * ST_TILE + 32)) continue; (() => {

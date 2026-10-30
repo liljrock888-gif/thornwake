@@ -16,6 +16,8 @@
     "test:frontier": "node test/frontier.test.mjs",
     "test:advanced": "node test/advanced-story.test.mjs",
     "test:duels": "node test/story-duels.test.mjs",
+    "test:refresh": "node test/story-refresh.test.mjs",
+    "test:gani": "node test/gani.test.mjs",
     "build:preview": "npm run build && node scripts/preview.mjs"
   },
   "engines": {

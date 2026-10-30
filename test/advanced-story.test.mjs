@@ -180,10 +180,10 @@ try{
   await context.close();
   const mobile=await browser.newContext({viewport:{width:375,height:812},isMobile:true,hasTouch:true}),mp=await mobile.newPage();await instrument(mp);await create(mp,'Touch Wanderer');
   await mp.evaluate(()=>{const q=__QA,d=q.d();d.gold=10000;d.lv=25;d.properties={willowhome:{storedGold:0}};q.enter('hearthward',13,19);});await dismiss(mp);
-  await mp.screenshot({path:'test-results/hearthward-phone.png'});await mp.locator('#stMenuBtn').tap();await mp.getByRole('button',{name:'Emotes · dance & gestures',exact:true}).tap();await mp.screenshot({path:'test-results/emotes-phone.png'});
+  await mp.screenshot({path:'test-results/hearthward-phone.png'});await mp.locator('#srDock').getByRole('button',{name:'Open menu',exact:true}).tap();await mp.getByRole('button',{name:'Emotes · dance & gestures',exact:true}).tap();await mp.screenshot({path:'test-results/emotes-phone.png'});
   await mp.getByRole('button',{name:'Lantern Dance · 12s',exact:true}).tap();assert.equal(await mp.evaluate(()=>__QA.s.emote.id),'dance');await mp.screenshot({path:'test-results/dance-phone-a.png'});await mp.waitForTimeout(350);await mp.screenshot({path:'test-results/dance-phone-b.png'});
-  await mp.locator('#stMenuBtn').tap();await mp.getByRole('button',{name:'Emotes · dance & gestures',exact:true}).tap();await mp.getByRole('button',{name:'Stop current emote',exact:true}).tap();assert.equal(await mp.evaluate(()=>__QA.s.emote),null);
-  await mp.locator('#stMenuBtn').tap();await mp.getByRole('button',{name:'Buildcraft · talents & synergies',exact:true}).tap();await mp.getByRole('button',{name:'Train · 1 point',exact:true}).first().tap();await mp.screenshot({path:'test-results/buildcraft-phone.png'});
+  await mp.locator('#srDock').getByRole('button',{name:'Open menu',exact:true}).tap();await mp.getByRole('button',{name:'Emotes · dance & gestures',exact:true}).tap();await mp.getByRole('button',{name:'Stop current emote',exact:true}).tap();assert.equal(await mp.evaluate(()=>__QA.s.emote),null);
+  await mp.locator('#srDock').getByRole('button',{name:'Open menu',exact:true}).tap();await mp.getByRole('button',{name:'Buildcraft · talents & synergies',exact:true}).tap();await mp.getByRole('button',{name:'Train · 1 point',exact:true}).first().tap();await mp.screenshot({path:'test-results/buildcraft-phone.png'});
   assert.equal(await mp.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await mp.getByRole('button',{name:'Back to Story menu',exact:true}).tap();await mp.getByRole('button',{name:'Confluence · combine spells & abilities',exact:true}).tap();await mp.screenshot({path:'test-results/confluence-phone.png'});
   await mp.getByRole('button',{name:'Back to Story menu',exact:true}).tap();await mp.getByRole('button',{name:'Familiars · little animal companions',exact:true}).tap();
   await mp.getByRole('button',{name:'Adopt Ember Fox',exact:true}).tap();assert.equal(await mp.evaluate(()=>__QA.f().familiar),'fox');await mp.screenshot({path:'test-results/familiars-phone.png'});
@@ -191,7 +191,7 @@ try{
   await mp.getByRole('button',{name:'Inspect Lantern Watchhold',exact:true}).tap();assert.equal(await mp.getByRole('button',{name:'Enter Lantern Watchhold',exact:true}).isDisabled(),true);
   await mp.evaluate(()=>{__QA.d().guild={rank:'D',pts:0,quests:[],done:[]};__QA.hold('watchhold');});
   await mp.getByRole('button',{name:'Enter Lantern Watchhold',exact:true}).tap();await dismiss(mp);assert.equal(await mp.evaluate(()=>__QA.d().map),'watchhold');await mp.screenshot({path:'test-results/stronghold-interior-phone.png'});
-  await mp.locator('#stMenuBtn').tap();await mp.getByRole('button',{name:'Jobs · civilian employment',exact:true}).tap();await mp.getByRole('button',{name:'Take Ward Courier shift',exact:true}).tap();
+  await mp.locator('#srDock').getByRole('button',{name:'Open menu',exact:true}).tap();await mp.getByRole('button',{name:'Jobs · civilian employment',exact:true}).tap();await mp.getByRole('button',{name:'Take Ward Courier shift',exact:true}).tap();
   await mp.screenshot({path:'test-results/jobs-phone.png'});await mp.getByRole('button',{name:'Resume exploring',exact:true}).tap();
   await mp.evaluate(()=>{const q=__QA,d=q.d();q.enter('clinic_lumenreach',7,5);d.hp=1;d.mp=0;q.talk('civic_lumenreach_nurse');});await mp.locator('#stLoad').waitFor({state:'hidden'});
   while(await mp.getByRole('button',{name:'Next',exact:true}).isVisible())await mp.getByRole('button',{name:'Next',exact:true}).tap();
@@ -204,7 +204,7 @@ try{
   await mp.getByRole('button',{name:'Attempt murder · permanent consequence',exact:true}).tap();await mp.screenshot({path:'test-results/crime-confirm-phone.png'});
   await mp.getByRole('button',{name:'Lower my weapon',exact:true}).tap();assert.equal(await mp.evaluate(()=>Object.keys(__QA.f().civilianDeaths).length),0);
   await mp.evaluate(()=>{const q=__QA,d=q.d();q.enter('lumenreach',18,16);d.hp=q.stats().hp;d.mp=q.stats().mp;});await dismiss(mp);
-  await mp.evaluate(()=>{__QA.s.keys={};});await mp.locator('#stMenuBtn').tap();await mp.getByRole('button',{name:'Justice · courts & wanted level',exact:true}).tap();await mp.screenshot({path:'test-results/justice-phone.png'});
+  await mp.evaluate(()=>{__QA.s.keys={};});await mp.locator('#srDock').getByRole('button',{name:'Open menu',exact:true}).tap();await mp.getByRole('button',{name:'Justice · courts & wanted level',exact:true}).tap();await mp.screenshot({path:'test-results/justice-phone.png'});
   await mp.getByRole('button',{name:'Resume exploring',exact:true}).tap();
   await mp.evaluate(()=>{const q=__QA,d=q.d();q.start(['wolf'],null,'=');for(const foe of q.s.battle.foes)Object.assign(foe,{hp:1000000,maxHp:1000000,next:Infinity,root:Infinity,x:d.x+55,y:d.y});});
   await mp.locator('#rtBar').waitFor({state:'visible'});
@@ -218,7 +218,7 @@ try{
   }
   await mp.evaluate(()=>{const d=__QA.d(),foe=__QA.s.battle.foes[0];foe.x=d.x+50;foe.y=d.y;__QA.rt.attackAt=0;__QA.rt.global=0;});
   const hpBefore=await mp.evaluate(()=>__QA.s.battle.foes[0].hp);
-  await mp.getByRole('button',{name:/^Attack \[Space\]/}).tap();await mp.waitForFunction(hp=>__QA.s.battle.foes[0].hp<hp,hpBefore);
+  await mp.locator('#rtBar [data-cooldown=attack]').tap();await mp.waitForFunction(hp=>__QA.s.battle.foes[0].hp<hp,hpBefore);
   await mp.screenshot({path:'test-results/realtime-combat-phone.png'});
   assert.equal(await mp.evaluate(()=>__QA.s.touchMove),null);
   assert.equal(await mp.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);

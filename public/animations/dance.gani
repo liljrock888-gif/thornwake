@@ -1,0 +1,47 @@
+GANI0001
+# Original Thornwake animation: dance
+DEFAULTBODY thornwake-dance.png
+LOOP
+CONTINUOUS
+SPRITE 0 BODY 0 0 64 88 original-character-frame
+SPRITE 1 BODY 64 0 64 88 original-character-frame
+SPRITE 2 BODY 128 0 64 88 original-character-frame
+SPRITE 3 BODY 192 0 64 88 original-character-frame
+SPRITE 4 BODY 0 88 64 88 original-character-frame
+SPRITE 5 BODY 64 88 64 88 original-character-frame
+SPRITE 6 BODY 128 88 64 88 original-character-frame
+SPRITE 7 BODY 192 88 64 88 original-character-frame
+SPRITE 8 BODY 0 176 64 88 original-character-frame
+SPRITE 9 BODY 64 176 64 88 original-character-frame
+SPRITE 10 BODY 128 176 64 88 original-character-frame
+SPRITE 11 BODY 192 176 64 88 original-character-frame
+SPRITE 12 BODY 0 264 64 88 original-character-frame
+SPRITE 13 BODY 64 264 64 88 original-character-frame
+SPRITE 14 BODY 128 264 64 88 original-character-frame
+SPRITE 15 BODY 192 264 64 88 original-character-frame
+ANI
+0 -32 -78
+4 -32 -78
+8 -32 -78
+12 -32 -78
+WAIT 1
+
+1 -32 -78
+5 -32 -78
+9 -32 -78
+13 -32 -78
+WAIT 1
+
+2 -32 -78
+6 -32 -78
+10 -32 -78
+14 -32 -78
+WAIT 1
+
+3 -32 -78
+7 -32 -78
+11 -32 -78
+15 -32 -78
+WAIT 1
+
+ANIEND

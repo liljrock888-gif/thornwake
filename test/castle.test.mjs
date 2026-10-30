@@ -119,10 +119,9 @@ try{
   await shot('boss-desktop');
   // A test-only one-hit fixture verifies the unchanged victory path, not balance.
   for(let attempt=0;attempt<8&&!await page.evaluate(()=>__CASTLE_QA.data().flags.king===true);attempt++){
-    await page.waitForFunction(()=>__CASTLE_QA.state.battle?.turn==='player');
-    await page.evaluate(()=>{for(const f of __CASTLE_QA.state.battle.foes)f.hp=1;});
-    await page.locator('#stActions button[title^="Basic attack."]').click();
-    await page.waitForFunction(()=>__CASTLE_QA.data().flags.king===true||__CASTLE_QA.state.battle?.turn==='player');
+    await page.evaluate(()=>{const d=__CASTLE_QA.data();for(const [i,f]of __CASTLE_QA.state.battle.foes.entries())Object.assign(f,{hp:1,x:d.x+55+i*12,y:d.y,next:Infinity,windup:null});});
+    await page.locator('#rtBar [data-cooldown=attack]').click();
+    await page.waitForTimeout(900);
   }
   ok(await page.evaluate(()=>__CASTLE_QA.data().flags.king===true),'Hollow King can be defeated with real combat controls');
   await page.locator('#stDialog').waitFor({state:'visible'});

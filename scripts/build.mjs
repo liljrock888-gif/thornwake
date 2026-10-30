@@ -1,7 +1,7 @@
 // Wraps game/thornwake.html (the same file published as the Claude artifact) into a
 // standalone page with the payments and online (accounts, cloud saves, online play) add-ons,
 // written to public/index.html.
-import {readFileSync, writeFileSync, readdirSync} from 'node:fs';
+import {readFileSync, writeFileSync, readdirSync, mkdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 
 const expansion = readFileSync(new URL('../game/homes-classes.js', import.meta.url), 'utf8');
@@ -25,8 +25,17 @@ const civics = readFileSync(new URL('../game/story-civics.js', import.meta.url),
 const familiars = readFileSync(new URL('../game/story-familiars.js', import.meta.url), 'utf8');
 const strongholds = readFileSync(new URL('../game/story-strongholds.js', import.meta.url), 'utf8');
 const emotes = readFileSync(new URL('../game/story-emotes.js', import.meta.url), 'utf8');
+const storyRefresh = readFileSync(new URL('../game/story-refresh.js', import.meta.url), 'utf8');
+const ganiPlayer = readFileSync(new URL('../game/gani-player.js', import.meta.url), 'utf8');
+const storyGani = readFileSync(new URL('../game/story-gani.js', import.meta.url), 'utf8');
 const game = source.replace(marker, expansion + '\n' + balance + '\n' + souls + '\n' + slots + '\n' + frontier + '\n' + inventory + '\n' + mythology + '\n' + realtime + '\n' + tabletop + '\n' + builds + '\n' + neighborhood + '\n' + fusion + '\n' + duels + '\n' + crime + '\n' + civics + '\n' + familiars + '\n' + strongholds + '\n' + emotes + '\n' + marker);
-const hash=createHash('sha256').update(game);
+const refreshedGame=game.replace(marker,storyRefresh+'\n'+ganiPlayer+'\n'+storyGani+'\n'+marker);
+// Ship actual editable original GANI files alongside the inline game.
+const ganiFactory=new Function(ganiPlayer+';return GANI.preset;')();
+mkdirSync(new URL('../public/animations/',import.meta.url),{recursive:true});
+for(const mode of ['idle','walk','slash','shoot','cast','dodge','guard','hit','dance','wave','sit','cheer'])
+  writeFileSync(new URL(`../public/animations/${mode}.gani`,import.meta.url),ganiFactory(mode,mode==='idle'?5:mode==='walk'?2:1));
+const hash=createHash('sha256').update(refreshedGame);
 function hashAssets(dir, prefix=''){
   for(const entry of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){
     const path=prefix+entry.name;
@@ -46,7 +55,7 @@ const page = `<!doctype html>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
 <body>
-${game}
+${refreshedGame}
 <script src="/payments.js"></script>
 <script src="/online.js"></script>
 </body>
