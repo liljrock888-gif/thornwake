@@ -18,6 +18,7 @@ writeFileSync(new URL('index.html',output),html);
 for(const file of ['payments.js','online.js','sw-bridge.js']){
   const path=new URL(file,output);
   if(!existsSync(path))continue;
-  writeFileSync(path,readFileSync(path,'utf8').replaceAll('localStorage','TW_PREVIEW_STORAGE'));
+  writeFileSync(path,readFileSync(path,'utf8').replaceAll('localStorage','TW_PREVIEW_STORAGE')
+    .replaceAll("fetch('/api/config')","Promise.resolve(new Response(JSON.stringify({enabled:false,supabase:null,products:[]})))"));
 }
 console.log('Built preview/ with session-only in-memory saves; production public/ is unchanged.');

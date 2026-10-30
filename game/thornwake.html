@@ -724,6 +724,7 @@ body.story #hud,body.story #mini,body.story #top,body.story #menuBtn,body.story 
       <section class="screen" id="scr-story" hidden>
         <h2>The Thornwake Chronicles</h2>
         <p class="status" id="stSummary">A story RPG. Make your own hero, explore an open world and fight turn-based battles.</p>
+        <div id="stCharacterSlots" class="storySlots" role="group" aria-label="Character slots"></div>
         <div class="menu"><button class="mbtn primary" id="stContinue">Continue story</button><button class="mbtn" id="stNew">New story</button></div>
         <button class="mbtn small back" id="stBack">Back</button>
       </section>
@@ -3992,6 +3993,7 @@ const overlay = $('overlay');
 let currentScreen = 'scr-main';
 // What's new: every update since launch, newest first. Bump the first id when adding an update; players who haven't opened it see NEW.
 const UPDATES = [
+  {id:64,date:'Oct 29',title:'A Second Legend',items:['You now have two independent character creation/save slots. Keep a Necromancer and Warlock, or any two heroes, without overwriting either adventure.','Select a slot on the story screen, then continue or create. Your existing hero stays in slot 1. New story uses an empty slot first; replacing an occupied slot requires explicit confirmation.','Each hero retains their own class, quests, levels, soul grimoire, mounts, housing and equipment. Account Crowns, purchases and cosmetics remain shared. Both slots are included in local and cloud profile saves.']},
   {id:63,date:'Oct 29',title:'Three Stacks, Measured Power',items:['Attack and defense buffs now stack independently up to three times, with diminishing returns instead of multiplying endlessly. Attack: +25% / +40% / +50% total. Defense: +40% / +65% / +80% total.','Each cast still costs mana and one turn, and refreshes its own four-enemy-turn duration. At three stacks, recasting refreshes duration without adding power.','Combat badges show each pool at 1/3, 2/3 or 3/3 with turns remaining. Expiry and defense-breaking attacks remove that pool; new battles begin without stacks. Defend, shields and transformations do not gain extra stacks.']},
   {id:62,date:'Oct 29',title:'The Fallen & the Infernal Pact',items:['Necromancer now raises real allied undead. Raise Dead is available from level 1, uses a fallen enemy or your selected grimoire soul, and works alongside your companion.','The saved Grimoire of the Fallen rolls 35% binding odds for defeated ordinary enemies and 8% for bosses. Search, filter and select captured souls; duplicate souls strengthen summons. Existing Necromancer saves gain the new mechanics without restarting.','Warlock is a separate playable class with its own wardrobe, eight techniques and five milestones: command a Brimstone Imp, cast weakening Hexes and Hellfire, and trade health for mana with Blood Offering.','Summons visibly fight, can absorb enemy attacks and last five allied turns. One summon at a time; souls remain collected after a summon falls.']},
   {id:61,date:'Oct 29',title:'Mounts Across the Sea',items:['Take your chosen mount by ship to the Brightwater Isles, Rougemarais, Valdris and Aetherfall. Mount ownership, selection and riding state travel with you.','Ride, dismount and call your mount on every outdoor island and land. The mount is visible and retains its normal speed.','Indoor buildings and dungeons remain on foot. Ship fares, travel requirements, solid buildings and hard map boundaries are unchanged.']},
@@ -4914,17 +4916,30 @@ const PASS = [
 ];
 const PROFILE_KEY = 'thornwake.profile';
 function freshProfile() {
-  return {v: 1, epoch: DATA_EPOCH, crowns: 300, heroes: [0, 1, 2, 3, 4, 5], skins: ['none'], trails: ['none'], moves: ['bolt', 'starfall'], pets: [], eggs: 1, boosts: {tome: 0, purse: 0, xp2: 0},
+  return {v: 1, epoch: DATA_EPOCH, storySlots:[null,null], storySlot:0, crowns: 300, heroes: [0, 1, 2, 3, 4, 5], skins: ['none'], trails: ['none'], moves: ['bolt', 'starfall'], pets: [], eggs: 1, boosts: {tome: 0, purse: 0, xp2: 0},
     eq: {skin: 'none', trail: 'none', q: 'bolt', r: 'starfall', pet: null}, pass: {premium: false, xp: 0, claimed: []}, stage: 0, cleared: []};
+}
+// Additive migration. `story` remains the active hero for older clients and
+// existing gameplay code; both full heroes travel in the same cloud profile.
+function stEnsureStorySlots(p){
+  const valid=d=>d&&typeof d==='object'&&!Array.isArray(d);
+  const slots=Array.isArray(p.storySlots)?p.storySlots.slice(0,2):[null,null];
+  for(let i=0;i<2;i++)if(!valid(slots[i]))slots[i]=null;
+  const index=p.storySlot===1?1:0;
+  // Preserve progress made in older builds that only update the active field.
+  if(valid(p.story))slots[index]=p.story;
+  p.storySlots=slots;p.storySlot=index;p.story=slots[index]||null;
+  return slots;
 }
 // Raising DATA_EPOCH wipes every player's progress once, the next time they open the game. Cloud saves from an older epoch are ignored too (see online.js).
 const DATA_EPOCH = 1, EPOCH_KEY = 'thornwake.epoch';
 if ((store.get(EPOCH_KEY) || 0) < DATA_EPOCH) { for (const k of [PROFILE_KEY, AUTO_KEY, 'thornwake.cloud', ...SAVE_KEYS]) store.del(k); store.set(EPOCH_KEY, DATA_EPOCH); }
 let PROF = Object.assign(freshProfile(), store.get(PROFILE_KEY) || {});
+stEnsureStorySlots(PROF);
 const ensureFreeHeroes = () => { for (const [i, r] of ROSTER.entries()) if (r.free && !PROF.heroes.includes(i)) PROF.heroes.push(i); };
 ensureFreeHeroes();
 const saveHooks = [];
-const saveProfile = () => { const saved=store.set(PROFILE_KEY, PROF); for (const f of saveHooks) f(); return saved; };
+const saveProfile = () => { stEnsureStorySlots(PROF);const saved=store.set(PROFILE_KEY, PROF); for (const f of saveHooks) f(); return saved; };
 const owns = (list, id) => PROF[list].includes(id);
 function grant(r) {
   if (r.crowns) PROF.crowns += r.crowns;
@@ -5066,10 +5081,10 @@ window.Thornwake = {
     saveProfile(); return true;
   },
   banner, el, storeCard, show,
-  refresh() { if (!overlay.hidden && currentScreen === 'scr-store') renderStore(); },
+  refresh() { if(!overlay.hidden){if(currentScreen==='scr-store')renderStore();if(currentScreen==='scr-story')openStoryMenu();} },
   // accounts add-on (accounts.js): cloud saves and an Account screen
-  getProfile: () => JSON.parse(JSON.stringify(PROF)),
-  replaceProfile(data) { PROF = Object.assign(freshProfile(), data); ensureFreeHeroes(); store.set(PROFILE_KEY, PROF); window.Thornwake.refresh(); },
+  getProfile: () => {stEnsureStorySlots(PROF);return JSON.parse(JSON.stringify(PROF));},
+  replaceProfile(data) { PROF = Object.assign(freshProfile(), data);stEnsureStorySlots(PROF); ensureFreeHeroes(); store.set(PROFILE_KEY, PROF); window.Thornwake.refresh(); },
   onSave(fn) { saveHooks.push(fn); },
   addMenuButton(id, label, onClick) { const b = el('button', 'mbtn', label); b.id = id; b.addEventListener('click', onClick); $('m-help').before(b); return b; },
   addScreen(section) { section.classList.add('screen'); section.hidden = true; $('scr-main').parentNode.appendChild(section); },
@@ -6486,7 +6501,7 @@ const ST_QUESTS = [
   'The king is ash. The curse loosens its grip. Wander as you will.',
 ];
 const stVillage = (x, y) => x >= 20 * ST_TILE && x < 27 * ST_TILE && y >= 21 * ST_TILE ? 'Harrowfield' : x > 29 * ST_TILE ? 'Saltmere, the Drowned Harbor' : y > 17 * ST_TILE ? 'Ravenhollow' : 'Thornwake, the Last Lit Village';
-const stNpcShown = (n, d) => (n.id !== 'liora' || !(d.companion === 'liora' && d.lv >= ST_COMP_LV)) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]) && (!n.night || stClock().dark > .25) && (n.id !== 'edda' || !ST.tut);
+const stNpcShown = (n, d) => (!n.fwCivilian || !d.frontier?.civilianDeaths?.[n.id]) && (n.id !== 'liora' || !(d.companion === 'liora' && d.lv >= ST_COMP_LV)) && (!n.need || d.flags[n.need]) && (!n.hideIf || !d.flags[n.hideIf]) && (!n.night || stClock().dark > .25) && (n.id !== 'edda' || !ST.tut);
 const stChestShown = (c, d) => !d.chests.includes(c.id) && (!c.need || d.flags[c.need]);
 const ST = {treesBy: {}, on: false, mode: 'walk', keys: {}, pad: {prev: []}, cam: {x: 0, y: 0}, mapC: null, dunC: {}, walkDist: 0, safe: 4, battle: null, tdir: null, dlg: null, foes: []};
 const stData = () => PROF.story;
@@ -7694,7 +7709,7 @@ const stPartyOf = p => p.presence.sw.pt;
 const stPartyMembers = () => SW.party ? stOthers().filter(p => stPartyOf(p) === SW.party) : [];
 function stNetPush(force) { // share where you are and what you look like, a few times a second
   if (!SW.room) return; const d = stData(), s = stStats(), M = d.riding && stM(d.mount);
-  const sw = {n: stCleanName(stTitledName()), k: ST_CLASSES[d.cls].look, c: d.color, o: d.outfit || null, lv: d.lv, m: d.map, x: Math.round(d.x), y: Math.round(d.y), f: (ST.face || 0) > 1 ? 1 : 0, mv: ST.moving ? 1 : 0, pt: SW.party, inv: SW.inv,
+  const sw = {n: stCleanName(stTitledName()), k: ST_CLASSES[d.cls].look, c: d.color, o: d.outfit || null, lv: d.lv, m: d.map, x: Math.round(d.x), y: Math.round(d.y), f: (ST.face || 0) > 1 ? 1 : 0, mv: ST.moving ? 1 : 0, em:ST.emote&&!ST.battle&&!ST.moving?{id:ST.emote.id,stamp:ST.emote.stamp}:null, pt: SW.party, inv: SW.inv,
     hc: Math.max(0, Math.round(d.hp)), r: M ? {k: M.kind, c: M.color, m: M.mane, f: M.fly ? 1 : 0, g: M.glow || 0} : 0, b: ST.mode === 'battle' ? 1 : 0, at: Math.round(s.atk), hp: s.hp, g: d.guild ? d.guild.rank : '', kk: SW.party === SW.me && SW.kick.length ? SW.kick : null};
   const sig = JSON.stringify(sw); if (!force && sig === SW.sig && performance.now() - SW.last < 2000) return; SW.sig = sig; SW.last = performance.now();
   SW.room.presence({sw, ch: SW.myChat}).catch(() => {});
@@ -7717,7 +7732,7 @@ function stDrawOthers(now) { // other players on this map, with name tags (party
   const d = stData();
   for (const p of stOthers()) { const sw = p.presence.sw; if (sw.m !== d.map) continue; const v = SW.vis[p.peer]; if (!v || Math.abs(v.x - ST.cam.x) > cw + 200 || Math.abs(v.y - ST.cam.y) > ch + 200) continue; const party = SW.party && sw.pt === SW.party;
     if (sw.r) { const mid = 'peer:' + p.peer; SW.mounts[mid] = {name: '', kind: sw.r.k, color: sw.r.c, mane: sw.r.m, fly: !!sw.r.f, glow: sw.r.g || null, speed: 1}; ctx.save(); ctx.translate(v.x, v.y + 10); ctx.scale(ST_CS + .08, ST_CS + .08); ctx.translate(-v.x, -(v.y + 10)); stDrawMount(ctx, mid, v.x, v.y + 10, sw.f ? Math.PI : 0, v.w, now, !!sw.mv); ctx.restore(); }
-    stDrawCh(Object.assign(stUnit(sw.k, sw.c, v.x, v.y - (sw.r ? 21 + (sw.r.f ? 21 : 0) : 0), sw.f ? Math.PI : 0, sw.mv ? v.w : 0, 200 + (p.peer.charCodeAt(0) || 0), sw.lv), {outfit: sw.o && typeof sw.o === 'object' ? sw.o : null}), now);
+    stDrawCh(Object.assign(stUnit(sw.k, sw.c, v.x, v.y - (sw.r ? 21 + (sw.r.f ? 21 : 0) : 0), sw.f ? Math.PI : 0, sw.mv ? v.w : 0, 200 + (p.peer.charCodeAt(0) || 0), sw.lv), {outfit: sw.o && typeof sw.o === 'object' ? sw.o : null,emote:!sw.mv&&!sw.b?fwRemoteEmote(sw.em):null}), now);
     ctx.textAlign = 'center'; ctx.font = '700 13px "Barlow Semi Condensed", sans-serif'; ctx.fillStyle = party ? '#7fe08a' : '#8fd4ff'; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = 3;
     const tag = `${sw.n} · Lv ${sw.lv}${sw.g ? ' · ' + sw.g : ''}${sw.b ? ' ⚔' : ''}`; ctx.strokeText(tag, v.x, v.y - 60); ctx.fillText(tag, v.x, v.y - 60);
     const bub = SW.bubble && SW.bubble[p.peer]; if (bub && performance.now() - bub.at < 6000) { ctx.font = '600 12px "Barlow Semi Condensed", sans-serif'; const w = Math.min(220, ctx.measureText(bub.t).width + 16); ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fillRect(v.x - w / 2, v.y - 96, w, 22); ctx.fillStyle = '#1a1206'; ctx.fillText(bub.t.length > 34 ? bub.t.slice(0, 33) + '…' : bub.t, v.x, v.y - 81); }
@@ -7970,9 +7985,11 @@ function stWardrobe() { // change your clothes any time, free
   const row = el('div', 'row'), x = el('button', '', 'Done'); x.addEventListener('click', stCloseMenu); row.appendChild(x); m.appendChild(row);
 }
 function openStoryMenu() {
+  stEnsureStorySlots(PROF);
   const d = stData();
   $('stContinue').hidden = !d;
-  $('stSummary').textContent = d ? `${d.name}, level ${d.lv} ${ST_CLASSES[d.cls].name}. Chapter ${Math.min(4, d.ch + 1)} of 4.` : 'A story RPG. Make your own hero, explore an open world and fight turn-based battles.';
+  $('stSummary').textContent = d ? `Slot ${PROF.storySlot+1}: ${d.name}, level ${d.lv} ${ST_CLASSES[d.cls].name}. Chapter ${Math.min(4, d.ch + 1)} of 4.` : `Slot ${PROF.storySlot+1} is empty. Create a hero here without replacing your other character.`;
+  stRenderCharacterSlots();
   show('scr-story');
 }
 function renderCreator() {
@@ -8006,7 +8023,7 @@ function renderCreator() {
   g.strokeStyle = '#546253'; g.lineWidth = 1; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(180, 192, 65 + i * 32, 0, Math.PI * 2); g.stroke(); }
   g.fillStyle = '#10181a'; g.beginPath(); g.ellipse(180, 384, 105, 17, 0, 0, 7); g.fill();
   g.setTransform(3.6, 0, 0, 3.6, c.width / 2, 350);
-  drawStorybookCharacter(g, {look: ST_CLASSES[crSel.cls].look, color: crSel.color, outfit: crSel.outfit, team: 0, level: 1, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, 0);
+  fwChibi(g, {look: ST_CLASSES[crSel.cls].look, color: crSel.color, outfit: crSel.outfit, team: 0, level: 1, face: 0, x: 0, y: 0, walk: 0, _lw: 0, atkT: 0, atkCd: 1, hitFlash: 0, id: 1}, 0, 1.45);
   $('crIdentity').textContent = ST_RACES[crSel.race].name + ' ' + ST_CLASSES[crSel.cls].name;
   $('crBuild').textContent = ST_DIFFS[crSel.diff == null ? 1 : crSel.diff].name + ' · ' + crSel.skills.length + '/3 abilities';
   creatorStep(crStep);
@@ -8018,14 +8035,12 @@ function stPreviewVoice(sex) { // speaks with the chosen voice, before a story e
 $('m-story').addEventListener('click', openStoryMenu);
 $('stBack').addEventListener('click', () => show('scr-main'));
 $('stContinue').addEventListener('click', () => startStory());
-$('stNew').addEventListener('click', () => {
-  if (stData() && !confirm('Start a new story? Your current story progress will be replaced.')) return;
-  crSel = {cls: 'warrior', race: 'human', color: ST_COLORS[0], skills: [], voice: 'm', outfit: {race: 'human',hat:'none'}, attr: {}, diff: 1}; crStep = 0; $('crName').value = ''; renderCreator(); show('scr-create');
-});
+$('stNew').addEventListener('click', stBeginCharacterCreation);
 $('crBack').addEventListener('click', openStoryMenu);
 $('crStart').addEventListener('click', () => {
+  if(!stConfirmCharacterTarget())return;
   const name = ($('crName').value.trim() || 'Wanderer').slice(0, 14), c = ST_CLASSES[crSel.cls];
-  PROF.story = {name, cls: crSel.cls, race: crSel.race, attr: Object.assign({}, crSel.attr), color: crSel.color, voice: crSel.voice, outfit: Object.assign({}, crSel.outfit), skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30, diff: crSel.diff == null ? 1 : crSel.diff,
+  PROF.story = {name, cls: crSel.cls, race: crSel.race, attr: Object.assign({}, crSel.attr), tabletop: crSel.tabletop ? structuredClone(crSel.tabletop) : null, color: crSel.color, voice: crSel.voice, outfit: Object.assign({}, crSel.outfit), skills: crSel.skills.slice(), lv: 1, xp: 0, hp: c.hp, mp: c.mp, gold: 30, diff: crSel.diff == null ? 1 : crSel.diff,
     items: {potion: 3, ether: 1}, x: 11 * ST_TILE+32, y: 11 * ST_TILE+8, ch: 0, pelts: 0, flags: {}, chests: [], rewarded: false, tut: 1,
     map: 'world', shrine: {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64}, lost: null};
   stSave(); startStory(true);
@@ -8300,6 +8315,7 @@ function startStory(fresh) {
   if (!ST.mapC) stDrawMapCanvas();
   hideMenus(); reset(0); G.started = false;
   ST.on = true; ST.mode = 'walk'; ST.keys = {}; ST.safe = 4; ST.walkDist = 0;
+  ST.battle=null;ST.sub=null;ST.curSkill=null;ST.tut=null;ST.foes=[];
   document.body.classList.add('story'); $('story').hidden = false; $('stBattle').hidden = true; $('stMenu').hidden = true;
   const d = stData(); d.map = d.map || 'world';if(fresh){ST.wx=null;d.skyPhase=.27;}ST.noticeRegion=null;ST.announcements=[];stSyncProgress();if (!d.shrine) d.shrine = {map: 'world', x: 12 * ST_TILE + 32, y: 11 * ST_TILE + 64};
   if (d.map !== 'world') { const px = d.x, py = d.y; stEnterMap(d.map, 2, 2); d.x = px; d.y = py; }
@@ -8910,7 +8926,7 @@ function stWalk(dt) {
     ST.moving = false; return;
   }
   if (!stBlocked(nx, d.y + 14)) d.x = nx; if (!stBlocked(d.x, ny + 14)) d.y = ny;
-  ST.face = dx < 0 ? Math.PI : dx > 0 ? 0 : ST.face || 0; ST.walk = (ST.walk || 0) + sp * m;
+  ST.face = dx < 0 ? Math.PI : dx > 0 ? 0 : ST.face || 0; ST.facing=Math.atan2(dy,dx); ST.walk = (ST.walk || 0) + sp * m;
   ST.walkDist += sp * m;
   // rare encounters on the road: a stranger offers a trait, very rarely, on any map
   ST.traitWalk = (ST.traitWalk || 0) + sp * m;
@@ -9802,7 +9818,7 @@ function stCloseMenu() { $('stMenu').hidden = true; $('stMenu').classList.remove
 $('stMenuBtn').addEventListener('click', () => ST.mode === 'menu' ? stCloseMenu() : stOpenMenu());
 { // the thumbstick: touch anywhere on the left side and drag
   const Z = $('stJoyZone'), B = $('stJoyBase'), K = $('stJoyKnob'), R = 56; let id = null, ox = 0, oy = 0;
-  Z.addEventListener('pointerdown', e => { if (ST.mode !== 'walk') return; e.preventDefault(); id = e.pointerId; ox = e.clientX; oy = e.clientY; Z.setPointerCapture(id); const r = Z.getBoundingClientRect(); B.style.left = (ox - r.left) + 'px'; B.style.top = (oy - r.top) + 'px'; B.classList.add('on'); K.style.transform = 'translate(-50%,-50%)'; ST.touchMove = [0, 0]; });
+  Z.addEventListener('pointerdown', e => { if (ST.mode !== 'walk' && !(ST.mode === 'battle' && ST.battle?.realtime)) return; e.preventDefault(); id = e.pointerId; ox = e.clientX; oy = e.clientY; Z.setPointerCapture(id); const r = Z.getBoundingClientRect(); B.style.left = (ox - r.left) + 'px'; B.style.top = (oy - r.top) + 'px'; B.classList.add('on'); K.style.transform = 'translate(-50%,-50%)'; ST.touchMove = [0, 0]; });
   Z.addEventListener('pointermove', e => { if (e.pointerId !== id) return; let dx = e.clientX - ox, dy = e.clientY - oy; const m = Math.hypot(dx, dy); if (m > R) { dx *= R / m; dy *= R / m; } K.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; ST.touchMove = m < 8 ? [0, 0] : [dx / R, dy / R]; });
   const end = e => { if (e.pointerId !== id) return; id = null; ST.touchMove = null; B.classList.remove('on'); };
   Z.addEventListener('pointerup', end); Z.addEventListener('pointercancel', end);
@@ -10256,7 +10272,19 @@ const gamePerf=el('span','','FPS: --');gamePerf.id='gamePerf';$('game').appendCh
 let perfFrames=0,perfStamp=performance.now();
 window.render_game_to_text=()=>{
   const d=stData(),b=ST.battle;
-  return JSON.stringify({screen:!$('startScreen').hidden?'title':!overlay.hidden?[...document.querySelectorAll('.screen')].find(s=>!s.hidden)?.id:'story',mode:ST.on?ST.mode:'menu',coordinates:'world pixels, origin top-left, +x right, +y down',player:ST.on&&d?{name:d.name,map:d.map,x:Math.round(d.x),y:Math.round(d.y),level:d.lv,hp:Math.round(d.hp),mp:Math.round(d.mp),race:d.race,cls:d.cls,evolution:stEvolutionName(d),magicTier:stMagicTier(d)+1,dominion:stDominionRank(d)}:null,objective:ST.on?stObjective():null,foes:ST.on&&b&&ST.mode==='battle'?b.foes.map(f=>({name:f.name,hp:Math.max(0,Math.round(f.hp)),maxHp:f.maxHp,hex:f.hex||0,burn:f.burn||0})):[],summon:ST.on&&b&&b.summon?{name:b.summon.name,key:b.summon.key,hp:Math.max(0,b.summon.hp),maxHp:b.summon.maxHp,turns:b.summon.turns}:null,selectedSoul:ST.on&&d?.cls==='necromancer'?d.soulBook?.selected:null,callout:STFX.callout?.text||null});
+  return JSON.stringify({
+    screen:!$('startScreen').hidden?'title':!overlay.hidden?[...document.querySelectorAll('.screen')].find(s=>!s.hidden)?.id:'story',
+    mode:ST.on?ST.mode:'menu',coordinates:'world pixels, origin top-left, +x right, +y down',
+    player:ST.on&&d?{name:d.name,map:d.map,x:Math.round(d.x),y:Math.round(d.y),level:d.lv,hp:Math.round(d.hp),mp:Math.round(d.mp),race:d.race,cls:d.cls,evolution:stEvolutionName(d),magicTier:stMagicTier(d)+1,dominion:stDominionRank(d),wanted:d.crime||0,guildRank:d.guild?.rank||null}:null,
+    objective:ST.on?stObjective():null,
+    foes:ST.on&&b&&ST.mode==='battle'?b.foes.map(f=>({name:f.name,hp:Math.max(0,Math.round(f.hp)),maxHp:f.maxHp,x:Math.round(f.x||0),y:Math.round(f.y||0),role:f.rtRole||null,intent:f.telegraph?.kind||null,hex:f.hex||0,burn:f.burn||0})):[],
+    summon:ST.on&&b&&b.summon?{name:b.summon.name,key:b.summon.key,hp:Math.max(0,b.summon.hp),maxHp:b.summon.maxHp,turns:b.summon.turns}:null,
+    familiar:ST.on?{active:fwData().familiar||null,combatHp:b?.familiar?.hp??null}:null,emote:ST.on?ST.emote?.id||null:null,
+    strongholds:ST.on?FW_STRONGHOLDS.map(H=>({name:H.name,level:H.level,rank:H.rank,unlocked:fwHoldAccess(H)})):[],
+    nearby:ST.on&&ST.mode==='walk'?stNearby()?.label||null:null,
+    duel:ST.on&&SDUEL.match?{seconds:Math.max(0,Math.ceil(90-SDUEL.match.t)),over:SDUEL.match.over||null,players:SDUEL.match.players.map(p=>({name:p.name,x:Math.round(p.x),y:Math.round(p.y),hp:Math.round(p.hp),mp:Math.round(p.mp)}))}:null,
+    selectedSoul:ST.on&&d?.cls==='necromancer'?d.soulBook?.selected:null,callout:STFX.callout?.text||null
+  });
 };
 function frame(now) {
   if(++perfFrames && now-perfStamp>=1000){gamePerf.textContent='FPS: '+Math.round(perfFrames*1000/(now-perfStamp));perfFrames=0;perfStamp=now;}

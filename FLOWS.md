@@ -1,5 +1,22 @@
 # Thornwake menu regression checks
 
+## Current Story overhaul verification inventory
+- Animation/emotes: inspect the eight walking frames and directional slash, cast, bow, shield, dodge and hit poses. Online player IDs may be strings; confirm their characters render at their actual coordinates. Eight social motions are cosmetic, require dismounting, stop on movement/combat/map changes, and validate online IDs/expiry. Test dance picker and Stop on native touch, plus two sequential dance screenshots.
+- Government/justice: local ballot only once per day; optional theft and permanent adult-civilian murder record charges and wanted responses, with flee/recoil/death effects. Essential quest/service NPCs and children are protected. One d20 hearing per charge set; fine, community-service and jail resolutions.
+- Jobs/clinics: accept courier shift → actual nurse dialogue → return to that city's registrar → one payment and XP level-up. Refuse incomplete, remote, repeat and low-level claims, simultaneous shifts and cooldown bypass. Nursing remains free.
+- Familiars: explicit free fox adoption, earned-gold/level gates for other animals, one active follower, bounded support and temporary knockout. No adoption or switching in combat. Original pets, mounts, companions and undead remain separate.
+- Strongholds: both map entrance and menu entry require level and Guild rank. Lantern Watchhold: level 10/D; Astral Citadel: 25/C; Crownspire Bastion: 40/A. Four staff, infirmary, quartermaster, class mentor, contract board and one-time guardian trials. Verify correct city exits and duplicate-reward refusal.
+- Phone: native touch in all four directions and attack during real-time combat; familiar adoption, locked/unlocked stronghold entry, job acceptance, free nursing care, registrar payment, justice menus and no horizontal overflow at 375×812.
+- Keep Arena, purchases, legacy heroes, original quests, mounts, deeds and both save slots intact.
+- Create on desktop and native-touch phone using the redesigned chibi studio and optional tabletop origins.
+- Explore all six frontier lands, interact with moving residents, complete a crystal quest and revisit saved progress.
+- Check 200 base spells, 800 catalog items, 200 connected labyrinth layouts, secret-earned permanent single-eye selection, real-time movement, telegraphed attacks and pause/resume.
+- Buildcraft: spend earned points, enforce twelve total/three per talent, verify actual stat tradeoffs and paid reset, and inspect fixed enemy counterplay.
+- Confluence: recipe eligibility from learned spells and owned class moves, one-time forge cost, four shared slots, actual dual-effect casts, mana/cooldown/restriction gates.
+- Hearthward: travel to peaceful district, preserved deeds and original doors, buy/place/pick up furnishings, correct neighborhood return, equipment/supply/gold storage, equipped-item rejection, slot isolation and save/reload.
+- Story PvP: two browser players through the existing room interface, explicit challenge/accept, safe-zone gating, actual movement/damage/guard/dash, normalized stats, safe departure/disconnect, no Story save/economy changes. Fixture transport is not evidence of a provisioned production service or ranked anti-cheat.
+- Visual review: studio, towns, combat, shops, secret eye, build menu, workshop, furnished room and PvP at desktop and 375×812. Check touch movement, reachable buttons, overflow and runtime errors.
+
 ## Mounts between islands
 - Scope corrected by the user: take and ride mounts on different islands and outdoor lands, not inside buildings or dungeons.
 - Buy or own a mount, select it, and press R / controller Y / Ride. Sail through the real port choices to Brightwater, Rougemarais, Valdris, Aetherfall and back to Saltmere.
@@ -87,6 +104,12 @@
 - Phone combat: duplicate exploration HUD hidden during battle; two-column skills and scrollable controls do not overlap the scene.
 
 ## Verification notes
+- Story expansion: travel to three new connected outdoor lands, walk their streets, speak to named residents, inspect crystals, accept and finish saved quests, and return to the Vale with mounts intact.
+- Spell archive: show 200 unique school/form combinations, search/filter, enforce learning level/gold/magic restrictions, equip at most four, execute distinct targeting and school effects, and save learned spells per hero.
+- Fantasy systems: 200 sequentially unlocked labyrinth floors with checkpoints; level-required loot and gold weapon/armor/accessory shops; click-player stats; free-only casino chips; crystal and grimoire animations.
+- Story-only real-time combat: movement during attacks, independent enemy windups, cooldowns and mana, existing classes/soul summons/buff caps retained. Arena renderer, controls, saves and purchases must not change.
+- Original anime-inspired progression: choose one clan and one eye, apply bounded clan passives, activate actual eye mechanics with costs/cooldowns, reject sealed magic, and retain choices separately in both saves.
+- Two character slots: show both slots on the story screen, migrate the original hero into slot 1 without changing progress, create a second independent hero without an overwrite prompt, switch/continue/save/reload both heroes, retain per-hero class/quest/soul/mount/housing data and shared account purchases, cancel creation without erasing either slot, and require explicit confirmation before replacing an occupied slot. Cloud profile export/import must retain both slots, including when the active slot is empty.
 - Attack/defense stacking: each stat has an independent three-stack cap with diminishing total bonuses (attack 25/40/50%, defense 40/65/80%), four-enemy-turn refresh, paid actions at cap, visible counts/expiry, no stale stacks after expiry/dispel or a fresh battle, and actual basic/named/area attack and defense calculations.
 - Necromancer: create a hero, use Raise Dead from level 1, see an allied undead attack and absorb hits alongside an existing companion, raise a defeated enemy, and verify summon limits, expiry and mana gates.
 - Grimoire of the Fallen: inspect 35% ordinary / 8% boss binding odds, successful and failed victory rolls, duplicate strengthening, search/filter/select captured souls, save/quit/continue, and migrate an old Necromancer without losing skills or mastery. Flee/loss/repeated victory must not award souls.

@@ -9,7 +9,7 @@ function soulRuleChecks(){
   const roll=(b,value)=>{const random=Math.random;Math.random=()=>value;try{const lines=[];stSoulCollectVictory(b,lines);return lines;}finally{Math.random=random;}};
   const encounter=(key='wolf',hp=0)=>({foes:[{...ST_FOES[key],key,hp}],over:true});
   try{
-    check(Object.keys(ST_CLASSES).length===12&&ST_CLASSES.warlock.name==='Warlock','Warlock is an actual twelfth playable class');
+    check(Object.keys(ST_CLASSES).length===15&&ST_CLASSES.warlock.name==='Warlock','Warlock remains a distinct playable class alongside the three new classes');
     for(const cls of ['necromancer','warlock']){
       check(ST_CLASS_PATHS[cls].length===8&&ST_CLASS_MILESTONES[cls].length===5,cls+' has eight trainable skills and five milestones');
       check(Object.entries(ST_SKILLS).filter(([,S])=>S.owner===cls).every(([id,S])=>stOwnsSkill({cls,lv:60},id)&&!stOwnsSkill({cls:cls==='warlock'?'necromancer':'warlock',lv:60},id)),cls+' enforces class-exclusive ownership');

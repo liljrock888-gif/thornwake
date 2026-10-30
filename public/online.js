@@ -91,7 +91,7 @@
 
   // A device counts as having its own progress if it has moved past a fresh profile.
   function hasProgress(p) {
-    return p.crowns !== 300 || p.heroes.length > 6 || (p.paid || []).length > 0 || p.pass.xp > 0 || p.pets.length > 0 || !!(p.rank && (p.rank.w || p.rank.l));
+    return !!p.story || (p.storySlots || []).some(Boolean) || p.crowns !== 300 || p.heroes.length > 6 || (p.paid || []).length > 0 || p.pass.xp > 0 || p.pets.length > 0 || !!(p.rank && (p.rank.w || p.rank.l));
   }
 
   async function signedIn(u) {
